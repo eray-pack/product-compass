@@ -6,11 +6,11 @@ export const Route = createFileRoute("/tools/sos")({
   component: SOS,
 });
 
-const PHASES = [
+const PHASES: { label: string; seconds: number }[] = [
   { label: "Inhale", seconds: 4 },
   { label: "Hold", seconds: 4 },
   { label: "Exhale", seconds: 6 },
-] as const;
+];
 
 function SOS() {
   const navigate = useNavigate();
