@@ -42,22 +42,43 @@ function ProgressScreen() {
       {/* Calendar */}
       <section className="px-6 mt-6">
         <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm font-semibold">Streak calendar</p>
-          <p className="text-xs text-muted-foreground mb-3">Last 12 weeks</p>
-          <div className="grid grid-flow-col grid-rows-7 gap-1">
-            {cells.map((v, i) => (
-              <div
-                key={i}
-                className="h-3 w-3 rounded-[3px]"
-                style={{
-                  backgroundColor:
-                    v === 0 ? "oklch(0.26 0.025 260)"
-                    : v === 1 ? "oklch(0.4 0.1 150)"
-                    : v === 2 ? "oklch(0.55 0.13 150)"
-                    : "oklch(0.7 0.16 150)",
-                }}
-              />
-            ))}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold">Streak calendar</p>
+              <p className="text-xs text-muted-foreground mb-3">Last 12 weeks</p>
+            </div>
+            {!state.isPremium && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 rounded-full">
+                <Lock className="h-3 w-3" /> PRO
+              </span>
+            )}
+          </div>
+          <div className="relative">
+            <div className={`grid grid-flow-col grid-rows-7 gap-1 ${state.isPremium ? "" : "blur-[5px] select-none pointer-events-none"}`}>
+              {cells.map((v, i) => (
+                <div
+                  key={i}
+                  className="h-3 w-3 rounded-[3px]"
+                  style={{
+                    backgroundColor:
+                      v === 0 ? "oklch(0.26 0.025 260)"
+                      : v === 1 ? "oklch(0.4 0.1 150)"
+                      : v === 2 ? "oklch(0.55 0.13 150)"
+                      : "oklch(0.7 0.16 150)",
+                  }}
+                />
+              ))}
+            </div>
+            {!state.isPremium && (
+              <button
+                onClick={() => triggerPaywall()}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                <span className="text-xs font-medium text-primary bg-card/80 border border-primary/30 px-3 py-1.5 rounded-full">
+                  Tap to see your full streak
+                </span>
+              </button>
+            )}
           </div>
           <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground">
             Less
@@ -72,13 +93,24 @@ function ProgressScreen() {
 
       {/* Total clean days */}
       <section className="px-6 mt-4">
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <button
+          type="button"
+          onClick={() => { if (!state.isPremium) triggerPaywall(); }}
+          className="w-full text-left rounded-2xl border border-border bg-card p-5 relative overflow-hidden"
+        >
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Relapses don't erase progress</p>
-          <p className="mt-2 text-3xl font-bold">{state.totalCleanDays} <span className="text-base font-normal text-muted-foreground">total clean days, ever</span></p>
+          <p className={`mt-2 text-3xl font-bold ${state.isPremium ? "" : "blur-md select-none"}`}>
+            {state.totalCleanDays} <span className="text-base font-normal text-muted-foreground">total clean days, ever</span>
+          </p>
           <p className="mt-2 text-xs text-muted-foreground">
             Your brain remembers every single one.
           </p>
-        </div>
+          {!state.isPremium && (
+            <span className="absolute top-4 right-4 inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 rounded-full">
+              <Lock className="h-3 w-3" /> PRO
+            </span>
+          )}
+        </button>
       </section>
 
       {/* Mood graph */}
