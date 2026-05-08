@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Award, Flame, Shield, Trophy } from "lucide-react";
+import { Award, Flame, Shield, Trophy, Lock } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount } from "@/lib/store";
+import { triggerPaywall } from "@/lib/paywall";
 
 export const Route = createFileRoute("/progress")({
   component: ProgressScreen,
