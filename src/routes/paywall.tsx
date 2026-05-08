@@ -1,41 +1,130 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Lock, Check } from "lucide-react";
+import { Lock, Check, X, Sparkles } from "lucide-react";
 import { useAppState } from "@/lib/store";
 
 export const Route = createFileRoute("/paywall")({
   component: Paywall,
 });
 
+type Stage = "main" | "final";
+
 function Paywall() {
   const [, update] = useAppState();
   const navigate = useNavigate();
+  const [stage, setStage] = useState<Stage>("main");
   const [plan, setPlan] = useState<"annual" | "monthly">("annual");
   const [seconds, setSeconds] = useState(14 * 60 + 59);
+  const [finalSeconds, setFinalSeconds] = useState(5 * 60);
 
   useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+    const t = setInterval(() => {
+      setSeconds((s) => (s > 0 ? s - 1 : 0));
+      setFinalSeconds((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
     return () => clearInterval(t);
   }, []);
 
-  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
-  const ss = String(seconds % 60).padStart(2, "0");
+  const fmt = (n: number) =>
+    `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
 
   const start = () => {
     update({ paywallSeen: true });
     navigate({ to: "/" });
   };
 
+  const continueFree = () => {
+    update({ paywallSeen: true });
+    navigate({ to: "/" });
+  };
+
+  if (stage === "final") {
+    return (
+      <div className="min-h-screen mx-auto max-w-md px-6 pt-12 pb-10 flex flex-col">
+        <div className="flex justify-end">
+          <button
+            onClick={continueFree}
+            aria-label="Continue with free plan"
+            className="h-9 w-9 grid place-items-center rounded-full border border-border text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="text-center mt-2">
+          <div className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] uppercase tracking-wider text-primary">
+            <Sparkles className="h-3 w-3" /> Final offer
+          </div>
+          <h1 className="mt-4 text-3xl font-bold leading-tight">Wait — one last thing</h1>
+          <p className="mt-2 text-muted-foreground">
+            We get it. Cost matters. Here's our lowest price ever — only on this screen.
+          </p>
+        </div>
+
+        <div className="mt-6 mx-auto rounded-full border border-destructive/40 bg-destructive/10 px-4 py-1.5 text-xs text-destructive-foreground">
+          Expires in {fmt(finalSeconds)}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-primary bg-primary/10 p-5 shadow-[var(--shadow-glow)]">
+          <div className="flex items-center justify-between">
+            <p className="text-xs uppercase tracking-wider text-primary">Annual — 92% off</p>
+            <span className="text-[10px] line-through text-muted-foreground">$39.99/yr</span>
+          </div>
+          <p className="mt-2 text-4xl font-bold">
+            $1.49<span className="text-sm font-normal text-muted-foreground">/month</span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">$17.88 billed once a year</p>
+          <ul className="mt-4 space-y-1.5 text-sm">
+            {[
+              "Everything in the full plan",
+              "Locked-in price for life",
+              "Cancel anytime",
+            ].map((f) => (
+              <li key={f} className="flex items-center gap-2 text-muted-foreground">
+                <Check className="h-4 w-4 text-primary" /> {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <button
+          onClick={start}
+          className="mt-6 h-14 w-full rounded-xl text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)]"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          Claim 92% Discount
+        </button>
+
+        <button
+          onClick={continueFree}
+          className="mt-3 h-12 w-full rounded-xl text-sm text-muted-foreground hover:text-foreground"
+        >
+          No thanks, continue with free plan
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen mx-auto max-w-md px-6 pt-12 pb-10 flex flex-col">
-      <div className="text-center">
+      <div className="flex justify-end">
+        <button
+          onClick={() => setStage("final")}
+          aria-label="Close"
+          className="h-9 w-9 grid place-items-center rounded-full border border-border text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="text-center mt-2">
         <p className="text-xs uppercase tracking-[0.25em] text-primary">Your plan is ready</p>
         <h1 className="mt-3 text-3xl font-bold leading-tight">Your recovery plan is ready</h1>
         <p className="mt-2 text-muted-foreground">Join 47,000 men who are rewiring their brain.</p>
       </div>
 
       <div className="mt-6 mx-auto rounded-full border border-destructive/40 bg-destructive/10 px-4 py-1.5 text-xs text-destructive-foreground">
-        This offer expires in {mm}:{ss}
+        This offer expires in {fmt(seconds)}
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3">
@@ -80,6 +169,13 @@ function Paywall() {
         style={{ background: "var(--gradient-primary)" }}
       >
         Start My Free Trial
+      </button>
+
+      <button
+        onClick={continueFree}
+        className="mt-3 h-12 w-full rounded-xl text-sm text-muted-foreground hover:text-foreground"
+      >
+        Continue with free plan
       </button>
 
       <p className="mt-3 text-center text-xs text-muted-foreground">7-day free trial. Cancel anytime.</p>
