@@ -1,120 +1,143 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
-import { Loader2, Sparkles, ArrowRight } from "lucide-react";
-import { ReportHistorySidebar } from "@/components/ReportHistorySidebar";
-import { ReportView, mockReport, type Report } from "@/components/ReportView";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Flame, Smile, Frown, Meh, Heart, Zap } from "lucide-react";
+import { PageShell } from "@/components/BottomNav";
+import { useAppState, dayCount } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
-  component: Index,
-  head: () => ({
-    meta: [
-      { title: "Marketscope — Instant market research for your product idea" },
-      {
-        name: "description",
-        content:
-          "Validate any product idea in seconds. Get demand, audience, competitors, pricing, and a clear go/no-go verdict.",
-      },
-    ],
-  }),
+  component: Dashboard,
 });
 
-function Index() {
-  const [idea, setIdea] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<Report | null>(null);
+const milestones = [
+  { day: 7, label: "Increased energy" },
+  { day: 14, label: "Sharper focus" },
+  { day: 30, label: "Confidence returning" },
+  { day: 60, label: "Emotional regulation" },
+  { day: 90, label: "Full dopamine reset" },
+];
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!idea.trim()) return;
-    setLoading(true);
-    setReport(null);
-    setTimeout(() => {
-      setReport(mockReport(idea.trim()));
-      setLoading(false);
-    }, 1400);
-  };
+function Dashboard() {
+  const [state] = useAppState();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!state.onboarding && typeof window !== "undefined") {
+      const raw = localStorage.getItem("stopamine.v1");
+      if (!raw || !JSON.parse(raw)?.onboarding) {
+        navigate({ to: "/onboarding" });
+      }
+    }
+  }, [state.onboarding, navigate]);
+
+  const day = dayCount(state.startDate);
+  const pct = Math.min(100, (day / 90) * 100);
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <ReportHistorySidebar />
+    <PageShell>
+      <header className="px-6 pt-12 pb-2">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Stopamine</p>
+      </header>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 px-6 flex items-center justify-between border-b">
-          <div className="text-sm text-muted-foreground">
-            {report ? "Report ready" : loading ? "Analyzing…" : "New research"}
+      {/* Day counter */}
+      <section className="px-6 pt-4">
+        <div className="rounded-2xl p-6 border border-border bg-[var(--gradient-surface)] shadow-[var(--shadow-glow)]">
+          <p className="text-sm text-muted-foreground">Today</p>
+          <h1 className="mt-1 text-6xl font-bold tracking-tight">Day {day}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your dopamine receptors are rebalancing.
+          </p>
+        </div>
+      </section>
+
+      {/* Brain recovery timeline */}
+      <section className="px-6 mt-6">
+        <h2 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">Brain recovery</h2>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="relative h-2 rounded-full bg-secondary overflow-hidden">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
+            />
           </div>
-          <button className="text-sm font-medium px-4 py-1.5 rounded-md border hover:bg-accent transition">
-            Sign In
-          </button>
-        </header>
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-            {!report && !loading && (
-              <div className="text-center mb-10">
-                <div className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-secondary text-secondary-foreground mb-5">
-                  <Sparkles className="h-3 w-3" />
-                  Validate ideas in seconds
-                </div>
-                <h1 className="font-display text-4xl md:text-5xl leading-[1.05] tracking-tight">
-                  What are you thinking of building?
-                </h1>
-                <p className="mt-3 text-muted-foreground">
-                  Get a focused market report — demand, audience, competitors, pricing, and a verdict.
-                </p>
-              </div>
-            )}
-
-            <form onSubmit={onSubmit} className="space-y-3">
-              <div className="relative">
-                <input
-                  value={idea}
-                  onChange={(e) => setIdea(e.target.value)}
-                  placeholder="Enter your product idea (e.g. sleep masks for travelers)"
-                  className="w-full h-14 px-5 pr-14 rounded-xl border bg-card text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring transition"
-                  disabled={loading}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading || !idea.trim()}
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 transition"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Generating report…
-                  </>
-                ) : (
-                  <>
-                    Generate Report
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-10">
-              {loading && <LoadingSkeleton />}
-              {report && !loading && <ReportView report={report} />}
-            </div>
+          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+            <span>0</span><span>30</span><span>60</span><span>90 days</span>
           </div>
-        </main>
-      </div>
-    </div>
+          <ul className="mt-4 space-y-2.5">
+            {milestones.map((m) => {
+              const reached = day >= m.day;
+              return (
+                <li key={m.day} className="flex items-center gap-3 text-sm">
+                  <span className={`h-2 w-2 rounded-full ${reached ? "bg-primary" : "bg-border"}`} />
+                  <span className={reached ? "text-foreground" : "text-muted-foreground"}>
+                    Day {m.day} — {m.label}
+                  </span>
+                  {reached && <span className="ml-auto text-[10px] text-primary uppercase">reached</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+
+      {/* Cards */}
+      <section className="px-6 mt-6 space-y-4">
+        <CheckInCard />
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+            <Heart className="h-3.5 w-3.5" /> Your goal
+          </p>
+          <p className="mt-2 text-base leading-snug">
+            I am becoming someone who{" "}
+            <span className="text-primary font-medium">
+              {state.onboarding?.identity || "is in full control of his mind"}
+            </span>.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Streak</p>
+            <p className="mt-1 text-3xl font-bold">{day} <span className="text-base font-normal text-muted-foreground">days clean</span></p>
+          </div>
+          <div className="h-14 w-14 rounded-full grid place-items-center bg-warning/10 border border-warning/30">
+            <Flame className="h-7 w-7 text-warning" />
+          </div>
+        </div>
+
+        <Link
+          to="/tools"
+          className="block rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-center text-sm font-medium text-destructive-foreground"
+        >
+          <Zap className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+          Feeling an urge? Open SOS tools →
+        </Link>
+      </section>
+    </PageShell>
   );
 }
 
-function LoadingSkeleton() {
+function CheckInCard() {
+  const moods = [
+    { v: 1, Icon: Frown, label: "Rough" },
+    { v: 2, Icon: Frown, label: "Low" },
+    { v: 3, Icon: Meh, label: "OK" },
+    { v: 4, Icon: Smile, label: "Good" },
+    { v: 5, Icon: Smile, label: "Strong" },
+  ];
   return (
-    <div className="space-y-4 animate-pulse">
-      <div className="h-8 w-2/3 bg-muted rounded" />
-      <div className="grid md:grid-cols-2 gap-4">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-40 rounded-xl bg-muted" />
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">Daily check-in</p>
+      <p className="mt-1 text-base">How are you feeling today?</p>
+      <div className="mt-4 grid grid-cols-5 gap-2">
+        {moods.map(({ v, Icon, label }) => (
+          <button
+            key={v}
+            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-secondary/40 py-2.5 text-[10px] text-muted-foreground hover:border-primary hover:text-primary transition"
+          >
+            <Icon className="h-5 w-5" />
+            {label}
+          </button>
         ))}
       </div>
-      <div className="h-20 rounded-xl bg-muted" />
     </div>
   );
 }
