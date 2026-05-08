@@ -7,37 +7,81 @@ export type OnboardingData = {
   triggers: string[];
   identity: string;
   name: string;
+  otherHabits: string[];
   completedAt: number;
 };
 
-const KEY = "stopamine.v1";
+export type Addiction = {
+  id: string;
+  name: string;
+  emoji: string;
+  startDate: number;
+  totalCleanDays: number;
+  urgesSurvived: number;
+  premium?: boolean; // if true, requires PRO to view past blur
+};
+
+export type ChallengeProgress = {
+  id: string;
+  doneAt: number; // ms
+};
+
+const KEY = "stopamine.v2";
 
 export type AppState = {
   onboarding: OnboardingData | null;
   paywallSeen: boolean;
   isPremium: boolean;
-  startDate: number; // ms
+  // Multi-addiction
+  addictions: Addiction[];
+  activeAddictionId: string;
+  // Gamification
+  points: number;
+  completedChallenges: ChallengeProgress[];
+  // Life tree
+  treeXP: number; // accumulates from streak + spend
+  treeUnlocks: string[]; // ids of cosmetic upgrades unlocked
+  // Legacy mirrors (kept for compatibility with existing screens)
+  startDate: number;
   totalCleanDays: number;
   badges: string[];
   urgesSurvived: number;
 };
 
-const defaultState = (): AppState => ({
-  onboarding: null,
-  paywallSeen: false,
-  isPremium: false,
-  startDate: Date.now() - 13 * 86400000, // mock: day 14
-  totalCleanDays: 47,
-  badges: ["First Week"],
-  urgesSurvived: 4,
-});
+const defaultState = (): AppState => {
+  const start = Date.now() - 13 * 86400000;
+  const main: Addiction = {
+    id: "porn",
+    name: "Porn",
+    emoji: "🧠",
+    startDate: start,
+    totalCleanDays: 47,
+    urgesSurvived: 4,
+  };
+  return {
+    onboarding: null,
+    paywallSeen: false,
+    isPremium: false,
+    addictions: [main],
+    activeAddictionId: main.id,
+    points: 120,
+    completedChallenges: [],
+    treeXP: 240,
+    treeUnlocks: ["sapling"],
+    startDate: start,
+    totalCleanDays: 47,
+    badges: ["First Week"],
+    urgesSurvived: 4,
+  };
+};
 
 export function loadState(): AppState {
   if (typeof window === "undefined") return defaultState();
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultState();
-    return { ...defaultState(), ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    return { ...defaultState(), ...parsed };
   } catch {
     return defaultState();
   }
@@ -51,9 +95,10 @@ export function saveState(s: AppState) {
 export function useAppState() {
   const [state, setState] = useState<AppState>(defaultState);
   useEffect(() => { setState(loadState()); }, []);
-  const update = (patch: Partial<AppState>) => {
+  const update = (patch: Partial<AppState> | ((s: AppState) => Partial<AppState>)) => {
     setState((prev) => {
-      const next = { ...prev, ...patch };
+      const p = typeof patch === "function" ? patch(prev) : patch;
+      const next = { ...prev, ...p };
       saveState(next);
       return next;
     });
@@ -63,4 +108,18 @@ export function useAppState() {
 
 export function dayCount(startDate: number) {
   return Math.max(1, Math.floor((Date.now() - startDate) / 86400000) + 1);
+}
+
+export function activeAddiction(s: AppState): Addiction {
+  return s.addictions.find((a) => a.id === s.activeAddictionId) ?? s.addictions[0];
+}
+
+// Tree level mapping
+export function treeStage(xp: number) {
+  if (xp < 100) return { stage: 0, name: "Seed", next: 100 };
+  if (xp < 300) return { stage: 1, name: "Sprout", next: 300 };
+  if (xp < 700) return { stage: 2, name: "Sapling", next: 700 };
+  if (xp < 1500) return { stage: 3, name: "Young tree", next: 1500 };
+  if (xp < 3000) return { stage: 4, name: "Strong tree", next: 3000 };
+  return { stage: 5, name: "Ancient tree", next: xp };
 }

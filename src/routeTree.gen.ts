@@ -9,15 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TreeRouteImport } from './routes/tree'
 import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as PaywallRouteImport } from './routes/paywall'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
 import { Route as ToolsColdRouteImport } from './routes/tools.cold'
 
+const TreeRoute = TreeRouteImport.update({
+  id: '/tree',
+  path: '/tree',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToolsRoute = ToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
@@ -43,6 +50,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChallengesRoute = ChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -61,32 +73,38 @@ const ToolsColdRoute = ToolsColdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/challenges': typeof ChallengesRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
   '/tools': typeof ToolsRouteWithChildren
+  '/tree': typeof TreeRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/sos': typeof ToolsSosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/challenges': typeof ChallengesRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
   '/tools': typeof ToolsRouteWithChildren
+  '/tree': typeof TreeRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/sos': typeof ToolsSosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/challenges': typeof ChallengesRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
   '/tools': typeof ToolsRouteWithChildren
+  '/tree': typeof TreeRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/sos': typeof ToolsSosRoute
 }
@@ -94,46 +112,61 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/challenges'
     | '/onboarding'
     | '/paywall'
     | '/progress'
     | '/settings'
     | '/tools'
+    | '/tree'
     | '/tools/cold'
     | '/tools/sos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/challenges'
     | '/onboarding'
     | '/paywall'
     | '/progress'
     | '/settings'
     | '/tools'
+    | '/tree'
     | '/tools/cold'
     | '/tools/sos'
   id:
     | '__root__'
     | '/'
+    | '/challenges'
     | '/onboarding'
     | '/paywall'
     | '/progress'
     | '/settings'
     | '/tools'
+    | '/tree'
     | '/tools/cold'
     | '/tools/sos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChallengesRoute: typeof ChallengesRoute
   OnboardingRoute: typeof OnboardingRoute
   PaywallRoute: typeof PaywallRoute
   ProgressRoute: typeof ProgressRoute
   SettingsRoute: typeof SettingsRoute
   ToolsRoute: typeof ToolsRouteWithChildren
+  TreeRoute: typeof TreeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tree': {
+      id: '/tree'
+      path: '/tree'
+      fullPath: '/tree'
+      preLoaderRoute: typeof TreeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tools': {
       id: '/tools'
       path: '/tools'
@@ -167,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/challenges': {
+      id: '/challenges'
+      path: '/challenges'
+      fullPath: '/challenges'
+      preLoaderRoute: typeof ChallengesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -207,11 +247,13 @@ const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChallengesRoute: ChallengesRoute,
   OnboardingRoute: OnboardingRoute,
   PaywallRoute: PaywallRoute,
   ProgressRoute: ProgressRoute,
   SettingsRoute: SettingsRoute,
   ToolsRoute: ToolsRouteWithChildren,
+  TreeRoute: TreeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
