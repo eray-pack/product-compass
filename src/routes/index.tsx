@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Flame, Smile, Frown, Meh, Heart, Zap } from "lucide-react";
+import { Flame, Smile, Frown, Meh, Heart, Zap, Lock } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount } from "@/lib/store";
+import { triggerPaywall } from "@/lib/paywall";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -62,20 +63,33 @@ function Dashboard() {
           <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
             <span>0</span><span>30</span><span>60</span><span>90 days</span>
           </div>
-          <ul className="mt-4 space-y-2.5">
-            {milestones.map((m) => {
-              const reached = day >= m.day;
-              return (
-                <li key={m.day} className="flex items-center gap-3 text-sm">
-                  <span className={`h-2 w-2 rounded-full ${reached ? "bg-primary" : "bg-border"}`} />
-                  <span className={reached ? "text-foreground" : "text-muted-foreground"}>
-                    Day {m.day} — {m.label}
-                  </span>
-                  {reached && <span className="ml-auto text-[10px] text-primary uppercase">reached</span>}
-                </li>
-              );
-            })}
-          </ul>
+          <div className="relative mt-4">
+            <ul className={`space-y-2.5 ${state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}`}>
+              {milestones.map((m) => {
+                const reached = day >= m.day;
+                return (
+                  <li key={m.day} className="flex items-center gap-3 text-sm">
+                    <span className={`h-2 w-2 rounded-full ${reached ? "bg-primary" : "bg-border"}`} />
+                    <span className={reached ? "text-foreground" : "text-muted-foreground"}>
+                      Day {m.day} — {m.label}
+                    </span>
+                    {reached && <span className="ml-auto text-[10px] text-primary uppercase">reached</span>}
+                  </li>
+                );
+              })}
+            </ul>
+            {!state.isPremium && (
+              <button
+                onClick={() => triggerPaywall()}
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl"
+              >
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/30 px-3 py-1.5 rounded-full">
+                  <Lock className="h-3 w-3" /> Unlock your milestones
+                </span>
+                <span className="text-[11px] text-muted-foreground">See exactly what's healing in your brain</span>
+              </button>
+            )}
+          </div>
         </div>
       </section>
 

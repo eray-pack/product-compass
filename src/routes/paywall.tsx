@@ -29,12 +29,12 @@ function Paywall() {
     `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
 
   const start = () => {
-    update({ paywallSeen: true });
+    update({ paywallSeen: true, isPremium: true });
     navigate({ to: "/" });
   };
 
   const continueFree = () => {
-    update({ paywallSeen: true });
+    update({ paywallSeen: true, isPremium: false });
     navigate({ to: "/" });
   };
 
