@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Flame, Smile, Frown, Meh, Heart, Zap } from "lucide-react";
+import { Flame, Smile, Frown, Meh, Heart, Zap, Lock } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount } from "@/lib/store";
+import { triggerPaywall } from "@/lib/paywall";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
