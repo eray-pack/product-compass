@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { PaywallModal } from "@/components/PaywallModal";
 
 function NotFoundComponent() {
   return (
