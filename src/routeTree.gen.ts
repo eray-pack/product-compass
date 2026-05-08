@@ -9,38 +9,166 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as PaywallRouteImport } from './routes/paywall'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsSosRouteImport } from './routes/tools.sos'
+import { Route as ToolsColdRouteImport } from './routes/tools.cold'
 
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaywallRoute = PaywallRouteImport.update({
+  id: '/paywall',
+  path: '/paywall',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsSosRoute = ToolsSosRouteImport.update({
+  id: '/sos',
+  path: '/sos',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsColdRoute = ToolsColdRouteImport.update({
+  id: '/cold',
+  path: '/cold',
+  getParentRoute: () => ToolsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/paywall': typeof PaywallRoute
+  '/progress': typeof ProgressRoute
+  '/settings': typeof SettingsRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/tools/cold': typeof ToolsColdRoute
+  '/tools/sos': typeof ToolsSosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/paywall': typeof PaywallRoute
+  '/progress': typeof ProgressRoute
+  '/settings': typeof SettingsRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/tools/cold': typeof ToolsColdRoute
+  '/tools/sos': typeof ToolsSosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/paywall': typeof PaywallRoute
+  '/progress': typeof ProgressRoute
+  '/settings': typeof SettingsRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/tools/cold': typeof ToolsColdRoute
+  '/tools/sos': typeof ToolsSosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/onboarding'
+    | '/paywall'
+    | '/progress'
+    | '/settings'
+    | '/tools'
+    | '/tools/cold'
+    | '/tools/sos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/paywall'
+    | '/progress'
+    | '/settings'
+    | '/tools'
+    | '/tools/cold'
+    | '/tools/sos'
+  id:
+    | '__root__'
+    | '/'
+    | '/onboarding'
+    | '/paywall'
+    | '/progress'
+    | '/settings'
+    | '/tools'
+    | '/tools/cold'
+    | '/tools/sos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PaywallRoute: typeof PaywallRoute
+  ProgressRoute: typeof ProgressRoute
+  SettingsRoute: typeof SettingsRoute
+  ToolsRoute: typeof ToolsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paywall': {
+      id: '/paywall'
+      path: '/paywall'
+      fullPath: '/paywall'
+      preLoaderRoute: typeof PaywallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +176,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/sos': {
+      id: '/tools/sos'
+      path: '/sos'
+      fullPath: '/tools/sos'
+      preLoaderRoute: typeof ToolsSosRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/cold': {
+      id: '/tools/cold'
+      path: '/cold'
+      fullPath: '/tools/cold'
+      preLoaderRoute: typeof ToolsColdRouteImport
+      parentRoute: typeof ToolsRoute
+    }
   }
 }
 
+interface ToolsRouteChildren {
+  ToolsColdRoute: typeof ToolsColdRoute
+  ToolsSosRoute: typeof ToolsSosRoute
+}
+
+const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsColdRoute: ToolsColdRoute,
+  ToolsSosRoute: ToolsSosRoute,
+}
+
+const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  OnboardingRoute: OnboardingRoute,
+  PaywallRoute: PaywallRoute,
+  ProgressRoute: ProgressRoute,
+  SettingsRoute: SettingsRoute,
+  ToolsRoute: ToolsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
