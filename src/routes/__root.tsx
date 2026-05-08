@@ -74,6 +74,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <PaywallModal />
     </QueryClientProvider>
   );
 }
