@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles, Coins, Lock, CreditCard } from "lucide-react";
+import { Sparkles, Coins, Lock, CreditCard, Share2, Users } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+import { useState } from "react";
 
 export const Route = createFileRoute("/tree")({
   component: TreePage,
@@ -65,6 +66,11 @@ function TreePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Social share */}
+      <section className="px-6 mt-4">
+        <ShareTreeCard stage={stage} day={day} xp={state.treeXP} />
       </section>
 
       {/* Why this matters reminder */}
@@ -131,6 +137,88 @@ function TreePage() {
         </div>
       </section>
     </PageShell>
+  );
+}
+
+const COMMUNITY_FEED = [
+  { name: "Marcus", stage: "Strong tree", day: 61, xp: 2340 },
+  { name: "Jaylen", stage: "Young tree", day: 34, xp: 980 },
+  { name: "Timo", stage: "Sapling", day: 19, xp: 420 },
+  { name: "Arjun", stage: "Ancient tree", day: 112, xp: 4100 },
+  { name: "Noah", stage: "Sprout", day: 8, xp: 180 },
+];
+
+function ShareTreeCard({ stage, day, xp }: { stage: { name: string; stage: number }; day: number; xp: number }) {
+  const [shared, setShared] = useState(false);
+  const [showCommunity, setShowCommunity] = useState(false);
+
+  const shareText = `Day ${day} of my recovery. My Life Tree is a ${stage.name} (${xp} XP). Building something real. 🌱 #Stopamine`;
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ text: shareText });
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      setShared(true);
+      setTimeout(() => setShared(false), 2500);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-success/30 bg-success/5 p-5 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-success/15 grid place-items-center text-success">
+          <Share2 className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold">Flex your tree</p>
+          <p className="text-[11px] text-muted-foreground">Your tree is proof. Show the world.</p>
+        </div>
+      </div>
+
+      <div className="rounded-xl bg-card border border-border p-3 text-xs text-muted-foreground italic leading-relaxed">
+        "{shareText}"
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={handleShare}
+          className="h-10 rounded-xl text-xs font-semibold text-primary-foreground"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          {shared ? "Copied!" : "Share tree"}
+        </button>
+        <button
+          onClick={() => setShowCommunity(!showCommunity)}
+          className="h-10 rounded-xl text-xs font-semibold bg-secondary text-foreground border border-border inline-flex items-center justify-center gap-1.5"
+        >
+          <Users className="h-3.5 w-3.5" /> Community
+        </button>
+      </div>
+
+      {showCommunity && (
+        <div className="space-y-2 pt-1">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Others grinding right now</p>
+          {COMMUNITY_FEED.map((u) => (
+            <div key={u.name} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
+              <div className="h-8 w-8 rounded-full bg-primary/10 grid place-items-center text-xs font-bold text-primary">
+                {u.name[0]}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{u.name}</p>
+                <p className="text-[10px] text-muted-foreground">{u.stage} · Day {u.day}</p>
+              </div>
+              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-full">
+                {u.xp} XP
+              </span>
+            </div>
+          ))}
+          <p className="text-[10px] text-center text-muted-foreground pt-1">
+            Full community coming soon · r/Stopamine
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
 

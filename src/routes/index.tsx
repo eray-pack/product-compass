@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Smile, Frown, Meh, Heart, Zap, Lock, Trophy, TreePine, Coins, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Smile, Frown, Meh, Heart, Zap, Lock, Trophy, TreePine, Coins, Sparkles, AlertTriangle } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { AddictionCarousel } from "@/components/AddictionCarousel";
 import { useAppState, dayCount, treeStage, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+import { RelapseModal } from "@/components/RelapseModal";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -21,6 +22,7 @@ const milestones = [
 function Dashboard() {
   const [state] = useAppState();
   const navigate = useNavigate();
+  const [showRelapse, setShowRelapse] = useState(false);
 
   useEffect(() => {
     if (!state.onboarding && typeof window !== "undefined") {
@@ -139,7 +141,22 @@ function Dashboard() {
           <Zap className="inline h-4 w-4 mr-1.5 -mt-0.5" />
           Feeling an urge? Open SOS tools →
         </Link>
+
+        <button
+          onClick={() => setShowRelapse(true)}
+          className="w-full rounded-2xl border border-border bg-secondary/30 p-4 text-center text-sm text-muted-foreground hover:border-destructive/40 hover:text-destructive transition"
+        >
+          <AlertTriangle className="inline h-3.5 w-3.5 mr-1.5 -mt-0.5" />
+          I relapsed — log it honestly
+        </button>
       </section>
+
+      {showRelapse && (
+        <RelapseModal
+          onClose={() => setShowRelapse(false)}
+          totalCleanDays={state.totalCleanDays}
+        />
+      )}
     </PageShell>
   );
 }

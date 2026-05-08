@@ -28,6 +28,12 @@ export type ChallengeProgress = {
 
 const KEY = "stopamine.v2";
 
+export type Relapse = {
+  ts: number; // timestamp
+  note?: string;
+  reframeShown: boolean;
+};
+
 export type AppState = {
   onboarding: OnboardingData | null;
   paywallSeen: boolean;
@@ -41,6 +47,8 @@ export type AppState = {
   // Life tree
   treeXP: number; // accumulates from streak + spend
   treeUnlocks: string[]; // ids of cosmetic upgrades unlocked
+  // Relapse tracking — counter never resets, relapses are logged separately
+  relapses: Relapse[];
   // Legacy mirrors (kept for compatibility with existing screens)
   startDate: number;
   totalCleanDays: number;
@@ -68,6 +76,7 @@ const defaultState = (): AppState => {
     completedChallenges: [],
     treeXP: 240,
     treeUnlocks: ["sapling"],
+    relapses: [],
     startDate: start,
     totalCleanDays: 47,
     badges: ["First Week"],
