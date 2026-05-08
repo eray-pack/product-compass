@@ -15,6 +15,7 @@ const KEY = "stopamine.v1";
 export type AppState = {
   onboarding: OnboardingData | null;
   paywallSeen: boolean;
+  isPremium: boolean;
   startDate: number; // ms
   totalCleanDays: number;
   badges: string[];
@@ -24,6 +25,7 @@ export type AppState = {
 const defaultState = (): AppState => ({
   onboarding: null,
   paywallSeen: false,
+  isPremium: false,
   startDate: Date.now() - 13 * 86400000, // mock: day 14
   totalCleanDays: 47,
   badges: ["First Week"],
