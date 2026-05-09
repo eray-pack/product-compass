@@ -39,6 +39,25 @@ function Dashboard() {
   const stage = treeStage(state.treeXP);
   const cost = state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self";
 
+  // Streak insight
+  const relapses = [...state.relapses].sort((a, b) => a.ts - b.ts);
+  const points = [active.startDate, ...relapses.map((r) => r.ts), Date.now()];
+  const gaps = points.slice(1).map((t, i) => (t - points[i]) / 86400000);
+  const bestStreak = Math.max(day, ...gaps.map((g) => Math.floor(g)));
+  const isPersonalBest = day >= bestStreak && relapses.length > 0;
+  const now = Date.now();
+  const lastMonthRelapses = relapses.filter((r) => now - r.ts < 30 * 86400000).length;
+  const prevMonthRelapses = relapses.filter((r) => {
+    const d = now - r.ts;
+    return d >= 30 * 86400000 && d < 60 * 86400000;
+  }).length;
+  const cleanerThanLastMonth = prevMonthRelapses > 0 && lastMonthRelapses < prevMonthRelapses;
+  const streakLine = isPersonalBest
+    ? "This is your longest streak yet."
+    : cleanerThanLastMonth
+    ? "You're cleaner this month than last. Keep going."
+    : "Every day you don't give in, your brain rewires itself.";
+
   return (
     <PageShell>
       <header className="px-6 pt-12 pb-2 flex items-center justify-between">
@@ -47,6 +66,19 @@ function Dashboard() {
           <Coins className="h-3 w-3" /> {state.points}
         </Link>
       </header>
+
+      {/* Streak hero */}
+      <section className="px-6 mt-4">
+        <div className="text-center">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Clean streak</p>
+          <p className="mt-2 text-6xl font-semibold tracking-tight bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
+            Day {day}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground max-w-xs mx-auto leading-snug">
+            {streakLine}
+          </p>
+        </div>
+      </section>
 
       {/* Swipeable addiction trackers */}
       <AddictionCarousel />
