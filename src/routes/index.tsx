@@ -67,6 +67,19 @@ function Dashboard() {
         </Link>
       </header>
 
+      {/* Streak hero */}
+      <section className="px-6 mt-4">
+        <div className="text-center">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Clean streak</p>
+          <p className="mt-2 text-6xl font-semibold tracking-tight bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
+            Day {day}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground max-w-xs mx-auto leading-snug">
+            {streakLine}
+          </p>
+        </div>
+      </section>
+
       {/* Swipeable addiction trackers */}
       <AddictionCarousel />
 
