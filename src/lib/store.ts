@@ -29,10 +29,13 @@ export type ChallengeProgress = {
 const KEY = "stopamine.v2";
 
 export type Relapse = {
-  ts: number; // timestamp
+  ts: number;
   note?: string;
   reframeShown: boolean;
 };
+
+export type NotificationStyle = "conversational" | "curiosity" | "question" | "quiet";
+export type NotificationApp = "messaging" | "instagram" | "email" | "rarely";
 
 export type AppState = {
   onboarding: OnboardingData | null;
@@ -45,11 +48,18 @@ export type AppState = {
   points: number;
   completedChallenges: ChallengeProgress[];
   // Life tree
-  treeXP: number; // accumulates from streak + spend
-  treeUnlocks: string[]; // ids of cosmetic upgrades unlocked
-  // Relapse tracking — counter never resets, relapses are logged separately
+  treeXP: number;
+  treeUnlocks: string[];
+  // Relapse tracking — momentum never resets
   relapses: Relapse[];
-  // Legacy mirrors (kept for compatibility with existing screens)
+  // Notification preferences
+  notificationStyles: NotificationStyle[];
+  notificationApps: NotificationApp[];
+  // Identity lock-in
+  lastIdentityShown: number;
+  // Upsell
+  momentumShieldDays: number;
+  // Legacy mirrors
   startDate: number;
   totalCleanDays: number;
   badges: string[];
@@ -77,6 +87,10 @@ const defaultState = (): AppState => {
     treeXP: 240,
     treeUnlocks: ["sapling"],
     relapses: [],
+    notificationStyles: [],
+    notificationApps: [],
+    lastIdentityShown: 0,
+    momentumShieldDays: 0,
     startDate: start,
     totalCleanDays: 47,
     badges: ["First Week"],

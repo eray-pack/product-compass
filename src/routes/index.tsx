@@ -1,11 +1,43 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Smile, Frown, Meh, Heart, Zap, Lock, Trophy, TreePine, Coins, Sparkles, AlertTriangle } from "lucide-react";
+import { Smile, Frown, Meh, Heart, Zap, Lock, Trophy, TreePine, Coins, Sparkles, AlertTriangle, Target, X } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { AddictionCarousel } from "@/components/AddictionCarousel";
 import { useAppState, dayCount, treeStage, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { RelapseModal } from "@/components/RelapseModal";
+
+const MILESTONES = [7, 14, 30, 60, 90];
+const MILESTONE_LABELS: Record<number, string> = {
+  7: "Increased energy",
+  14: "Sharper focus returns",
+  30: "Confidence rebuilding",
+  60: "Emotional regulation",
+  90: "Full dopamine reset",
+};
+
+function nextMilestone(day: number) {
+  const next = MILESTONES.find((m) => m > day);
+  if (!next) return null;
+  return { day: next, label: MILESTONE_LABELS[next], daysAway: next - day };
+}
+
+const VARIABLE_REWARDS = [
+  { weight: 50, xp: 10, message: null },
+  { weight: 25, xp: 50, message: "Unexpected bonus. Your consistency is paying off." },
+  { weight: 15, xp: 20, message: "You just unlocked something rare. Keep going.", badge: true },
+  { weight: 10, xp: 0, message: null },
+];
+
+function rollReward(): { xp: number; message: string | null; badge?: boolean } {
+  const roll = Math.random() * 100;
+  let cumulative = 0;
+  for (const r of VARIABLE_REWARDS) {
+    cumulative += r.weight;
+    if (roll < cumulative) return r;
+  }
+  return VARIABLE_REWARDS[0];
+}
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -20,9 +52,11 @@ const milestones = [
 ];
 
 function Dashboard() {
-  const [state] = useAppState();
+  const [state, update] = useAppState();
   const navigate = useNavigate();
   const [showRelapse, setShowRelapse] = useState(false);
+  const [rewardMsg, setRewardMsg] = useState<string | null>(null);
+  const [showIdentity, setShowIdentity] = useState(false);
 
   useEffect(() => {
     if (!state.onboarding && typeof window !== "undefined") {
@@ -38,6 +72,16 @@ function Dashboard() {
   const pct = Math.min(100, (day / 90) * 100);
   const stage = treeStage(state.treeXP);
   const cost = state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self";
+  const next = nextMilestone(day);
+
+  // Show weekly identity reminder
+  useEffect(() => {
+    if (!state.onboarding?.identity) return;
+    const weekMs = 7 * 86400000;
+    if (Date.now() - (state.lastIdentityShown ?? 0) > weekMs) {
+      setShowIdentity(true);
+    }
+  }, [state.onboarding, state.lastIdentityShown]);
 
   // Streak insight
   const relapses = [...state.relapses].sort((a, b) => a.ts - b.ts);
@@ -136,7 +180,7 @@ function Dashboard() {
 
       {/* Cards */}
       <section className="px-6 mt-6 space-y-4">
-        <CheckInCard />
+        <CheckInCard onReward={setRewardMsg} />
 
         {/* Quick links to quests + tree */}
         <div className="grid grid-cols-2 gap-3">
@@ -168,6 +212,21 @@ function Dashboard() {
           </p>
         </div>
 
+        {next && (
+          <div className="rounded-2xl border border-success/30 bg-success/5 p-4 flex items-center gap-4">
+            <div className="h-10 w-10 rounded-full bg-success/15 grid place-items-center text-success shrink-0">
+              <Target className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Next milestone</p>
+              <p className="text-sm font-semibold">Day {next.day} — {next.label}</p>
+            </div>
+            <span className="text-xs font-bold text-success bg-success/15 border border-success/30 px-2.5 py-1 rounded-full whitespace-nowrap">
+              {next.daysAway}d away
+            </span>
+          </div>
+        )}
+
         <Link to="/tools"
           className="block rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-center text-sm font-medium text-destructive-foreground">
           <Zap className="inline h-4 w-4 mr-1.5 -mt-0.5" />
@@ -184,16 +243,44 @@ function Dashboard() {
       </section>
 
       {showRelapse && (
-        <RelapseModal
-          onClose={() => setShowRelapse(false)}
-          totalCleanDays={state.totalCleanDays}
-        />
+        <RelapseModal onClose={() => setShowRelapse(false)} totalCleanDays={state.totalCleanDays} />
+      )}
+
+      {showIdentity && state.onboarding?.identity && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="rounded-3xl border border-primary/30 bg-card p-7 w-full max-w-sm space-y-5 text-center relative">
+            <button onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
+              className="absolute top-4 right-4 text-muted-foreground">
+              <X className="h-4 w-4" />
+            </button>
+            <p className="text-xs uppercase tracking-wider text-primary">You made a promise.</p>
+            <p className="text-2xl font-bold leading-snug">
+              I am becoming someone who{" "}
+              <span className="text-primary">{state.onboarding.identity}</span>.
+            </p>
+            <p className="text-sm text-muted-foreground">You're still becoming that person.</p>
+            <button
+              onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
+              className="w-full h-12 rounded-2xl text-sm font-semibold text-primary-foreground"
+              style={{ background: "var(--gradient-primary)" }}>
+              I'm still in.
+            </button>
+          </div>
+        </div>
+      )}
+
+      {rewardMsg && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-primary/40 bg-card px-5 py-3 text-sm text-primary shadow-lg">
+          {rewardMsg}
+        </div>
       )}
     </PageShell>
   );
 }
 
-function CheckInCard() {
+function CheckInCard({ onReward }: { onReward: (msg: string) => void }) {
+  const [, update] = useAppState();
+  const [checked, setChecked] = useState(false);
   const moods = [
     { v: 1, Icon: Frown, label: "Rough" },
     { v: 2, Icon: Frown, label: "Low" },
@@ -201,19 +288,37 @@ function CheckInCard() {
     { v: 4, Icon: Smile, label: "Good" },
     { v: 5, Icon: Smile, label: "Strong" },
   ];
+
+  const handleMood = (v: number) => {
+    if (checked) return;
+    setChecked(true);
+    const reward = rollReward();
+    if (reward.xp > 0) {
+      update((s) => ({ points: s.points + reward.xp, treeXP: s.treeXP + Math.floor(reward.xp / 5) }));
+    }
+    if (reward.message) {
+      onReward(reward.message);
+      setTimeout(() => onReward(""), 3000);
+    }
+    if (v >= 4) {
+      update((s) => ({ urgesSurvived: s.urgesSurvived }));
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <p className="text-xs uppercase tracking-wider text-muted-foreground">Daily check-in</p>
       <p className="mt-1 text-base">How are you feeling today?</p>
       <div className="mt-4 grid grid-cols-5 gap-2">
         {moods.map(({ v, Icon, label }) => (
-          <button key={v}
-            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-secondary/40 py-2.5 text-[10px] text-muted-foreground hover:border-primary hover:text-primary transition">
+          <button key={v} onClick={() => handleMood(v)}
+            className={`flex flex-col items-center gap-1 rounded-xl border py-2.5 text-[10px] transition ${checked ? "border-border bg-secondary/20 text-muted-foreground/50" : "border-border bg-secondary/40 text-muted-foreground hover:border-primary hover:text-primary"}`}>
             <Icon className="h-5 w-5" />
             {label}
           </button>
         ))}
       </div>
+      {checked && <p className="mt-3 text-center text-xs text-primary">Check-in recorded ✓</p>}
     </div>
   );
 }
