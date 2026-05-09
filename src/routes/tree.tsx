@@ -46,10 +46,10 @@ function TreePage() {
   return (
     <PageShell>
       <header className="px-6 pt-12">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Life Tree</p>
-        <h1 className="mt-2 text-3xl font-bold">What you're building.</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Every clean day, every challenge — your tree grows. This is the version of your life you're earning back.
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Sacred Ground</p>
+        <h1 className="mt-2 text-3xl font-bold">Your Life Tree</h1>
+        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+          This tree is sacred. Every clean day is permanently etched into it. No one can take it from you.
         </p>
       </header>
 
