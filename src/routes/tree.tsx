@@ -155,6 +155,58 @@ function TreePage() {
         </div>
       </section>
 
+      {/* Hall of Legends */}
+      <section className="px-6 mt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Crown className="h-4 w-4" style={{ color: "oklch(0.85 0.16 85)" }} />
+          <h2 className="text-sm font-bold tracking-wide">Hall of Legends</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">The few who reached Ancient tree. This is what's possible.</p>
+        <div className="space-y-2">
+          {HALL_OF_LEGENDS.map((u, i) => (
+            <div
+              key={u.name}
+              className="flex items-center gap-3 rounded-2xl p-4"
+              style={{
+                background: "linear-gradient(135deg, oklch(0.24 0.04 80 / 0.5), oklch(0.2 0.025 260 / 0.6))",
+                border: "1px solid oklch(0.78 0.16 85 / 0.45)",
+                boxShadow: "0 0 20px -8px oklch(0.78 0.16 85 / 0.4)",
+              }}
+            >
+              <div
+                className="h-11 w-11 rounded-full grid place-items-center shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, oklch(0.5 0.14 85), oklch(0.35 0.1 75))",
+                  boxShadow: "inset 0 0 6px oklch(0.95 0.1 90 / 0.4)",
+                }}
+              >
+                <Crown className="h-5 w-5" style={{ color: "oklch(0.97 0.12 95)" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-bold truncate">{u.name}</p>
+                  <span
+                    className="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full"
+                    style={{
+                      color: "oklch(0.95 0.12 90)",
+                      border: "1px solid oklch(0.78 0.16 85 / 0.6)",
+                      background: "oklch(0.5 0.14 85 / 0.15)",
+                    }}
+                  >
+                    Legendary
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Ancient tree · Day {u.day} · {u.xp.toLocaleString()} XP</p>
+              </div>
+              <span className="text-[10px] font-bold" style={{ color: "oklch(0.85 0.14 85)" }}>#{i + 1}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-center text-muted-foreground mt-3 italic">
+          One day, your name belongs here.
+        </p>
+      </section>
+
       <section className="px-6 mt-6">
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
           <p className="text-sm text-muted-foreground">
