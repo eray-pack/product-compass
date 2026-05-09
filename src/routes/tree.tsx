@@ -58,13 +58,30 @@ function TreePage() {
         <div className="rounded-2xl border border-border bg-[var(--gradient-surface)] p-6 shadow-[var(--shadow-glow)]">
           <div className="aspect-square w-full rounded-xl bg-card/40 border border-border grid place-items-center relative overflow-hidden">
             <Tree stage={stage.stage} />
-            <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full">
-              Stage {stage.stage} · {stage.name}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full">
+                Stage {stage.stage} · {stage.name}
+              </span>
+              <span
+                className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  color: "oklch(0.92 0.14 90)",
+                  background: "linear-gradient(135deg, oklch(0.35 0.08 75 / 0.4), oklch(0.5 0.14 85 / 0.25))",
+                  border: "1px solid oklch(0.78 0.16 85 / 0.7)",
+                  boxShadow: "0 0 16px -2px oklch(0.78 0.16 85 / 0.5), inset 0 0 8px oklch(0.78 0.16 85 / 0.15)",
+                }}
+              >
+                <Crown className="h-3 w-3" /> {RANK_BY_STAGE[stage.stage]}
+              </span>
             </div>
             <div className="absolute bottom-3 right-3 inline-flex items-center gap-1 text-[10px] text-warning bg-warning/10 border border-warning/30 px-2 py-1 rounded-full">
               <Sparkles className="h-3 w-3" /> Day {day} of you
             </div>
           </div>
+          <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Globe className="h-3.5 w-3.5 text-success" />
+            Your tree ranks in the <span className="text-success font-semibold">top {TOP_PCT_BY_STAGE[stage.stage]}%</span> of all Stopamine users
+          </p>
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">{stage.name}</span>
