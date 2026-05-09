@@ -191,35 +191,43 @@ function ShareTreeCard({ stage, day, xp }: { stage: { name: string; stage: numbe
   };
 
   return (
-    <div className="rounded-2xl border border-success/30 bg-success/5 p-5 space-y-4">
+    <div
+      className="rounded-2xl p-6 space-y-4"
+      style={{
+        background: "linear-gradient(135deg, oklch(0.28 0.1 155 / 0.5), oklch(0.22 0.06 260 / 0.6))",
+        border: "1px solid oklch(0.7 0.16 150 / 0.5)",
+        boxShadow: "0 0 32px -8px oklch(0.7 0.16 150 / 0.45)",
+      }}
+    >
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-success/15 grid place-items-center text-success">
-          <Share2 className="h-5 w-5" />
+        <div className="h-12 w-12 rounded-full bg-success/20 grid place-items-center text-success shrink-0">
+          <Share2 className="h-6 w-6" />
         </div>
         <div>
-          <p className="text-sm font-semibold">Flex your tree</p>
-          <p className="text-[11px] text-muted-foreground">Your tree is proof. Show the world.</p>
+          <p className="text-base font-bold leading-tight">Show the world your tree</p>
+          <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+            Your tree is proof of real work. Most people never make it this far.
+          </p>
         </div>
       </div>
 
-      <div className="rounded-xl bg-card border border-border p-3 text-xs text-muted-foreground italic leading-relaxed">
+      <div className="rounded-xl bg-card/60 border border-border p-3 text-xs text-muted-foreground italic leading-relaxed">
         "{shareText}"
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={handleShare}
-          className="h-10 rounded-xl text-xs font-semibold text-primary-foreground"
-          style={{ background: "var(--gradient-primary)" }}
-        >
-          {shared ? "Copied!" : "Share tree"}
-        </button>
-        <button
-          onClick={() => setShowCommunity(!showCommunity)}
-          className="h-10 rounded-xl text-xs font-semibold bg-secondary text-foreground border border-border inline-flex items-center justify-center gap-1.5"
-        >
-          <Users className="h-3.5 w-3.5" /> Community
-        </button>
+      <button
+        onClick={handleShare}
+        className="w-full h-12 rounded-xl text-sm font-bold text-primary-foreground shadow-[var(--shadow-glow)]"
+        style={{ background: "var(--gradient-primary)" }}
+      >
+        {shared ? "Copied to clipboard" : "Show the world your tree"}
+      </button>
+      <button
+        onClick={() => setShowCommunity(!showCommunity)}
+        className="w-full h-10 rounded-xl text-xs font-semibold bg-secondary/60 text-foreground border border-border inline-flex items-center justify-center gap-1.5"
+      >
+        <Users className="h-3.5 w-3.5" /> {showCommunity ? "Hide community" : "See community"}
+      </button>
       </div>
 
       {showCommunity && (
