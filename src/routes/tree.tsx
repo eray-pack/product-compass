@@ -17,6 +17,15 @@ const UPGRADES = [
   { id: "root-deep", name: "Deep roots", desc: "Permanent +10% XP from challenges", costPoints: 500, costMoney: 7.99, pro: true },
 ];
 
+const RANK_BY_STAGE = ["Beginner", "Awakened", "Disciplined", "Respected", "Elite", "Legendary"];
+const TOP_PCT_BY_STAGE = [78, 56, 34, 21, 12, 3];
+
+const HALL_OF_LEGENDS = [
+  { name: "Dimitri K.", day: 412, xp: 6240 },
+  { name: "Samuel R.", day: 287, xp: 4980 },
+  { name: "Kenji T.", day: 156, xp: 3420 },
+];
+
 function TreePage() {
   const [state, update] = useAppState();
   const day = dayCount(state.startDate);
