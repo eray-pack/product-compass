@@ -228,7 +228,6 @@ function ShareTreeCard({ stage, day, xp }: { stage: { name: string; stage: numbe
       >
         <Users className="h-3.5 w-3.5" /> {showCommunity ? "Hide community" : "See community"}
       </button>
-      </div>
 
       {showCommunity && (
         <div className="space-y-2 pt-1">
