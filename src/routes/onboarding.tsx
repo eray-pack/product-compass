@@ -25,6 +25,7 @@ function Onboarding() {
   const [, update] = useAppState();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [interstitial, setInterstitial] = useState<null | { title: string; body: string; nextStep: number }>(null);
   const [duration, setDuration] = useState("");
   const [pickedCosts, setPickedCosts] = useState<string[]>([]);
   const [pickedTriggers, setPickedTriggers] = useState<string[]>([]);
@@ -33,6 +34,24 @@ function Onboarding() {
   const [name, setName] = useState("");
 
   const next = () => setStep((s) => s + 1);
+  const goAfterCosts = () =>
+    setInterstitial({
+      title: "That took honesty.",
+      body: "Most people never admit this to themselves. Naming what it costs you is how the work begins.",
+      nextStep: 2,
+    });
+  const goAfterTriggers = () =>
+    setInterstitial({
+      title: "We hear you.",
+      body: "We'll use this to protect you at exactly the right moments — not with willpower, but with timing.",
+      nextStep: 3,
+    });
+  const dismissInterstitial = () => {
+    if (!interstitial) return;
+    setStep(interstitial.nextStep);
+    setInterstitial(null);
+  };
+
   const finish = () => {
     update({
       onboarding: {
@@ -53,97 +72,134 @@ function Onboarding() {
   };
 
   const TOTAL = 6;
+  // animation key — bumps on every step or interstitial change
+  const animKey = interstitial ? `int-${interstitial.nextStep}` : `step-${step}`;
 
   return (
     <div className="min-h-screen mx-auto max-w-md flex flex-col">
       <div className="px-6 pt-10">
         <div className="flex gap-1.5">
-          {Array.from({ length: TOTAL }).map((_, i) => (
-            <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-secondary"}`} />
-          ))}
+          {Array.from({ length: TOTAL }).map((_, i) => {
+            const completed = i < step;
+            const current = i === step;
+            return (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                  completed
+                    ? "bg-primary shadow-[0_0_8px_var(--primary-glow)]"
+                    : current
+                    ? "bg-primary/70"
+                    : "bg-secondary"
+                }`}
+              />
+            );
+          })}
         </div>
       </div>
 
-      <div className="flex-1 px-6 pt-10 pb-8 flex flex-col">
-        {step === 0 && (
-          <Step eyebrow={`Step 1 of ${TOTAL}`} title="Before we start — be honest with yourself"
-            subtitle="How long have you been struggling with this?"
-            cta={duration ? "Continue" : ""} onContinue={next}>
-            <div className="space-y-3">
-              {durations.map((d) => (
-                <Option key={d} selected={duration === d} onClick={() => setDuration(d)}>{d}</Option>
-              ))}
-            </div>
-          </Step>
-        )}
+      <div key={animKey} className="flex-1 px-6 pt-10 pb-8 flex flex-col animate-step-in">
+        {interstitial ? (
+          <Interstitial title={interstitial.title} body={interstitial.body} onContinue={dismissInterstitial} />
+        ) : (
+          <>
+            {step === 0 && (
+              <Step eyebrow={`Step 1 of ${TOTAL}`} title="Before we start — be honest with yourself"
+                subtitle="How long have you been struggling with this?"
+                cta={duration ? "Continue" : ""} onContinue={next}>
+                <div className="space-y-3">
+                  {durations.map((d) => (
+                    <Option key={d} selected={duration === d} onClick={() => setDuration(d)}>{d}</Option>
+                  ))}
+                </div>
+              </Step>
+            )}
 
-        {step === 1 && (
-          <Step eyebrow={`Step 2 of ${TOTAL}`} title="What does it cost you?"
-            subtitle="Select everything this has taken from you."
-            cta={pickedCosts.length ? "These are the things I'm taking back" : ""} onContinue={next}>
-            <div className="space-y-3">
-              {costs.map((c) => (
-                <CheckOption key={c} selected={pickedCosts.includes(c)} onClick={() => toggle(pickedCosts, c, setPickedCosts)}>{c}</CheckOption>
-              ))}
-            </div>
-          </Step>
-        )}
+            {step === 1 && (
+              <Step eyebrow={`Step 2 of ${TOTAL}`} title="What does it cost you?"
+                subtitle="Select everything this has taken from you."
+                cta={pickedCosts.length ? "These are the things I'm taking back" : ""} onContinue={goAfterCosts}>
+                <div className="space-y-3">
+                  {costs.map((c) => (
+                    <CheckOption key={c} selected={pickedCosts.includes(c)} onClick={() => toggle(pickedCosts, c, setPickedCosts)}>{c}</CheckOption>
+                  ))}
+                </div>
+              </Step>
+            )}
 
-        {step === 2 && (
-          <Step eyebrow={`Step 3 of ${TOTAL}`} title="Your trigger profile"
-            subtitle="When are you most vulnerable? We'll use this for smart reminders."
-            cta={pickedTriggers.length ? "Continue" : ""} onContinue={next}>
-            <div className="space-y-3">
-              {triggers.map((t) => (
-                <CheckOption key={t} selected={pickedTriggers.includes(t)} onClick={() => toggle(pickedTriggers, t, setPickedTriggers)}>{t}</CheckOption>
-              ))}
-            </div>
-          </Step>
-        )}
+            {step === 2 && (
+              <Step eyebrow={`Step 3 of ${TOTAL}`} title="Your trigger profile"
+                subtitle="When are you most vulnerable? We'll use this for smart reminders."
+                cta={pickedTriggers.length ? "Continue" : ""} onContinue={goAfterTriggers}>
+                <div className="space-y-3">
+                  {triggers.map((t) => (
+                    <CheckOption key={t} selected={pickedTriggers.includes(t)} onClick={() => toggle(pickedTriggers, t, setPickedTriggers)}>{t}</CheckOption>
+                  ))}
+                </div>
+              </Step>
+            )}
 
-        {step === 3 && (
-          <Step eyebrow={`Step 4 of ${TOTAL}`} title="Anything else you want to quit?"
-            subtitle="With PRO you can track multiple addictions side-by-side. Pick any you'd like to add later — you can skip and add them anytime."
-            cta="Continue"
-            onContinue={next}>
-            <div className="mb-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-primary bg-primary/10 border border-primary/30 px-2.5 py-1 rounded-full">
-              <Lock className="h-3 w-3" /> Unlocked with PRO
-            </div>
-            <div className="space-y-3">
-              {otherHabitOptions.map((h) => (
-                <CheckOption key={h} selected={pickedHabits.includes(h)} onClick={() => toggle(pickedHabits, h, setPickedHabits)}>{h}</CheckOption>
-              ))}
-            </div>
-          </Step>
-        )}
+            {step === 3 && (
+              <Step eyebrow={`Step 4 of ${TOTAL}`} title="Anything else you want to quit?"
+                subtitle="With PRO you can track multiple addictions side-by-side. Pick any you'd like to add later — you can skip and add them anytime."
+                cta="Continue"
+                onContinue={next}>
+                <div className="mb-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-primary bg-primary/10 border border-primary/30 px-2.5 py-1 rounded-full">
+                  <Lock className="h-3 w-3" /> Unlocked with PRO
+                </div>
+                <div className="space-y-3">
+                  {otherHabitOptions.map((h) => (
+                    <CheckOption key={h} selected={pickedHabits.includes(h)} onClick={() => toggle(pickedHabits, h, setPickedHabits)}>{h}</CheckOption>
+                  ))}
+                </div>
+              </Step>
+            )}
 
-        {step === 4 && (
-          <Step eyebrow={`Step 5 of ${TOTAL}`} title="Identity statement"
-            subtitle="This becomes your personal mantra, shown to you every day."
-            cta={identity.trim() ? "Continue" : ""} onContinue={next}>
-            <label className="block text-sm text-muted-foreground mb-3">I am becoming someone who…</label>
-            <textarea value={identity} onChange={(e) => setIdentity(e.target.value)}
-              placeholder="e.g. is in full control of his mind" rows={4}
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-lg leading-snug focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" />
-          </Step>
-        )}
+            {step === 4 && (
+              <Step eyebrow={`Step 5 of ${TOTAL}`} title="Identity statement"
+                subtitle="This becomes your personal mantra, shown to you every day."
+                cta={identity.trim() ? "Continue" : ""} onContinue={next}>
+                <label className="block text-sm text-muted-foreground mb-3">I am becoming someone who…</label>
+                <textarea value={identity} onChange={(e) => setIdentity(e.target.value)}
+                  placeholder="e.g. is in full control of his mind" rows={4}
+                  className="w-full rounded-xl border border-border bg-card px-4 py-3 text-lg leading-snug focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" />
+              </Step>
+            )}
 
-        {step === 5 && (
-          <Step eyebrow={`Step 6 of ${TOTAL}`} title="Your commitment"
-            subtitle="Read it. Sign it. This is who you are now."
-            cta={name.trim() ? "I commit to this" : ""} onContinue={finish}>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Identity</p>
-              <p className="mt-2 text-xl leading-snug">
-                I am becoming someone who <span className="text-primary">{identity || "…"}</span>.
-              </p>
-            </div>
-            <label className="block text-sm text-muted-foreground mt-6 mb-2">Sign with your first name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your first name"
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" />
-          </Step>
+            {step === 5 && (
+              <Step eyebrow={`Step 6 of ${TOTAL}`} title="Your commitment"
+                subtitle="Read it. Sign it. This is who you are now."
+                cta={name.trim() ? "I commit to this" : ""} onContinue={finish}>
+                <div className="rounded-2xl border border-border bg-card p-5">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Identity</p>
+                  <p className="mt-2 text-xl leading-snug">
+                    I am becoming someone who <span className="text-primary">{identity || "…"}</span>.
+                  </p>
+                </div>
+                <label className="block text-sm text-muted-foreground mt-6 mb-2">Sign with your first name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your first name"
+                  className="w-full rounded-xl border border-border bg-card px-4 py-3 text-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" />
+              </Step>
+            )}
+          </>
         )}
       </div>
+    </div>
+  );
+}
+
+function Interstitial({ title, body, onContinue }: { title: string; body: string; onContinue: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="h-px w-10 bg-primary mb-6" />
+        <h2 className="text-3xl font-semibold leading-tight">{title}</h2>
+        <p className="mt-4 text-muted-foreground text-lg leading-relaxed">{body}</p>
+      </div>
+      <button onClick={onContinue}
+        className="mt-8 h-14 w-full rounded-xl bg-primary text-primary-foreground font-medium inline-flex items-center justify-center gap-2 transition">
+        Continue <ArrowRight className="h-4 w-4" />
+      </button>
     </div>
   );
 }

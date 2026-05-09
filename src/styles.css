@@ -46,10 +46,10 @@
   --card-foreground: oklch(0.97 0.005 260);
   --popover: oklch(0.21 0.025 260);
   --popover-foreground: oklch(0.97 0.005 260);
-  /* Electric blue */
-  --primary: oklch(0.65 0.21 255);
+  /* Muted clinical teal (#1A6B6B) */
+  --primary: oklch(0.5 0.06 195);
   --primary-foreground: oklch(0.99 0.005 260);
-  --primary-glow: oklch(0.75 0.18 255);
+  --primary-glow: oklch(0.62 0.08 195);
   --secondary: oklch(0.26 0.028 260);
   --secondary-foreground: oklch(0.97 0.005 260);
   --muted: oklch(0.24 0.025 260);
@@ -64,13 +64,19 @@
   --warning-foreground: oklch(0.15 0.01 260);
   --border: oklch(0.3 0.025 260);
   --input: oklch(0.28 0.025 260);
-  --ring: oklch(0.65 0.21 255);
+  --ring: oklch(0.5 0.06 195);
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.65 0.21 255), oklch(0.55 0.22 270));
+  --gradient-primary: linear-gradient(135deg, oklch(0.5 0.06 195), oklch(0.42 0.07 200));
   --gradient-surface: linear-gradient(180deg, oklch(0.21 0.025 260), oklch(0.18 0.022 260));
-  --shadow-glow: 0 0 40px -10px oklch(0.65 0.21 255 / 0.45);
+  --shadow-glow: 0 0 40px -10px oklch(0.5 0.06 195 / 0.45);
   --shadow-sos: 0 0 60px -10px oklch(0.62 0.24 25 / 0.6);
 }
+
+@keyframes step-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-step-in { animation: step-fade-in 300ms ease both; }
 
 @layer base {
   * { border-color: var(--color-border); }
