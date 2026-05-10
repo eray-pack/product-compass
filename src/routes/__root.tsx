@@ -4,10 +4,12 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 import appCss from "../styles.css?url";
 import { PaywallModal } from "@/components/PaywallModal";
@@ -89,7 +91,7 @@ const SPLASH_KEY = "_stopamine_splash";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  // Start hidden so SSR HTML matches; reveal after client check
+  const navigate = useNavigate();
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
@@ -99,6 +101,17 @@ function RootComponent() {
       setShowSplash(true);
     }
   }, []);
+
+  // Auth guard — redirect to /auth if not signed in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) navigate({ to: "/auth" });
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) navigate({ to: "/auth" });
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleSplashDone = useCallback(() => setShowSplash(false), []);
 
