@@ -3,7 +3,7 @@ import { Home, TreePine, Wrench, Users, BarChart2, Settings } from "lucide-react
 
 const NAV_ITEMS = [
   { to: "/",          label: "Home",      icon: Home      },
-  { to: "/tree",      label: "Tree",      icon: TreePine  },
+  { to: "/tree",      label: "Companion", icon: TreePine  },
   { to: "/tools",     label: "Tools",     icon: Wrench    },
   { to: "/community", label: "Community", icon: Users     },
   { to: "/progress",  label: "Progress",  icon: BarChart2 },

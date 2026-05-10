@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Zap, AlertTriangle, Target, Sparkles, Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
-import { CompanionAvatar, dayToStage, STAGE_DAYS, COMPANION_LABELS } from "@/components/avatars/CompanionAvatar";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { triggerPaywall } from "@/lib/paywall";
 import { RelapseModal } from "@/components/RelapseModal";
@@ -347,63 +346,6 @@ function Dashboard() {
         </div>
         <BrainTimeline day={day} />
       </section>
-
-      {/* ── Companion ────────────────────────────────────────────────── */}
-      {state.companion && (
-        <section className="px-6 mt-7">
-          <div
-            className="rounded-2xl border border-border/60 overflow-hidden"
-            style={{ background: "var(--gradient-surface)" }}
-          >
-            <div className="flex items-end gap-4 px-5 pt-4 pb-4">
-              {/* Avatar */}
-              <div className="shrink-0 w-24 h-28">
-                <CompanionAvatar
-                  type={state.companion}
-                  day={day}
-                  relapseCount={state.relapses.length}
-                  className="w-full h-full"
-                />
-              </div>
-              {/* Info */}
-              <div className="flex-1 pb-1">
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground">
-                  Your companion
-                </p>
-                <p className="mt-0.5 text-sm font-bold">
-                  {COMPANION_LABELS[state.companion].name}
-                </p>
-                {(() => {
-                  const stage = dayToStage(day);
-                  const nextStageDay = STAGE_DAYS[stage + 1];
-                  if (!nextStageDay) {
-                    return <p className="mt-1 text-xs text-muted-foreground">Peak form achieved.</p>;
-                  }
-                  const daysLeft = nextStageDay - day;
-                  return (
-                    <>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Next evolution in <span className="font-semibold" style={{ color: "var(--primary)" }}>{daysLeft} day{daysLeft !== 1 ? "s" : ""}</span>
-                      </p>
-                      {/* Mini progress to next stage */}
-                      <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-                        <div
-                          className="h-full rounded-full transition-all duration-700"
-                          style={{
-                            width: `${Math.round(((day - STAGE_DAYS[stage]) / (nextStageDay - STAGE_DAYS[stage])) * 100)}%`,
-                            background: "var(--gradient-primary)",
-                          }}
-                        />
-                      </div>
-                      <p className="mt-0.5 text-[9px] text-muted-foreground/60">Stage {stage + 1} of 6</p>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── Cards ────────────────────────────────────────────────────── */}
       <section className="px-6 mt-7 space-y-3">
