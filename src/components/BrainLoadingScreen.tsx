@@ -161,16 +161,14 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
     // ── Hemisphere material factory ───────────────────────────────────────────
     const makeBrainMat = (clippingNormal: THREE.Vector3) => {
       const mat = new THREE.MeshStandardMaterial({
-        color:             new THREE.Color(0x020c20),
-        emissive:          new THREE.Color(0x001e66),
-        emissiveIntensity: 1.4,
-        roughness:         0.58,
-        metalness:         0.08,
+        color:             new THREE.Color(0xf2c4b0),  // light pink / flesh
+        emissive:          new THREE.Color(0xc0524a),  // warm rose emissive glow
+        emissiveIntensity: 0.18,                       // subtle — doesn't overpower the base colour
+        roughness:         0.72,
+        metalness:         0.02,
         transparent:       true,
-        opacity:           0.95,
+        opacity:           0.97,
         side:              THREE.FrontSide,
-        // Clip each hemisphere at the midline so inner faces don't bleed
-        // through the fissure gap when viewed from an angle.
         clippingPlanes: [new THREE.Plane(clippingNormal, 0.02)],
       });
       return mat;
@@ -248,13 +246,13 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
     cGeo.scale(1.35, 0.58, 0.86);
     displaceSphere(cGeo, 0.060, 3.14);
     const cerebMat = new THREE.MeshStandardMaterial({
-      color:             new THREE.Color(0x020c20),
-      emissive:          new THREE.Color(0x001e66),
-      emissiveIntensity: 1.2,
-      roughness:         0.62,
-      metalness:         0.06,
+      color:             new THREE.Color(0xeab8a4),  // slightly deeper pink for cerebellum
+      emissive:          new THREE.Color(0xb04840),
+      emissiveIntensity: 0.15,
+      roughness:         0.75,
+      metalness:         0.02,
       transparent:       true,
-      opacity:           0.92,
+      opacity:           0.95,
     });
     const cerebell = new THREE.Mesh(cGeo, cerebMat);
     cerebell.position.set(0, -0.60, -0.75);
@@ -265,10 +263,11 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
     const stem = new THREE.Mesh(
       stemGeo,
       new THREE.MeshStandardMaterial({
-        color: 0x010810,
-        emissive: new THREE.Color(0x001155),
-        emissiveIntensity: 0.9,
-        roughness: 0.90,
+        color:             new THREE.Color(0xd4a090),  // muted pink-tan for stem
+        emissive:          new THREE.Color(0x8b3030),
+        emissiveIntensity: 0.12,
+        roughness:         0.85,
+        metalness:         0.01,
       }),
     );
     stem.position.set(0, -0.98, -0.46);
@@ -346,11 +345,12 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
       if (e < 900) pMat.opacity = lerp(pMat.opacity, 0.65, 0.005);
       pMat.opacity += 0.032 * Math.sin(e * 0.0055) * (pMat.opacity > 0.28 ? 1 : 0);
 
-      // Breathing emissive glow on all brain surfaces
-      const pulse = 1.25 + 0.38 * Math.sin(e * 0.0016);
+      // Subtle breathing pulse on the pink brain — stays in the 0.12–0.26 range
+      // so the warm glow breathes without washing out the flesh colour.
+      const pulse = 0.18 + 0.08 * Math.sin(e * 0.0016);
       leftMat.emissiveIntensity  = pulse;
       rightMat.emissiveIntensity = pulse;
-      cerebMat.emissiveIntensity = pulse * 0.82;
+      cerebMat.emissiveIntensity = pulse * 0.80;
 
       pathways.forEach((p) => {
         if (e < p.activateAt) return;
