@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, Check, Lock } from "lucide-react";
 import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
+import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
 
 const HABIT_MAP: Record<string, { name: string; emoji: string }> = {
   "Social media doomscrolling": { name: "Social media", emoji: "📱" },
@@ -53,6 +54,7 @@ function Onboarding() {
   const [identity, setIdentity] = useState("");
   const [customIdentitySelected, setCustomIdentitySelected] = useState(false);
   const [name, setName] = useState("");
+  const [companion, setCompanion] = useState<CompanionType | null>(null);
 
   const next = () => setStep((s) => s + 1);
   const finish = () => {

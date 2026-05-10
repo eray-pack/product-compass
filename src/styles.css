@@ -202,6 +202,17 @@ html.light {
 }
 
 /* ── Animations ─────────────────────────────────────────── */
+@keyframes companion-relapse {
+  0%   { transform: scale(1) translateX(0);    filter: none; }
+  12%  { transform: scale(1) translateX(-6px); }
+  25%  { transform: scale(1) translateX(6px);  }
+  38%  { transform: scale(1) translateX(-5px); }
+  50%  { transform: scale(0.88) translateX(4px); filter: grayscale(0.5); }
+  75%  { transform: scale(0.85) translateX(0);   filter: grayscale(0.3); }
+  100% { transform: scale(1) translateX(0);    filter: none; }
+}
+.companion-relapse { animation: companion-relapse 1s ease-out; }
+
 @keyframes step-fade-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
