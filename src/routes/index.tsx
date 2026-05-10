@@ -101,7 +101,7 @@ function Dashboard() {
 
   // Streak insight
   const relapses = [...state.relapses].sort((a, b) => a.ts - b.ts);
-  const points = [active.startDate, ...relapses.map((r) => r.ts), Date.now()];
+  const points = [active?.startDate ?? Date.now(), ...relapses.map((r) => r.ts), Date.now()];
   const gaps = points.slice(1).map((t, i) => (t - points[i]) / 86400000);
   const bestStreak = Math.max(day, ...gaps.map((g) => Math.floor(g)));
   const isPersonalBest = day >= bestStreak && relapses.length > 0;
