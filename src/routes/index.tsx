@@ -63,9 +63,13 @@ function Dashboard() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const raw = localStorage.getItem("stopamine.v2");
-    const saved = raw ? JSON.parse(raw) : null;
-    if (!saved?.onboarding || !saved?.addictions?.length) {
+    try {
+      const raw = localStorage.getItem("stopamine.v2");
+      const saved = raw ? JSON.parse(raw) : null;
+      if (!saved?.onboarding || !saved?.addictions?.length) {
+        navigate({ to: "/onboarding" });
+      }
+    } catch {
       navigate({ to: "/onboarding" });
     }
   }, [navigate]);

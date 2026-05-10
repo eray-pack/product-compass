@@ -11,7 +11,7 @@ export const Route = createFileRoute("/progress")({
 function ProgressScreen() {
   const [state] = useAppState();
   const active = activeAddiction(state);
-  if (!active?.startDate) return null;
+  if (!active) return null;
   const day = dayCount(active.startDate);
   const longest = longestCleanPeriod(state);
   const daysSinceStart = Math.floor((Date.now() - active.startDate) / 86400000);

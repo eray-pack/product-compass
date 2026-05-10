@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 
 export const Route = createFileRoute("/tools/sos")({
@@ -17,6 +17,7 @@ function SOS() {
   const [elapsed, setElapsed] = useState(0);
   const [phaseIdx, setPhaseIdx] = useState(0);
   const [phaseLeft, setPhaseLeft] = useState(PHASES[0].seconds);
+  const phaseIdxRef = useRef(0);
   const done = elapsed >= 180;
 
   useEffect(() => {
@@ -24,16 +25,13 @@ function SOS() {
       setElapsed((e) => e + 1);
       setPhaseLeft((p) => {
         if (p > 1) return p - 1;
-        setPhaseIdx((i) => {
-          const next = (i + 1) % PHASES.length;
-          setPhaseLeft(PHASES[next].seconds);
-          return next;
-        });
-        return PHASES[(phaseIdx + 1) % PHASES.length].seconds;
+        const next = (phaseIdxRef.current + 1) % PHASES.length;
+        phaseIdxRef.current = next;
+        setPhaseIdx(next);
+        return PHASES[next].seconds;
       });
     }, 1000);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");

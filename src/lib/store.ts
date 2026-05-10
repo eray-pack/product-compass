@@ -126,10 +126,11 @@ export function useAppState() {
 }
 
 export function dayCount(startDate: number) {
+  if (!startDate || isNaN(startDate)) return 1;
   return Math.max(1, Math.floor((Date.now() - startDate) / 86400000) + 1);
 }
 
-export function activeAddiction(s: AppState): Addiction {
+export function activeAddiction(s: AppState): Addiction | undefined {
   return s.addictions.find((a) => a.id === s.activeAddictionId) ?? s.addictions[0];
 }
 
