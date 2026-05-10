@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Zap, AlertTriangle, Target, Sparkles, Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
@@ -194,6 +194,19 @@ function CheckInCard({ onReward }: { onReward: (msg: string) => void }) {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    // Runs before the component mounts — safe to redirect with no flash.
+    if (typeof window === "undefined") return;
+    let needsOnboarding = false;
+    try {
+      const raw = localStorage.getItem("stopamine.v2");
+      const saved = raw ? JSON.parse(raw) : null;
+      needsOnboarding = !saved?.onboarding || !saved?.addictions?.length;
+    } catch {
+      needsOnboarding = true;
+    }
+    if (needsOnboarding) throw redirect({ to: "/onboarding" });
+  },
   component: Dashboard,
 });
 
@@ -205,20 +218,6 @@ function Dashboard() {
   const [showIdentity, setShowIdentity] = useState(false);
   const [reEntryDays, setReEntryDays] = useState(0);
   const [showAddHabit, setShowAddHabit] = useState(false);
-
-  // Redirect if not onboarded
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = localStorage.getItem("stopamine.v2");
-      const saved = raw ? JSON.parse(raw) : null;
-      if (!saved?.onboarding || !saved?.addictions?.length) {
-        navigate({ to: "/onboarding" });
-      }
-    } catch {
-      navigate({ to: "/onboarding" });
-    }
-  }, [navigate]);
 
   const active = activeAddiction(state);
   const day = active ? dayCount(active.startDate) : 1;
