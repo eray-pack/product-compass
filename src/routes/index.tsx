@@ -262,16 +262,16 @@ function Dashboard() {
         <Link
           to="/challenges"
           className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
-          style={{ color: "var(--warning)", borderColor: "oklch(0.78 0.16 70 / 0.3)", background: "oklch(0.78 0.16 70 / 0.08)" }}
+          style={{ color: "var(--primary)", borderColor: "rgba(196,135,58,0.35)", background: "rgba(196,135,58,0.08)" }}
         >
           <Coins className="h-3 w-3" /> {state.points}
         </Link>
       </header>
 
       {/* ── Hero: Day counter ────────────────────────────────────────── */}
-      <section className="px-6 mt-6 text-center">
+      <section className="neural-mesh-fine px-6 mt-6 text-center">
         <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-muted-foreground">Day</p>
-        <p className="font-bold leading-none tabular-nums" style={{ fontSize: "8rem" }}>
+        <p className="day-monument font-bold leading-none tabular-nums" style={{ fontSize: "8rem" }}>
           {String(day).padStart(3, "0")}
         </p>
         <p className="mt-2 text-sm text-muted-foreground inline-flex items-center gap-2 flex-wrap justify-center">
@@ -288,7 +288,7 @@ function Dashboard() {
             className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors"
             style={{
               color: "var(--primary)",
-              borderColor: "oklch(0.62 0.22 255 / 0.35)",
+              borderColor: "rgba(196,135,58,0.35)",
               background: "oklch(0.62 0.22 255 / 0.08)",
             }}
           >
@@ -320,7 +320,7 @@ function Dashboard() {
 
       {/* ── Recovery progress bar ────────────────────────────────────── */}
       <div className="px-6 mt-4">
-        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "oklch(0.22 0.03 265)" }}>
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#2a2218" }}>
           <div
             className="h-full rounded-full transition-all duration-700"
             style={{ width: `${recoveryPct}%`, background: "var(--gradient-primary)" }}

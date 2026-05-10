@@ -39,48 +39,55 @@
 :root {
   --radius: 0.875rem;
 
-  /* ── Dark navy #0a0f1a ────────────────────────────────── */
-  --background:   oklch(0.09 0.02 265);
-  --surface:      oklch(0.12 0.022 265);
-  --surface-2:    oklch(0.16 0.025 265);
-  --foreground:   oklch(0.96 0.005 260);
+  /* ── Warm black #0D0A08 ───────────────────────────────── */
+  --background:   #0D0A08;
+  --surface:      #15110D;
+  --surface-2:    #261F15;
+  --foreground:   #f5ede0;
 
-  --card:              oklch(0.13 0.022 265);
-  --card-foreground:   oklch(0.96 0.005 260);
-  --popover:           oklch(0.13 0.022 265);
-  --popover-foreground: oklch(0.96 0.005 260);
+  --card:              #1C170F;
+  --card-foreground:   #f5ede0;
+  --popover:           #1C170F;
+  --popover-foreground: #f5ede0;
 
-  /* ── Electric blue ────────────────────────────────────── */
-  --primary:           oklch(0.62 0.22 255);
-  --primary-foreground: oklch(0.99 0.005 260);
-  --primary-glow:      oklch(0.72 0.20 255);
+  /* ── Amber / gold — earned, sacred ───────────────────── */
+  --primary:           #C4873A;
+  --primary-foreground: #1F1408;
+  --primary-glow:      #D4A76A;
 
-  --secondary:           oklch(0.16 0.025 265);
-  --secondary-foreground: oklch(0.96 0.005 260);
+  --secondary:           #261F15;
+  --secondary-foreground: #f5ede0;
 
-  --muted:           oklch(0.15 0.022 265);
-  --muted-foreground: oklch(0.60 0.018 265);
+  --muted:           #1C170F;
+  --muted-foreground: #a89580;
 
-  --accent:           oklch(0.18 0.03 265);
-  --accent-foreground: oklch(0.96 0.005 260);
+  --accent:           #322819;
+  --accent-foreground: #f5ede0;
 
   --destructive:           oklch(0.62 0.24 25);
-  --destructive-foreground: oklch(0.99 0.005 260);
+  --destructive-foreground: #f5ede0;
 
-  --success:           oklch(0.70 0.16 150);
-  --success-foreground: oklch(0.15 0.01 260);
+  /* ── Deep teal as success ─────────────────────────────── */
+  --success:           #1A4A4A;
+  --success-foreground: #f5ede0;
 
-  --warning:           oklch(0.78 0.16 70);
-  --warning-foreground: oklch(0.15 0.01 260);
+  --warning:           #D4A76A;
+  --warning-foreground: #1F1408;
 
-  --border: oklch(0.22 0.03 265);
-  --input:  oklch(0.20 0.025 265);
-  --ring:   oklch(0.62 0.22 255);
+  --border: #3a2e1f;
+  --input:  #2a2218;
+  --ring:   #C4873A;
+
+  /* ── Amber tints ──────────────────────────────────────── */
+  --primary-tint-08: rgba(196,135,58,0.08);
+  --primary-tint-10: rgba(196,135,58,0.10);
+  --primary-tint-30: rgba(196,135,58,0.30);
+  --border-soft:     rgba(58,46,31,0.6);
 
   /* ── Gradients & shadows ──────────────────────────────── */
-  --gradient-primary: linear-gradient(135deg, oklch(0.62 0.22 255), oklch(0.52 0.24 265));
-  --gradient-surface: linear-gradient(180deg, oklch(0.13 0.022 265), oklch(0.09 0.02 265));
-  --shadow-glow: 0 0 40px -10px oklch(0.62 0.22 255 / 0.55);
+  --gradient-primary: linear-gradient(135deg, #C4873A, #8B5E20);
+  --gradient-surface: linear-gradient(180deg, #1C170F, #0D0A08);
+  --shadow-glow: 0 0 0 1px rgba(196,135,58,0.40), 0 0 28px rgba(196,135,58,0.45);
   --shadow-sos:  0 0 60px -10px oklch(0.62 0.24 25 / 0.6);
 
   /* ── Extended radius scale ────────────────────────────── */
@@ -210,11 +217,59 @@ html.light {
 @keyframes breathe-in  { from { transform: scale(1); }    to { transform: scale(1.45); } }
 @keyframes breathe-out { from { transform: scale(1.45); } to { transform: scale(1); } }
 
+/* Amber glow pulse on timeline indicator */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px -5px oklch(0.62 0.22 255 / 0.5); }
-  50%       { box-shadow: 0 0 40px -5px oklch(0.62 0.22 255 / 0.9); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(196,135,58,0.4), 0 0 14px rgba(196,135,58,0.7); }
+  50%       { box-shadow: 0 0 0 5px rgba(196,135,58,0.5), 0 0 22px rgba(196,135,58,0.95); }
 }
 .animate-glow-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
+
+/* Heartbeat — thump-thump-rest (replaces mechanical breathe) */
+@keyframes heartbeat {
+  0%   { transform: scale(1);    opacity: 0.85; }
+  14%  { transform: scale(1.12); opacity: 1; }
+  28%  { transform: scale(1.02); opacity: 0.92; }
+  42%  { transform: scale(1.09); opacity: 1; }
+  56%  { transform: scale(1);    opacity: 0.88; }
+  100% { transform: scale(1);    opacity: 0.85; }
+}
+.animate-heartbeat { animation: heartbeat 2.8s ease-in-out infinite; }
+
+/* Leaf shimmer */
+@keyframes shimmer-leaf {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 1; filter: drop-shadow(0 0 6px rgba(232,200,150,0.55)); }
+}
+.animate-shimmer-leaf { animation: shimmer-leaf 3s ease-in-out infinite; }
+
+/* Neural mesh backgrounds */
+.neural-mesh {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(196,135,58,0.14) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(196,135,58,0.05), transparent 60%);
+  background-size: 22px 22px, 100% 100%;
+}
+.neural-mesh-fine {
+  background-image: radial-gradient(circle at 1px 1px, rgba(196,135,58,0.10) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+/* Monumental day number — warm amber halo */
+.day-monument {
+  text-shadow:
+    0 0 24px rgba(196,135,58,0.55),
+    0 0 60px rgba(196,135,58,0.30),
+    0 2px 0 rgba(255,255,255,0.04);
+}
+
+/* Tree stage — sunrise glow from below */
+.tree-stage {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(196,135,58,0.45), transparent 65%),
+    radial-gradient(ellipse 60% 80% at 50% 60%, rgba(196,135,58,0.18), transparent 70%),
+    linear-gradient(180deg, #0D0A08 0%, #1A1108 60%, #2a1a0a 100%) !important;
+  border-color: rgba(196,135,58,0.30) !important;
+}
 
 /* ── Base ───────────────────────────────────────────────── */
 @layer base {
