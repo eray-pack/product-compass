@@ -1,0 +1,174 @@
+/* ============================================================
+   Stopamine Design Tokens
+   Source of truth: src/styles.css (eray-pack/product-compass)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ── Radius scale ─────────────────────────────────────── */
+  --radius:    0.875rem;   /* 14px — system root */
+  --radius-sm: 0.625rem;   /* 10px */
+  --radius-md: 0.75rem;    /* 12px */
+  --radius-lg: 0.875rem;   /* 14px */
+  --radius-xl: 1.125rem;   /* 18px */
+  --radius-2xl: 1rem;      /* 16px — canonical card */
+  --radius-3xl: 1.5rem;    /* 24px — modal */
+  --radius-pill: 9999px;
+
+  /* ── Color · Surface (dark navy hue family) ───────────── */
+  --background:        oklch(0.09  0.02  265);   /* #0a0f1a */
+  --surface:           oklch(0.12  0.022 265);
+  --surface-2:         oklch(0.16  0.025 265);
+  --foreground:        oklch(0.96  0.005 260);
+  --card:              oklch(0.13  0.022 265);
+  --card-foreground:   oklch(0.96  0.005 260);
+  --popover:           oklch(0.13  0.022 265);
+  --popover-foreground:oklch(0.96  0.005 260);
+
+  /* ── Color · Primary (electric blue) ──────────────────── */
+  --primary:           oklch(0.62  0.22  255);   /* progress, identity, CTAs */
+  --primary-foreground:oklch(0.99  0.005 260);
+  --primary-glow:      oklch(0.72  0.20  255);
+  --primary-tint-08:   oklch(0.62  0.22  255 / 0.08);
+  --primary-tint-10:   oklch(0.62  0.22  255 / 0.10);
+  --primary-tint-30:   oklch(0.62  0.22  255 / 0.30);
+
+  /* ── Color · Secondary / muted / accent ───────────────── */
+  --secondary:           oklch(0.16 0.025 265);
+  --secondary-foreground:oklch(0.96 0.005 260);
+  --muted:               oklch(0.15 0.022 265);
+  --muted-foreground:    oklch(0.60 0.018 265);
+  --accent:              oklch(0.18 0.03  265);
+  --accent-foreground:   oklch(0.96 0.005 260);
+
+  /* ── Color · Semantic ─────────────────────────────────── */
+  --destructive:           oklch(0.62 0.24 25);    /* relapse, active urge */
+  --destructive-foreground:oklch(0.99 0.005 260);
+  --success:               oklch(0.70 0.16 150);
+  --success-foreground:    oklch(0.15 0.01 260);
+  --warning:               oklch(0.78 0.16 70);    /* points / XP coin pill */
+  --warning-foreground:    oklch(0.15 0.01 260);
+
+  /* ── Color · Borders & focus ──────────────────────────── */
+  --border:        oklch(0.22 0.03  265);
+  --border-soft:   oklch(0.22 0.03  265 / 0.6);
+  --input:         oklch(0.20 0.025 265);
+  --ring:          oklch(0.62 0.22  255);
+
+  /* ── Gradients ────────────────────────────────────────── */
+  --gradient-primary: linear-gradient(135deg, oklch(0.62 0.22 255), oklch(0.52 0.24 265));
+  --gradient-surface: linear-gradient(180deg, oklch(0.13 0.022 265), oklch(0.09 0.02 265));
+
+  /* ── Shadows (glows only — no drop shadows) ───────────── */
+  --shadow-glow: 0 0 40px -10px oklch(0.62 0.22 255 / 0.55);
+  --shadow-sos:  0 0 60px -10px oklch(0.62 0.24 25  / 0.60);
+
+  /* ── Type · Family ────────────────────────────────────── */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body:    "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ── Type · Scale ─────────────────────────────────────── */
+  --fs-day:     8rem;       /* 128px — Day 047 hero */
+  --fs-h1:      2rem;       /* 32px — onboarding h1 */
+  --fs-h2:      1.5rem;     /* 24px — SOS h1 */
+  --fs-h3:      1.25rem;    /* 20px — modal h2 */
+  --fs-body:    0.875rem;   /* 14px — main body */
+  --fs-sm:      0.8125rem;  /* 13px */
+  --fs-xs:      0.75rem;    /* 12px */
+  --fs-2xs:     0.6875rem;  /* 11px — eyebrows */
+  --fs-3xs:     0.625rem;   /* 10px — micro labels */
+  --fs-4xs:     0.5625rem;  /*  9px — timeline labels */
+
+  /* ── Type · Tracking ──────────────────────────────────── */
+  --tracking-eyebrow:    0.20em;
+  --tracking-eyebrow-lg: 0.25em;
+  --tracking-eyebrow-xl: 0.30em;
+  --tracking-tight:      -0.01em;
+
+  /* ── Spacing (4px grid) ───────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;   /* canonical mobile gutter */
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+}
+
+/* ============================================================
+   Semantic helpers — use these in markup for consistency
+   ============================================================ */
+
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+
+.h-day {
+  font: 700 var(--fs-day)/0.95 var(--font-display);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.h1 {
+  font: 700 var(--fs-h1)/1.15 var(--font-display);
+  letter-spacing: var(--tracking-tight);
+}
+
+.h2 {
+  font: 700 var(--fs-h2)/1.25 var(--font-display);
+}
+
+.h3 {
+  font: 600 var(--fs-h3)/1.3 var(--font-display);
+}
+
+.body {
+  font: 500 var(--fs-body)/1.5 var(--font-body);
+}
+
+.body-muted {
+  font: 400 var(--fs-body)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+
+.eyebrow {
+  font: 600 var(--fs-2xs)/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow-lg);
+  color: var(--muted-foreground);
+}
+
+.eyebrow-primary {
+  font: 700 var(--fs-2xs)/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow-xl);
+  color: var(--primary);
+}
+
+.micro-label {
+  font: 600 var(--fs-3xs)/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--muted-foreground);
+}
+
+.italic-helper {
+  font: 400 italic var(--fs-xs)/1.4 var(--font-body);
+  color: oklch(0.60 0.018 265 / 0.6);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+}

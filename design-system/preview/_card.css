@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: oklch(0.09 0.02 265);
+  color: oklch(0.96 0.005 260);
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+  min-height: 100vh;
+}
+
+.card {
+  padding: 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 12px; }
+
+.swatch {
+  flex: 1;
+  min-width: 0;
+  border-radius: 14px;
+  border: 1px solid oklch(0.22 0.03 265);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 90px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.swatch .name {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.swatch .value {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9.5px;
+  opacity: 0.7;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: oklch(0.60 0.018 265);
+}
+.eyebrow-blue {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.30em;
+  text-transform: uppercase;
+  color: oklch(0.62 0.22 255);
+}
+
+.token-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid oklch(0.22 0.03 265 / 0.5);
+  font-size: 12px;
+}
+.token-row:last-child { border-bottom: none; }
+.token-row .label { font-weight: 600; flex: 1; }
+.token-row .meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10.5px; color: oklch(0.60 0.018 265); }
