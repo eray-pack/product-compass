@@ -17,6 +17,7 @@ import { Route as PaywallRouteImport } from './routes/paywall'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChallengesRouteImport } from './routes/challenges'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
 import { Route as ToolsColdRouteImport } from './routes/tools.cold'
@@ -61,6 +62,11 @@ const ChallengesRoute = ChallengesRouteImport.update({
   path: '/challenges',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -79,6 +85,7 @@ const ToolsColdRoute = ToolsColdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/challenges': typeof ChallengesRoute
   '/community': typeof CommunityRoute
   '/onboarding': typeof OnboardingRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/challenges': typeof ChallengesRoute
   '/community': typeof CommunityRoute
   '/onboarding': typeof OnboardingRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/challenges': typeof ChallengesRoute
   '/community': typeof CommunityRoute
   '/onboarding': typeof OnboardingRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/challenges'
     | '/community'
     | '/onboarding'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/challenges'
     | '/community'
     | '/onboarding'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/challenges'
     | '/community'
     | '/onboarding'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   ChallengesRoute: typeof ChallengesRoute
   CommunityRoute: typeof CommunityRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChallengesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -267,6 +287,7 @@ const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   ChallengesRoute: ChallengesRoute,
   CommunityRoute: CommunityRoute,
   OnboardingRoute: OnboardingRoute,
