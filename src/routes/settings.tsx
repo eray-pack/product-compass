@@ -2,17 +2,19 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
+import { Crown } from "lucide-react";
+import { triggerPaywall } from "@/lib/paywall";
 
 export const Route = createFileRoute("/settings")({
   component: Settings,
 });
 
 const notifs = [
-  { key: "daily", title: "Daily commitment reminder", sub: "08:00 — your chosen time" },
-  { key: "urge", title: "Urge warning", sub: "At your identified trigger times" },
-  { key: "milestone", title: "Streak milestone alerts", sub: "Day 7, 14, 30, 60, 90" },
-  { key: "weekly", title: "Weekly brain update", sub: "Science fact about recovery" },
-  { key: "reframe", title: "Random reframes", sub: "Variable schedule — 2-4×/week" },
+  { key: "daily",     title: "Daily commitment reminder", sub: "08:00 — your chosen time" },
+  { key: "urge",      title: "Urge warning",              sub: "At your identified trigger times" },
+  { key: "milestone", title: "Streak milestone alerts",   sub: "Day 7, 14, 30, 60, 90" },
+  { key: "weekly",    title: "Weekly brain update",       sub: "Science fact about recovery" },
+  { key: "reframe",   title: "Random reframes",           sub: "Variable schedule — 2-4×/week" },
 ];
 
 function Settings() {
@@ -25,34 +27,86 @@ function Settings() {
   const reset = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("stopamine.v1");
+      localStorage.removeItem("stopamine.v2");
       navigate({ to: "/onboarding" });
     }
   };
 
+  const initials = state.onboarding?.name
+    ? state.onboarding.name.slice(0, 2).toUpperCase()
+    : "—";
+
   return (
     <PageShell>
-      <header className="px-6 pt-12">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Settings</p>
-        <h1 className="mt-2 text-3xl font-bold">Your setup.</h1>
+      {/* ── Profile header ───────────────────────────────────── */}
+      <header className="px-6 pt-12 pb-2">
+        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">You</p>
       </header>
 
-      {state.onboarding && (
-        <section className="px-6 mt-6">
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Signed in as</p>
-            <p className="mt-1 text-lg font-semibold">{state.onboarding.name || "—"}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              "I am becoming someone who <span className="text-primary">{state.onboarding.identity}</span>."
-            </p>
+      {state.onboarding ? (
+        <section className="px-6 mt-4">
+          <div
+            className="rounded-2xl border border-border/60 p-5 flex items-center gap-4"
+            style={{ background: "var(--gradient-surface)" }}
+          >
+            {/* Avatar */}
+            <div
+              className="h-14 w-14 rounded-2xl grid place-items-center text-xl font-bold text-white shrink-0"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-lg leading-tight truncate">
+                {state.onboarding.name || "—"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-snug line-clamp-2">
+                "I am becoming someone who{" "}
+                <span style={{ color: "var(--primary)" }}>{state.onboarding.identity}</span>."
+              </p>
+            </div>
           </div>
-        </section>
-      )}
 
+          {/* PRO badge / upgrade */}
+          {state.isPremium ? (
+            <div
+              className="mt-3 rounded-2xl border border-primary/30 p-3 flex items-center gap-3"
+              style={{ background: "oklch(0.62 0.22 255 / 0.07)" }}
+            >
+              <Crown className="h-5 w-5 shrink-0" style={{ color: "var(--primary)" }} />
+              <div>
+                <p className="text-sm font-semibold" style={{ color: "var(--primary)" }}>PRO member</p>
+                <p className="text-xs text-muted-foreground">All features unlocked</p>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => triggerPaywall()}
+              className="mt-3 w-full rounded-2xl border border-primary/30 p-3 flex items-center gap-3 text-left"
+              style={{ background: "oklch(0.62 0.22 255 / 0.07)" }}
+            >
+              <Crown className="h-5 w-5 shrink-0" style={{ color: "var(--primary)" }} />
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: "var(--primary)" }}>Upgrade to PRO</p>
+                <p className="text-xs text-muted-foreground">Unlock full brain recovery analytics</p>
+              </div>
+              <span
+                className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0"
+                style={{ background: "var(--gradient-primary)", color: "white" }}
+              >
+                83% OFF
+              </span>
+            </button>
+          )}
+        </section>
+      ) : null}
+
+      {/* ── Notifications ────────────────────────────────────── */}
       <section className="px-6 mt-6">
         <p className="text-sm font-semibold mb-3">Smart notifications</p>
-        <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+        <div className="rounded-2xl border border-border/60 bg-card divide-y divide-border/40">
           {notifs.map((n) => (
-            <label key={n.key} className="flex items-center gap-3 p-4">
+            <label key={n.key} className="flex items-center gap-3 p-4 cursor-pointer">
               <div className="flex-1">
                 <p className="text-sm font-medium">{n.title}</p>
                 <p className="text-xs text-muted-foreground">{n.sub}</p>
@@ -66,10 +120,11 @@ function Settings() {
         </div>
       </section>
 
-      <section className="px-6 mt-6">
+      {/* ── Danger zone ──────────────────────────────────────── */}
+      <section className="px-6 mt-6 pb-4">
         <button
           onClick={reset}
-          className="w-full text-sm text-destructive py-3 rounded-xl border border-destructive/30"
+          className="w-full text-sm font-semibold py-3 rounded-2xl border border-destructive/30 text-destructive transition-colors hover:bg-destructive/5"
         >
           Reset onboarding (demo)
         </button>
@@ -82,10 +137,12 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   return (
     <button
       onClick={() => onChange(!value)}
-      className={`h-6 w-11 rounded-full p-0.5 transition ${value ? "bg-primary" : "bg-secondary"}`}
+      className="h-6 w-11 rounded-full p-0.5 transition-colors shrink-0"
+      style={{ background: value ? "var(--primary)" : "oklch(0.22 0.03 265)" }}
     >
       <span
-        className={`block h-5 w-5 rounded-full bg-white transition-transform ${value ? "translate-x-5" : "translate-x-0"}`}
+        className="block h-5 w-5 rounded-full bg-white transition-transform shadow-sm"
+        style={{ transform: value ? "translateX(20px)" : "translateX(0)" }}
       />
     </button>
   );

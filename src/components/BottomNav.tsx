@@ -1,71 +1,42 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, TreePine, BarChart3, Users, AlertTriangle } from "lucide-react";
-import { useState } from "react";
-import { RelapseModal } from "@/components/RelapseModal";
-import { useAppState } from "@/lib/store";
+import { Home, TreePine, Wrench, Users, BarChart2 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/tree", label: "Tree", icon: TreePine },
-  { to: "/community", label: "Community", icon: Users },
-  { to: "/progress", label: "Progress", icon: BarChart3 },
+  { to: "/",          label: "Home",      icon: Home      },
+  { to: "/tree",      label: "Tree",      icon: TreePine  },
+  { to: "/tools",     label: "Tools",     icon: Wrench    },
+  { to: "/community", label: "Community", icon: Users     },
+  { to: "/progress",  label: "Progress",  icon: BarChart2 },
 ] as const;
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
-  const [state] = useAppState();
-  const [showRelapse, setShowRelapse] = useState(false);
 
   return (
-    <>
-      <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-md flex items-center">
-          {/* Left two tabs */}
-          {NAV_ITEMS.slice(0, 2).map(({ to, label, icon: Icon }) => {
-            const active = to === "/" ? path === "/" : path.startsWith(to);
-            return (
-              <Link key={to} to={to}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
-                <Icon className="h-5 w-5" />
-                {label}
-              </Link>
-            );
-          })}
-
-          {/* Red panic button — dead center */}
-          <div className="flex-1 flex flex-col items-center justify-center py-2 gap-1">
-            <button
-              onClick={() => setShowRelapse(true)}
-              className="h-12 w-12 rounded-full bg-destructive grid place-items-center shadow-lg shadow-destructive/30 active:scale-95 transition-transform"
-              aria-label="Log relapse"
+    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border/60 bg-card/95 backdrop-blur-xl">
+      <div className="mx-auto max-w-md flex items-stretch">
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => {
+          const active = to === "/" ? path === "/" : path.startsWith(to);
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`flex-1 flex flex-col items-center gap-1 pt-3 pb-2 text-[10px] font-semibold tracking-wide transition-colors relative ${
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <AlertTriangle className="h-5 w-5 text-white" />
-            </button>
-            <span className="text-[10px] text-destructive font-medium">Relapse</span>
-          </div>
-
-          {/* Right two tabs */}
-          {NAV_ITEMS.slice(2).map(({ to, label, icon: Icon }) => {
-            const active = path.startsWith(to);
-            return (
-              <Link key={to} to={to}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
-                <Icon className="h-5 w-5" />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
-        <div className="h-[env(safe-area-inset-bottom)]" />
-      </nav>
-
-      {showRelapse && (
-        <RelapseModal
-          onClose={() => setShowRelapse(false)}
-          totalCleanDays={state.totalCleanDays}
-        />
-      )}
-    </>
+              {/* Active indicator line */}
+              {active && (
+                <span className="absolute top-0 inset-x-4 h-[2px] rounded-full bg-primary" />
+              )}
+              <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
+              {label}
+            </Link>
+          );
+        })}
+      </div>
+      <div className="h-[env(safe-area-inset-bottom)]" />
+    </nav>
   );
 }
 

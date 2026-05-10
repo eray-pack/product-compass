@@ -20,55 +20,69 @@ function Tools() {
   const [planOpen, setPlanOpen] = useState(false);
   const [trigger, setTrigger] = useState("");
   const [action, setAction] = useState("");
-  const [plans, setPlans] = useState<{ trigger: string; action: string }[]>([
+  const [plans, setPlans] = useState([
     { trigger: "feel bored at night", action: "do 20 push-ups and read for 10 minutes" },
   ]);
 
   return (
     <PageShell>
-      <header className="px-6 pt-12">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Tools</p>
+      {/* ── Header ───────────────────────────────────────────── */}
+      <header className="px-6 pt-12 pb-2">
+        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Tools</p>
         <h1 className="mt-2 text-3xl font-bold">Use what works.</h1>
       </header>
 
-      {/* SOS */}
+      {/* ── SOS hero ─────────────────────────────────────────── */}
       <section className="px-6 mt-6">
         <Link
           to="/tools/sos"
-          className="block rounded-2xl border border-destructive/50 p-6 text-center"
-          style={{ background: "linear-gradient(180deg, oklch(0.35 0.15 25 / 0.4), oklch(0.25 0.1 25 / 0.4))", boxShadow: "var(--shadow-sos)" }}
+          className="block rounded-2xl p-6 text-center active:opacity-90 transition-opacity"
+          style={{
+            background: "linear-gradient(180deg, oklch(0.35 0.15 25 / 0.4), oklch(0.25 0.1 25 / 0.35))",
+            border: "1px solid oklch(0.62 0.24 25 / 0.5)",
+            boxShadow: "var(--shadow-sos)",
+          }}
         >
           <div className="relative mx-auto h-20 w-20 rounded-full grid place-items-center bg-destructive">
             <span className="absolute inset-0 rounded-full bg-destructive animate-pulse-ring" />
-            <Zap className="relative h-9 w-9 text-destructive-foreground" />
+            <Zap className="relative h-9 w-9 text-white" />
           </div>
-          <p className="mt-4 text-lg font-semibold">I'm feeling an urge right now</p>
-          <p className="mt-1 text-xs text-muted-foreground">Tap to start urge surfing</p>
+          <p className="mt-4 text-lg font-bold">I'm feeling an urge right now</p>
+          <p className="mt-1 text-xs text-muted-foreground">Tap to start urge surfing · 3 minutes</p>
         </Link>
       </section>
 
-      {/* Other tools */}
-      <section className="px-6 mt-6 space-y-4">
+      {/* ── Other tools ──────────────────────────────────────── */}
+      <section className="px-6 mt-5 space-y-3 pb-4">
+        {/* Reframe */}
         <ToolCard
           icon={Brain}
           title="Reframe"
           desc="A psychological reframe to rewire your reaction."
-          onClick={() => setReframe(reframes[Math.floor(Math.random() * reframes.length)])}
           ctaLabel="Show me one"
+          onClick={() => setReframe(reframes[Math.floor(Math.random() * reframes.length)])}
         >
           {reframe && (
-            <div className="mt-4 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm leading-snug">
+            <div
+              className="mt-4 rounded-xl p-4 text-sm leading-snug border"
+              style={{
+                background: "oklch(0.62 0.22 255 / 0.08)",
+                borderColor: "oklch(0.62 0.22 255 / 0.25)",
+                color: "var(--foreground)",
+              }}
+            >
               {reframe}
             </div>
           )}
         </ToolCard>
 
-        <Link
-          to="/tools/cold"
-          className="block rounded-2xl border border-border bg-card p-5"
-        >
+        {/* Cold exposure */}
+        <Link to="/tools/cold" className="block rounded-2xl border border-border/60 bg-card p-5">
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/15 grid place-items-center text-primary">
+            <div
+              className="h-10 w-10 rounded-xl grid place-items-center shrink-0"
+              style={{ background: "oklch(0.62 0.22 255 / 0.12)", color: "var(--primary)" }}
+            >
               <Snowflake className="h-5 w-5" />
             </div>
             <div className="flex-1">
@@ -78,6 +92,7 @@ function Tools() {
           </div>
         </Link>
 
+        {/* Implementation plan */}
         <ToolCard
           icon={GitBranch}
           title="Implementation Plan"
@@ -87,16 +102,32 @@ function Tools() {
         >
           <ul className="mt-4 space-y-2">
             {plans.map((p, i) => (
-              <li key={i} className="rounded-xl border border-border bg-secondary/40 p-3 text-sm">
-                <span className="text-muted-foreground">If I </span><span className="text-foreground">{p.trigger}</span>
-                <span className="text-muted-foreground">, I will </span><span className="text-primary">{p.action}</span>.
+              <li
+                key={i}
+                className="rounded-xl border border-border/40 p-3 text-sm"
+                style={{ background: "oklch(0.16 0.025 265)" }}
+              >
+                <span className="text-muted-foreground">If I </span>
+                <span className="text-foreground font-medium">{p.trigger}</span>
+                <span className="text-muted-foreground">, I will </span>
+                <span style={{ color: "var(--primary)" }} className="font-medium">{p.action}</span>.
               </li>
             ))}
           </ul>
           {planOpen && (
             <div className="mt-4 space-y-2">
-              <input value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="If I feel… (trigger)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary" />
-              <input value={action} onChange={(e) => setAction(e.target.value)} placeholder="…I will (action)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+              <input
+                value={trigger}
+                onChange={(e) => setTrigger(e.target.value)}
+                placeholder="If I feel… (trigger)"
+                className="w-full rounded-xl border border-border/60 bg-background px-3 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+              />
+              <input
+                value={action}
+                onChange={(e) => setAction(e.target.value)}
+                placeholder="…I will (action)"
+                className="w-full rounded-xl border border-border/60 bg-background px-3 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+              />
               <button
                 onClick={() => {
                   if (trigger.trim() && action.trim()) {
@@ -104,7 +135,8 @@ function Tools() {
                     setTrigger(""); setAction(""); setPlanOpen(false);
                   }
                 }}
-                className="w-full rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-medium inline-flex items-center justify-center gap-1"
+                className="w-full rounded-xl px-3 py-2.5 text-sm font-semibold text-primary-foreground inline-flex items-center justify-center gap-1"
+                style={{ background: "var(--gradient-primary)" }}
               >
                 <Plus className="h-4 w-4" /> Save plan
               </button>
@@ -119,19 +151,31 @@ function Tools() {
 function ToolCard({
   icon: Icon, title, desc, ctaLabel, onClick, children,
 }: {
-  icon: any; title: string; desc: string; ctaLabel: string; onClick: () => void; children?: React.ReactNode;
+  icon: React.ElementType; title: string; desc: string;
+  ctaLabel: string; onClick: () => void; children?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border/60 bg-card p-5">
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-xl bg-primary/15 grid place-items-center text-primary">
+        <div
+          className="h-10 w-10 rounded-xl grid place-items-center shrink-0"
+          style={{ background: "oklch(0.62 0.22 255 / 0.12)", color: "var(--primary)" }}
+        >
           <Icon className="h-5 w-5" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <p className="font-semibold">{title}</p>
           <p className="text-sm text-muted-foreground">{desc}</p>
         </div>
-        <button onClick={onClick} className="text-xs font-medium text-primary px-3 py-1.5 rounded-lg border border-primary/30">
+        <button
+          onClick={onClick}
+          className="text-xs font-semibold px-3 py-1.5 rounded-lg border shrink-0 transition-colors"
+          style={{
+            color: "var(--primary)",
+            borderColor: "oklch(0.62 0.22 255 / 0.3)",
+            background: "oklch(0.62 0.22 255 / 0.06)",
+          }}
+        >
           {ctaLabel}
         </button>
       </div>

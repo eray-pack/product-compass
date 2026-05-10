@@ -1,15 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Smile, Frown, Meh, Heart, Zap, Lock, Trophy, TreePine, Coins, Sparkles, AlertTriangle, Target, X } from "lucide-react";
+import { Zap, AlertTriangle, Target, Sparkles, Coins, X } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
-import { AddictionCarousel } from "@/components/AddictionCarousel";
-import { useAppState, dayCount, treeStage, activeAddiction } from "@/lib/store";
+import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
-import { inactivityDays } from "@/lib/store";
 
-const MILESTONES = [7, 14, 30, 60, 90];
+const MILESTONES = [
+  { day: 7,  label: "Energy",      short: "E" },
+  { day: 14, label: "Focus",       short: "F" },
+  { day: 30, label: "Confidence",  short: "C" },
+  { day: 60, label: "Regulation",  short: "R" },
+  { day: 90, label: "Reset",       short: "✓" },
+];
+
 const MILESTONE_LABELS: Record<number, string> = {
   7: "Increased energy",
   14: "Sharper focus returns",
@@ -19,39 +24,176 @@ const MILESTONE_LABELS: Record<number, string> = {
 };
 
 function nextMilestone(day: number) {
-  const next = MILESTONES.find((m) => m > day);
-  if (!next) return null;
-  return { day: next, label: MILESTONE_LABELS[next], daysAway: next - day };
+  const m = MILESTONES.find((m) => m.day > day);
+  if (!m) return null;
+  return { ...m, fullLabel: MILESTONE_LABELS[m.day], daysAway: m.day - day };
 }
 
-const VARIABLE_REWARDS = [
-  { weight: 50, xp: 10, message: null },
-  { weight: 25, xp: 50, message: "Unexpected bonus. Your consistency is paying off." },
-  { weight: 15, xp: 20, message: "You just unlocked something rare. Keep going.", badge: true },
-  { weight: 10, xp: 0, message: null },
+// ── Brain recovery timeline ───────────────────────────────────────────────────
+function BrainTimeline({ day }: { day: number }) {
+  const pct = Math.min(100, (day / 90) * 100);
+
+  return (
+    <div className="mt-3">
+      {/* Track */}
+      <div className="relative h-1.5 rounded-full" style={{ background: "oklch(0.22 0.03 265)" }}>
+        {/* Fill */}
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
+          style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
+        />
+
+        {/* Milestone dots */}
+        {MILESTONES.map(({ day: m }) => {
+          const pos = (m / 90) * 100;
+          const reached = day >= m;
+          return (
+            <div
+              key={m}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10"
+              style={{ left: `${pos}%` }}
+            >
+              <div
+                className="h-3.5 w-3.5 rounded-full border-2 transition-all"
+                style={{
+                  background: reached ? "var(--primary)" : "oklch(0.13 0.022 265)",
+                  borderColor: reached ? "var(--primary)" : "oklch(0.22 0.03 265)",
+                  boxShadow: reached ? "0 0 10px 2px oklch(0.62 0.22 255 / 0.6)" : "none",
+                }}
+              />
+            </div>
+          );
+        })}
+
+        {/* Glowing current-position indicator */}
+        {pct < 100 && (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20"
+            style={{ left: `${pct}%` }}
+          >
+            <div
+              className="h-4 w-4 rounded-full animate-glow-pulse"
+              style={{
+                background: "var(--primary)",
+                boxShadow: "0 0 16px 4px oklch(0.62 0.22 255 / 0.7)",
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Day labels */}
+      <div className="relative h-9 mt-0.5">
+        {MILESTONES.map(({ day: m, label }) => {
+          const pos = (m / 90) * 100;
+          const reached = day >= m;
+          return (
+            <div
+              key={m}
+              className="absolute -translate-x-1/2 text-center"
+              style={{ left: `${pos}%` }}
+            >
+              <p
+                className="text-[9px] font-semibold leading-none"
+                style={{ color: reached ? "var(--primary)" : "oklch(0.42 0.018 265)" }}
+              >
+                {label}
+              </p>
+              <p
+                className="text-[8px] mt-0.5 leading-none"
+                style={{ color: reached ? "oklch(0.50 0.18 255)" : "oklch(0.34 0.015 265)" }}
+              >
+                d{m}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Daily check-in ────────────────────────────────────────────────────────────
+const MOODS = [
+  { v: 1, emoji: "😞", label: "Rough" },
+  { v: 2, emoji: "😕", label: "Low" },
+  { v: 3, emoji: "😐", label: "OK" },
+  { v: 4, emoji: "🙂", label: "Good" },
+  { v: 5, emoji: "😤", label: "Strong" },
 ];
 
-function rollReward(): { xp: number; message: string | null; badge?: boolean } {
+const VARIABLE_REWARDS = [
+  { weight: 50, xp: 10,  message: null },
+  { weight: 25, xp: 50,  message: "Unexpected bonus. Consistency pays." },
+  { weight: 15, xp: 20,  message: "You just unlocked something rare.", badge: true },
+  { weight: 10, xp: 0,   message: null },
+];
+
+function rollReward() {
   const roll = Math.random() * 100;
-  let cumulative = 0;
+  let cum = 0;
   for (const r of VARIABLE_REWARDS) {
-    cumulative += r.weight;
-    if (roll < cumulative) return r;
+    cum += r.weight;
+    if (roll < cum) return r;
   }
   return VARIABLE_REWARDS[0];
 }
 
+function CheckInCard({ onReward }: { onReward: (msg: string) => void }) {
+  const [, update] = useAppState();
+  const [checked, setChecked] = useState(false);
+
+  const handleMood = (v: number) => {
+    if (checked) return;
+    setChecked(true);
+    const reward = rollReward();
+    if (reward.xp > 0) {
+      update((s) => ({ points: s.points + reward.xp, treeXP: s.treeXP + Math.floor(reward.xp / 5) }));
+    }
+    if (reward.message) {
+      onReward(reward.message);
+      setTimeout(() => onReward(""), 3000);
+    }
+  };
+
+  return (
+    <div
+      className="rounded-2xl p-5 border border-border/60"
+      style={{ background: "var(--gradient-surface)" }}
+    >
+      <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+        Daily Check-in
+      </p>
+      <p className="mt-1 text-base font-semibold">How are you feeling today?</p>
+      <div className="mt-4 flex gap-2">
+        {MOODS.map(({ v, emoji, label }) => (
+          <button
+            key={v}
+            onClick={() => handleMood(v)}
+            className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border text-[10px] font-medium transition-all ${
+              checked
+                ? "border-border/40 text-muted-foreground/40 cursor-default"
+                : "border-border/60 text-muted-foreground hover:border-primary/60 hover:text-primary"
+            }`}
+          >
+            <span className="text-lg leading-none">{emoji}</span>
+            {label}
+          </button>
+        ))}
+      </div>
+      {checked && (
+        <p className="mt-3 text-center text-xs font-medium text-primary">
+          Check-in recorded ✓
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
-
-const milestones = [
-  { day: 7, label: "Increased energy" },
-  { day: 14, label: "Sharper focus" },
-  { day: 30, label: "Confidence returning" },
-  { day: 60, label: "Emotional regulation" },
-  { day: 90, label: "Full dopamine reset" },
-];
 
 function Dashboard() {
   const [state, update] = useAppState();
@@ -61,6 +203,7 @@ function Dashboard() {
   const [showIdentity, setShowIdentity] = useState(false);
   const [reEntryDays, setReEntryDays] = useState(0);
 
+  // Redirect if not onboarded
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -76,31 +219,25 @@ function Dashboard() {
 
   const active = activeAddiction(state);
   const day = active ? dayCount(active.startDate) : 1;
-  const pct = Math.min(100, (day / 90) * 100);
-  const stage = treeStage(state.treeXP);
-  const cost = state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self";
+  const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
   const next = nextMilestone(day);
 
-  // Login tracking + re-entry detection
+  // Login + re-entry detection
   useEffect(() => {
     if (!state.onboarding) return;
     const inactive = inactivityDays(state.lastLoginAt);
-    if (inactive >= 30) {
-      setReEntryDays(inactive);
-    }
+    if (inactive >= 30) setReEntryDays(inactive);
     update((s) => ({
       lastLoginAt: Date.now(),
       loginHistory: [...(s.loginHistory ?? []).slice(-89), Date.now()],
     }));
   }, [state.onboarding]);
 
-  // Show weekly identity reminder
+  // Weekly identity reminder
   useEffect(() => {
     if (!state.onboarding?.identity) return;
     const weekMs = 7 * 86400000;
-    if (Date.now() - (state.lastIdentityShown ?? 0) > weekMs) {
-      setShowIdentity(true);
-    }
+    if (Date.now() - (state.lastIdentityShown ?? 0) > weekMs) setShowIdentity(true);
   }, [state.onboarding, state.lastIdentityShown]);
 
   // Streak insight
@@ -108,149 +245,176 @@ function Dashboard() {
   const points = [active?.startDate ?? Date.now(), ...relapses.map((r) => r.ts), Date.now()];
   const gaps = points.slice(1).map((t, i) => (t - points[i]) / 86400000);
   const bestStreak = Math.max(day, ...gaps.map((g) => Math.floor(g)));
-  const isPersonalBest = day >= bestStreak && relapses.length > 0;
-  const now = Date.now();
-  const lastMonthRelapses = relapses.filter((r) => now - r.ts < 30 * 86400000).length;
-  const prevMonthRelapses = relapses.filter((r) => {
-    const d = now - r.ts;
-    return d >= 30 * 86400000 && d < 60 * 86400000;
-  }).length;
-  const cleanerThanLastMonth = prevMonthRelapses > 0 && lastMonthRelapses < prevMonthRelapses;
-  const streakLine = isPersonalBest
-    ? "This is your longest streak yet."
-    : cleanerThanLastMonth
-    ? "You're cleaner this month than last. Keep going."
-    : "Every day you don't give in, your brain rewires itself.";
+  const streakLine =
+    day >= bestStreak && relapses.length > 0
+      ? "This is your longest streak yet."
+      : "Every day you don't give in, your brain rewires itself.";
 
   return (
     <PageShell>
+      {/* ── Header ──────────────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 flex items-center justify-between">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Stopamine</p>
-        <Link to="/challenges" className="inline-flex items-center gap-1 text-xs font-medium text-warning bg-warning/10 border border-warning/30 px-2.5 py-1 rounded-full">
+        <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-muted-foreground">
+          Stopamine
+        </span>
+        <Link
+          to="/challenges"
+          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
+          style={{ color: "var(--warning)", borderColor: "oklch(0.78 0.16 70 / 0.3)", background: "oklch(0.78 0.16 70 / 0.08)" }}
+        >
           <Coins className="h-3 w-3" /> {state.points}
         </Link>
       </header>
 
-      {/* Swipeable addiction trackers */}
-      <AddictionCarousel />
+      {/* ── Hero: Day counter ────────────────────────────────────────── */}
+      <section className="px-6 mt-6 text-center">
+        <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-muted-foreground">Day</p>
+        <p className="font-bold leading-none tabular-nums" style={{ fontSize: "8rem" }}>
+          {String(day).padStart(3, "0")}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {active?.name ?? "recovery"} journey ·{" "}
+          <span className="font-semibold" style={{ color: "var(--primary)" }}>
+            {recoveryPct}%
+          </span>{" "}
+          to brain reset
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground/60 italic">{streakLine}</p>
+      </section>
 
-      {/* Why-you're-here reminder */}
-      <section className="px-6 mt-4">
-        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
-          <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-          <p className="text-sm leading-snug">
-            <span className="text-primary font-medium">You're doing real work.</span>{" "}
-            Remember — you started this for{" "}
-            <span className="text-foreground font-medium">{cost}</span>. Today counts.
+      {/* ── Stats row ───────────────────────────────────────────────── */}
+      <div className="px-6 mt-5 grid grid-cols-3 gap-3">
+        {[
+          { label: "Recovery", value: `${recoveryPct}%` },
+          { label: "Best Streak", value: `${bestStreak}d` },
+          { label: "Relapses", value: String(state.relapses.length) },
+        ].map(({ label, value }) => (
+          <div
+            key={label}
+            className="rounded-2xl border border-border/60 p-3 text-center"
+            style={{ background: "var(--gradient-surface)" }}
+          >
+            <p className="text-xl font-bold tabular-nums" style={{ color: "var(--primary)" }}>
+              {value}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Recovery progress bar ────────────────────────────────────── */}
+      <div className="px-6 mt-4">
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "oklch(0.22 0.03 265)" }}>
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${recoveryPct}%`, background: "var(--gradient-primary)" }}
+          />
+        </div>
+        <div className="mt-1 flex justify-between text-[10px] text-muted-foreground/50">
+          <span>Day 0</span>
+          <span>90-day reset</span>
+        </div>
+      </div>
+
+      {/* ── Brain recovery timeline ──────────────────────────────────── */}
+      <section className="px-6 mt-7">
+        <div className="flex items-baseline justify-between mb-1">
+          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+            Brain Recovery Timeline
           </p>
+          <span
+            className="text-[10px] font-bold tabular-nums"
+            style={{ color: "var(--primary)" }}
+          >
+            d{day}
+          </span>
         </div>
+        <BrainTimeline day={day} />
       </section>
 
-      {/* Brain recovery timeline */}
-      <section className="px-6 mt-6">
-        <h2 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">Brain recovery</h2>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <div className="relative h-2 rounded-full bg-secondary overflow-hidden">
-            <div className="absolute inset-y-0 left-0 rounded-full"
-              style={{ width: `${pct}%`, background: "var(--gradient-primary)" }} />
-          </div>
-          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
-            <span>0</span><span>30</span><span>60</span><span>90 days</span>
-          </div>
-          <div className="relative mt-4">
-            <ul className={`space-y-2.5 ${state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}`}>
-              {milestones.map((m) => {
-                const reached = day >= m.day;
-                return (
-                  <li key={m.day} className="flex items-center gap-3 text-sm">
-                    <span className={`h-2 w-2 rounded-full ${reached ? "bg-primary" : "bg-border"}`} />
-                    <span className={reached ? "text-foreground" : "text-muted-foreground"}>
-                      Day {m.day} — {m.label}
-                    </span>
-                    {reached && <span className="ml-auto text-[10px] text-primary uppercase">reached</span>}
-                  </li>
-                );
-              })}
-            </ul>
-            {!state.isPremium && (
-              <button onClick={() => triggerPaywall()}
-                className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl">
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/30 px-3 py-1.5 rounded-full">
-                  <Lock className="h-3 w-3" /> Unlock your milestones
-                </span>
-                <span className="text-[11px] text-muted-foreground">See exactly what's healing in your brain</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Cards */}
-      <section className="px-6 mt-6 space-y-4">
+      {/* ── Cards ────────────────────────────────────────────────────── */}
+      <section className="px-6 mt-7 space-y-3">
+        {/* Daily check-in */}
         <CheckInCard onReward={setRewardMsg} />
 
-        {/* Quick links to quests + tree */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link to="/challenges" className="rounded-2xl border border-border bg-card p-4 hover:border-primary transition">
-            <div className="h-9 w-9 rounded-full grid place-items-center bg-warning/10 text-warning">
-              <Trophy className="h-5 w-5" />
-            </div>
-            <p className="mt-2 text-sm font-semibold">Quests</p>
-            <p className="text-[11px] text-muted-foreground">Earn points today</p>
-          </Link>
-          <Link to="/tree" className="rounded-2xl border border-border bg-card p-4 hover:border-primary transition">
-            <div className="h-9 w-9 rounded-full grid place-items-center bg-success/10 text-success">
-              <TreePine className="h-5 w-5" />
-            </div>
-            <p className="mt-2 text-sm font-semibold">Life Tree</p>
-            <p className="text-[11px] text-muted-foreground">{stage.name} · {state.treeXP} XP</p>
-          </Link>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-            <Heart className="h-3.5 w-3.5" /> Your goal
-          </p>
-          <p className="mt-2 text-base leading-snug">
-            I am becoming someone who{" "}
-            <span className="text-primary font-medium">
-              {state.onboarding?.identity || "is in full control of his mind"}
-            </span>.
+        {/* Why you're here */}
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
+          <Sparkles className="h-4 w-4 mt-0.5 shrink-0" style={{ color: "var(--primary)" }} />
+          <p className="text-sm leading-snug">
+            <span className="font-semibold" style={{ color: "var(--primary)" }}>
+              You're doing real work.
+            </span>{" "}
+            Remember — you started for{" "}
+            <span className="text-foreground font-medium">
+              {state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self"}
+            </span>
+            . Today counts.
           </p>
         </div>
 
+        {/* Next milestone */}
         {next && (
-          <div className="rounded-2xl border border-success/30 bg-success/5 p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-success/15 grid place-items-center text-success shrink-0">
-              <Target className="h-5 w-5" />
+          <div
+            className="rounded-2xl border p-4 flex items-center gap-4"
+            style={{ borderColor: "oklch(0.22 0.03 265)", background: "var(--gradient-surface)" }}
+          >
+            <div
+              className="h-11 w-11 rounded-xl grid place-items-center shrink-0"
+              style={{ background: "oklch(0.62 0.22 255 / 0.12)" }}
+            >
+              <Target className="h-5 w-5" style={{ color: "var(--primary)" }} />
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Next milestone</p>
-              <p className="text-sm font-semibold">Day {next.day} — {next.label}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                Next milestone
+              </p>
+              <p className="text-sm font-semibold mt-0.5">
+                Day {next.day} — {next.fullLabel}
+              </p>
             </div>
-            <span className="text-xs font-bold text-success bg-success/15 border border-success/30 px-2.5 py-1 rounded-full whitespace-nowrap">
-              {next.daysAway}d away
+            <span
+              className="text-xs font-bold px-2.5 py-1 rounded-full border tabular-nums shrink-0"
+              style={{
+                color: "var(--primary)",
+                borderColor: "oklch(0.62 0.22 255 / 0.3)",
+                background: "oklch(0.62 0.22 255 / 0.08)",
+              }}
+            >
+              {next.daysAway}d
             </span>
           </div>
         )}
 
-        <Link to="/tools"
-          className="block rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-center text-sm font-medium text-destructive-foreground">
+        {/* SOS */}
+        <Link
+          to="/tools/sos"
+          className="block rounded-2xl p-4 text-center font-semibold text-sm transition-opacity active:opacity-80"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.62 0.22 255 / 0.15), oklch(0.52 0.24 265 / 0.15))",
+            border: "1px solid oklch(0.62 0.22 255 / 0.35)",
+            color: "var(--primary)",
+          }}
+        >
           <Zap className="inline h-4 w-4 mr-1.5 -mt-0.5" />
-          Feeling an urge? Open SOS tools →
+          Feeling an urge? Open SOS →
         </Link>
 
+        {/* Log relapse */}
         <button
           onClick={() => setShowRelapse(true)}
-          className="w-full rounded-2xl border border-border bg-secondary/30 p-4 text-center text-sm text-muted-foreground hover:border-destructive/40 hover:text-destructive transition"
+          className="w-full rounded-2xl border border-border/40 bg-card/50 p-4 text-center text-sm text-muted-foreground hover:border-destructive/40 hover:text-destructive transition-colors"
         >
           <AlertTriangle className="inline h-3.5 w-3.5 mr-1.5 -mt-0.5" />
           I relapsed — log it honestly
         </button>
       </section>
 
+      {/* ── Modals ───────────────────────────────────────────────────── */}
       {showRelapse && (
-        <RelapseModal onClose={() => setShowRelapse(false)} totalCleanDays={state.totalCleanDays} />
+        <RelapseModal
+          onClose={() => setShowRelapse(false)}
+          totalCleanDays={state.totalCleanDays}
+        />
       )}
 
       {reEntryDays >= 30 && (
@@ -259,21 +423,27 @@ function Dashboard() {
 
       {showIdentity && state.onboarding?.identity && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="rounded-3xl border border-primary/30 bg-card p-7 w-full max-w-sm space-y-5 text-center relative">
-            <button onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
-              className="absolute top-4 right-4 text-muted-foreground">
+          <div
+            className="rounded-3xl border border-primary/25 p-7 w-full max-w-sm space-y-5 text-center relative"
+            style={{ background: "var(--card)" }}
+          >
+            <button
+              onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
+              className="absolute top-4 right-4 text-muted-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
-            <p className="text-xs uppercase tracking-wider text-primary">You made a promise.</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-primary">You made a promise.</p>
             <p className="text-2xl font-bold leading-snug">
               I am becoming someone who{" "}
-              <span className="text-primary">{state.onboarding.identity}</span>.
+              <span style={{ color: "var(--primary)" }}>{state.onboarding.identity}</span>.
             </p>
             <p className="text-sm text-muted-foreground">You're still becoming that person.</p>
             <button
               onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
-              className="w-full h-12 rounded-2xl text-sm font-semibold text-primary-foreground"
-              style={{ background: "var(--gradient-primary)" }}>
+              className="w-full h-12 rounded-2xl text-sm font-bold text-primary-foreground"
+              style={{ background: "var(--gradient-primary)" }}
+            >
               I'm still in.
             </button>
           </div>
@@ -281,55 +451,10 @@ function Dashboard() {
       )}
 
       {rewardMsg && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-primary/40 bg-card px-5 py-3 text-sm text-primary shadow-lg">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-primary/40 bg-card px-5 py-3 text-sm font-semibold text-primary shadow-lg">
           {rewardMsg}
         </div>
       )}
     </PageShell>
-  );
-}
-
-function CheckInCard({ onReward }: { onReward: (msg: string) => void }) {
-  const [, update] = useAppState();
-  const [checked, setChecked] = useState(false);
-  const moods = [
-    { v: 1, Icon: Frown, label: "Rough" },
-    { v: 2, Icon: Frown, label: "Low" },
-    { v: 3, Icon: Meh, label: "OK" },
-    { v: 4, Icon: Smile, label: "Good" },
-    { v: 5, Icon: Smile, label: "Strong" },
-  ];
-
-  const handleMood = (v: number) => {
-    if (checked) return;
-    setChecked(true);
-    const reward = rollReward();
-    if (reward.xp > 0) {
-      update((s) => ({ points: s.points + reward.xp, treeXP: s.treeXP + Math.floor(reward.xp / 5) }));
-    }
-    if (reward.message) {
-      onReward(reward.message);
-      setTimeout(() => onReward(""), 3000);
-    }
-    if (v >= 4) {
-      update((s) => ({ urgesSurvived: s.urgesSurvived }));
-    }
-  };
-
-  return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <p className="text-xs uppercase tracking-wider text-muted-foreground">Daily check-in</p>
-      <p className="mt-1 text-base">How are you feeling today?</p>
-      <div className="mt-4 grid grid-cols-5 gap-2">
-        {moods.map(({ v, Icon, label }) => (
-          <button key={v} onClick={() => handleMood(v)}
-            className={`flex flex-col items-center gap-1 rounded-xl border py-2.5 text-[10px] transition ${checked ? "border-border bg-secondary/20 text-muted-foreground/50" : "border-border bg-secondary/40 text-muted-foreground hover:border-primary hover:text-primary"}`}>
-            <Icon className="h-5 w-5" />
-            {label}
-          </button>
-        ))}
-      </div>
-      {checked && <p className="mt-3 text-center text-xs text-primary">Check-in recorded ✓</p>}
-    </div>
   );
 }

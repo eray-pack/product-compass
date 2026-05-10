@@ -18,6 +18,14 @@ export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
+const identityOptions = [
+  "is in full control of his mind",
+  "no longer needs external validation",
+  "chooses discomfort over instant gratification",
+  "is someone his future self is proud of",
+  "shows up with discipline, not mood",
+];
+
 const durations = ["Less than 6 months", "1-2 years", "3-5 years", "More than 5 years"];
 const costs = ["Relationships", "Focus & work", "Self-confidence", "Sleep", "Social life", "Mental health"];
 const triggers = ["Late at night", "When bored", "When stressed", "When alone", "After rejection"];
@@ -43,6 +51,7 @@ function Onboarding() {
   const [notifStyles, setNotifStyles] = useState<NotificationStyle[]>([]);
   const [notifApps, setNotifApps] = useState<NotificationApp[]>([]);
   const [identity, setIdentity] = useState("");
+  const [customIdentitySelected, setCustomIdentitySelected] = useState(false);
   const [name, setName] = useState("");
 
   const next = () => setStep((s) => s + 1);
@@ -97,7 +106,11 @@ function Onboarding() {
       <div className="px-6 pt-10">
         <div className="flex gap-1.5">
           {Array.from({ length: TOTAL }).map((_, i) => (
-            <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-secondary"}`} />
+            <div
+              key={i}
+              className="h-1 flex-1 rounded-full transition-all"
+              style={{ background: i <= step ? "var(--primary)" : "oklch(0.22 0.03 265)" }}
+            />
           ))}
         </div>
       </div>
@@ -193,14 +206,71 @@ function Onboarding() {
         )}
 
         {step === 5 && (
-          <Step eyebrow={`Step 6 of ${TOTAL}`} title="Identity statement"
-            subtitle="This becomes your personal mantra, shown to you every day."
-            cta={identity.trim() ? "Continue" : ""} onContinue={next}>
-            <label className="block text-sm text-muted-foreground mb-3">I am becoming someone who…</label>
-            <textarea value={identity} onChange={(e) => setIdentity(e.target.value)}
-              placeholder="e.g. is in full control of his mind" rows={4}
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-lg leading-snug focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" />
-          </Step>
+          <div className="flex-1 flex flex-col animate-step-in">
+            {/* Blue label */}
+            <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-primary">
+              IDENTITY · 04
+            </p>
+
+            {/* Heading */}
+            <h1 className="mt-4 text-[2rem] font-bold leading-tight tracking-tight">
+              Choose who you<br />are becoming.
+            </h1>
+
+            {/* Radio options */}
+            <div className="mt-8 flex-1 space-y-3">
+              {identityOptions.map((option) => (
+                <IdentityRadio
+                  key={option}
+                  selected={identity === option && !customIdentitySelected}
+                  onClick={() => {
+                    setIdentity(option);
+                    setCustomIdentitySelected(false);
+                  }}
+                >
+                  {option}
+                </IdentityRadio>
+              ))}
+
+              {/* Write your own */}
+              {customIdentitySelected ? (
+                <div className="flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-primary bg-primary/10 transition-all">
+                  <span className="h-5 w-5 rounded-full border-2 border-primary flex-shrink-0 flex items-center justify-center">
+                    <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                  </span>
+                  <input
+                    autoFocus
+                    value={identity}
+                    onChange={(e) => setIdentity(e.target.value)}
+                    placeholder="e.g. is in full control of his mind"
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setCustomIdentitySelected(true);
+                    setIdentity("");
+                  }}
+                  className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-border bg-card hover:border-primary/40 transition-all"
+                >
+                  <span className="h-5 w-5 rounded-full border-2 border-muted-foreground flex-shrink-0" />
+                  <span className="text-sm text-muted-foreground">Write your own...</span>
+                </button>
+              )}
+            </div>
+
+            {/* CTA */}
+            <button
+              disabled={!identity.trim()}
+              onClick={next}
+              className="mt-8 h-14 w-full rounded-2xl text-white font-bold inline-flex items-center justify-center gap-2 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+              style={{ background: identity.trim() ? "var(--gradient-primary)" : "oklch(0.22 0.03 265)" }}
+            >
+              {identity.trim() ? "This is who I'm becoming" : "Pick an option"}
+              {identity.trim() && <ArrowRight className="h-4 w-4" />}
+            </button>
+          </div>
         )}
 
         {step === 6 && (
@@ -228,13 +298,17 @@ function Step({ eyebrow, title, subtitle, children, cta, onContinue }: {
   children: React.ReactNode; cta: string; onContinue: () => void;
 }) {
   return (
-    <div className="flex-1 flex flex-col">
-      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{eyebrow}</p>
-      <h1 className="mt-3 text-3xl font-bold leading-tight">{title}</h1>
-      {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
+    <div className="flex-1 flex flex-col animate-step-in">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">{eyebrow}</p>
+      <h1 className="mt-3 text-[2rem] font-bold leading-tight tracking-tight">{title}</h1>
+      {subtitle && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{subtitle}</p>}
       <div className="mt-8 flex-1">{children}</div>
-      <button disabled={!cta} onClick={onContinue}
-        className="mt-8 h-14 w-full rounded-xl bg-primary text-primary-foreground font-medium inline-flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed transition">
+      <button
+        disabled={!cta}
+        onClick={onContinue}
+        className="mt-8 h-14 w-full rounded-2xl text-primary-foreground font-bold inline-flex items-center justify-center gap-2 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+        style={{ background: cta ? "var(--gradient-primary)" : "oklch(0.22 0.03 265)" }}
+      >
         {cta || "Pick an option"}
         {cta && <ArrowRight className="h-4 w-4" />}
       </button>
@@ -244,21 +318,70 @@ function Step({ eyebrow, title, subtitle, children, cta, onContinue }: {
 
 function Option({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick}
-      className={`w-full text-left px-5 py-4 rounded-xl border transition ${selected ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground"}`}>
+    <button
+      onClick={onClick}
+      className="w-full text-left px-5 py-4 rounded-2xl border-2 transition-all font-medium text-sm"
+      style={{
+        borderColor: selected ? "var(--primary)" : "oklch(0.22 0.03 265)",
+        background: selected ? "oklch(0.62 0.22 255 / 0.10)" : "var(--card)",
+        color: selected ? "var(--foreground)" : "var(--muted-foreground)",
+      }}
+    >
       {children}
+    </button>
+  );
+}
+
+function IdentityRadio({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all ${
+        selected
+          ? "border-primary bg-primary/10"
+          : "border-border bg-card hover:border-primary/40"
+      }`}
+    >
+      {/* Radio indicator */}
+      <span
+        className={`h-5 w-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+          selected ? "border-primary" : "border-muted-foreground"
+        }`}
+      >
+        {selected && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
+      </span>
+      <span className={`text-sm leading-snug ${selected ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+        I am someone who <span className={selected ? "text-primary" : ""}>{children}</span>
+      </span>
     </button>
   );
 }
 
 function CheckOption({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick}
-      className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl border transition ${selected ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-      <span className={`h-5 w-5 rounded-md grid place-items-center border ${selected ? "bg-primary border-primary" : "border-border"}`}>
-        {selected && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 transition-all text-sm"
+      style={{
+        borderColor: selected ? "var(--primary)" : "oklch(0.22 0.03 265)",
+        background: selected ? "oklch(0.62 0.22 255 / 0.10)" : "var(--card)",
+      }}
+    >
+      <span
+        className="h-5 w-5 rounded-md grid place-items-center border-2 shrink-0 transition-all"
+        style={{
+          background: selected ? "var(--primary)" : "transparent",
+          borderColor: selected ? "var(--primary)" : "oklch(0.30 0.025 265)",
+        }}
+      >
+        {selected && <Check className="h-3.5 w-3.5 text-white" />}
       </span>
-      <span className={selected ? "text-foreground" : "text-muted-foreground"}>{children}</span>
+      <span
+        className="text-left font-medium"
+        style={{ color: selected ? "var(--foreground)" : "var(--muted-foreground)" }}
+      >
+        {children}
+      </span>
     </button>
   );
 }

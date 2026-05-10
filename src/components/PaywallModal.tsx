@@ -37,18 +37,28 @@ export function PaywallModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="relative w-full max-w-md bg-card border border-border rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div
+        className="relative w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto border border-border/60"
+        style={{ background: "var(--card)" }}
+      >
         <button
           onClick={closePaywall}
           aria-label="Close"
-          className="absolute top-4 right-4 h-9 w-9 grid place-items-center rounded-full border border-border text-muted-foreground hover:text-foreground"
+          className="absolute top-4 right-4 h-9 w-9 grid place-items-center rounded-full border border-border/60 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="text-center pt-2">
-          <div className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] uppercase tracking-wider text-primary">
+          <div
+            className="mx-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
+            style={{
+              color: "var(--primary)",
+              borderColor: "oklch(0.62 0.22 255 / 0.35)",
+              background: "oklch(0.62 0.22 255 / 0.08)",
+            }}
+          >
             <Sparkles className="h-3 w-3" /> Final offer · just for you
           </div>
           <h2 className="mt-4 text-2xl font-bold leading-tight">Unlock your full recovery plan</h2>
@@ -57,20 +67,32 @@ export function PaywallModal() {
           </p>
         </div>
 
-        <div className="mt-5 mx-auto w-fit rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-[11px] text-destructive-foreground">
+        <div className="mt-5 mx-auto w-fit rounded-full border border-destructive/35 bg-destructive/10 px-3 py-1 text-[11px] font-semibold text-destructive">
           Expires in {fmt(seconds)}
         </div>
 
-        <div className="mt-5 rounded-2xl border border-primary bg-primary/10 p-5 shadow-[var(--shadow-glow)]">
+        <div
+          className="mt-5 rounded-2xl border p-5"
+          style={{
+            borderColor: "oklch(0.62 0.22 255 / 0.35)",
+            background: "oklch(0.62 0.22 255 / 0.07)",
+            boxShadow: "var(--shadow-glow)",
+          }}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wider text-primary">Annual — 92% off</p>
+            <p
+              className="text-[11px] font-bold uppercase tracking-wider"
+              style={{ color: "var(--primary)" }}
+            >
+              Annual — 92% off
+            </p>
             <span className="text-[10px] line-through text-muted-foreground">$39.99/yr</span>
           </div>
-          <p className="mt-2 text-4xl font-bold">
+          <p className="mt-2 text-4xl font-bold tabular-nums">
             $1.49<span className="text-sm font-normal text-muted-foreground">/month</span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">$17.88 billed once a year · locked-in for life</p>
-          <ul className="mt-4 space-y-1.5 text-sm">
+          <ul className="mt-4 space-y-2 text-sm">
             {[
               "Full brain recovery timeline",
               "Streak calendar & deep analytics",
@@ -78,7 +100,7 @@ export function PaywallModal() {
               "Unlimited SOS tools and reframes",
             ].map((f) => (
               <li key={f} className="flex items-center gap-2 text-muted-foreground">
-                <Check className="h-4 w-4 text-primary" /> {f}
+                <Check className="h-4 w-4 shrink-0" style={{ color: "var(--primary)" }} /> {f}
               </li>
             ))}
           </ul>
@@ -86,15 +108,15 @@ export function PaywallModal() {
 
         <button
           onClick={claim}
-          className="mt-5 h-14 w-full rounded-xl text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)]"
-          style={{ background: "var(--gradient-primary)" }}
+          className="mt-5 h-14 w-full rounded-2xl font-bold text-base text-white"
+          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
         >
           Claim 92% Discount
         </button>
 
         <button
           onClick={closePaywall}
-          className="mt-2 h-11 w-full rounded-xl text-xs text-muted-foreground hover:text-foreground"
+          className="mt-2 h-11 w-full rounded-2xl text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           Maybe later
         </button>
