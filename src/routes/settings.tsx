@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageShell } from "@/components/BottomNav";
-import { useAppState } from "@/lib/store";
-import { Crown } from "lucide-react";
+import { useAppState, activeAddiction, dayCount } from "@/lib/store";
+import { Crown, Plus } from "lucide-react";
 import { triggerPaywall } from "@/lib/paywall";
+import { AddAddictionModal } from "@/components/AddAddictionModal";
 
 export const Route = createFileRoute("/settings")({
   component: Settings,
@@ -23,6 +24,8 @@ function Settings() {
   const [enabled, setEnabled] = useState<Record<string, boolean>>({
     daily: true, urge: true, milestone: true, weekly: false, reframe: true,
   });
+  const [showAddModal, setShowAddModal] = useState(false);
+  const active = activeAddiction(state);
 
   const reset = () => {
     if (typeof window !== "undefined") {
@@ -120,6 +123,55 @@ function Settings() {
         </div>
       </section>
 
+      {/* ── Tracked habits ───────────────────────────────────── */}
+      <section className="px-6 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold">Tracked habits</p>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full border transition-colors"
+            style={{
+              color: "var(--primary)",
+              borderColor: "oklch(0.62 0.22 255 / 0.35)",
+              background: "oklch(0.62 0.22 255 / 0.08)",
+            }}
+          >
+            <Plus className="h-3 w-3" /> Add habit
+          </button>
+        </div>
+        <div className="rounded-2xl border border-border/60 bg-card divide-y divide-border/40">
+          {state.addictions.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">No habits tracked yet.</p>
+          ) : (
+            state.addictions.map((a) => {
+              const day = dayCount(a.startDate);
+              const isActive = a.id === state.activeAddictionId || (!state.activeAddictionId && a === state.addictions[0]);
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => update({ activeAddictionId: a.id })}
+                  className="w-full flex items-center gap-3 p-4 text-left transition-colors hover:bg-white/[0.02]"
+                >
+                  <span className="text-2xl leading-none">{a.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">{a.name}</p>
+                    <p className="text-xs text-muted-foreground">Day {day}</p>
+                  </div>
+                  {isActive && (
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: "oklch(0.62 0.22 255 / 0.15)", color: "var(--primary)" }}
+                    >
+                      Active
+                    </span>
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+      </section>
+
       {/* ── Danger zone ──────────────────────────────────────── */}
       <section className="px-6 mt-6 pb-4">
         <button
@@ -129,6 +181,7 @@ function Settings() {
           Reset onboarding (demo)
         </button>
       </section>
+      {showAddModal && <AddAddictionModal onClose={() => setShowAddModal(false)} />}
     </PageShell>
   );
 }

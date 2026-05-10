@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Zap, AlertTriangle, Target, Sparkles, Coins, X } from "lucide-react";
+import { Zap, AlertTriangle, Target, Sparkles, Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
+import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { triggerPaywall } from "@/lib/paywall";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
@@ -202,6 +203,7 @@ function Dashboard() {
   const [rewardMsg, setRewardMsg] = useState<string | null>(null);
   const [showIdentity, setShowIdentity] = useState(false);
   const [reEntryDays, setReEntryDays] = useState(0);
+  const [showAddHabit, setShowAddHabit] = useState(false);
 
   // Redirect if not onboarded
   useEffect(() => {
@@ -272,12 +274,26 @@ function Dashboard() {
         <p className="font-bold leading-none tabular-nums" style={{ fontSize: "8rem" }}>
           {String(day).padStart(3, "0")}
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {active?.name ?? "recovery"} journey ·{" "}
-          <span className="font-semibold" style={{ color: "var(--primary)" }}>
-            {recoveryPct}%
-          </span>{" "}
-          to brain reset
+        <p className="mt-2 text-sm text-muted-foreground inline-flex items-center gap-2 flex-wrap justify-center">
+          <span>
+            {active?.name ?? "recovery"} journey ·{" "}
+            <span className="font-semibold" style={{ color: "var(--primary)" }}>
+              {recoveryPct}%
+            </span>{" "}
+            to brain reset
+          </span>
+          <button
+            onClick={() => setShowAddHabit(true)}
+            aria-label="Add habit"
+            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors"
+            style={{
+              color: "var(--primary)",
+              borderColor: "oklch(0.62 0.22 255 / 0.35)",
+              background: "oklch(0.62 0.22 255 / 0.08)",
+            }}
+          >
+            <Plus className="h-2.5 w-2.5" /> Add habit
+          </button>
         </p>
         <p className="mt-1 text-xs text-muted-foreground/60 italic">{streakLine}</p>
       </section>
@@ -410,6 +426,8 @@ function Dashboard() {
       </section>
 
       {/* ── Modals ───────────────────────────────────────────────────── */}
+      {showAddHabit && <AddAddictionModal onClose={() => setShowAddHabit(false)} />}
+
       {showRelapse && (
         <RelapseModal
           onClose={() => setShowRelapse(false)}
