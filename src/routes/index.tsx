@@ -6,6 +6,8 @@ import { AddictionCarousel } from "@/components/AddictionCarousel";
 import { useAppState, dayCount, treeStage, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { RelapseModal } from "@/components/RelapseModal";
+import { ReEntryScreen } from "@/components/ReEntryScreen";
+import { inactivityDays } from "@/lib/store";
 
 const MILESTONES = [7, 14, 30, 60, 90];
 const MILESTONE_LABELS: Record<number, string> = {
@@ -57,6 +59,7 @@ function Dashboard() {
   const [showRelapse, setShowRelapse] = useState(false);
   const [rewardMsg, setRewardMsg] = useState<string | null>(null);
   const [showIdentity, setShowIdentity] = useState(false);
+  const [reEntryDays, setReEntryDays] = useState(0);
 
   useEffect(() => {
     if (!state.onboarding && typeof window !== "undefined") {
@@ -73,6 +76,19 @@ function Dashboard() {
   const stage = treeStage(state.treeXP);
   const cost = state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self";
   const next = nextMilestone(day);
+
+  // Login tracking + re-entry detection
+  useEffect(() => {
+    if (!state.onboarding) return;
+    const inactive = inactivityDays(state.lastLoginAt);
+    if (inactive >= 30) {
+      setReEntryDays(inactive);
+    }
+    update((s) => ({
+      lastLoginAt: Date.now(),
+      loginHistory: [...(s.loginHistory ?? []).slice(-89), Date.now()],
+    }));
+  }, [state.onboarding]);
 
   // Show weekly identity reminder
   useEffect(() => {
@@ -244,6 +260,10 @@ function Dashboard() {
 
       {showRelapse && (
         <RelapseModal onClose={() => setShowRelapse(false)} totalCleanDays={state.totalCleanDays} />
+      )}
+
+      {reEntryDays >= 30 && (
+        <ReEntryScreen inactiveDays={reEntryDays} onDone={() => setReEntryDays(0)} />
       )}
 
       {showIdentity && state.onboarding?.identity && (

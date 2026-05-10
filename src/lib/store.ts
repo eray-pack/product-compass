@@ -59,6 +59,10 @@ export type AppState = {
   lastIdentityShown: number;
   // Upsell
   momentumShieldDays: number;
+  // Login & activity tracking
+  lastLoginAt: number;
+  loginHistory: number[];
+  totalReturns: number;
   // Legacy mirrors
   startDate: number;
   totalCleanDays: number;
@@ -91,6 +95,9 @@ const defaultState = (): AppState => {
     notificationApps: [],
     lastIdentityShown: 0,
     momentumShieldDays: 0,
+    lastLoginAt: 0,
+    loginHistory: [],
+    totalReturns: 0,
     startDate: start,
     totalCleanDays: 47,
     badges: ["First Week"],
@@ -135,6 +142,20 @@ export function dayCount(startDate: number) {
 
 export function activeAddiction(s: AppState): Addiction {
   return s.addictions.find((a) => a.id === s.activeAddictionId) ?? s.addictions[0];
+}
+
+export function longestCleanPeriod(s: AppState): number {
+  const active = activeAddiction(s);
+  if (s.relapses.length === 0) return dayCount(active.startDate);
+  const sorted = [...s.relapses].sort((a, b) => a.ts - b.ts);
+  const points = [active.startDate, ...sorted.map(r => r.ts), Date.now()];
+  const gaps = points.slice(1).map((t, i) => Math.floor((t - points[i]) / 86400000));
+  return Math.max(...gaps);
+}
+
+export function inactivityDays(lastLoginAt: number): number {
+  if (!lastLoginAt) return 0;
+  return Math.floor((Date.now() - lastLoginAt) / 86400000);
 }
 
 // Tree level mapping

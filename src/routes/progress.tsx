@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Award, Flame, Shield, Trophy, Lock } from "lucide-react";
+import { Award, Flame, Shield, Trophy, Lock, BookOpen } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
-import { useAppState, dayCount } from "@/lib/store";
+import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 
 export const Route = createFileRoute("/progress")({
@@ -10,7 +10,11 @@ export const Route = createFileRoute("/progress")({
 
 function ProgressScreen() {
   const [state] = useAppState();
-  const day = dayCount(state.startDate);
+  const active = activeAddiction(state);
+  const day = dayCount(active.startDate);
+  const longest = longestCleanPeriod(state);
+  const daysSinceStart = Math.floor((Date.now() - active.startDate) / 86400000);
+  const totalLogins = state.loginHistory?.length ?? 0;
 
   // Mock contribution-style grid: 12 weeks x 7 days
   const cells = Array.from({ length: 84 }, (_, i) => {
@@ -129,6 +133,39 @@ function ProgressScreen() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Recovery Story */}
+      <section className="px-6 mt-4">
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 grid place-items-center text-primary">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Your Recovery Story</p>
+              <p className="text-[11px] text-muted-foreground">This is not a streak. This is your history.</p>
+            </div>
+          </div>
+          <div className="space-y-2.5">
+            {[
+              { label: "Days since you started", value: `${daysSinceStart}` },
+              { label: "Total clean days, ever", value: `${state.totalCleanDays}` },
+              { label: "Longest clean period", value: `${longest} days` },
+              { label: "Times you came back", value: `${state.totalReturns}` },
+              { label: "Relapses logged honestly", value: `${state.relapses?.length ?? 0}` },
+              { label: "App sessions", value: `${totalLogins}` },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between items-center text-sm border-b border-border/40 pb-2 last:border-0 last:pb-0">
+                <span className="text-muted-foreground">{label}</span>
+                <span className="font-bold">{value}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+            "Every chapter counts. Every time you came back was a choice. Most people stop choosing."
+          </p>
         </div>
       </section>
 
