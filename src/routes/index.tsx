@@ -71,8 +71,7 @@ function Dashboard() {
   }, [navigate]);
 
   const active = activeAddiction(state);
-  if (!active) return null;
-  const day = dayCount(active.startDate);
+  const day = active ? dayCount(active.startDate) : 1;
   const pct = Math.min(100, (day / 90) * 100);
   const stage = treeStage(state.treeXP);
   const cost = state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self";

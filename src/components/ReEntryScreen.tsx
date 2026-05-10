@@ -23,10 +23,9 @@ export function ReEntryScreen({ inactiveDays, onDone }: Props) {
 
   const active = activeAddiction(state);
   const totalClean = state.totalCleanDays;
-  if (!active) return null;
   const longest = longestCleanPeriod(state);
   const returns = state.totalReturns;
-  const currentDay = dayCount(active.startDate);
+  const currentDay = active ? dayCount(active.startDate) : 1;
 
   const handleKeptGoing = () => {
     // Add missed days to momentum — they stayed clean without the app
