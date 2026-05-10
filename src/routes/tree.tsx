@@ -4,6 +4,7 @@ import { PageShell } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState } from "react";
+import { Tree3D } from "@/components/Tree3D";
 
 export const Route = createFileRoute("/tree")({
   component: TreePage,
@@ -56,8 +57,8 @@ function TreePage() {
       {/* Tree visual */}
       <section className="px-6 mt-6">
         <div className="rounded-2xl border border-border bg-[var(--gradient-surface)] p-6 shadow-[var(--shadow-glow)]">
-          <div className="aspect-square w-full rounded-xl bg-card/40 border border-border grid place-items-center relative overflow-hidden">
-            <Tree stage={stage.stage} />
+          <div className="aspect-square w-full rounded-xl bg-[#0a0a0a] border border-border relative overflow-hidden">
+            <Tree3D day={day} />
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full">
                 Stage {stage.stage} · {stage.name}
@@ -307,52 +308,3 @@ function ShareTreeCard({ stage, day, xp }: { stage: { name: string; stage: numbe
   );
 }
 
-function Tree({ stage }: { stage: number }) {
-  // Simple SVG tree that grows with stage
-  const trunkH = 30 + stage * 8;
-  const canopyR = 18 + stage * 10;
-  const leafCount = stage; // extra leaves
-  return (
-    <svg viewBox="0 0 200 200" className="h-[80%] w-[80%]">
-      <defs>
-        <radialGradient id="canopy" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="oklch(0.78 0.18 150)" />
-          <stop offset="100%" stopColor="oklch(0.45 0.14 155)" />
-        </radialGradient>
-        <linearGradient id="trunk" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="oklch(0.45 0.06 60)" />
-          <stop offset="100%" stopColor="oklch(0.28 0.05 55)" />
-        </linearGradient>
-      </defs>
-      {/* ground */}
-      <ellipse cx="100" cy="180" rx="70" ry="6" fill="oklch(0.26 0.025 260)" />
-      {/* trunk */}
-      <rect x={96} y={180 - trunkH} width="8" height={trunkH} rx="3" fill="url(#trunk)" />
-      {/* canopy */}
-      {stage >= 1 && (
-        <circle cx="100" cy={180 - trunkH - canopyR / 2} r={canopyR} fill="url(#canopy)" opacity="0.95" />
-      )}
-      {stage >= 2 && (
-        <>
-          <circle cx={100 - canopyR * 0.6} cy={180 - trunkH - canopyR * 0.3} r={canopyR * 0.7} fill="url(#canopy)" opacity="0.9" />
-          <circle cx={100 + canopyR * 0.6} cy={180 - trunkH - canopyR * 0.3} r={canopyR * 0.7} fill="url(#canopy)" opacity="0.9" />
-        </>
-      )}
-      {stage >= 3 && (
-        <circle cx="100" cy={180 - trunkH - canopyR * 1.1} r={canopyR * 0.7} fill="url(#canopy)" opacity="0.9" />
-      )}
-      {/* sparkle leaves */}
-      {Array.from({ length: leafCount }).map((_, i) => {
-        const a = (i / Math.max(1, leafCount)) * Math.PI * 2;
-        const r = canopyR + 4;
-        const cx = 100 + Math.cos(a) * r;
-        const cy = 180 - trunkH - canopyR / 2 + Math.sin(a) * r;
-        return <circle key={i} cx={cx} cy={cy} r="2" fill="oklch(0.85 0.18 90)" opacity="0.85" />;
-      })}
-      {stage === 0 && (
-        // seed
-        <ellipse cx="100" cy="172" rx="6" ry="4" fill="oklch(0.5 0.08 60)" />
-      )}
-    </svg>
-  );
-}
