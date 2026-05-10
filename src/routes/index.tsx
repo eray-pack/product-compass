@@ -62,13 +62,13 @@ function Dashboard() {
   const [reEntryDays, setReEntryDays] = useState(0);
 
   useEffect(() => {
-    if (!state.onboarding && typeof window !== "undefined") {
-      const raw = localStorage.getItem("stopamine.v2");
-      if (!raw || !JSON.parse(raw)?.onboarding) {
-        navigate({ to: "/onboarding" });
-      }
+    if (typeof window === "undefined") return;
+    const raw = localStorage.getItem("stopamine.v2");
+    const saved = raw ? JSON.parse(raw) : null;
+    if (!saved?.onboarding || !saved?.addictions?.length) {
+      navigate({ to: "/onboarding" });
     }
-  }, [state.onboarding, navigate]);
+  }, [navigate]);
 
   const active = activeAddiction(state);
   const day = dayCount(active.startDate);
@@ -126,19 +126,6 @@ function Dashboard() {
           <Coins className="h-3 w-3" /> {state.points}
         </Link>
       </header>
-
-      {/* Streak hero */}
-      <section className="px-6 mt-4">
-        <div className="text-center">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Clean streak</p>
-          <p className="mt-2 text-6xl font-semibold tracking-tight bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
-            Day {day}
-          </p>
-          <p className="mt-3 text-sm text-muted-foreground max-w-xs mx-auto leading-snug">
-            {streakLine}
-          </p>
-        </div>
-      </section>
 
       {/* Swipeable addiction trackers */}
       <AddictionCarousel />

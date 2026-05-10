@@ -1,7 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, Check, Lock } from "lucide-react";
-import { useAppState, NotificationStyle, NotificationApp } from "@/lib/store";
+import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
+
+const HABIT_MAP: Record<string, { name: string; emoji: string }> = {
+  "Social media doomscrolling": { name: "Social media", emoji: "📱" },
+  "Sugar / junk food": { name: "Sugar", emoji: "🍩" },
+  "Alcohol": { name: "Alcohol", emoji: "🍺" },
+  "Nicotine / vaping": { name: "Nicotine", emoji: "🚬" },
+  "Cannabis": { name: "Cannabis", emoji: "🌿" },
+  "Online gambling / betting": { name: "Gambling", emoji: "🎰" },
+  "Video game binges": { name: "Gaming", emoji: "🎮" },
+  "Procrastination": { name: "Procrastination", emoji: "⏳" },
+};
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
@@ -36,6 +47,27 @@ function Onboarding() {
 
   const next = () => setStep((s) => s + 1);
   const finish = () => {
+    const now = Date.now();
+    const mainAddiction: Addiction = {
+      id: "porn",
+      name: "Porn",
+      emoji: "🧠",
+      startDate: now,
+      totalCleanDays: 0,
+      urgesSurvived: 0,
+    };
+    const extraAddictions: Addiction[] = pickedHabits.map((h) => {
+      const preset = HABIT_MAP[h] ?? { name: h, emoji: "🔒" };
+      return {
+        id: preset.name.toLowerCase().replace(/\s+/g, "-"),
+        name: preset.name,
+        emoji: preset.emoji,
+        startDate: now,
+        totalCleanDays: 0,
+        urgesSurvived: 0,
+        premium: true,
+      };
+    });
     update({
       onboarding: {
         duration,
@@ -44,10 +76,12 @@ function Onboarding() {
         identity,
         name,
         otherHabits: pickedHabits,
-        completedAt: Date.now(),
+        completedAt: now,
       },
       notificationStyles: notifStyles,
       notificationApps: notifApps,
+      addictions: [mainAddiction, ...extraAddictions],
+      activeAddictionId: mainAddiction.id,
     });
     navigate({ to: "/paywall" });
   };

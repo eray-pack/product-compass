@@ -70,40 +70,29 @@ export type AppState = {
   urgesSurvived: number;
 };
 
-const defaultState = (): AppState => {
-  const start = Date.now() - 13 * 86400000;
-  const main: Addiction = {
-    id: "porn",
-    name: "Porn",
-    emoji: "🧠",
-    startDate: start,
-    totalCleanDays: 47,
-    urgesSurvived: 4,
-  };
-  return {
-    onboarding: null,
-    paywallSeen: false,
-    isPremium: false,
-    addictions: [main],
-    activeAddictionId: main.id,
-    points: 120,
-    completedChallenges: [],
-    treeXP: 240,
-    treeUnlocks: ["sapling"],
-    relapses: [],
-    notificationStyles: [],
-    notificationApps: [],
-    lastIdentityShown: 0,
-    momentumShieldDays: 0,
-    lastLoginAt: 0,
-    loginHistory: [],
-    totalReturns: 0,
-    startDate: start,
-    totalCleanDays: 47,
-    badges: ["First Week"],
-    urgesSurvived: 4,
-  };
-};
+const defaultState = (): AppState => ({
+  onboarding: null,
+  paywallSeen: false,
+  isPremium: false,
+  addictions: [],
+  activeAddictionId: "",
+  points: 0,
+  completedChallenges: [],
+  treeXP: 0,
+  treeUnlocks: [],
+  relapses: [],
+  notificationStyles: [],
+  notificationApps: [],
+  lastIdentityShown: 0,
+  momentumShieldDays: 0,
+  lastLoginAt: 0,
+  loginHistory: [],
+  totalReturns: 0,
+  startDate: Date.now(),
+  totalCleanDays: 0,
+  badges: [],
+  urgesSurvived: 0,
+});
 
 export function loadState(): AppState {
   if (typeof window === "undefined") return defaultState();
