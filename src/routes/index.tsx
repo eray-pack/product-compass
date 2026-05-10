@@ -71,6 +71,7 @@ function Dashboard() {
   }, [navigate]);
 
   const active = activeAddiction(state);
+  if (!active) return null;
   const day = dayCount(active.startDate);
   const pct = Math.min(100, (day / 90) * 100);
   const stage = treeStage(state.treeXP);

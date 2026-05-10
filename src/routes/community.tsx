@@ -221,7 +221,7 @@ function CommunityPage() {
 function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const [state] = useAppState();
   const active = activeAddiction(state);
-  const day = dayCount(active.startDate);
+  const day = active ? dayCount(active.startDate) : 1;
   const stage = treeStage(state.treeXP);
 
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES[room.id] ?? []);
