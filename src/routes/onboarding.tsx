@@ -80,6 +80,7 @@ function Onboarding() {
       };
     });
     update({
+      companion: companion ?? "tree",
       onboarding: {
         duration,
         costs: pickedCosts,
@@ -101,7 +102,7 @@ function Onboarding() {
     setter(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   };
 
-  const TOTAL = 7;
+  const TOTAL = 8;
 
   return (
     <div className="min-h-screen mx-auto max-w-md flex flex-col">
@@ -276,7 +277,74 @@ function Onboarding() {
         )}
 
         {step === 6 && (
-          <Step eyebrow={`Step 7 of ${TOTAL}`} title="Your commitment"
+          <div className="flex-1 flex flex-col animate-step-in">
+            <p className="text-[11px] font-semibold tracking-[0.25em] uppercase" style={{ color: "var(--primary)" }}>
+              COMPANION · Step 7 of {TOTAL}
+            </p>
+            <h1 className="mt-4 text-[2rem] font-bold leading-tight tracking-tight">
+              Choose your<br />recovery companion.
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              They grow alongside you — day by day, stage by stage. This is what you're working toward.
+            </p>
+
+            {/* Three companion cards */}
+            <div className="mt-8 flex gap-3 flex-1">
+              {(["tree", "man", "woman"] as CompanionType[]).map((type) => {
+                const { name, tagline } = COMPANION_LABELS[type];
+                const selected = companion === type;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => setCompanion(type)}
+                    className="flex-1 flex flex-col items-center rounded-2xl border-2 transition-all overflow-hidden pb-4"
+                    style={{
+                      borderColor: selected ? "var(--primary)" : "var(--border)",
+                      background: selected ? "var(--primary)" + "12" : "var(--card)",
+                    }}
+                  >
+                    {/* Final-stage preview */}
+                    <div className="w-full flex items-end justify-center pt-2 px-2" style={{ height: "140px" }}>
+                      <CompanionStage type={type} stage={5} className="w-full h-full" />
+                    </div>
+                    {/* Selection indicator dot */}
+                    <span
+                      className="mt-2 h-4 w-4 rounded-full border-2 flex items-center justify-center transition-all"
+                      style={{
+                        borderColor: selected ? "var(--primary)" : "var(--border)",
+                        background: selected ? "var(--primary)" : "transparent",
+                      }}
+                    >
+                      {selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                    </span>
+                    <p className="mt-1.5 text-xs font-bold" style={{ color: selected ? "var(--primary)" : "var(--foreground)" }}>
+                      {name}
+                    </p>
+                    <p className="mt-0.5 text-[9px] text-muted-foreground text-center px-2 leading-tight">
+                      {tagline}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              disabled={!companion}
+              onClick={next}
+              className="mt-8 h-14 w-full rounded-2xl font-bold inline-flex items-center justify-center gap-2 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+              style={{
+                background: companion ? "var(--gradient-primary)" : "var(--muted)",
+                color: companion ? "var(--primary-foreground)" : "var(--muted-foreground)",
+              }}
+            >
+              {companion ? `${COMPANION_LABELS[companion].name} — let's go` : "Choose your companion"}
+              {companion && <ArrowRight className="h-4 w-4" />}
+            </button>
+          </div>
+        )}
+
+        {step === 7 && (
+          <Step eyebrow={`Step 8 of ${TOTAL}`} title="Your commitment"
             subtitle="Read it. Sign it. This is who you are now."
             cta={name.trim() ? "I commit to this" : ""} onContinue={finish}>
             <div className="rounded-2xl border border-border bg-card p-5">

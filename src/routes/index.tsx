@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Zap, AlertTriangle, Target, Sparkles, Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
+import { CompanionAvatar, dayToStage, STAGE_DAYS, COMPANION_LABELS } from "@/components/avatars/CompanionAvatar";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { triggerPaywall } from "@/lib/paywall";
 import { RelapseModal } from "@/components/RelapseModal";
