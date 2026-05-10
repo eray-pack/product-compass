@@ -7,9 +7,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 
 import appCss from "../styles.css?url";
 import { PaywallModal } from "@/components/PaywallModal";
+import { BrainLoadingScreen } from "@/components/BrainLoadingScreen";
 
 function NotFoundComponent() {
   return (
@@ -78,10 +80,27 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Show splash only on the first page load per session
+const SPLASH_KEY = "_stopamine_splash";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Start hidden so SSR HTML matches; reveal after client check
+  const [showSplash, setShowSplash] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!sessionStorage.getItem(SPLASH_KEY)) {
+      sessionStorage.setItem(SPLASH_KEY, "1");
+      setShowSplash(true);
+    }
+  }, []);
+
+  const handleSplashDone = useCallback(() => setShowSplash(false), []);
+
   return (
     <QueryClientProvider client={queryClient}>
+      {showSplash && <BrainLoadingScreen onDone={handleSplashDone} />}
       <Outlet />
       <PaywallModal />
     </QueryClientProvider>
