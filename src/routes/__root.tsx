@@ -74,7 +74,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <head><HeadContent /></head>
+      <head>
+        {/* Runs synchronously before paint — prevents theme flash */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('stopamine.theme')||'dark';document.documentElement.className=t;}catch(e){}})();` }} />
+        <HeadContent />
+      </head>
       <body className="bg-background text-foreground">{children}<Scripts /></body>
     </html>
   );
