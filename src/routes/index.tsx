@@ -272,7 +272,7 @@ function Dashboard() {
       <section className="neural-mesh-fine px-6 mt-6 text-center">
         <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-muted-foreground">Day</p>
         <p className="day-monument font-bold leading-none tabular-nums" style={{ fontSize: "8rem" }}>
-          {String(day).padStart(3, "0")}
+          {day}
         </p>
         <p className="mt-2 text-sm text-muted-foreground inline-flex items-center gap-2 flex-wrap justify-center">
           <span>
