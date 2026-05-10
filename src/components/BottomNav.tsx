@@ -1,22 +1,120 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, TreePine, Wrench, Users, BarChart2, Settings } from "lucide-react";
+import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
+import { loadState } from "@/lib/store";
 
-const NAV_ITEMS = [
-  { to: "/",          label: "Home",      icon: Home      },
-  { to: "/tree",      label: "Companion", icon: TreePine  },
-  { to: "/tools",     label: "Tools",     icon: Wrench    },
-  { to: "/community", label: "Community", icon: Users     },
-  { to: "/progress",  label: "Progress",  icon: BarChart2 },
+// ── Companion icons ───────────────────────────────────────────────────────────
+
+function TreeIcon({ strokeWidth }: { strokeWidth: number }) {
+  return (
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* trunk */}
+      <line x1="12" y1="22" x2="12" y2="13" />
+      {/* bottom layer */}
+      <path d="M5 17l7-4 7 4" />
+      {/* middle layer */}
+      <path d="M7 13l5-4 5 4" />
+      {/* top layer */}
+      <path d="M9 9l3-5 3 5" />
+    </svg>
+  );
+}
+
+function ManIcon({ strokeWidth }: { strokeWidth: number }) {
+  return (
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* head */}
+      <circle cx="12" cy="5" r="3" />
+      {/* straight shoulders → body */}
+      <path d="M8 10h8" />
+      {/* torso center line */}
+      <line x1="12" y1="10" x2="12" y2="16" />
+      {/* arms */}
+      <line x1="8" y1="10" x2="6" y2="15" />
+      <line x1="16" y1="10" x2="18" y2="15" />
+      {/* legs */}
+      <line x1="12" y1="16" x2="9" y2="22" />
+      <line x1="12" y1="16" x2="15" y2="22" />
+    </svg>
+  );
+}
+
+function WomanIcon({ strokeWidth }: { strokeWidth: number }) {
+  return (
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* head */}
+      <circle cx="12" cy="5" r="3" />
+      {/* slightly narrower shoulders */}
+      <path d="M9 10h6" />
+      {/* torso */}
+      <line x1="12" y1="10" x2="12" y2="14" />
+      {/* arms */}
+      <line x1="9" y1="10" x2="7" y2="15" />
+      <line x1="15" y1="10" x2="17" y2="15" />
+      {/* skirt — flared triangle */}
+      <path d="M12 14l-5 8h10l-5-8z" />
+    </svg>
+  );
+}
+
+const COMPANION_ICONS = {
+  tree:  TreeIcon,
+  man:   ManIcon,
+  woman: WomanIcon,
+} as const;
+
+// ── Static nav items (companion tab handled separately) ───────────────────────
+const BASE_NAV = [
+  { to: "/",          label: "Home",      Icon: Home      },
+  { to: "/tools",     label: "Tools",     Icon: Wrench    },
+  { to: "/community", label: "Community", Icon: Users     },
+  { to: "/progress",  label: "Progress",  Icon: BarChart2 },
 ] as const;
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
 
+  // Read companion from localStorage — same source as the rest of the app.
+  // loadState() is synchronous and cheap (just a JSON.parse).
+  const companion = loadState().companion ?? "tree";
+  const CompanionIcon = COMPANION_ICONS[companion];
+
+  // Build ordered nav: Home | Companion | Tools | Community | Progress
+  const navItems = [
+    BASE_NAV[0],
+    { to: "/tree" as const, label: "Companion", Icon: null as unknown as typeof Home },
+    ...BASE_NAV.slice(1),
+  ];
+
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border/60 backdrop-blur-xl" style={{ background: "var(--card)" }}>
       <div className="mx-auto max-w-md flex items-stretch">
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => {
+        {navItems.map(({ to, label, Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
+          const sw = active ? 2.2 : 1.8;
           return (
             <Link
               key={to}
@@ -28,7 +126,11 @@ export function BottomNav() {
               {active && (
                 <span className="absolute top-0 inset-x-4 h-[2px] rounded-full bg-primary" />
               )}
-              <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
+              {to === "/tree" ? (
+                <CompanionIcon strokeWidth={sw} />
+              ) : (
+                <Icon className="h-5 w-5" strokeWidth={sw} />
+              )}
               {label}
             </Link>
           );
