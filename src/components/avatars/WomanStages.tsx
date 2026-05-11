@@ -515,8 +515,8 @@ export function Woman5({ className }: P) {
         <ellipse cx="17" cy="121" rx="5.5" ry="5" fill={SKD}/>
         <ellipse cx="83" cy="121" rx="5.5" ry="5" fill={SKD}/>
 
-        {/* Neck — short trapezoid, barely visible */}
-        <path d="M45 50 Q44 53 42 58 Q50 60 58 58 Q56 53 55 50Z" fill={SK}/>
+        {/* Neck — short, wide, skin-colored */}
+        <rect x="42" y="50" width="16" height="14" rx="4" fill={SKD}/>
 
         {/* Gold necklace */}
         <path d="M43 59 Q50 64 57 59" stroke="#FFD54F" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.9"/>
