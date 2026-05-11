@@ -392,6 +392,13 @@ html.light {
 }
 .anim-leaf { animation: leaf-drift var(--leaf-dur, 5s) ease-in-out infinite var(--leaf-delay, 0s); }
 
+/* Idle breathing bob — used by Man/Woman companion SVG inner group */
+@keyframes idle-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+.idle-breathe { animation: idle-breathe 4s ease-in-out infinite; }
+
 /* 3D drop-shadow on companion characters */
 .companion-3d {
   filter:
