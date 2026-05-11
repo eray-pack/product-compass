@@ -515,64 +515,74 @@ export function Woman5({ className }: P) {
         <ellipse cx="17" cy="121" rx="5.5" ry="5" fill={SKD}/>
         <ellipse cx="83" cy="121" rx="5.5" ry="5" fill={SKD}/>
 
-        {/* Neck — wider and shorter for natural proportions */}
-        <rect x="44" y="51" width="12" height="7" rx="4" fill={SK}/>
-        {/* Décolletage skin area — fills the gap between neck and dress V-neck */}
-        <path d="M37 58 Q50 64 63 58 Q58 74 50 74 Q42 74 37 58Z" fill={SK}/>
+        {/* Neck — short trapezoid, barely visible */}
+        <path d="M45 50 Q44 53 42 58 Q50 60 58 58 Q56 53 55 50Z" fill={SK}/>
 
-        {/* Gold necklace — drapes over décolletage */}
-        <path d="M43 60 Q50 65 57 60" stroke="#FFD54F" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.9"/>
-        <path d="M46 63 Q50 68 54 63" stroke="#FFD54F" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.75"/>
-        <circle cx="50" cy="68" r="2.2" fill="#FFD54F" opacity="0.95"/>
-        <circle cx="50" cy="68" r="1.2" fill="#FFE082"/>
+        {/* Gold necklace */}
+        <path d="M43 59 Q50 64 57 59" stroke="#FFD54F" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.9"/>
+        <path d="M46 62 Q50 67 54 62" stroke="#FFD54F" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.75"/>
+        <circle cx="50" cy="67" r="2.2" fill="#FFD54F" opacity="0.95"/>
+        <circle cx="50" cy="67" r="1.2" fill="#FFE082"/>
 
-        {/* Ears — moved slightly wider to match face */}
-        <ellipse cx="34" cy="36" rx="3" ry="4" fill={SKD}/>
-        <ellipse cx="66" cy="36" rx="3" ry="4" fill={SKD}/>
-        {/* Face — slightly wider ellipse for softer, rounder feminine shape */}
-        <ellipse cx="50" cy="36" rx="15" ry="13.5" fill="url(#w5f)"/>
-        {/* Soft cheek blush */}
-        <ellipse cx="37" cy="40" rx="5" ry="3.5" fill="#F09878" opacity="0.20"/>
-        <ellipse cx="63" cy="40" rx="5" ry="3.5" fill="#F09878" opacity="0.20"/>
+        {/* Ears */}
+        <ellipse cx="36" cy="36" rx="2.8" ry="3.8" fill={SKD}/>
+        <ellipse cx="64" cy="36" rx="2.8" ry="3.8" fill={SKD}/>
+        {/* Face — upright oval, clearly feminine (taller than wide) */}
+        <ellipse cx="50" cy="36" rx="13" ry="14.5" fill="url(#w5f)"/>
+        {/* Cheek blush */}
+        <ellipse cx="39" cy="41" rx="5" ry="3" fill="#F09878" opacity="0.22"/>
+        <ellipse cx="61" cy="41" rx="5" ry="3" fill="#F09878" opacity="0.22"/>
 
         {/* Elegant updo — chignon — cap bottom at y=26, no mask */}
         <path d="M36 28 Q50 20 64 28 Q60 26 50 28 Q40 26 36 28Z" fill={HAIR}/>
         <ellipse cx="50" cy="19" rx="10" ry="7" fill={HAIR}/>
         <path d="M42 18 Q50 14 58 18 Q56 22 50 23 Q44 22 42 18Z" fill="#2A1A0A" opacity="0.45"/>
         <path d="M43 15 Q50 12 57 15" stroke="#3A2414" strokeWidth="1.3" fill="none" opacity="0.4"/>
-        {/* Loose face-framing strands */}
-        <path d="M36 30 Q34 38 35 48" stroke={HAIR} strokeWidth="3.5" strokeLinecap="round" fill="none"/>
-        <path d="M64 30 Q66 38 65 48" stroke={HAIR} strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+        {/* Short face-framing wisps — end at cheekbone, NOT chin */}
+        <path d="M36 29 Q33 34 34 41" stroke={HAIR} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.75"/>
+        <path d="M64 29 Q67 34 66 41" stroke={HAIR} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.75"/>
         {/* Tiny gold hair pin */}
         <path d="M54 18 L58 16" stroke="#FFD54F" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.85"/>
 
-        {/* Eyebrows — soft feminine arch, thinner stroke */}
-        <path d="M41.5 30.2 Q44.5 29 47.5 30" stroke={HAIR} strokeWidth="1.1" strokeLinecap="round" fill="none"/>
-        <path d="M52.5 30 Q55.5 29 58.5 30.2" stroke={HAIR} strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+        {/* Eyebrows — thin, gently arched, feminine */}
+        <path d="M41 30 Q44.5 28.5 48 30" stroke={HAIR} strokeWidth="1.0" strokeLinecap="round" fill="none"/>
+        <path d="M52 30 Q55.5 28.5 59 30" stroke={HAIR} strokeWidth="1.0" strokeLinecap="round" fill="none"/>
 
-        {/* Eyes — slightly larger and rounder for feminine look */}
-        <ellipse cx="44" cy="34" rx="3.8" ry="2.6" fill="white"/>
-        <ellipse cx="56" cy="34" rx="3.8" ry="2.6" fill="white"/>
-        <circle cx="44" cy="34" r="2.0" fill="#3D2010"/>
-        <circle cx="56" cy="34" r="2.0" fill="#3D2010"/>
-        <circle cx="44" cy="34" r="0.95" fill="#070402"/>
-        <circle cx="56" cy="34" r="0.95" fill="#070402"/>
-        <circle cx="43.1" cy="33.1" r="0.85" fill="white"/>
-        <circle cx="55.1" cy="33.1" r="0.85" fill="white"/>
-        {/* Upper lid — skin tone (was HAIR = mask) */}
-        <path d="M40.5 32.5 Q44 31 47.5 32.5" stroke="#C09070" strokeWidth="1.2" fill="none" opacity="0.45"/>
-        <path d="M52.5 32.5 Q56 31 59.5 32.5" stroke="#C09070" strokeWidth="1.2" fill="none" opacity="0.45"/>
-        {/* Outer lash flick paths removed */}
+        {/* Eyes — big, round, with feminine lash line and flicks */}
+        <ellipse cx="44" cy="34" rx="4.2" ry="3.0" fill="white"/>
+        <ellipse cx="56" cy="34" rx="4.2" ry="3.0" fill="white"/>
+        <circle cx="44" cy="34.3" r="2.3" fill="#3D2010"/>
+        <circle cx="56" cy="34.3" r="2.3" fill="#3D2010"/>
+        <circle cx="44" cy="34.3" r="1.05" fill="#070402"/>
+        <circle cx="56" cy="34.3" r="1.05" fill="#070402"/>
+        <circle cx="43.0" cy="33.2" r="0.9" fill="white"/>
+        <circle cx="55.0" cy="33.2" r="0.9" fill="white"/>
+        {/* Upper lash line */}
+        <path d="M39.8 31.5 Q44 29.8 48.2 31.5" stroke={HAIR} strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+        <path d="M51.8 31.5 Q56 29.8 60.2 31.5" stroke={HAIR} strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+        {/* Outer lash flicks — feminine wing */}
+        <path d="M39.8 31.5 Q38.3 30.5 37.5 31.0" stroke={HAIR} strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+        <path d="M39.8 31.5 Q38.0 29.8 37.5 29.5" stroke={HAIR} strokeWidth="0.9" strokeLinecap="round" fill="none"/>
+        <path d="M60.2 31.5 Q61.7 30.5 62.5 31.0" stroke={HAIR} strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+        <path d="M60.2 31.5 Q62.0 29.8 62.5 29.5" stroke={HAIR} strokeWidth="0.9" strokeLinecap="round" fill="none"/>
+        {/* Lower lid crease — skin tone */}
+        <path d="M40.2 36.5 Q44 37.8 47.8 36.5" stroke="#C09070" strokeWidth="0.8" fill="none" opacity="0.4"/>
+        <path d="M52.2 36.5 Q56 37.8 59.8 36.5" stroke="#C09070" strokeWidth="0.8" fill="none" opacity="0.4"/>
 
-        {/* Nose */}
-        <ellipse cx="47.5" cy="40" rx="1.3" ry="0.9" fill="#C4906A" opacity="0.38"/>
-        <ellipse cx="52.5" cy="40" rx="1.3" ry="0.9" fill="#C4906A" opacity="0.38"/>
-        <path d="M48.5 38.5 Q50 40 51.5 38.5" stroke="#C4906A" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.38"/>
+        {/* Nose — small, delicate */}
+        <ellipse cx="48" cy="41" rx="1.0" ry="0.7" fill="#C4906A" opacity="0.30"/>
+        <ellipse cx="52" cy="41" rx="1.0" ry="0.7" fill="#C4906A" opacity="0.30"/>
+        <path d="M48.8 39.5 Q50 41 51.2 39.5" stroke="#C4906A" strokeWidth="0.8" strokeLinecap="round" fill="none" opacity="0.30"/>
 
-        {/* Warm smile with defined lips */}
-        <path d="M45.5 45.5 Q50 44 54.5 45.5 Q52 49.5 50 50 Q48 49.5 45.5 45.5Z" fill={LIPL} opacity="0.35"/>
-        <path d="M45.5 45.5 Q50 49.5 54.5 45.5" stroke={LIP} strokeWidth="1.7" strokeLinecap="round" fill="none"/>
-        <path d="M45.5 45.5 Q47.5 44 50 44.5 Q52.5 44 54.5 45.5" stroke="#A84858" strokeWidth="0.9" fill="none" opacity="0.5"/>
+        {/* Full lips — soft pink, clearly feminine */}
+        {/* Upper lip bow */}
+        <path d="M46 45.5 Q47.5 44.2 50 44.8 Q52.5 44.2 54 45.5" stroke="#B86070" strokeWidth="1.0" fill="none" opacity="0.85"/>
+        {/* Lip fill */}
+        <path d="M46 45.5 Q50 44.5 54 45.5 Q52 50 50 50.5 Q48 50 46 45.5Z" fill={LIPL} opacity="0.55"/>
+        {/* Lower lip outline */}
+        <path d="M46 45.5 Q50 50.5 54 45.5" stroke={LIP} strokeWidth="1.9" strokeLinecap="round" fill="none"/>
+        {/* Cupid's bow highlight */}
+        <path d="M48 45.2 Q50 44.6 52 45.2" stroke="white" strokeWidth="0.7" fill="none" opacity="0.35"/>
 
         {/* Subtle golden rim */}
         <ellipse cx="50" cy="88" rx="45" ry="60" stroke="#FFD54F" strokeWidth="1.5" strokeOpacity="0.26" fill="none" strokeDasharray="5 4"/>
