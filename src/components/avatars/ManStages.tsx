@@ -119,10 +119,10 @@ export function Man0({ className }: P) {
         {/* Head */}
         <circle cx="50" cy="37" r="14" fill="url(#m0f)" />
 
-        {/* Disheveled hair — single filled cap with natural wavy top.
-            Wavy top shape (not separate strands) gives messy look without antennae. */}
+        {/* Disheveled hair — cap closes at hairline (y≈28), NOT over the eyes.
+            The wavy top gives messy look; the bottom stays at y=28–30. */}
         <path
-          d="M36 30 Q37 20 42 17 Q46 14 50 16 Q54 14 58 17 Q63 20 64 30 Q63 36 59 38 Q50 40 41 38 Q37 36 36 30Z"
+          d="M37 28 Q38 19 43 16 Q46 13 50 15 Q54 13 57 16 Q62 19 63 28 Q60 27 56 28 Q50 30 44 28 Q40 27 37 28Z"
           fill="url(#m0h)"
         />
 
@@ -175,15 +175,14 @@ export function Man1({ className }: P) {
         <ellipse cx="65" cy="37" rx="3" ry="4" fill={SKD} />
         <circle cx="50" cy="37" r="14" fill="url(#m1f)" />
 
-        {/* Hair — slightly unkempt but no antennae.
-            Side shapes suggest a bit of puffiness at the temples. */}
+        {/* Hair — cap closes at hairline (y≈28), side tufts stay above y=28 */}
         <path
-          d="M36 30 Q38 20 43 18 Q47 16 50 17 Q53 16 57 18 Q62 20 64 30 Q63 36 59 38 Q50 40 41 38 Q37 36 36 30Z"
+          d="M37 28 Q39 20 44 18 Q47 16 50 17 Q53 16 56 18 Q61 20 63 28 Q60 27 56 28 Q50 30 44 28 Q40 27 37 28Z"
           fill={HAIR}
         />
-        {/* Slight side tufts — filled, close to the hairline */}
-        <path d="M36 30 Q34 25 35 21 Q38 20 39 24Z" fill={HAIR} />
-        <path d="M64 30 Q66 25 65 21 Q62 20 61 24Z" fill={HAIR} />
+        {/* Slight side tufts — small, above hairline only */}
+        <path d="M37 28 Q35 24 35 21 Q38 20 39 24Z" fill={HAIR} />
+        <path d="M63 28 Q65 24 65 21 Q62 20 61 24Z" fill={HAIR} />
 
         {/* Faint dark circles — fading */}
         <ellipse cx="44" cy="37.5" rx="3.2" ry="1.3" fill="#6080A0" opacity="0.10" />
@@ -239,10 +238,10 @@ export function Man2({ className }: P) {
         <ellipse cx="65" cy="37" rx="3" ry="4" fill={SKD} />
         <circle cx="50" cy="37" r="14" fill="url(#m2f)" />
 
-        {/* Neat short hair with side part — smooth cap, no sticking-up strands */}
-        <path d="M36 29 Q50 21 64 29 Q63 35 59 38 Q50 40 41 38 Q37 35 36 29Z" fill={HAIR} />
-        {/* Side part line */}
-        <path d="M44 23 Q45 29 45 36" stroke="#0E0804" strokeWidth="0.8" fill="none" opacity="0.3" />
+        {/* Neat short hair — cap closes at hairline (y≈27), no dip over eyes */}
+        <path d="M37 27 Q50 19 63 27 Q61 26 58 28 Q50 30 42 28 Q39 26 37 27Z" fill={HAIR} />
+        {/* Side part line — stays within hair cap */}
+        <path d="M44 22 Q45 26 45 28" stroke="#0E0804" strokeWidth="0.8" fill="none" opacity="0.3" />
 
         <ManFace mouth="M46 47 Q50 48.5 54 47" />
       </g>
@@ -303,10 +302,10 @@ export function Man3({ className }: P) {
         <ellipse cx="65" cy="37" rx="3" ry="4" fill={SKD} />
         <circle cx="50" cy="37" r="14" fill="url(#m3f)" />
 
-        {/* Short neat hair with clean fade at sides */}
-        <path d="M36 29 Q50 21 64 29 Q63 35 59 38 Q50 40 41 38 Q37 35 36 29Z" fill={HAIR} />
-        <path d="M36 29 Q37 34 37 38" stroke={HAIR} strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.4" />
-        <path d="M64 29 Q63 34 63 38" stroke={HAIR} strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.4" />
+        {/* Short neat hair — cap closes at hairline (y≈27), fade strokes stay near hairline */}
+        <path d="M37 27 Q50 19 63 27 Q61 26 58 28 Q50 30 42 28 Q39 26 37 27Z" fill={HAIR} />
+        <path d="M37 27 Q37 29 38 31" stroke={HAIR} strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.4" />
+        <path d="M63 27 Q63 29 62 31" stroke={HAIR} strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.4" />
 
         <ManFace mouth="M46 47 Q50 49 54 47" />
       </g>
@@ -370,8 +369,8 @@ export function Man4({ className }: P) {
         <ellipse cx="65" cy="37" rx="3" ry="4" fill={SKD} />
         <circle cx="50" cy="37" r="14" fill="url(#m4f)" />
 
-        {/* Short professional hair */}
-        <path d="M36 29 Q50 21 64 29 Q63 35 60 38 Q50 40 40 38 Q37 35 36 29Z" fill={HAIR} />
+        {/* Short professional hair — cap closes at hairline (y≈27) */}
+        <path d="M37 27 Q50 19 63 27 Q61 26 59 28 Q50 30 41 28 Q39 26 37 27Z" fill={HAIR} />
 
         <ManFace mouth="M46 47 Q50 49.5 54 47" />
       </g>
@@ -454,10 +453,10 @@ export function Man5({ className }: P) {
         <ellipse cx="65" cy="37" rx="3" ry="4" fill={SKD} />
         <circle cx="50" cy="37" r="14" fill="url(#m5f)" />
 
-        {/* Sharp well-groomed hair */}
-        <path d="M36 28 Q50 20 64 28 Q63 35 59 37 Q50 39 41 37 Q37 35 36 28Z" fill={HAIR} />
-        {/* Subtle highlight streak */}
-        <path d="M38 24 Q50 20 62 24" stroke="#3A2414" strokeWidth="1.2" fill="none" opacity="0.35" />
+        {/* Sharp well-groomed hair — cap closes at hairline (y≈26) */}
+        <path d="M37 26 Q50 18 63 26 Q61 25 58 27 Q50 29 42 27 Q39 25 37 26Z" fill={HAIR} />
+        {/* Subtle highlight streak — stays within cap */}
+        <path d="M39 22 Q50 18 61 22" stroke="#3A2414" strokeWidth="1.2" fill="none" opacity="0.35" />
 
         {/* Face — confident, strong arch brows */}
         <ManFace
