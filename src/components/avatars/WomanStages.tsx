@@ -487,9 +487,11 @@ export function Woman5({ className }: P) {
         </radialGradient>
       </defs>
 
-      <ellipse cx="50" cy="137" rx="22" ry="3.5" fill="black" opacity="0.14"/>
+      <ellipse cx="50" cy="125" rx="22" ry="3.5" fill="black" opacity="0.14"/>
 
       <g className="idle-breathe">
+        {/* Body group shifted up 12px so dress top (y=74→62) meets neck bottom (y=62) */}
+        <g transform="translate(0, -12)">
         {/* Golden aura — moves with character */}
         <ellipse cx="50" cy="95" rx="44" ry="58" fill="url(#w5aura)"/>
 
@@ -514,6 +516,8 @@ export function Woman5({ className }: P) {
         <path d="M81 108 Q83 116 83 120" stroke={SK} strokeWidth="11" strokeLinecap="round" fill="none"/>
         <ellipse cx="17" cy="121" rx="5.5" ry="5" fill={SKD}/>
         <ellipse cx="83" cy="121" rx="5.5" ry="5" fill={SKD}/>
+
+        </g>{/* end body translate group */}
 
         {/* Neck — copied from ManStages, woman's skin color */}
         <rect x="46" y="51" width="8" height="11" rx="3.5" fill={SK}/>
@@ -585,7 +589,7 @@ export function Woman5({ className }: P) {
         <path d="M48 45.2 Q50 44.6 52 45.2" stroke="white" strokeWidth="0.7" fill="none" opacity="0.35"/>
 
         {/* Subtle golden rim */}
-        <ellipse cx="50" cy="88" rx="45" ry="60" stroke="#FFD54F" strokeWidth="1.5" strokeOpacity="0.26" fill="none" strokeDasharray="5 4"/>
+        <ellipse cx="50" cy="76" rx="45" ry="60" stroke="#FFD54F" strokeWidth="1.5" strokeOpacity="0.26" fill="none" strokeDasharray="5 4"/>
       </g>
     </svg>
   );
