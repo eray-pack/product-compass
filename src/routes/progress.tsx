@@ -30,6 +30,15 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
             <stop offset="0%" stopColor="#8B5E20" />
             <stop offset="100%" stopColor="#C4873A" />
           </linearGradient>
+          <filter id="amber-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feFlood floodColor="#C4873A" floodOpacity="0.45" result="color" />
+            <feComposite in="color" in2="blur" operator="in" result="glow" />
+            <feMerge>
+              <feMergeNode in="glow" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
         {/* Track */}
         <circle cx="98" cy="98" r={R} fill="none" stroke="#261F15" strokeWidth="11" />
@@ -55,7 +64,8 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
         <text
           x="98" y="86"
           textAnchor="middle" fontSize="30" fontWeight="700"
-          fill="#f5ede0" fontFamily="'Space Grotesk', sans-serif"
+          fill="#1A1A1A" fontFamily="'Space Grotesk', sans-serif"
+          filter="url(#amber-glow)"
         >
           {pct}%
         </text>
@@ -63,14 +73,14 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
         <text
           x="98" y="108"
           textAnchor="middle" fontSize="13" fontWeight="500"
-          fill="#a89580" fontFamily="'Space Grotesk', sans-serif"
+          fill="#3D2E1A" fontFamily="'Space Grotesk', sans-serif"
         >
           day {day}
         </text>
         <text
           x="98" y="124"
           textAnchor="middle" fontSize="10"
-          fill="#6b5e50" fontFamily="'Space Grotesk', sans-serif"
+          fill="#5A4A35" fontFamily="'Space Grotesk', sans-serif"
         >
           to reset
         </text>
