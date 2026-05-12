@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Zap, AlertTriangle, Coins, X, Plus } from "lucide-react";
+import { Zap, Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
@@ -501,10 +501,13 @@ function Dashboard() {
       <section className="px-6 mt-2 pb-8">
         <button
           onClick={() => setShowRelapse(true)}
-          className="w-full py-3 text-center text-[11px] transition-colors"
-          style={{ color: "oklch(0.45 0.015 265 / 0.7)" }}
+          className="w-full py-3 rounded-2xl text-center text-[13px] font-medium transition-opacity active:opacity-60"
+          style={{
+            color: "oklch(0.75 0.010 265)",
+            border: "1px solid oklch(0.28 0.020 265 / 0.8)",
+            background: "oklch(0.15 0.015 265 / 0.5)",
+          }}
         >
-          <AlertTriangle className="inline h-3 w-3 mr-1 -mt-0.5" />
           I relapsed — log it honestly
         </button>
       </section>
