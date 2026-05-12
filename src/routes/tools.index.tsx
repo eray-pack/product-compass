@@ -36,7 +36,7 @@ function Tools() {
       <section className="flex justify-center mt-10 mb-2 fade-up-1">
         <Link
           to="/tools/sos"
-          className="flex flex-col items-center justify-center text-center active:scale-95 transition-transform"
+          className="sos-heartbeat flex flex-col items-center justify-center text-center active:scale-95 transition-transform"
           style={{
             width: 220,
             height: 220,
@@ -45,7 +45,7 @@ function Tools() {
           }}
         >
           <div
-            className="sos-breathe flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center"
             style={{
               width: 220,
               height: 220,
