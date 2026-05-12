@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Coins, X, Plus, Lock } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
+import { triggerPaywall } from "@/lib/paywall";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
@@ -443,7 +444,10 @@ function Dashboard() {
           <SignalGame to="/tools/tap"    glow="#C4873A" label="Impulse Shift" icon={<ImpulseShiftIcon />} />
           <SignalGame to="/tools/memory" glow="#6BAA75" label="Neural Link"   icon={<NeuralLinkIcon />} />
         </div>
-        <div className="mt-4 flex items-center justify-center gap-1.5">
+        <button
+          onClick={() => triggerPaywall()}
+          className="mt-4 flex items-center justify-center gap-1.5 w-full active:opacity-70 transition-opacity"
+        >
           <span
             className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
             style={{ color: "var(--primary)", borderColor: "oklch(0.62 0.22 255 / 0.3)", background: "oklch(0.62 0.22 255 / 0.06)" }}
@@ -451,7 +455,7 @@ function Dashboard() {
             <Lock className="h-3 w-3" /> PRO
           </span>
           <span className="text-[11px] text-muted-foreground/60">More games available</span>
-        </div>
+        </button>
       </section>
 
       {/* ── Daily check-in ──────────────────────────────────── */}
