@@ -128,7 +128,7 @@ export function BottomNav() {
               className={`flex-1 flex flex-col items-center gap-1 pt-3 pb-2 text-[9.5px] font-semibold tracking-wide transition-all relative ${
                 active ? "" : "opacity-50 hover:opacity-80"
               }`}
-              style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }}
+              style={{ color: active ? "#C4873A" : "rgba(255,255,255,0.85)" }}
             >
               {active && (
                 <span
