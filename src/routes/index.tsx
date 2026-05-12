@@ -344,8 +344,8 @@ function Dashboard() {
       </div>
 
       {/* ── Brain recovery timeline ──────────────────────────── */}
-      <section className="px-6 mt-6 fade-up-2">
-        <div className="flex items-baseline justify-between mb-1">
+      <section className="px-6 mt-6 fade-up-2 text-center">
+        <div className="flex items-baseline justify-center gap-2 mb-1">
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
             Brain Recovery Timeline
           </p>
@@ -357,7 +357,7 @@ function Dashboard() {
       </section>
 
       {/* ── Cut the Signal ──────────────────────────────────── */}
-      <section className="px-6 mt-10 fade-up-3">
+      <section className="px-6 mt-10 fade-up-3 text-center">
         <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-5">
           Cut the Signal
         </p>
