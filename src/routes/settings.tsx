@@ -111,7 +111,56 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
 
 // ── Sections ─────────────────────────────────────────────────────────────────
 
-function AccountSection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
+// ── Circular crop helper ──────────────────────────────────────────────────────
+
+function cropToCircle(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const size = Math.min(img.width, img.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d")!;
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(
+          img,
+          (img.width - size) / 2,
+          (img.height - size) / 2,
+          size,
+          size,
+          0,
+          0,
+          size,
+          size
+        );
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = e.target!.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Account section ───────────────────────────────────────────────────────────
+
+function AccountSection({
+  state,
+  update,
+}: {
+  state: ReturnType<typeof useAppState>[0];
+  update: ReturnType<typeof useAppState>[1];
+}) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const libraryInputRef = useRef<HTMLInputElement>(null);
+
   const initials = state.onboarding?.name
     ? state.onboarding.name.slice(0, 2).toUpperCase()
     : "—";
@@ -123,21 +172,58 @@ function AccountSection({ state }: { state: ReturnType<typeof useAppState>[0] })
       })
     : "—";
 
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    setPickerOpen(false);
+    try {
+      const dataUrl = await cropToCircle(file);
+      update({ profilePhoto: dataUrl });
+    } catch {
+      // silently ignore crop errors
+    }
+  };
+
   return (
     <section>
       <SectionLabel>Account</SectionLabel>
+
+      {/* Hidden file inputs */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="user"
+        className="hidden"
+        onChange={(e) => handleFile(e.target.files?.[0])}
+      />
+      <input
+        ref={libraryInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => handleFile(e.target.files?.[0])}
+      />
 
       {/* Profile card */}
       <div className="rounded-2xl border border-border/70 bg-card p-4 mb-3 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
-            <div
-              className="h-16 w-16 rounded-2xl grid place-items-center text-2xl font-bold"
-              style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
-            >
-              {initials}
-            </div>
+            {state.profilePhoto ? (
+              <img
+                src={state.profilePhoto}
+                alt="Profile"
+                className="h-16 w-16 rounded-2xl object-cover"
+              />
+            ) : (
+              <div
+                className="h-16 w-16 rounded-2xl grid place-items-center text-2xl font-bold"
+                style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
+              >
+                {initials}
+              </div>
+            )}
             <button
+              onClick={() => setPickerOpen(true)}
               className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-background grid place-items-center bg-card hover:bg-muted transition-colors shadow-sm"
               title="Change photo"
               aria-label="Change profile photo"
@@ -167,6 +253,47 @@ function AccountSection({ state }: { state: ReturnType<typeof useAppState>[0] })
         <Row icon={Mail} label="Email" value="Not connected" onClick={() => {}} />
         <Row icon={Lock} label="Change Password" onClick={() => {}} />
       </Card>
+
+      {/* Photo picker sheet */}
+      {pickerOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end"
+          style={{ background: "oklch(0 0 0 / 0.55)" }}
+          onClick={() => setPickerOpen(false)}
+        >
+          <div
+            className="w-full mx-auto max-w-md rounded-t-3xl p-4 pb-8 space-y-2"
+            style={{ background: "var(--card)", borderTop: "1px solid var(--border)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-center text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-3 pt-1">
+              Profile Photo
+            </p>
+            <button
+              onClick={() => { setPickerOpen(false); setTimeout(() => cameraInputRef.current?.click(), 50); }}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left text-sm font-medium transition-colors hover:bg-foreground/[0.05] active:bg-foreground/[0.08]"
+              style={{ border: "1px solid var(--border)" }}
+            >
+              <Camera className="h-5 w-5 text-muted-foreground shrink-0" />
+              Take Photo
+            </button>
+            <button
+              onClick={() => { setPickerOpen(false); setTimeout(() => libraryInputRef.current?.click(), 50); }}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left text-sm font-medium transition-colors hover:bg-foreground/[0.05] active:bg-foreground/[0.08]"
+              style={{ border: "1px solid var(--border)" }}
+            >
+              <span className="h-5 w-5 flex items-center justify-center shrink-0 text-muted-foreground text-base leading-none">⊞</span>
+              Choose from Library
+            </button>
+            <button
+              onClick={() => setPickerOpen(false)}
+              className="w-full py-3 text-sm font-semibold text-muted-foreground mt-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -497,7 +624,7 @@ function Settings() {
 
       {/* Content */}
       <div className="px-5 pt-6 space-y-7 pb-12">
-        <AccountSection state={state} />
+        <AccountSection state={state} update={update} />
         <BillingSection state={state} />
         <AppearanceSection />
         <NotificationsSection />
