@@ -148,37 +148,6 @@ function Tools() {
   );
 }
 
-function GameCard({
-  to, icon: Icon, title, desc, color, bg,
-}: {
-  to: string; icon: React.ElementType; title: string; desc: string;
-  color: string; bg: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 active:opacity-80 transition-opacity"
-    >
-      <div
-        className="h-11 w-11 rounded-xl grid place-items-center shrink-0"
-        style={{ background: bg, color }}
-      >
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[15px]">{title}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
-      </div>
-      <span
-        className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0"
-        style={{ background: bg, color, border: `1px solid ${color}40` }}
-      >
-        Play
-      </span>
-    </Link>
-  );
-}
-
 function ToolCard({
   icon: Icon, title, desc, ctaLabel, onClick, children,
 }: {
