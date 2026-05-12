@@ -110,21 +110,31 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border/60 backdrop-blur-xl" style={{ background: "var(--card)" }}>
+    <nav
+      className="fixed bottom-0 inset-x-0 z-40 backdrop-blur-2xl"
+      style={{
+        background: "oklch(0.11 0.018 265 / 0.92)",
+        borderTop: "1px solid oklch(0.20 0.025 265 / 0.6)",
+      }}
+    >
       <div className="mx-auto max-w-md flex items-stretch">
         {navItems.map(({ to, label, Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
-          const sw = active ? 2.2 : 1.8;
+          const sw = active ? 2.2 : 1.6;
           return (
             <Link
               key={to}
               to={to}
-              className={`flex-1 flex flex-col items-center gap-1 pt-3 pb-2 text-[10px] font-semibold tracking-wide transition-colors relative ${
-                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              className={`flex-1 flex flex-col items-center gap-1 pt-3 pb-2 text-[9.5px] font-semibold tracking-wide transition-all relative ${
+                active ? "" : "opacity-50 hover:opacity-80"
               }`}
+              style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }}
             >
               {active && (
-                <span className="absolute top-0 inset-x-4 h-[2px] rounded-full bg-primary" />
+                <span
+                  className="absolute top-0 inset-x-5 h-[1.5px] rounded-full"
+                  style={{ background: "var(--gradient-primary)" }}
+                />
               )}
               {to === "/tree" ? (
                 <CompanionIcon strokeWidth={sw} />
