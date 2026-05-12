@@ -492,7 +492,6 @@ function Dashboard() {
             color: "oklch(0.72 0.18 25)",
           }}
         >
-          <Zap className="h-4 w-4" />
           Feeling an urge right now?
         </Link>
       </section>
