@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Zap, Coins, X, Plus } from "lucide-react";
+import { Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
