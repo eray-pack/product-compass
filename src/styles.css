@@ -201,6 +201,15 @@ html.light {
   color: oklch(0.60 0.018 265 / 0.6);
 }
 
+/* ── Progress ring text — theme-aware SVG fills ─────────── */
+.ring-text-primary   { fill: #1A1A1A; }
+.ring-text-secondary { fill: #3D2E1A; }
+.ring-text-tertiary  { fill: #5A4A35; }
+
+.dark .ring-text-primary   { fill: #FFFFFF; }
+.dark .ring-text-secondary { fill: rgba(255,255,255,0.70); }
+.dark .ring-text-tertiary  { fill: rgba(255,255,255,0.45); }
+
 /* ── Animations ─────────────────────────────────────────── */
 @keyframes companion-relapse {
   0%   { transform: scale(1) translateX(0);    filter: none; }

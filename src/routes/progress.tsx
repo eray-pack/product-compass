@@ -64,7 +64,8 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
         <text
           x="98" y="86"
           textAnchor="middle" fontSize="30" fontWeight="700"
-          fill="#1A1A1A" fontFamily="'Space Grotesk', sans-serif"
+          className="ring-text-primary"
+          fontFamily="'Space Grotesk', sans-serif"
           filter="url(#amber-glow)"
         >
           {pct}%
@@ -73,14 +74,16 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
         <text
           x="98" y="108"
           textAnchor="middle" fontSize="13" fontWeight="500"
-          fill="#3D2E1A" fontFamily="'Space Grotesk', sans-serif"
+          className="ring-text-secondary"
+          fontFamily="'Space Grotesk', sans-serif"
         >
           day {day}
         </text>
         <text
           x="98" y="124"
           textAnchor="middle" fontSize="10"
-          fill="#5A4A35" fontFamily="'Space Grotesk', sans-serif"
+          className="ring-text-tertiary"
+          fontFamily="'Space Grotesk', sans-serif"
         >
           to reset
         </text>
