@@ -279,13 +279,13 @@ function Dashboard() {
   return (
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
-      <header className="px-6 pt-12 pb-2 flex items-center justify-between fade-up">
+      <header className="px-6 pt-12 pb-2 relative flex items-center justify-center fade-up">
         <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-muted-foreground/60">
           Stopamine
         </span>
         <Link
           to="/challenges"
-          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
+          className="absolute right-6 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
           style={{ color: "var(--primary)", borderColor: "rgba(196,135,58,0.28)", background: "rgba(196,135,58,0.06)" }}
         >
           <Coins className="h-3 w-3" /> {state.points}
