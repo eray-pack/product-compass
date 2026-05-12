@@ -19,8 +19,10 @@ import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsTapRouteImport } from './routes/tools.tap'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
 import { Route as ToolsColdRouteImport } from './routes/tools.cold'
+import { Route as ToolsBreathRouteImport } from './routes/tools.breath'
 
 const TreeRoute = TreeRouteImport.update({
   id: '/tree',
@@ -72,6 +74,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsTapRoute = ToolsTapRouteImport.update({
+  id: '/tap',
+  path: '/tap',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsSosRoute = ToolsSosRouteImport.update({
   id: '/sos',
   path: '/sos',
@@ -80,6 +87,11 @@ const ToolsSosRoute = ToolsSosRouteImport.update({
 const ToolsColdRoute = ToolsColdRouteImport.update({
   id: '/cold',
   path: '/cold',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsBreathRoute = ToolsBreathRouteImport.update({
+  id: '/breath',
+  path: '/breath',
   getParentRoute: () => ToolsRoute,
 } as any)
 
@@ -94,8 +106,10 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
+  '/tools/breath': typeof ToolsBreathRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/sos': typeof ToolsSosRoute
+  '/tools/tap': typeof ToolsTapRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,8 +122,10 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
+  '/tools/breath': typeof ToolsBreathRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/sos': typeof ToolsSosRoute
+  '/tools/tap': typeof ToolsTapRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,8 +139,10 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
+  '/tools/breath': typeof ToolsBreathRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/sos': typeof ToolsSosRoute
+  '/tools/tap': typeof ToolsTapRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,8 +157,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tools'
     | '/tree'
+    | '/tools/breath'
     | '/tools/cold'
     | '/tools/sos'
+    | '/tools/tap'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,8 +173,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tools'
     | '/tree'
+    | '/tools/breath'
     | '/tools/cold'
     | '/tools/sos'
+    | '/tools/tap'
   id:
     | '__root__'
     | '/'
@@ -167,8 +189,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tools'
     | '/tree'
+    | '/tools/breath'
     | '/tools/cold'
     | '/tools/sos'
+    | '/tools/tap'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -256,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/tap': {
+      id: '/tools/tap'
+      path: '/tap'
+      fullPath: '/tools/tap'
+      preLoaderRoute: typeof ToolsTapRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/sos': {
       id: '/tools/sos'
       path: '/sos'
@@ -270,17 +301,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsColdRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/breath': {
+      id: '/tools/breath'
+      path: '/breath'
+      fullPath: '/tools/breath'
+      preLoaderRoute: typeof ToolsBreathRouteImport
+      parentRoute: typeof ToolsRoute
+    }
   }
 }
 
 interface ToolsRouteChildren {
+  ToolsBreathRoute: typeof ToolsBreathRoute
   ToolsColdRoute: typeof ToolsColdRoute
   ToolsSosRoute: typeof ToolsSosRoute
+  ToolsTapRoute: typeof ToolsTapRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsBreathRoute: ToolsBreathRoute,
   ToolsColdRoute: ToolsColdRoute,
   ToolsSosRoute: ToolsSosRoute,
+  ToolsTapRoute: ToolsTapRoute,
 }
 
 const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
