@@ -457,6 +457,13 @@ html.light {
 }
 .sos-heartbeat { animation: sos-heartbeat 1s ease-out infinite; }
 
+/* SOS border breathe — slow 8s cycle, barely noticeable living glow */
+@keyframes sos-breathe {
+  0%, 100% { box-shadow: 0 0 0 1px oklch(0.55 0.20 25 / 0.30), 0 0 12px 2px oklch(0.55 0.20 25 / 0.10); }
+  50%       { box-shadow: 0 0 0 3px oklch(0.55 0.20 25 / 0.50), 0 0 28px 6px oklch(0.55 0.20 25 / 0.20); }
+}
+.sos-breathe { animation: sos-breathe 8s ease-in-out infinite; }
+
 /* ── Base ───────────────────────────────────────────────── */
 @layer base {
   * { border-color: var(--color-border); }

@@ -45,7 +45,7 @@ function Tools() {
           }}
         >
           <div
-            className="sos-heartbeat flex flex-col items-center justify-center"
+            className="sos-breathe flex flex-col items-center justify-center"
             style={{
               width: 220,
               height: 220,
@@ -53,7 +53,7 @@ function Tools() {
             }}
           >
             <p className="text-[15px] font-bold text-white leading-snug px-8">
-              I'm feeling an urge right now
+              Urge hitting?<br />We've got you.
             </p>
             <p className="mt-2 text-[11px] px-6 leading-relaxed" style={{ color: "oklch(0.70 0.06 25)" }}>
               Tap to start urge surfing · 3 min
