@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   ArrowLeft,
   User,

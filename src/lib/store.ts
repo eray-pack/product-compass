@@ -59,6 +59,8 @@ export type AppState = {
   lastIdentityShown: number;
   // Upsell
   momentumShieldDays: number;
+  // Profile photo (base64 data URL)
+  profilePhoto: string | null;
   // Companion avatar
   companion: "tree" | "man" | "woman";
   // Login & activity tracking
@@ -83,6 +85,7 @@ const defaultState = (): AppState => ({
   treeXP: 0,
   treeUnlocks: [],
   relapses: [],
+  profilePhoto: null,
   companion: "tree",
   notificationStyles: [],
   notificationApps: [],
