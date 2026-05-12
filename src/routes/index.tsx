@@ -110,13 +110,36 @@ function rollReward() {
   return VARIABLE_REWARDS[0];
 }
 
+type MoodResponse = {
+  message: string;
+  buttons: { label: string; to: string }[];
+};
+
+function moodResponse(v: number): MoodResponse {
+  if (v <= 2) return {
+    message: "Tough day. That's okay. You showed up anyway.",
+    buttons: [
+      { label: "Cut the Signal", to: "/tools/breath" },
+      { label: "I'm feeling an urge", to: "/tools/sos" },
+    ],
+  };
+  if (v === 3) return {
+    message: "Steady is strength. Most people quit on days like this.",
+    buttons: [{ label: "Check your progress", to: "/progress" }],
+  };
+  return {
+    message: "You're rewiring. Keep this energy — it compounds.",
+    buttons: [{ label: "See your streak", to: "/progress" }],
+  };
+}
+
 function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   const [, update] = useAppState();
-  const [checked, setChecked] = useState(false);
+  const [mood, setMood] = useState<number | null>(null);
 
   const handleMood = (v: number) => {
-    if (checked) return;
-    setChecked(true);
+    if (mood !== null) return;
+    setMood(v);
     const reward = rollReward();
     if (reward.xp > 0) {
       update((s) => ({ points: s.points + reward.xp, treeXP: s.treeXP + Math.floor(reward.xp / 5) }));
@@ -127,29 +150,83 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
     }
   };
 
+  const response = mood !== null ? moodResponse(mood) : null;
+  const isLow = mood !== null && mood <= 2;
+  const isHigh = mood !== null && mood >= 4;
+
   return (
     <div>
+      {/* Emoji row */}
       <div className="flex gap-2">
         {MOODS.map(({ v, emoji, label }) => (
           <button
             key={v}
             onClick={() => handleMood(v)}
             className={`flex-1 flex flex-col items-center gap-1.5 py-3.5 rounded-2xl text-[10px] font-medium transition-all ${
-              checked
-                ? "opacity-30 cursor-default"
+              mood !== null
+                ? v === mood
+                  ? "border border-primary/40 active:scale-100 cursor-default"
+                  : "opacity-20 cursor-default"
                 : "border border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary active:scale-95"
             }`}
-            style={checked ? {} : { background: "var(--card)" }}
+            style={
+              mood !== null && v === mood
+                ? { background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }
+                : mood !== null
+                ? {}
+                : { background: "var(--card)" }
+            }
           >
             <span className="text-xl leading-none">{emoji}</span>
             {label}
           </button>
         ))}
       </div>
-      {checked && (
-        <p className="mt-4 text-center text-xs font-medium" style={{ color: "var(--primary)" }}>
-          Check-in recorded ✓
-        </p>
+
+      {/* Contextual response */}
+      {response && (
+        <div className="mt-5 fade-up">
+          <p
+            className="text-sm font-semibold leading-snug"
+            style={{
+              color: isLow
+                ? "oklch(0.78 0.12 25)"
+                : isHigh
+                ? "oklch(0.78 0.14 150)"
+                : "var(--foreground)",
+            }}
+          >
+            {response.message}
+          </p>
+          <div className="mt-4 flex gap-2 flex-wrap">
+            {response.buttons.map(({ label, to }) => (
+              <Link
+                key={label}
+                to={to}
+                className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-opacity active:opacity-70"
+                style={{
+                  background: isLow
+                    ? "oklch(0.30 0.10 25 / 0.5)"
+                    : "oklch(0.62 0.22 255 / 0.08)",
+                  border: `1px solid ${
+                    isLow
+                      ? "oklch(0.55 0.20 25 / 0.35)"
+                      : isHigh
+                      ? "oklch(0.60 0.18 150 / 0.35)"
+                      : "oklch(0.62 0.22 255 / 0.28)"
+                  }`,
+                  color: isLow
+                    ? "oklch(0.80 0.14 25)"
+                    : isHigh
+                    ? "oklch(0.75 0.18 150)"
+                    : "var(--primary)",
+                }}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
