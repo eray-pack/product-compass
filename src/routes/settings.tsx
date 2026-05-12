@@ -392,13 +392,14 @@ function LanguageSection() {
 }
 
 function AboutSection() {
+  const navigate = useNavigate();
   return (
     <section>
       <SectionLabel>About</SectionLabel>
       <Card>
         <Row icon={Info} label="App Version" value="1.0.0" chevron={false} />
-        <Row icon={FileText} label="Terms of Service" onClick={() => {}} />
-        <Row icon={ShieldCheck} label="Privacy Policy" onClick={() => {}} />
+        <Row icon={FileText} label="Terms of Service" onClick={() => navigate({ to: "/terms" })} />
+        <Row icon={ShieldCheck} label="Privacy Policy" onClick={() => navigate({ to: "/privacy" })} />
       </Card>
     </section>
   );

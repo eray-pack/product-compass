@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TreeRouteImport } from './routes/tree'
 import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PaywallRouteImport } from './routes/paywall'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as CommunityRouteImport } from './routes/community'
@@ -36,6 +38,11 @@ const ToolsRoute = ToolsRouteImport.update({
   path: '/tools',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -44,6 +51,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const ProgressRoute = ProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PaywallRoute = PaywallRouteImport.update({
@@ -114,8 +126,10 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
@@ -132,8 +146,10 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
   '/tools/cold': typeof ToolsColdRoute
@@ -150,8 +166,10 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
@@ -170,8 +188,10 @@ export interface FileRouteTypes {
     | '/community'
     | '/onboarding'
     | '/paywall'
+    | '/privacy'
     | '/progress'
     | '/settings'
+    | '/terms'
     | '/tools'
     | '/tree'
     | '/tools/breath'
@@ -188,8 +208,10 @@ export interface FileRouteTypes {
     | '/community'
     | '/onboarding'
     | '/paywall'
+    | '/privacy'
     | '/progress'
     | '/settings'
+    | '/terms'
     | '/tree'
     | '/tools/breath'
     | '/tools/cold'
@@ -205,8 +227,10 @@ export interface FileRouteTypes {
     | '/community'
     | '/onboarding'
     | '/paywall'
+    | '/privacy'
     | '/progress'
     | '/settings'
+    | '/terms'
     | '/tools'
     | '/tree'
     | '/tools/breath'
@@ -224,8 +248,10 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   OnboardingRoute: typeof OnboardingRoute
   PaywallRoute: typeof PaywallRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProgressRoute: typeof ProgressRoute
   SettingsRoute: typeof SettingsRoute
+  TermsRoute: typeof TermsRoute
   ToolsRoute: typeof ToolsRouteWithChildren
   TreeRoute: typeof TreeRoute
 }
@@ -246,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -258,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/progress'
       fullPath: '/progress'
       preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paywall': {
@@ -374,8 +414,10 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   OnboardingRoute: OnboardingRoute,
   PaywallRoute: PaywallRoute,
+  PrivacyRoute: PrivacyRoute,
   ProgressRoute: ProgressRoute,
   SettingsRoute: SettingsRoute,
+  TermsRoute: TermsRoute,
   ToolsRoute: ToolsRouteWithChildren,
   TreeRoute: TreeRoute,
 }
