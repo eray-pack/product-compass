@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Zap, Brain, Snowflake, GitBranch, Plus } from "lucide-react";
+import { Brain, Snowflake, GitBranch, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/tools/")({
@@ -32,29 +32,33 @@ function Tools() {
         <h1 className="mt-2 text-3xl font-bold">Use what works.</h1>
       </header>
 
-      {/* ── SOS hero — full bleed, no box feel ──────────────── */}
-      <section className="px-6 mt-8 fade-up-1">
+      {/* ── SOS hero — glowing circle ────────────────────────── */}
+      <section className="flex justify-center mt-10 mb-2 fade-up-1">
         <Link
           to="/tools/sos"
-          className="relative block overflow-hidden rounded-3xl p-7 text-center active:opacity-90 transition-opacity"
+          className="flex flex-col items-center justify-center text-center active:scale-95 transition-transform"
           style={{
-            background: "linear-gradient(160deg, oklch(0.30 0.14 25 / 0.55), oklch(0.18 0.08 25 / 0.45))",
-            border: "1px solid oklch(0.55 0.20 25 / 0.40)",
-            boxShadow: "0 0 60px -10px oklch(0.62 0.24 25 / 0.5), inset 0 1px 0 oklch(0.70 0.15 25 / 0.12)",
+            width: 220,
+            height: 220,
+            borderRadius: "50%",
+            background: "oklch(0.18 0.06 25)",
           }}
         >
-          {/* Ambient orb */}
           <div
-            className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
-            style={{ width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, oklch(0.62 0.24 25 / 0.15), transparent 70%)", filter: "blur(30px)" }}
-            aria-hidden
-          />
-          <div className="relative mx-auto h-20 w-20 rounded-full grid place-items-center bg-destructive">
-            <span className="absolute inset-0 rounded-full bg-destructive animate-pulse-ring" />
-            <Zap className="relative h-9 w-9 text-white" />
+            className="sos-heartbeat flex flex-col items-center justify-center"
+            style={{
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+            }}
+          >
+            <p className="text-[15px] font-bold text-white leading-snug px-8">
+              I'm feeling an urge right now
+            </p>
+            <p className="mt-2 text-[11px] px-6 leading-relaxed" style={{ color: "oklch(0.70 0.06 25)" }}>
+              Tap to start urge surfing · 3 min
+            </p>
           </div>
-          <p className="relative mt-5 text-lg font-bold">I'm feeling an urge right now</p>
-          <p className="relative mt-1 text-xs text-muted-foreground">Tap to start urge surfing · 3 minutes</p>
         </Link>
       </section>
 
