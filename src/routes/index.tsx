@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Coins, X, Plus } from "lucide-react";
+import { Coins, X, Plus, Lock } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
@@ -442,6 +442,15 @@ function Dashboard() {
           <SignalGame to="/tools/breath" glow="#6BAED6" label="Mind Pulse"    icon={<MindPulseIcon />} />
           <SignalGame to="/tools/tap"    glow="#C4873A" label="Impulse Shift" icon={<ImpulseShiftIcon />} />
           <SignalGame to="/tools/memory" glow="#6BAA75" label="Neural Link"   icon={<NeuralLinkIcon />} />
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-1.5">
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+            style={{ color: "var(--primary)", borderColor: "oklch(0.62 0.22 255 / 0.3)", background: "oklch(0.62 0.22 255 / 0.06)" }}
+          >
+            <Lock className="h-3 w-3" /> PRO
+          </span>
+          <span className="text-[11px] text-muted-foreground/60">More games available</span>
         </div>
       </section>
 
