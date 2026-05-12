@@ -446,16 +446,16 @@ html.light {
 }
 .ring-glow { animation: ring-glow 3s ease-in-out infinite; }
 
-/* SOS heartbeat — ~80 BPM (0.75s cycle), two fast peaks then rest */
+/* SOS heartbeat — ~60 BPM (1s cycle), two gentle peaks then long rest */
 @keyframes sos-heartbeat {
-  0%   { box-shadow: 0 0 0 0px oklch(0.62 0.24 25 / 0.85); }
-  14%  { box-shadow: 0 0 0 18px oklch(0.62 0.24 25 / 0.40); }
-  28%  { box-shadow: 0 0 0 8px  oklch(0.62 0.24 25 / 0.55); }
-  42%  { box-shadow: 0 0 0 24px oklch(0.62 0.24 25 / 0.25); }
-  70%  { box-shadow: 0 0 0 36px oklch(0.62 0.24 25 / 0.00); }
+  0%   { box-shadow: 0 0 0 0px  oklch(0.62 0.24 25 / 0.70); }
+  10%  { box-shadow: 0 0 0 14px oklch(0.62 0.24 25 / 0.30); }
+  20%  { box-shadow: 0 0 0 6px  oklch(0.62 0.24 25 / 0.40); }
+  32%  { box-shadow: 0 0 0 20px oklch(0.62 0.24 25 / 0.16); }
+  60%  { box-shadow: 0 0 0 28px oklch(0.62 0.24 25 / 0.00); }
   100% { box-shadow: 0 0 0 0px  oklch(0.62 0.24 25 / 0.00); }
 }
-.sos-heartbeat { animation: sos-heartbeat 0.75s ease-out infinite; }
+.sos-heartbeat { animation: sos-heartbeat 1s ease-out infinite; }
 
 /* ── Base ───────────────────────────────────────────────── */
 @layer base {
