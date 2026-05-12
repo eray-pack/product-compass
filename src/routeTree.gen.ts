@@ -19,6 +19,7 @@ import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsTapRouteImport } from './routes/tools.tap'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
 import { Route as ToolsMemoryRouteImport } from './routes/tools.memory'
@@ -75,6 +76,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsTapRoute = ToolsTapRouteImport.update({
   id: '/tap',
   path: '/tap',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/tools/memory': typeof ToolsMemoryRoute
   '/tools/sos': typeof ToolsSosRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -127,13 +134,13 @@ export interface FileRoutesByTo {
   '/paywall': typeof PaywallRoute
   '/progress': typeof ProgressRoute
   '/settings': typeof SettingsRoute
-  '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/memory': typeof ToolsMemoryRoute
   '/tools/sos': typeof ToolsSosRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools': typeof ToolsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +159,7 @@ export interface FileRoutesById {
   '/tools/memory': typeof ToolsMemoryRoute
   '/tools/sos': typeof ToolsSosRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +179,7 @@ export interface FileRouteTypes {
     | '/tools/memory'
     | '/tools/sos'
     | '/tools/tap'
+    | '/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -181,13 +190,13 @@ export interface FileRouteTypes {
     | '/paywall'
     | '/progress'
     | '/settings'
-    | '/tools'
     | '/tree'
     | '/tools/breath'
     | '/tools/cold'
     | '/tools/memory'
     | '/tools/sos'
     | '/tools/tap'
+    | '/tools'
   id:
     | '__root__'
     | '/'
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/tools/memory'
     | '/tools/sos'
     | '/tools/tap'
+    | '/tools/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -292,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/tap': {
       id: '/tools/tap'
       path: '/tap'
@@ -336,6 +353,7 @@ interface ToolsRouteChildren {
   ToolsMemoryRoute: typeof ToolsMemoryRoute
   ToolsSosRoute: typeof ToolsSosRoute
   ToolsTapRoute: typeof ToolsTapRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
@@ -344,6 +362,7 @@ const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsMemoryRoute: ToolsMemoryRoute,
   ToolsSosRoute: ToolsSosRoute,
   ToolsTapRoute: ToolsTapRoute,
+  ToolsIndexRoute: ToolsIndexRoute,
 }
 
 const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
