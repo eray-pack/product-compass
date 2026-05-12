@@ -108,7 +108,7 @@ function MemoryMatch() {
     <div className="min-h-screen flex flex-col pb-6" style={{ background: "var(--background)" }}>
       {/* Back */}
       <button
-        onClick={() => { if (timerRef.current) clearInterval(timerRef.current); navigate({ to: "/tools" }); }}
+        onClick={() => { if (timerRef.current) clearInterval(timerRef.current); navigate({ to: "/" }); }}
         className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center"
         style={{ background: "oklch(0.20 0.03 265 / 0.8)", border: "1px solid var(--border)" }}
       >

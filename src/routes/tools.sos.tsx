@@ -218,7 +218,7 @@ function SOS() {
       {/* ── Back + ACTIVE URGE badge ───────────────────────────── */}
       <div className="flex items-center justify-between">
         <Link
-          to="/tools"
+          to="/"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground font-medium"
         >
           <ArrowLeft className="h-4 w-4" /> Back

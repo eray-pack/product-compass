@@ -3,7 +3,7 @@ import { X, Check, Lock, Star } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
 
-const RENAG_AFTER_MS = 45_000;
+const RENAG_AFTER_MS = 120_000; // 2 minutes
 const TIMER_START = 15 * 60; // 15:00
 
 const BENEFITS = [
