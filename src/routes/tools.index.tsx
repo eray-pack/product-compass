@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Zap, Brain, Snowflake, GitBranch, Plus, Wind, Target, Grid3x3 } from "lucide-react";
+import { Zap, Brain, Snowflake, GitBranch, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/tools/")({
@@ -31,39 +31,6 @@ function Tools() {
         <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Tools</p>
         <h1 className="mt-2 text-3xl font-bold">Use what works.</h1>
       </header>
-
-      {/* ── Distraction Games ────────────────────────────────── */}
-      <section className="px-6 mt-6">
-        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground mb-3">
-          Distraction Games
-        </p>
-        <div className="space-y-2.5">
-          <GameCard
-            to="/tools/breath"
-            icon={Wind}
-            title="Breath Ball"
-            desc="Ride the wave. Breathe it out."
-            color="oklch(0.55 0.18 220)"
-            bg="oklch(0.55 0.18 220 / 0.10)"
-          />
-          <GameCard
-            to="/tools/tap"
-            icon={Target}
-            title="Tap the Urge"
-            desc="Pop the craving before it pops you."
-            color="var(--primary)"
-            bg="oklch(0.62 0.18 55 / 0.10)"
-          />
-          <GameCard
-            to="/tools/memory"
-            icon={Grid3x3}
-            title="Memory Match"
-            desc="Flip, focus, forget the urge."
-            color="oklch(0.60 0.18 150)"
-            bg="oklch(0.60 0.18 150 / 0.10)"
-          />
-        </div>
-      </section>
 
       {/* ── SOS hero ─────────────────────────────────────────── */}
       <section className="px-6 mt-6">

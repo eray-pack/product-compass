@@ -30,6 +30,81 @@ function nextMilestone(day: number) {
   return { ...m, fullLabel: MILESTONE_LABELS[m.day], daysAway: m.day - day };
 }
 
+// ── Cut the Signal: game circle components ────────────────────────────────────
+function SignalGame({ to, glow, label, icon }: { to: string; glow: string; label: string; icon: React.ReactNode }) {
+  return (
+    <Link to={to} className="flex flex-col items-center gap-2.5 active:opacity-70 transition-opacity">
+      <div
+        className="h-[68px] w-[68px] rounded-full grid place-items-center"
+        style={{
+          background: "var(--card)",
+          border: `1.5px solid ${glow}55`,
+          boxShadow: `0 0 18px 4px ${glow}40, 0 0 6px 1px ${glow}30`,
+        }}
+      >
+        {icon}
+      </div>
+      <span className="text-[11px] font-semibold text-foreground/80 text-center leading-tight max-w-[72px]">
+        {label}
+      </span>
+    </Link>
+  );
+}
+
+function MindPulseIcon() {
+  return (
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+      {/* Outer ring */}
+      <circle cx="15" cy="15" r="12" stroke="#6BAED6" strokeWidth="1.2" strokeOpacity="0.5"/>
+      {/* Inner orb */}
+      <circle cx="15" cy="15" r="6" fill="#6BAED6" fillOpacity="0.2" stroke="#6BAED6" strokeWidth="1.4"/>
+      {/* Pulse line */}
+      <path d="M5 15 L9 15 L11 10 L13 20 L15 13 L17 17 L19 15 L25 15" stroke="#6BAED6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ImpulseShiftIcon() {
+  return (
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+      {/* Outer ring */}
+      <circle cx="15" cy="15" r="12" stroke="#C4873A" strokeWidth="1.2" strokeOpacity="0.5"/>
+      {/* Middle ring */}
+      <circle cx="15" cy="15" r="7" stroke="#C4873A" strokeWidth="1.2" strokeOpacity="0.7"/>
+      {/* Center dot */}
+      <circle cx="15" cy="15" r="2.2" fill="#C4873A"/>
+      {/* Crosshair ticks */}
+      <line x1="15" y1="2" x2="15" y2="6"  stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="15" y1="24" x2="15" y2="28" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="2"  y1="15" x2="6"  y2="15" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="24" y1="15" x2="28" y2="15" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function NeuralLinkIcon() {
+  return (
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+      {/* Connecting lines */}
+      <line x1="8"  y1="8"  x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
+      <line x1="22" y1="8"  x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
+      <line x1="8"  y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
+      <line x1="22" y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
+      <line x1="8"  y1="8"  x2="22" y2="8"  stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.45"/>
+      <line x1="8"  y1="22" x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.45"/>
+      <line x1="8"  y1="8"  x2="8"  y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.45"/>
+      <line x1="22" y1="8"  x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.45"/>
+      {/* Corner nodes */}
+      <circle cx="8"  cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.25" stroke="#6BAA75" strokeWidth="1.2"/>
+      <circle cx="22" cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.25" stroke="#6BAA75" strokeWidth="1.2"/>
+      <circle cx="8"  cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.25" stroke="#6BAA75" strokeWidth="1.2"/>
+      <circle cx="22" cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.25" stroke="#6BAA75" strokeWidth="1.2"/>
+      {/* Center node */}
+      <circle cx="15" cy="15" r="3.5" fill="#6BAA75" fillOpacity="0.35" stroke="#6BAA75" strokeWidth="1.4"/>
+    </svg>
+  );
+}
+
 // ── Brain recovery timeline ───────────────────────────────────────────────────
 function BrainTimeline({ day }: { day: number }) {
   const pct = Math.min(100, (day / 90) * 100);
@@ -345,6 +420,18 @@ function Dashboard() {
           </span>
         </div>
         <BrainTimeline day={day} />
+      </section>
+
+      {/* ── Cut the Signal ──────────────────────────────────────────── */}
+      <section className="px-6 mt-7">
+        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-4">
+          Cut the Signal
+        </p>
+        <div className="flex justify-around">
+          <SignalGame to="/tools/breath" glow="#6BAED6" label="Mind Pulse" icon={<MindPulseIcon />} />
+          <SignalGame to="/tools/tap"    glow="#C4873A" label="Impulse Shift" icon={<ImpulseShiftIcon />} />
+          <SignalGame to="/tools/memory" glow="#6BAA75" label="Neural Link" icon={<NeuralLinkIcon />} />
+        </div>
       </section>
 
       {/* ── Cards ────────────────────────────────────────────────────── */}
