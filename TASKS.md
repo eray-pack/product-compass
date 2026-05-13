@@ -1,12 +1,12 @@
 # Team Stopamine
 
 ## Fortune — Product & Creative Lead
-- App builder — bouwt en vormt het product van idee tot werkende ervaring
-- Storytelling — vertaalt visie naar gevoel, flow en beleving binnen de app
-- Probleemoplossend product design — lost gebruikersproblemen op door slim en intuïtief te ontwerpen
-- UX & klanttevredenheid — optimaliseert elke stap die de gebruiker doorloopt
-- Frontend development — vertaalt designs naar werkende code
-- Marketing — positionering, boodschap en merkbeleving naar buiten
+- App builder — builds and shapes the product from idea to working experience
+- Storytelling — translates vision into feeling, flow and experience within the app
+- Problem-solving product design — solves user problems through smart and intuitive design
+- UX & customer satisfaction — optimizes every step the user goes through
+- Frontend development — translates designs into working code
+- Marketing — positioning, messaging and brand experience outward
 
 ## Eray
 
