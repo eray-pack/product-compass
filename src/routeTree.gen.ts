@@ -26,6 +26,7 @@ import { Route as ToolsTapRouteImport } from './routes/tools.tap'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
 import { Route as ToolsMemoryRouteImport } from './routes/tools.memory'
 import { Route as ToolsColdRouteImport } from './routes/tools.cold'
+import { Route as ToolsCoachRouteImport } from './routes/tools.coach'
 import { Route as ToolsBreathRouteImport } from './routes/tools.breath'
 
 const TreeRoute = TreeRouteImport.update({
@@ -113,6 +114,11 @@ const ToolsColdRoute = ToolsColdRouteImport.update({
   path: '/cold',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsCoachRoute = ToolsCoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsBreathRoute = ToolsBreathRouteImport.update({
   id: '/breath',
   path: '/breath',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
+  '/tools/coach': typeof ToolsCoachRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/memory': typeof ToolsMemoryRoute
   '/tools/sos': typeof ToolsSosRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
+  '/tools/coach': typeof ToolsCoachRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/memory': typeof ToolsMemoryRoute
   '/tools/sos': typeof ToolsSosRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
+  '/tools/coach': typeof ToolsCoachRoute
   '/tools/cold': typeof ToolsColdRoute
   '/tools/memory': typeof ToolsMemoryRoute
   '/tools/sos': typeof ToolsSosRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/tools'
     | '/tree'
     | '/tools/breath'
+    | '/tools/coach'
     | '/tools/cold'
     | '/tools/memory'
     | '/tools/sos'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tree'
     | '/tools/breath'
+    | '/tools/coach'
     | '/tools/cold'
     | '/tools/memory'
     | '/tools/sos'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/tools'
     | '/tree'
     | '/tools/breath'
+    | '/tools/coach'
     | '/tools/cold'
     | '/tools/memory'
     | '/tools/sos'
@@ -377,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsColdRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/coach': {
+      id: '/tools/coach'
+      path: '/coach'
+      fullPath: '/tools/coach'
+      preLoaderRoute: typeof ToolsCoachRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/breath': {
       id: '/tools/breath'
       path: '/breath'
@@ -389,6 +408,7 @@ declare module '@tanstack/react-router' {
 
 interface ToolsRouteChildren {
   ToolsBreathRoute: typeof ToolsBreathRoute
+  ToolsCoachRoute: typeof ToolsCoachRoute
   ToolsColdRoute: typeof ToolsColdRoute
   ToolsMemoryRoute: typeof ToolsMemoryRoute
   ToolsSosRoute: typeof ToolsSosRoute
@@ -398,6 +418,7 @@ interface ToolsRouteChildren {
 
 const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsBreathRoute: ToolsBreathRoute,
+  ToolsCoachRoute: ToolsCoachRoute,
   ToolsColdRoute: ToolsColdRoute,
   ToolsMemoryRoute: ToolsMemoryRoute,
   ToolsSosRoute: ToolsSosRoute,

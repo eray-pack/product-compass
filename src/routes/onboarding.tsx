@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowRight, Check, Lock } from "lucide-react";
 import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
 import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
+import { WolfSittingPreview } from "@/components/avatars/WolfStages";
 
 const HABIT_MAP: Record<string, { name: string; emoji: string }> = {
   "Social media doomscrolling": { name: "Social media", emoji: "📱" },
@@ -288,9 +289,9 @@ function Onboarding() {
               They grow alongside you — day by day, stage by stage. This is what you're working toward.
             </p>
 
-            {/* Three companion cards */}
-            <div className="mt-8 flex gap-3 flex-1">
-              {(["tree", "man", "woman"] as CompanionType[]).map((type) => {
+            {/* Two companion cards */}
+            <div className="mt-8 flex gap-4 flex-1">
+              {(["tree", "wolf"] as CompanionType[]).map((type) => {
                 const { name, tagline } = COMPANION_LABELS[type];
                 const selected = companion === type;
                 return (
@@ -304,8 +305,11 @@ function Onboarding() {
                     }}
                   >
                     {/* Final-stage preview */}
-                    <div className="w-full flex items-end justify-center pt-2 px-2" style={{ height: "140px" }}>
-                      <CompanionStage type={type} stage={5} className="w-full h-full" />
+                    <div className="w-full flex items-end justify-center pt-2 px-2" style={{ height: "160px" }}>
+                      {type === "wolf"
+                        ? <WolfSittingPreview className="w-full h-full" />
+                        : <CompanionStage type="tree" stage={5} className="w-full h-full" />
+                      }
                     </div>
                     {/* Selection indicator dot */}
                     <span

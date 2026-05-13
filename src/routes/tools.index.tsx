@@ -15,6 +15,65 @@ const reframes = [
   "You're not giving something up. You're getting yourself back.",
 ];
 
+function CoachRobot() {
+  return (
+    <svg
+      width="52"
+      height="66"
+      viewBox="0 0 52 66"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      overflow="visible"
+      className="robot-body"
+    >
+      {/* Antenna */}
+      <line x1="26" y1="9" x2="26" y2="2" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="26" cy="2" r="2.5" fill="#C4873A" />
+
+      {/* Head */}
+      <rect x="8" y="9" width="36" height="22" rx="6" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
+
+      {/* Eyes */}
+      <circle cx="19" cy="20" r="3.5" fill="#C4873A" opacity="0.85" />
+      <circle cx="33" cy="20" r="3.5" fill="#C4873A" opacity="0.85" />
+      {/* Eye shine */}
+      <circle cx="20.2" cy="18.5" r="1.2" fill="#f5ede0" opacity="0.55" />
+      <circle cx="34.2" cy="18.5" r="1.2" fill="#f5ede0" opacity="0.55" />
+
+      {/* Smile */}
+      <path d="M 20 26 Q 26 30.5 32 26" stroke="#C4873A" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.85" />
+
+      {/* Neck */}
+      <rect x="21" y="31" width="10" height="5" rx="2.5" fill="#261F15" />
+
+      {/* Body */}
+      <rect x="5" y="36" width="42" height="26" rx="6" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
+
+      {/* Chest panel */}
+      <rect x="14" y="42" width="24" height="12" rx="3" fill="#261F15" stroke="#C4873A" strokeWidth="0.6" opacity="0.75" />
+      {/* Indicator dots — left dim, right lit */}
+      <circle cx="23" cy="48" r="2.5" fill="#C4873A" opacity="0.35" />
+      <circle cx="30" cy="48" r="2.5" fill="#C4873A" opacity="0.9" />
+
+      {/* Left arm — static */}
+      <rect x="0" y="38" width="9" height="18" rx="4.5" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
+
+      {/* Right arm — waving (pivot: top-center of rect = shoulder joint) */}
+      <rect
+        x="43"
+        y="38"
+        width="9"
+        height="18"
+        rx="4.5"
+        fill="#1C170F"
+        stroke="#C4873A"
+        strokeWidth="1.2"
+        className="robot-wave-arm"
+      />
+    </svg>
+  );
+}
+
 function Tools() {
   const [reframe, setReframe] = useState<string | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
@@ -68,7 +127,7 @@ function Tools() {
           <div className="flex items-center gap-3">
             <div
               className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-              style={{ background: "oklch(0.62 0.22 255 / 0.10)", color: "var(--primary)" }}
+              style={{ background: "oklch(0.62 0.22 255 / 0.10)", color: "var(--primary)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
             >
               <Brain className="h-4 w-4" />
             </div>
@@ -95,12 +154,21 @@ function Tools() {
         )}
       </section>
 
-      {/* ── Cold Exposure ────────────────────────────────────── */}
+      {/* ── Recovery Coach ───────────────────────────────────── */}
       <section className="px-6 mt-6 pt-6 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
+        <Link to="/tools/coach" className="flex flex-col items-center text-center gap-1 py-1 active:scale-95 transition-transform">
+          <CoachRobot />
+          <p className="font-semibold text-sm mt-2">Recovery Coach</p>
+          <p className="text-[11px] text-muted-foreground">Talk it through. No judgment.</p>
+        </Link>
+      </section>
+
+      {/* ── Cold Exposure ────────────────────────────────────── */}
+      <section className="px-6 mt-6 pt-6 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <Link to="/tools/cold" className="flex items-center gap-3">
           <div
             className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-            style={{ background: "oklch(0.55 0.18 220 / 0.10)", color: "oklch(0.65 0.18 220)" }}
+            style={{ background: "oklch(0.55 0.18 220 / 0.10)", color: "oklch(0.65 0.18 220)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
           >
             <Snowflake className="h-4 w-4" />
           </div>
@@ -108,17 +176,16 @@ function Tools() {
             <p className="font-semibold text-sm">Cold Exposure</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">2-minute guided cold shower breathing.</p>
           </div>
-          <span className="text-xs text-muted-foreground">→</span>
         </Link>
       </section>
 
       {/* ── Implementation Plan ──────────────────────────────── */}
-      <section className="px-6 mt-6 pt-6 pb-8 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
+      <section className="px-6 mt-6 pt-6 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
               className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-              style={{ background: "oklch(0.62 0.22 255 / 0.10)", color: "var(--primary)" }}
+              style={{ background: "oklch(0.62 0.22 255 / 0.10)", color: "var(--primary)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
             >
               <GitBranch className="h-4 w-4" />
             </div>

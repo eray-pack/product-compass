@@ -27,7 +27,7 @@ function TreeIcon({ strokeWidth }: { strokeWidth: number }) {
   );
 }
 
-function ManIcon({ strokeWidth }: { strokeWidth: number }) {
+function WolfIcon({ strokeWidth }: { strokeWidth: number }) {
   return (
     <svg
       className="h-5 w-5"
@@ -38,52 +38,26 @@ function ManIcon({ strokeWidth }: { strokeWidth: number }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
+      {/* ears */}
+      <path d="M4 8 L6 2 L9 7" />
+      <path d="M15 7 L18 2 L20 8" />
       {/* head */}
-      <circle cx="12" cy="5" r="3" />
-      {/* straight shoulders → body */}
-      <path d="M8 10h8" />
-      {/* torso center line */}
-      <line x1="12" y1="10" x2="12" y2="16" />
-      {/* arms */}
-      <line x1="8" y1="10" x2="6" y2="15" />
-      <line x1="16" y1="10" x2="18" y2="15" />
-      {/* legs */}
-      <line x1="12" y1="16" x2="9" y2="22" />
-      <line x1="12" y1="16" x2="15" y2="22" />
-    </svg>
-  );
-}
-
-function WomanIcon({ strokeWidth }: { strokeWidth: number }) {
-  return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* head */}
-      <circle cx="12" cy="5" r="3" />
-      {/* slightly narrower shoulders */}
-      <path d="M9 10h6" />
-      {/* torso */}
-      <line x1="12" y1="10" x2="12" y2="14" />
-      {/* arms */}
-      <line x1="9" y1="10" x2="7" y2="15" />
-      <line x1="15" y1="10" x2="17" y2="15" />
-      {/* skirt — flared triangle */}
-      <path d="M12 14l-5 8h10l-5-8z" />
+      <path d="M4 8 Q4 14 12 14 Q20 14 20 8 Q20 4 15 3 Q12 2 9 3 Q4 4 4 8Z" />
+      {/* snout */}
+      <path d="M9 12 Q12 15 15 12" />
+      {/* body */}
+      <path d="M7 14 Q4 18 5 22" />
+      <path d="M17 14 Q20 18 19 22" />
+      <path d="M5 22 Q12 20 19 22" />
+      {/* tail */}
+      <path d="M5 16 Q1 12 3 8" />
     </svg>
   );
 }
 
 const COMPANION_ICONS = {
-  tree:  TreeIcon,
-  man:   ManIcon,
-  woman: WomanIcon,
+  tree: TreeIcon,
+  wolf: WolfIcon,
 } as const;
 
 // ── Static nav items (companion tab handled separately) ───────────────────────
@@ -102,10 +76,12 @@ export function BottomNav() {
   const companion = loadState().companion ?? "tree";
   const CompanionIcon = COMPANION_ICONS[companion];
 
+  const companionLabel = companion === "wolf" ? "Companion" : "Tree";
+
   // Build ordered nav: Home | Companion | Tools | Community | Progress
   const navItems = [
     BASE_NAV[0],
-    { to: "/tree" as const, label: "Companion", Icon: null as unknown as typeof Home },
+    { to: "/tree" as const, label: companionLabel, Icon: null as unknown as typeof Home },
     ...BASE_NAV.slice(1),
   ];
 

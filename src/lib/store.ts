@@ -62,7 +62,7 @@ export type AppState = {
   // Profile photo (base64 data URL)
   profilePhoto: string | null;
   // Companion avatar
-  companion: "tree" | "man" | "woman";
+  companion: "tree" | "wolf";
   // Login & activity tracking
   lastLoginAt: number;
   loginHistory: number[];
@@ -100,13 +100,17 @@ const defaultState = (): AppState => ({
   urgesSurvived: 0,
 });
 
+const VALID_COMPANIONS = new Set<string>(["tree", "wolf"]);
+
 export function loadState(): AppState {
   if (typeof window === "undefined") return defaultState();
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
-    return { ...defaultState(), ...parsed };
+    const merged: AppState = { ...defaultState(), ...parsed };
+    if (!VALID_COMPANIONS.has(merged.companion)) merged.companion = "tree";
+    return merged;
   } catch {
     return defaultState();
   }

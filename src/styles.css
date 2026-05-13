@@ -473,6 +473,80 @@ html.light {
 }
 .sos-breathe { animation: sos-breathe 8s ease-in-out infinite; }
 
+/* ── Coach robot illustration ──────────────────────────── */
+@keyframes robot-bob {
+  0%, 100% { transform: rotate(-5deg) translateY(0px); }
+  50%       { transform: rotate(-5deg) translateY(-3px); }
+}
+.robot-body {
+  animation: robot-bob 2.6s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes robot-wave {
+  0%, 100% { transform: rotate(10deg); }
+  30%       { transform: rotate(115deg); }
+  55%       { transform: rotate(75deg); }
+  80%       { transform: rotate(115deg); }
+}
+.robot-wave-arm {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: robot-wave 2.6s ease-in-out infinite;
+}
+
+/* ── Community hero silhouettes ─────────────────────────── */
+@keyframes community-sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50%       { transform: rotate(2.5deg); }
+}
+@keyframes community-sway-alt {
+  0%, 100% { transform: rotate(2.5deg); }
+  50%       { transform: rotate(-2.5deg); }
+}
+@keyframes community-breathe {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+.community-sway-1 {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: community-sway 5.2s ease-in-out infinite;
+}
+.community-sway-2 {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: community-sway-alt 6.8s ease-in-out infinite;
+}
+.community-breathe {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: community-breathe 3.6s ease-in-out infinite;
+}
+@keyframes community-arm-wave {
+  0%, 100% { transform: rotate(-120deg); }
+  45%       { transform: rotate(-68deg); }
+}
+.community-wave-arm {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: community-arm-wave 3.2s ease-in-out infinite;
+}
+
+/* ── Coach typing dots ─────────────────────────────────── */
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+
 /* ── Base ───────────────────────────────────────────────── */
 @layer base {
   * { border-color: var(--color-border); }

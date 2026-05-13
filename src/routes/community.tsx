@@ -37,35 +37,47 @@ type Message = {
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 const ROOMS: Room[] = [
-  { id: "global",        name: "Global",          description: "Everyone is here. Show up daily.", icon: Globe,    color: "oklch(0.55 0.18 260)", memberCount: 46847, isGlobal: true },
-  { id: "bible",         name: "Faith & Recovery", description: "Recovery through faith. All beliefs welcome.", icon: Book,     color: "oklch(0.55 0.17 60)",  memberCount: 3241 },
-  { id: "fitness",       name: "Fitness Mode",     description: "Replace the habit with movement.", icon: Dumbbell, color: "oklch(0.52 0.16 145)", memberCount: 5890 },
-  { id: "relationships", name: "Relationships",    description: "How this affects the people around us.", icon: Heart,    color: "oklch(0.55 0.18 10)",  memberCount: 2107 },
-  { id: "mental",        name: "Mental Health",    description: "Anxiety, depression, and addiction.", icon: Shield,   color: "oklch(0.50 0.15 290)", memberCount: 4562 },
+  { id: "global",        name: "Global",           description: "Everyone is here. Show up daily.",                icon: Globe,    color: "oklch(0.55 0.18 260)", memberCount: 46847, isGlobal: true },
+  { id: "bible",         name: "Faith & Recovery",  description: "Recovery through faith. All beliefs welcome.",   icon: Book,     color: "oklch(0.55 0.17 60)",  memberCount: 3241 },
+  { id: "fitness",       name: "Fitness Mode",      description: "Replace the habit with movement.",               icon: Dumbbell, color: "oklch(0.52 0.16 145)", memberCount: 5890 },
+  { id: "relationships", name: "Relationships",     description: "How this affects the people around us.",         icon: Heart,    color: "oklch(0.55 0.18 10)",  memberCount: 2107 },
+  { id: "mental",        name: "Mental Health",     description: "Anxiety, depression, and addiction.",            icon: Shield,   color: "oklch(0.50 0.15 290)", memberCount: 4562 },
 ];
 
-const MOCK_MESSAGES: Record<string, Message[]> = {
-  global: [
-    { id: "1", userId: "u1", name: "Marcus",  initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Elite",       text: "day 61 checking in. feeling sharp today.", ts: Date.now() - 1000 * 60 * 4 },
-    { id: "2", userId: "u2", name: "Arjun",   initial: "A", avatarColor: "oklch(0.50 0.15 290)", rank: "Legendary",   text: "112 days. the urges barely register anymore. it gets easier.", ts: Date.now() - 1000 * 60 * 3 },
-    { id: "3", userId: "u3", name: "Timo",    initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Disciplined", text: "used the sos button last night. worked. still going.", ts: Date.now() - 1000 * 60 * 2 },
-    { id: "4", userId: "u4", name: "Noah",    initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awakened",    text: "first week done. harder than i thought but i'm here", ts: Date.now() - 1000 * 60 * 1 },
-    { id: "5", userId: "u5", name: "Jaylen",  initial: "J", avatarColor: "oklch(0.52 0.16 145)", rank: "Respected",   text: "relapsed on day 28 but came back day 29. momentum never stopped.", ts: Date.now() - 1000 * 30 },
-  ],
-  bible: [
-    { id: "b1", userId: "u6", name: "Samuel",  initial: "S", avatarColor: "oklch(0.55 0.17 60)", rank: "Elite",     text: "praying for everyone here tonight. you're not alone in this.", ts: Date.now() - 1000 * 60 * 5 },
-    { id: "b2", userId: "u7", name: "Dimitri", initial: "D", avatarColor: "oklch(0.56 0.16 60)", rank: "Legendary", text: "1 Cor 10:13 — he will not let you be tempted beyond what you can bear.", ts: Date.now() - 1000 * 60 * 2 },
-  ],
-  fitness: [
-    { id: "f1", userId: "u8", name: "Kenji",  initial: "K", avatarColor: "oklch(0.54 0.14 180)", rank: "Elite", text: "replaced the urge with a cold shower + 20 pushups. works every time.", ts: Date.now() - 1000 * 60 * 8 },
-    { id: "f2", userId: "u9", name: "Marcus", initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Elite", text: "ran 5k this morning. day 61. body feels different.", ts: Date.now() - 1000 * 60 * 3 },
-  ],
-  relationships: [],
-  mental: [
-    { id: "m1", userId: "u10", name: "Timo", initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Disciplined", text: "anyone else notice anxiety drops significantly after 2 weeks clean?", ts: Date.now() - 1000 * 60 * 10 },
-    { id: "m2", userId: "u11", name: "Noah", initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awakened",    text: "yes. the brain fog lifted around day 10 for me.", ts: Date.now() - 1000 * 60 * 6 },
-  ],
+// Avatar clusters per room — shown in the card
+const ROOM_AVATARS: Record<string, { initial: string; bg: string }[]> = {
+  global:        [{ initial: "M", bg: "#4B7FCC" }, { initial: "J", bg: "#4A9A6E" }, { initial: "A", bg: "#8B6BD4" }, { initial: "R", bg: "#CC7044" }, { initial: "T", bg: "#4A8CA0" }],
+  bible:         [{ initial: "S", bg: "#B8933A" }, { initial: "D", bg: "#A07838" }, { initial: "E", bg: "#C4A05A" }, { initial: "R", bg: "#8B6B30" }],
+  fitness:       [{ initial: "K", bg: "#3A8B5C" }, { initial: "M", bg: "#4B9E6E" }, { initial: "C", bg: "#2E7A50" }, { initial: "B", bg: "#5FAA78" }],
+  relationships: [{ initial: "L", bg: "#B8404A" }, { initial: "P", bg: "#CC5560" }, { initial: "R", bg: "#A03040" }, { initial: "H", bg: "#D46070" }],
+  mental:        [{ initial: "T", bg: "#5A4AB8" }, { initial: "N", bg: "#7060CC" }, { initial: "G", bg: "#4A3A9E" }, { initial: "V", bg: "#6858D0" }],
 };
+
+function makeMockMessages(): Record<string, Message[]> {
+  const now = Date.now();
+  return {
+    global: [
+      { id: "1", userId: "u1", name: "Marcus",  initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Elite",       text: "day 61 checking in. feeling sharp today.", ts: now - 1000 * 60 * 4 },
+      { id: "2", userId: "u2", name: "Arjun",   initial: "A", avatarColor: "oklch(0.50 0.15 290)", rank: "Legendary",   text: "112 days. the urges barely register anymore. it gets easier.", ts: now - 1000 * 60 * 3 },
+      { id: "3", userId: "u3", name: "Timo",    initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Disciplined", text: "used the sos button last night. worked. still going.", ts: now - 1000 * 60 * 2 },
+      { id: "4", userId: "u4", name: "Noah",    initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awakened",    text: "first week done. harder than i thought but i'm here", ts: now - 1000 * 60 * 1 },
+      { id: "5", userId: "u5", name: "Jaylen",  initial: "J", avatarColor: "oklch(0.52 0.16 145)", rank: "Respected",   text: "relapsed on day 28 but came back day 29. momentum never stopped.", ts: now - 1000 * 30 },
+    ],
+    bible: [
+      { id: "b1", userId: "u6", name: "Samuel",  initial: "S", avatarColor: "oklch(0.55 0.17 60)", rank: "Elite",     text: "praying for everyone here tonight. you're not alone in this.", ts: now - 1000 * 60 * 5 },
+      { id: "b2", userId: "u7", name: "Dimitri", initial: "D", avatarColor: "oklch(0.56 0.16 60)", rank: "Legendary", text: "1 Cor 10:13 — he will not let you be tempted beyond what you can bear.", ts: now - 1000 * 60 * 2 },
+    ],
+    fitness: [
+      { id: "f1", userId: "u8", name: "Kenji",  initial: "K", avatarColor: "oklch(0.54 0.14 180)", rank: "Elite", text: "replaced the urge with a cold shower + 20 pushups. works every time.", ts: now - 1000 * 60 * 8 },
+      { id: "f2", userId: "u9", name: "Marcus", initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Elite", text: "ran 5k this morning. day 61. body feels different.", ts: now - 1000 * 60 * 3 },
+    ],
+    relationships: [],
+    mental: [
+      { id: "m1", userId: "u10", name: "Timo", initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Disciplined", text: "anyone else notice anxiety drops significantly after 2 weeks clean?", ts: now - 1000 * 60 * 10 },
+      { id: "m2", userId: "u11", name: "Noah", initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awakened",    text: "yes. the brain fog lifted around day 10 for me.", ts: now - 1000 * 60 * 6 },
+    ],
+  };
+}
 
 const RANK_COLORS: Record<string, string> = {
   Legendary:   "text-amber-400 bg-amber-400/10 border-amber-400/30",
@@ -83,6 +95,156 @@ function timeAgo(ts: number): string {
   if (diff < 60) return `${diff}s`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m`;
   return `${Math.floor(diff / 3600)}h`;
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return `${n}`;
+}
+
+// ─── Community hero ───────────────────────────────────────────────────────────
+// Silhouette person: all shapes share the same fill; overlapping regions
+// merge into a single continuous silhouette. Local coords: feet at y=0.
+function CommunityHero() {
+  const fill = "#C4873A";
+
+  // Reusable body parts (legs + torso + head)
+  const Body = () => (
+    <>
+      <circle cx="0" cy="-97" r="12" fill={fill} />
+      <rect x="-11" y="-84" width="22" height="54" rx="8" fill={fill} />
+      <rect x="-12" y="-32" width="10" height="32" rx="5" fill={fill} />
+      <rect x="2"   y="-32" width="10" height="32" rx="5" fill={fill} />
+    </>
+  );
+  // Hanging arms
+  const ArmsNormal = () => (
+    <>
+      <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} />
+      <rect x="14"  y="-81" width="10" height="34" rx="5" fill={fill} />
+    </>
+  );
+  // Both arms raised (V-shape, SVG rotate around shoulder)
+  const ArmsRaised = () => (
+    <>
+      <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} transform="rotate(-138 -19 -83)" />
+      <rect x="14"  y="-81" width="10" height="34" rx="5" fill={fill} transform="rotate(138 19 -83)" />
+    </>
+  );
+  // Right arm raised — talking pose (arm toward face area)
+  const ArmsTalking = () => (
+    <>
+      <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} />
+      <rect x="14"  y="-81" width="10" height="34" rx="5" fill={fill} transform="rotate(100 19 -83)" />
+    </>
+  );
+
+  return (
+    <div className="relative overflow-hidden" style={{ height: 112, marginTop: 16 }}>
+      {/* Dark backdrop */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, #0a0804 0%, #110c07 100%)" }} />
+
+      <svg viewBox="0 0 360 105" width="100%" height="105" style={{ position: "absolute", bottom: 0, left: 0 }}>
+        <defs>
+          <radialGradient id="cg-spot" cx="50%" cy="100%" r="60%">
+            <stop offset="0%"   stopColor="#C4873A" stopOpacity="0.50" />
+            <stop offset="50%"  stopColor="#C4873A" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#C4873A" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Warm spotlight on the ground */}
+        <ellipse cx="180" cy="103" rx="168" ry="18" fill="url(#cg-spot)" />
+
+        {/* ── Person 1 — far left, back, small, normal ── */}
+        <g transform="translate(40, 98) scale(0.30)">
+          <g className="community-sway-1" opacity="0.36">
+            <Body /><ArmsNormal />
+          </g>
+        </g>
+
+        {/* ── Person 2 — center-left, mid-depth, arms raised ── */}
+        <g transform="translate(108, 98) scale(0.43)">
+          <g className="community-sway-2" opacity="0.60">
+            <Body /><ArmsRaised />
+          </g>
+        </g>
+
+        {/* ── Person 3 — center front, tallest, waving arm ── */}
+        <g transform="translate(184, 98) scale(0.54)">
+          <g className="community-breathe" opacity="0.84">
+            <Body />
+            {/* Left arm static */}
+            <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} />
+            {/* Right arm — animated wave */}
+            <rect x="14" y="-81" width="10" height="34" rx="5" fill={fill} className="community-wave-arm" />
+          </g>
+        </g>
+
+        {/* ── Person 4 — center-right, mid-depth, talking ── */}
+        <g transform="translate(258, 98) scale(0.41)">
+          <g className="community-sway-1" opacity="0.54">
+            <Body /><ArmsTalking />
+          </g>
+        </g>
+
+        {/* ── Person 5 — far right, back, small, arms raised ── */}
+        <g transform="translate(318, 98) scale(0.34)">
+          <g className="community-sway-2" opacity="0.38">
+            <Body /><ArmsRaised />
+          </g>
+        </g>
+      </svg>
+
+      {/* Fade to page background */}
+      <div className="absolute inset-x-0 bottom-0 h-10 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
+    </div>
+  );
+}
+
+// ─── Avatar stack ─────────────────────────────────────────────────────────────
+function AvatarStack({ roomId, memberCount, isGlobal }: { roomId: string; memberCount: number; isGlobal?: boolean }) {
+  const avatars = ROOM_AVATARS[roomId] ?? [];
+  const shown = avatars.slice(0, 4);
+
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      {/* Overlapping circles */}
+      <div className="flex">
+        {shown.map((av, i) => (
+          <div
+            key={i}
+            className="h-5 w-5 rounded-full grid place-items-center text-[8px] font-bold text-white border border-card"
+            style={{
+              background: av.bg,
+              marginLeft: i > 0 ? -6 : 0,
+              zIndex: shown.length - i,
+              position: "relative",
+            }}
+          >
+            {av.initial}
+          </div>
+        ))}
+      </div>
+
+      {/* Live dot + count for global; plain count for others */}
+      {isGlobal ? (
+        <div className="flex items-center gap-1.5">
+          <span
+            className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
+            style={{ background: "#3a9a6e", boxShadow: "0 0 5px #3a9a6e" }}
+          />
+          <span className="text-[10px] font-medium" style={{ color: "#4aaa80" }}>
+            247 active now
+          </span>
+        </div>
+      ) : (
+        <span className="text-[10px]" style={{ color: "oklch(0.52 0.015 265 / 0.55)" }}>
+          +{formatCount(memberCount - shown.length)} others
+        </span>
+      )}
+    </div>
+  );
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -115,8 +277,13 @@ function CommunityPage() {
         </p>
       </header>
 
+      {/* ── Hero silhouettes ─────────────────────────────────── */}
+      <div className="fade-up-1">
+        <CommunityHero />
+      </div>
+
       {/* ── Room list ────────────────────────────────────────── */}
-      <section className="px-6 mt-8 fade-up-1">
+      <section className="px-6 mt-2 fade-up-2">
         <div className="space-y-0">
           {ROOMS.map((room, i) => {
             const joined = joinedRooms.includes(room.id);
@@ -125,36 +292,57 @@ function CommunityPage() {
               <button
                 key={room.id}
                 onClick={() => handleJoin(room)}
-                className="w-full text-left flex items-center gap-4 py-4 transition-opacity active:opacity-70"
+                className="w-full text-left flex items-start gap-4 py-4 transition-opacity active:opacity-70"
                 style={{ borderBottom: i < ROOMS.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.6)" : "none" }}
               >
+                {/* Icon */}
                 <div
-                  className="h-11 w-11 rounded-2xl grid place-items-center shrink-0"
+                  className="h-11 w-11 rounded-2xl grid place-items-center shrink-0 mt-0.5"
                   style={{ background: `${room.color}18`, border: `1px solid ${room.color}30` }}
                 >
                   <Icon className="h-5 w-5" style={{ color: room.color }} />
                 </div>
+
+                {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold truncate">{room.name}</p>
-                    {room.isGlobal && (
-                      <span
-                        className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0"
-                        style={{ color: "var(--primary)", background: "rgba(196,135,58,0.10)", border: "1px solid rgba(196,135,58,0.20)" }}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold truncate">{room.name}</p>
+                        {room.isGlobal && (
+                          <span
+                            className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0"
+                            style={{ color: "var(--primary)", background: "rgba(196,135,58,0.10)", border: "1px solid rgba(196,135,58,0.20)" }}
+                          >
+                            Live
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "oklch(0.55 0.015 265 / 0.75)" }}>
+                        {room.description}
+                      </p>
+                    </div>
+
+                    {/* Pill button */}
+                    {joined ? (
+                      <div
+                        className="text-[11px] font-semibold px-3 py-1 rounded-full shrink-0 mt-0.5"
+                        style={{ border: "1px solid oklch(0.28 0.03 265 / 0.55)", color: "var(--muted-foreground)", background: "oklch(0.18 0.02 265 / 0.5)" }}
                       >
-                        Live
-                      </span>
+                        Open
+                      </div>
+                    ) : (
+                      <div
+                        className="text-[11px] font-semibold px-3 py-1 rounded-full shrink-0 mt-0.5"
+                        style={{ border: "1px solid #C4873A66", color: "#C4873A", background: "rgba(196,135,58,0.08)" }}
+                      >
+                        Join
+                      </div>
                     )}
                   </div>
-                  <p className="text-[11px] mt-0.5 truncate" style={{ color: "oklch(0.55 0.015 265 / 0.75)" }}>
-                    {room.description}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-[10px] text-muted-foreground/50">{(room.memberCount / 1000).toFixed(1)}k</p>
-                  <p className="text-[10px] mt-0.5" style={{ color: joined ? "var(--primary)" : "oklch(0.55 0.015 265 / 0.6)" }}>
-                    {joined ? "Open" : "Join"}
-                  </p>
+
+                  {/* Avatar stack + live/member count */}
+                  <AvatarStack roomId={room.id} memberCount={room.memberCount} isGlobal={room.isGlobal} />
                 </div>
               </button>
             );
@@ -163,7 +351,7 @@ function CommunityPage() {
       </section>
 
       {/* ── Create community ─────────────────────────────────── */}
-      <section className="px-6 mt-8 pb-6 fade-up-2">
+      <section className="px-6 mt-8 pb-6 fade-up-3">
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
@@ -191,7 +379,7 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const day = active ? dayCount(active.startDate) : 1;
   const stage = treeStage(state.treeXP);
 
-  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES[room.id] ?? []);
+  const [messages, setMessages] = useState<Message[]>(() => makeMockMessages()[room.id] ?? []);
   const [input, setInput] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);

@@ -5,11 +5,25 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { loadEnv } from "vite";
 
-// Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-// @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
+// loadEnv reads .env from the project root at config time (Node.js context).
+// The '' prefix means load all vars, not just VITE_* ones.
+const localEnv = loadEnv("", process.cwd(), "");
+
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
+  },
+  vite: {
+    // envPrefix tells Vite to expose ANTHROPIC_* vars via import.meta.env in all
+    // processed code (client + server). This is the most reliable dev-mode path.
+    envPrefix: ["VITE_", "ANTHROPIC_"],
+    // define bakes the value in at compile time as a process.env fallback.
+    define: {
+      "process.env.ANTHROPIC_API_KEY": JSON.stringify(
+        localEnv.ANTHROPIC_API_KEY ?? "",
+      ),
+    },
   },
 });
