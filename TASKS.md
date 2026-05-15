@@ -33,7 +33,7 @@
 - [ ] Design the AI Coach screen header / empty state (currently bare)
 - [ ] Design paywall screen — review current layout, flag anything that feels weak
 
-**Deadline: Friday May 23**
+**Deadline: Wednesday May 21**
 
 ---
 
