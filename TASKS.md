@@ -24,7 +24,7 @@
 
 **Eray**
 - [ ] Set `ANTHROPIC_API_KEY` secret in Wrangler so `/api/chat` works in prod (`wrangler secret put ANTHROPIC_API_KEY`)
-- [ ] Test AI Coach end-to-end: dev server → coach screen → real Claude response
+- [ ] Test AI Coach end-to-end: dev server → coach screen → real Claude response *(Fortune handles this locally with his Claude Console API key)*
 - [ ] Fix auth signup bug ("database error saving new user") — diagnose via Supabase MCP
 - [ ] Push community.tsx rebase to GitHub (already resolved locally)
 - [ ] Paywall walkthrough — run dev server, screenshot each step, fix weak copy/layout
