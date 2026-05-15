@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount, activeAddiction } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Send, Lock, Plus, Users, Globe, Book, Dumbbell,
@@ -252,14 +253,20 @@ function CommunityPage() {
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [joinedRooms, setJoinedRooms] = useState<string[]>(["global"]);
   const [showCreate, setShowCreate] = useState(false);
+  const [userRooms, setUserRooms] = useState<Room[]>([]);
 
   const handleJoin = (room: Room) => {
     if (!joinedRooms.includes(room.id)) setJoinedRooms((prev) => [...prev, room.id]);
     setActiveRoom(room);
   };
 
+  const handleRoomCreated = (room: Room) => {
+    setUserRooms((prev) => [...prev, room]);
+    setShowCreate(false);
+  };
+
   if (showCreate) {
-    return <CreateRoomScreen onBack={() => setShowCreate(false)} onCreate={() => setShowCreate(false)} />;
+    return <CreateRoomScreen onBack={() => setShowCreate(false)} onCreate={handleRoomCreated} />;
   }
 
   if (activeRoom) {
@@ -285,7 +292,7 @@ function CommunityPage() {
       {/* ── Room list ────────────────────────────────────────── */}
       <section className="px-6 mt-2 fade-up-2">
         <div className="space-y-0">
-          {ROOMS.map((room, i) => {
+          {[...ROOMS, ...userRooms].map((room, i, all) => {
             const joined = joinedRooms.includes(room.id);
             const Icon = room.icon;
             return (
@@ -293,7 +300,7 @@ function CommunityPage() {
                 key={room.id}
                 onClick={() => handleJoin(room)}
                 className="w-full text-left flex items-start gap-4 py-4 transition-opacity active:opacity-70"
-                style={{ borderBottom: i < ROOMS.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.6)" : "none" }}
+                style={{ borderBottom: i < all.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.6)" : "none" }}
               >
                 {/* Icon */}
                 <div
@@ -534,16 +541,43 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
 }
 
 // ─── Create room screen ───────────────────────────────────────────────────────
-function CreateRoomScreen({ onBack, onCreate }: { onBack: () => void; onCreate: (name: string) => void }) {
+function CreateRoomScreen({ onBack, onCreate }: { onBack: () => void; onCreate: (room: Room) => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const handleCreate = () => {
-    if (!name.trim()) return;
+  const handleCreate = async () => {
+    if (!name.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+
+    const { data: roomId, error: rpcError } = await supabase.rpc("create_room", {
+      p_name: name.trim(),
+      p_description: description.trim(),
+      p_is_private: isPrivate,
+      p_password: null,
+    });
+
+    if (rpcError) {
+      setError(rpcError.message);
+      setLoading(false);
+      return;
+    }
+
+    const newRoom: Room = {
+      id: roomId as string,
+      name: name.trim(),
+      description: description.trim(),
+      icon: Users,
+      color: "oklch(0.55 0.15 220)",
+      memberCount: 1,
+    };
+
     setDone(true);
-    setTimeout(() => onCreate(name), 1500);
+    setTimeout(() => onCreate(newRoom), 1200);
   };
 
   if (done) {
@@ -554,7 +588,7 @@ function CreateRoomScreen({ onBack, onCreate }: { onBack: () => void; onCreate: 
         </div>
         <h2 className="text-xl font-bold">Community created.</h2>
         <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-          Real communities will be live once we connect Supabase. Your room is saved locally for now.
+          Your room is live. Invite others to join.
         </p>
       </div>
     );
@@ -609,18 +643,16 @@ function CreateRoomScreen({ onBack, onCreate }: { onBack: () => void; onCreate: 
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${isPrivate ? "translate-x-5" : "translate-x-0.5"}`} />
           </button>
         </div>
-        {isPrivate && (
-          <p className="text-xs text-muted-foreground/70 leading-relaxed">
-            You'll get an invite link to share. Live invite system requires Supabase (coming in Week 2).
-          </p>
+        {error && (
+          <p className="text-xs text-red-400 leading-relaxed">{error}</p>
         )}
         <button
           onClick={handleCreate}
-          disabled={!name.trim()}
+          disabled={!name.trim() || loading}
           className="w-full h-12 rounded-2xl text-sm font-semibold text-primary-foreground disabled:opacity-30 transition"
           style={{ background: "var(--gradient-primary)" }}
         >
-          Create community
+          {loading ? "Creating…" : "Create community"}
         </button>
       </div>
     </div>
