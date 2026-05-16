@@ -47,7 +47,6 @@ function ColdSwitch() {
   const [misses, setMisses]       = useState(0);
   const [target, setTarget]       = useState<0 | 1>(0);
   const [pair, setPair]           = useState(TASK_PAIRS[0]);
-  const [flashSide, setFlashSide] = useState<0 | 1 | null>(null);
   const [feedback, setFeedback]   = useState<"ok" | "bad" | null>(null);
   const [windowMs, setWindowMs]   = useState(INITIAL_WINDOW);
   const [promptKey, setPromptKey] = useState(0);
@@ -85,9 +84,7 @@ function ColdSwitch() {
     targetRef.current = side as 0 | 1;
     setTarget(side as 0 | 1);
     setPair(p);
-    setFlashSide(side as 0 | 1);
     setPromptKey((k) => k + 1);
-    setTimeout(() => setFlashSide(null), 260);
 
     missRef.current = setTimeout(() => {
       if (phaseRef.current !== "playing") return;
@@ -383,11 +380,9 @@ function ColdSwitch() {
             </div>
           </div>
 
-          {/* Tap zones */}
+          {/* Tap zones — identical appearance until tapped */}
           <div className="flex gap-3 flex-1">
             {([0, 1] as const).map((side) => {
-              const isTarget       = side === target;
-              const isFlash        = flashSide === side;
               const isCorrectFlash = correctFlashSide === side;
 
               return (
@@ -396,31 +391,18 @@ function ColdSwitch() {
                   onPointerDown={(e) => { e.preventDefault(); tap(side); }}
                   className="flex-1 relative rounded-3xl flex flex-col items-center justify-center gap-4 overflow-hidden"
                   style={{
-                    touchAction:   "none",
-                    background:    "rgba(0,10,16,0.92)",
-                    borderWidth:   "2px",
-                    borderStyle:   "solid",
+                    touchAction: "none",
+                    background:  "rgba(0,10,16,0.92)",
+                    border:      `2px solid ${C}28`,
                   }}
-                  initial={{
-                    borderColor: `${C}28`,
-                    boxShadow:   `0 0 0 0px ${C}00`,
+                  whileTap={{
+                    scale:      0.95,
+                    borderColor: `${C}88`,
+                    boxShadow:  `0 0 24px ${C}44`,
                   }}
-                  animate={{
-                    borderColor: isFlash
-                      ? C
-                      : isTarget
-                      ? `${C}cc`
-                      : `${C}28`,
-                    boxShadow: isFlash
-                      ? `0 0 0 2px ${C}, 0 0 44px ${C}70, 0 0 88px ${C}28`
-                      : isTarget
-                      ? `0 0 0 1px ${C}88, 0 0 28px ${C}44, 0 0 56px ${C}18`
-                      : `0 0 0 0px ${C}00`,
-                  }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  {/* Correct-tap cyan burst overlay */}
+                  {/* Correct-tap cyan burst overlay — shown only after a correct tap */}
                   <AnimatePresence>
                     {isCorrectFlash && (
                       <motion.div
@@ -437,89 +419,45 @@ function ColdSwitch() {
                     )}
                   </AnimatePresence>
 
-                  {/* Target inner glow */}
-                  {isTarget && (
-                    <div
-                      className="absolute inset-0 pointer-events-none rounded-3xl"
-                      style={{
-                        background: `radial-gradient(ellipse 80% 70% at 50% 50%, ${C}12 0%, transparent 70%)`,
-                      }}
-                    />
-                  )}
-
-                  {/* Arrow — bounces toward centre when this side is the new target */}
+                  {/* Arrow — both sides identical, fade in on each new prompt */}
                   <motion.div
                     key={`arrow-${promptKey}-${side}`}
-                    initial={
-                      isTarget
-                        ? { x: side === 0 ? 10 : -10, opacity: 0.5 }
-                        : { opacity: 1 }
-                    }
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={
-                      isTarget
-                        ? { type: "spring", stiffness: 600, damping: 18 }
-                        : { duration: 0 }
-                    }
+                    initial={{ opacity: 0.4, scale: 0.88 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 480, damping: 22 }}
                   >
                     <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
                       {side === 0 ? (
                         <path
                           d="M22 10 L12 18 L22 26 M12 18 H26"
-                          stroke={isTarget ? C : `${C}55`}
-                          strokeWidth={isTarget ? "2.8" : "2"}
+                          stroke={`${C}66`}
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{
-                            filter: isTarget
-                              ? `drop-shadow(0 0 6px ${C}) drop-shadow(0 0 16px ${C}88)`
-                              : undefined,
-                          }}
                         />
                       ) : (
                         <path
                           d="M14 10 L24 18 L14 26 M24 18 H10"
-                          stroke={isTarget ? C : `${C}55`}
-                          strokeWidth={isTarget ? "2.8" : "2"}
+                          stroke={`${C}66`}
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{
-                            filter: isTarget
-                              ? `drop-shadow(0 0 6px ${C}) drop-shadow(0 0 16px ${C}88)`
-                              : undefined,
-                          }}
                         />
                       )}
                     </svg>
                   </motion.div>
 
-                  {/* Task label — refreshes on each prompt */}
+                  {/* Task label — same colour on both sides */}
                   <motion.span
                     key={`label-${promptKey}-${side}`}
                     className="text-[11px] font-black tracking-[0.22em] uppercase"
-                    style={{ color: isTarget ? C : `${C}50` }}
-                    initial={{ opacity: 0.5, scale: 0.9 }}
+                    style={{ color: `${C}66` }}
+                    initial={{ opacity: 0.4, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      damping: 22,
-                      delay: 0.04,
-                    }}
+                    transition={{ type: "spring", stiffness: 480, damping: 22, delay: 0.04 }}
                   >
                     {pair[side]}
                   </motion.span>
-
-                  {/* Scanlines on active zone */}
-                  {isTarget && (
-                    <div
-                      className="absolute inset-0 pointer-events-none rounded-3xl"
-                      style={{
-                        backgroundImage:
-                          "repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,255,255,0.018) 4px, rgba(0,255,255,0.018) 5px)",
-                      }}
-                    />
-                  )}
                 </motion.button>
               );
             })}
