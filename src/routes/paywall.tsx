@@ -268,11 +268,11 @@ function Paywall() {
       {/* Features */}
       <ul className="space-y-2 text-sm">
         {[
-          "Personalized brain recovery timeline",
-          "SOS urge surfing tools, anytime",
-          "Smart reminders tailored to you",
-          "Daily reframes + momentum tracking",
-          "Life Tree — your sacred progress symbol",
+          "AI Coach remembers you — not just today, every session",
+          "8 specialized tools for the moments it gets hardest",
+          "See which triggers cause your relapses — and break the pattern",
+          "Create your own recovery room, lead your community",
+          "PRO members are 3x more likely to reach day 90",
         ].map((f) => (
           <li key={f} className="flex items-center gap-2 text-muted-foreground">
             <Check className="h-4 w-4 text-primary shrink-0" /> {f}

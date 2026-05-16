@@ -1,7 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Lock } from "lucide-react";
 import { sendCoachMessage, type ChatMessage } from "@/lib/coach";
+import { useAppState } from "@/lib/store";
+import { triggerPaywall } from "@/lib/paywall";
+
+const FREE_DAILY_LIMIT = 3;
+const LIMIT_KEY = "stopamine.coach.free";
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10); // "2026-05-16"
+}
+
+function getFreeUsage(): number {
+  try {
+    const raw = localStorage.getItem(LIMIT_KEY);
+    if (!raw) return 0;
+    const { date, count } = JSON.parse(raw);
+    if (date !== getTodayKey()) return 0;
+    return count;
+  } catch { return 0; }
+}
+
+function incrementFreeUsage() {
+  const count = getFreeUsage() + 1;
+  localStorage.setItem(LIMIT_KEY, JSON.stringify({ date: getTodayKey(), count }));
+  return count;
+}
 
 export const Route = createFileRoute("/tools/coach")({
   component: Coach,
@@ -19,11 +44,15 @@ const QUICK_SUGGESTIONS = [
 ];
 
 function Coach() {
+  const [state] = useAppState();
   const [messages, setMessages] = useState<ChatMessage[]>([FIRST_MESSAGE]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [freeUsed, setFreeUsed] = useState(getFreeUsage);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const isLimitReached = !state.isPremium && freeUsed >= FREE_DAILY_LIMIT;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,11 +62,22 @@ function Coach() {
     const text = (override ?? input).trim();
     if (!text || isTyping) return;
 
+    // Free limit check
+    if (!state.isPremium && freeUsed >= FREE_DAILY_LIMIT) {
+      triggerPaywall();
+      return;
+    }
+
     const userMsg: ChatMessage = { role: "user", content: text };
     const next = [...messages, userMsg];
     setMessages(next);
     setInput("");
     setIsTyping(true);
+
+    if (!state.isPremium) {
+      const newCount = incrementFreeUsage();
+      setFreeUsed(newCount);
+    }
 
     try {
       const reply = await sendCoachMessage(next);
@@ -188,35 +228,60 @@ function Coach() {
         className="shrink-0 px-4 pb-8 pt-3"
         style={{ borderTop: "1px solid var(--border)" }}
       >
-        <div
-          className="flex items-end gap-2 rounded-2xl px-3 py-2"
-          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
-        >
-          <textarea
-            ref={inputRef}
-            rows={1}
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder="Tell me what's on your mind…"
-            className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground leading-relaxed py-1"
-            style={{ maxHeight: 120 }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isTyping}
-            className="h-8 w-8 rounded-xl grid place-items-center shrink-0 transition-all mb-0.5"
-            style={{
-              background: input.trim() && !isTyping ? "var(--primary)" : "var(--surface-2)",
-              color: input.trim() && !isTyping ? "var(--primary-foreground)" : "var(--muted-foreground)",
-            }}
+        {/* Free limit banner */}
+        {!state.isPremium && (
+          <div className="mb-3 flex items-center justify-between text-[11px] px-1">
+            {isLimitReached ? (
+              <button
+                onClick={() => triggerPaywall()}
+                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 font-medium"
+                style={{ background: "oklch(0.62 0.22 255 / 0.1)", border: "1px solid oklch(0.62 0.22 255 / 0.3)", color: "var(--primary)" }}
+              >
+                <Lock className="h-3.5 w-3.5" />
+                You've used your 3 free messages today — unlock PRO to continue
+              </button>
+            ) : (
+              <p style={{ color: "var(--muted-foreground)" }}>
+                {FREE_DAILY_LIMIT - freeUsed} free message{FREE_DAILY_LIMIT - freeUsed !== 1 ? "s" : ""} left today
+              </p>
+            )}
+          </div>
+        )}
+
+        {!isLimitReached && (
+          <div
+            className="flex items-end gap-2 rounded-2xl px-3 py-2"
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
-            <Send className="h-3.5 w-3.5" />
-          </button>
-        </div>
-        <p className="text-center text-[10px] mt-2" style={{ color: "var(--muted-foreground)" }}>
-          Press Enter to send · Shift+Enter for new line
-        </p>
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={input}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Tell me what's on your mind…"
+              className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground leading-relaxed py-1"
+              style={{ maxHeight: 120 }}
+            />
+            <button
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isTyping}
+              className="h-8 w-8 rounded-xl grid place-items-center shrink-0 transition-all mb-0.5"
+              style={{
+                background: input.trim() && !isTyping ? "var(--primary)" : "var(--surface-2)",
+                color: input.trim() && !isTyping ? "var(--primary-foreground)" : "var(--muted-foreground)",
+              }}
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        {!isLimitReached && (
+          <p className="text-center text-[10px] mt-2" style={{ color: "var(--muted-foreground)" }}>
+            Press Enter to send · Shift+Enter for new line
+          </p>
+        )}
       </div>
     </div>
   );
