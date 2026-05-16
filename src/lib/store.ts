@@ -1,5 +1,6 @@
-// Local-storage backed mock store for Stopamine
+// Local-storage backed store for Stopamine — syncs key fields to Supabase
 import { useEffect, useState } from "react";
+import { supabase } from "./supabase";
 
 export type OnboardingData = {
   duration: string;
@@ -121,14 +122,57 @@ export function saveState(s: AppState) {
   localStorage.setItem(KEY, JSON.stringify(s));
 }
 
+async function syncToSupabase(s: AppState) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from("user_state").upsert({
+    user_id: session.user.id,
+    points: s.points,
+    tree_xp: s.treeXP,
+    badges: s.badges,
+    total_returns: s.totalReturns,
+    last_login_at: s.lastLoginAt,
+    onboarding: s.onboarding,
+    updated_at: new Date().toISOString(),
+  });
+}
+
+async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => void) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  const { data } = await supabase
+    .from("user_state")
+    .select("points, tree_xp, badges, total_returns, last_login_at, onboarding")
+    .eq("user_id", session.user.id)
+    .single();
+  if (!data) return;
+  setState((prev) => {
+    const merged: AppState = {
+      ...prev,
+      points: data.points ?? prev.points,
+      treeXP: data.tree_xp ?? prev.treeXP,
+      badges: data.badges ?? prev.badges,
+      totalReturns: data.total_returns ?? prev.totalReturns,
+      lastLoginAt: data.last_login_at ?? prev.lastLoginAt,
+      onboarding: data.onboarding ?? prev.onboarding,
+    };
+    saveState(merged);
+    return merged;
+  });
+}
+
 export function useAppState() {
   const [state, setState] = useState<AppState>(defaultState);
-  useEffect(() => { setState(loadState()); }, []);
+  useEffect(() => {
+    setState(loadState());
+    loadFromSupabase(setState);
+  }, []);
   const update = (patch: Partial<AppState> | ((s: AppState) => Partial<AppState>)) => {
     setState((prev) => {
       const p = typeof patch === "function" ? patch(prev) : patch;
       const next = { ...prev, ...p };
       saveState(next);
+      syncToSupabase(next);
       return next;
     });
   };
