@@ -19,7 +19,8 @@ export type Addiction = {
   startDate: number;
   totalCleanDays: number;
   urgesSurvived: number;
-  premium?: boolean; // if true, requires PRO to view past blur
+  premium?: boolean;      // if true, requires PRO to view past blur
+  startDateLocked?: boolean; // set to true after first manual date override
 };
 
 export type ChallengeProgress = {

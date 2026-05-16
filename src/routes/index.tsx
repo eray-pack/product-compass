@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Coins, X, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
+import { BADGES, currentBadge, nextBadge, badgeSplit } from "@/lib/badges";
 import { initPurchases, checkPremium } from "@/lib/purchases";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
@@ -441,6 +442,130 @@ function Label({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── Badge Milestone Panel ────────────────────────────────────────────────────
+function BadgeMilestones({ day }: { day: number }) {
+  const { earned, upcoming } = badgeSplit(day);
+  const badge = currentBadge(day);
+
+  return (
+    <div className="px-6 pt-6 pb-4" style={{ minHeight: 220 }}>
+      {/* Current badge highlight */}
+      {badge ? (
+        <div
+          className="flex items-center gap-3 mb-5 px-4 py-3 rounded-2xl"
+          style={{
+            background: `${badge.glow.replace("0.40", "0.12")}`,
+            border: `1px solid ${badge.color}40`,
+          }}
+        >
+          <div
+            className="h-10 w-10 rounded-xl grid place-items-center text-[22px] font-bold shrink-0"
+            style={{ background: `${badge.color}22`, border: `1px solid ${badge.color}55`, color: badge.color }}
+          >
+            {badge.symbol}
+          </div>
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.3em] uppercase mb-0.5"
+               style={{ color: `${badge.color}90` }}>Current rank</p>
+            <p className="text-[18px] font-bold leading-tight" style={{ color: badge.color }}>
+              {badge.name}
+            </p>
+          </div>
+          <p className="ml-auto text-[10px] text-right" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Day<br /><span className="text-[15px] font-bold tabular-nums" style={{ color: "rgba(255,255,255,0.55)" }}>{day}</span>
+          </p>
+        </div>
+      ) : (
+        <div className="mb-5 text-center">
+          <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Finish Day 1 to earn your first badge
+          </p>
+        </div>
+      )}
+
+      {/* Upcoming badges — teased */}
+      {upcoming.length > 0 && (
+        <>
+          <p className="text-[9px] font-bold tracking-[0.35em] uppercase mb-3"
+             style={{ color: "rgba(255,255,255,0.22)" }}>
+            Coming up
+          </p>
+          <div className="space-y-2">
+            {upcoming.slice(0, 5).map((b, i) => {
+              const daysAway = b.day - day;
+              const isNext   = i === 0;
+              return (
+                <div
+                  key={b.name}
+                  className="flex items-center gap-3"
+                  style={{ opacity: isNext ? 1 : Math.max(0.3, 0.85 - i * 0.18) }}
+                >
+                  {/* Blurred icon */}
+                  <div
+                    className="h-8 w-8 rounded-xl grid place-items-center text-[16px] font-bold shrink-0"
+                    style={{
+                      background: isNext ? `${b.color}18` : "rgba(255,255,255,0.04)",
+                      border: `1px solid ${isNext ? b.color + "40" : "rgba(255,255,255,0.08)"}`,
+                      color: isNext ? b.color : "rgba(255,255,255,0.2)",
+                      filter: isNext ? "none" : `blur(${Math.min(3, i * 1.2)}px)`,
+                    }}
+                  >
+                    {b.symbol}
+                  </div>
+                  {/* Name + days */}
+                  <div className="flex-1">
+                    <p
+                      className="text-[13px] font-semibold"
+                      style={{ color: isNext ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.25)" }}
+                    >
+                      {b.name}
+                    </p>
+                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.2)" }}>
+                      Day {b.day}
+                    </p>
+                  </div>
+                  {/* Days away pill */}
+                  {isNext && (
+                    <div
+                      className="px-2 py-0.5 rounded-full text-[9px] font-bold"
+                      style={{ background: `${b.color}15`, border: `1px solid ${b.color}30`, color: b.color }}
+                    >
+                      {daysAway}d away
+                    </div>
+                  )}
+                  {!isNext && (
+                    <div
+                      className="h-4 w-4 rounded-full grid place-items-center shrink-0"
+                      style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                    >
+                      <div className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* All earned (if more than current) */}
+      {earned.length > 1 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {earned.slice(0, -1).map((b) => (
+            <div
+              key={b.name}
+              className="px-2 py-0.5 rounded-full text-[9px] font-bold"
+              style={{ background: `${b.color}12`, border: `1px solid ${b.color}30`, color: `${b.color}90` }}
+            >
+              {b.symbol} {b.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Dashboard() {
   const [state, update] = useAppState();
   const navigate        = useNavigate();
@@ -449,6 +574,8 @@ function Dashboard() {
   const [showIdentity, setShowIdentity] = useState(false);
   const [reEntryDays,  setReEntryDays]  = useState(0);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [heroPage,     setHeroPage]     = useState(0); // 0 = counter, 1 = badges
+  const touchStartX                     = useRef(0);
 
   const active      = activeAddiction(state);
   const day         = active ? dayCount(active.startDate) : 1;
@@ -538,75 +665,96 @@ function Dashboard() {
         </div>
       </motion.header>
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <motion.section
-        className="relative px-6 pt-8 pb-5 text-center overflow-hidden"
-        initial="hidden"
-        animate="show"
-        variants={seq(0.1, 0.1)}
+      {/* ── HERO (swipeable: counter ↔ badges) ───────────────── */}
+      <motion.div
+        className="overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          const delta = touchStartX.current - e.changedTouches[0].clientX;
+          if (Math.abs(delta) > 44) setHeroPage(delta > 0 ? 1 : 0);
+        }}
       >
-        {/* Ambient light — behind the number */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute ambient-drift"
-          style={{
-            top: "0%", left: "50%",
-            width: 340, height: 340,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(196,135,58,0.09) 0%, transparent 68%)",
-            filter: "blur(50px)",
-          }}
-        />
-
-        {/* Eyebrow */}
-        <motion.p
-          className="text-[9px] font-bold tracking-[0.5em] uppercase"
-          style={{ color: "rgba(196,135,58,0.45)" }}
-          variants={fade}
-        >
-          Day
-        </motion.p>
-
-        {/* The number — singular focus */}
         <motion.div
-          className="relative inline-block"
-          variants={{
-            hidden: { opacity: 0, y: 30, scale: 0.95 },
-            show:   { opacity: 1, y: 0,  scale: 1,   transition: { duration: 1.1, ease: EASE } },
-          }}
+          style={{ display: "flex", willChange: "transform" }}
+          animate={{ x: heroPage === 0 ? "0%" : "-100%" }}
+          transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.85 }}
         >
-          <span
-            className="day-monument font-bold leading-none tabular-nums select-none"
-            style={{ fontSize: "clamp(6rem, 28vw, 9.5rem)" }}
-          >
-            {day}
-          </span>
+          {/* ── Slide 0: Counter ── */}
+          <div style={{ minWidth: "100%", width: "100%" }}>
+            <section
+              className="relative px-6 pt-8 pb-5 text-center overflow-hidden"
+            >
+              {/* Ambient light */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute ambient-drift"
+                style={{
+                  top: "0%", left: "50%",
+                  width: 340, height: 340,
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(196,135,58,0.09) 0%, transparent 68%)",
+                  filter: "blur(50px)",
+                }}
+              />
+              {/* Eyebrow */}
+              <p className="text-[9px] font-bold tracking-[0.5em] uppercase"
+                 style={{ color: "rgba(196,135,58,0.45)" }}>
+                Day
+              </p>
+              {/* The number */}
+              <div className="relative inline-block">
+                <span
+                  className="day-monument font-bold leading-none tabular-nums select-none"
+                  style={{ fontSize: "clamp(6rem, 28vw, 9.5rem)" }}
+                >
+                  {day}
+                </span>
+              </div>
+              {/* Habit context */}
+              <div className="mt-3 flex items-center justify-center gap-3">
+                <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+                <span className="text-[10px] font-bold tracking-[0.3em] uppercase"
+                      style={{ color: "rgba(255,255,255,0.4)" }}>
+                  {active?.name ?? "Recovery"}
+                </span>
+                <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+              </div>
+              {/* Streak line */}
+              <p className="mt-3 text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+                {streakLine}
+              </p>
+            </section>
+          </div>
+
+          {/* ── Slide 1: Badges ── */}
+          <div style={{ minWidth: "100%", width: "100%" }}>
+            <BadgeMilestones day={day} />
+          </div>
         </motion.div>
 
-        {/* Habit context */}
-        <motion.div
-          className="mt-3 flex items-center justify-center gap-3"
-          variants={up}
-        >
-          <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
-          <span
-            className="text-[10px] font-bold tracking-[0.3em] uppercase"
-            style={{ color: "rgba(255,255,255,0.4)" }}
-          >
-            {active?.name ?? "Recovery"}
-          </span>
-          <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
-        </motion.div>
-
-        {/* Streak line */}
-        <motion.p
-          className="mt-3 text-[12px]"
-          style={{ color: "rgba(255,255,255,0.25)" }}
-          variants={fade}
-        >
-          {streakLine}
-        </motion.p>
-      </motion.section>
+        {/* Page dots */}
+        <div className="flex justify-center gap-1.5 pb-2 pt-1">
+          {[0, 1].map((i) => (
+            <button
+              key={i}
+              onClick={() => setHeroPage(i)}
+              style={{
+                width: heroPage === i ? 16 : 4,
+                height: 4,
+                borderRadius: 2,
+                background: heroPage === i ? "#C4873A" : "rgba(255,255,255,0.15)",
+                transition: "all 0.25s ease",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+              }}
+            />
+          ))}
+        </div>
+      </motion.div>
 
       {/* ── STATS ─────────────────────────────────────────────── */}
       <motion.div
