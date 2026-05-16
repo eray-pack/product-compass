@@ -56,9 +56,9 @@
 ### Week of May 30 — Paywall & Monetisation
 
 **Eray**
-- [ ] Integrate RevenueCat for subscription handling (mobile-first, works with App Store)
-- [ ] Wire paywall gate — lock features behind real subscription check (replace `isPremium` localStorage flag)
-- [ ] Set up Supabase Edge Function for RevenueCat webhook (payment events → update user role in DB)
+- [x] Integrate RevenueCat for subscription handling (mobile-first, works with App Store)
+- [x] Wire paywall gate — lock features behind real subscription check (replace `isPremium` localStorage flag)
+- [x] Set up Supabase Edge Function for RevenueCat webhook (payment events → update user role in DB)
 - [ ] Re-enable email confirmation in Supabase before any real users sign up
 
 **Fortune**
