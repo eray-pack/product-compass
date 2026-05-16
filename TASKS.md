@@ -37,13 +37,13 @@
 
 ---
 
-### Week of May 23 — Auth & Data Persistence
+### Week of May 23 — Auth & Data Persistence ✅
 
 **Eray**
-- [ ] Wire signup/login fully to Supabase (profiles + user_state trigger working)
-- [ ] Move streak + XP from localStorage → Supabase (`user_state` table)
-- [ ] Fetch user's created rooms from Supabase on community page load (rooms disappear on refresh now)
-- [ ] Regenerate `supabase-setup.sql` from live DB schema
+- [x] Wire signup/login fully to Supabase — fixed by disabling email confirmation (re-enable before launch)
+- [x] Move streak + XP from localStorage → Supabase (`user_state` table)
+- [x] Fetch user's created rooms from Supabase on community page load
+- [x] Regenerate `supabase-setup.sql` from live DB schema
 
 **Fortune**
 - [ ] Onboarding polish — review each screen after auth is wired
@@ -56,12 +56,13 @@
 ### Week of May 30 — Paywall & Monetisation
 
 **Eray**
-- [ ] Integrate RevenueCat or Stripe for subscription handling
-- [ ] Wire paywall gate — lock features behind subscription check
-- [ ] Set up Supabase Edge Function for webhook (payment events → update user role)
+- [ ] Integrate RevenueCat for subscription handling (mobile-first, works with App Store)
+- [ ] Wire paywall gate — lock features behind real subscription check (replace `isPremium` localStorage flag)
+- [ ] Set up Supabase Edge Function for RevenueCat webhook (payment events → update user role in DB)
+- [ ] Re-enable email confirmation in Supabase before any real users sign up
 
 **Fortune**
-- [ ] Final paywall design — pricing screen, offer modal, post-purchase state
-- [ ] App Store screenshots / marketing visuals (start early)
+- [ ] Post-purchase screen design — what does the user see after subscribing?
+- [ ] App Store screenshots / marketing visuals (start early, takes time)
 
 **Deadline: Friday June 6**
