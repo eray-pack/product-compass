@@ -7,6 +7,10 @@ import {
   ArrowLeft, Send, Lock, Plus, Users, Globe, Book, Dumbbell,
   Heart, MessageCircle, Crown, Shield, Check, X
 } from "lucide-react";
+// @ts-ignore — react-simple-maps v3 ships no bundled types
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+// @ts-ignore — world-atlas ships plain JSON, no types needed
+import topology from "world-atlas/countries-110m.json";
 
 export const Route = createFileRoute("/community")({
   component: CommunityPage,
@@ -103,102 +107,143 @@ function formatCount(n: number): string {
   return `${n}`;
 }
 
-// ─── Community hero ───────────────────────────────────────────────────────────
-// Silhouette person: all shapes share the same fill; overlapping regions
-// merge into a single continuous silhouette. Local coords: feet at y=0.
-function CommunityHero() {
-  const fill = "#C4873A";
+// ─── Activity dots for the flat world map ────────────────────────────────────
+// Coordinates are [longitude, latitude] — GeoJSON convention
+const ACTIVITY_DOTS: { name: string; coords: [number, number] }[] = [
+  { name: "New York",   coords: [-74,    41    ] },
+  { name: "London",     coords: [-0.1,   51.5  ] },
+  { name: "Amsterdam",  coords: [4.9,    52.4  ] },
+  { name: "Paris",      coords: [2.3,    48.9  ] },
+  { name: "Berlin",     coords: [13.4,   52.5  ] },
+  { name: "São Paulo",  coords: [-46.6, -23.5  ] },
+  { name: "Lagos",      coords: [3.4,    6.5   ] },
+  { name: "Dubai",      coords: [55.3,   25.2  ] },
+  { name: "Mumbai",     coords: [72.8,   19.1  ] },
+  { name: "Singapore",  coords: [103.8,   1.3  ] },
+  { name: "Tokyo",      coords: [139.7,  35.7  ] },
+  { name: "Sydney",     coords: [151.2, -33.9  ] },
+];
 
-  // Reusable body parts (legs + torso + head)
-  const Body = () => (
-    <>
-      <circle cx="0" cy="-97" r="12" fill={fill} />
-      <rect x="-11" y="-84" width="22" height="54" rx="8" fill={fill} />
-      <rect x="-12" y="-32" width="10" height="32" rx="5" fill={fill} />
-      <rect x="2"   y="-32" width="10" height="32" rx="5" fill={fill} />
-    </>
-  );
-  // Hanging arms
-  const ArmsNormal = () => (
-    <>
-      <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} />
-      <rect x="14"  y="-81" width="10" height="34" rx="5" fill={fill} />
-    </>
-  );
-  // Both arms raised (V-shape, SVG rotate around shoulder)
-  const ArmsRaised = () => (
-    <>
-      <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} transform="rotate(-138 -19 -83)" />
-      <rect x="14"  y="-81" width="10" height="34" rx="5" fill={fill} transform="rotate(138 19 -83)" />
-    </>
-  );
-  // Right arm raised — talking pose (arm toward face area)
-  const ArmsTalking = () => (
-    <>
-      <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} />
-      <rect x="14"  y="-81" width="10" height="34" rx="5" fill={fill} transform="rotate(100 19 -83)" />
-    </>
-  );
+function WorldMapHero() {
+  const [liveCount, setLiveCount] = useState(248);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLiveCount((n) => Math.max(240, Math.min(260, n + Math.floor(Math.random() * 5) - 2)));
+    }, 3500);
+    return () => clearInterval(id);
+  }, []);
 
   return (
-    <div className="relative overflow-hidden" style={{ height: 112, marginTop: 16 }}>
-      {/* Dark backdrop */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, #0a0804 0%, #110c07 100%)" }} />
+    <div style={{ marginTop: 8 }} className="px-4">
+      {/* ── Live counter ── */}
+      <div className="flex items-center justify-center gap-2 pb-2">
+        <span
+          className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
+          style={{ background: "#C4873A", boxShadow: "0 0 6px #C4873A" }}
+        />
+        <span
+          className="text-[11px] font-bold tracking-wider tabular-nums"
+          style={{ color: "#C4873A" }}
+        >
+          {liveCount} active now
+        </span>
+      </div>
 
-      <svg viewBox="0 0 360 105" width="100%" height="105" style={{ position: "absolute", bottom: 0, left: 0 }}>
-        <defs>
-          <radialGradient id="cg-spot" cx="50%" cy="100%" r="60%">
-            <stop offset="0%"   stopColor="#C4873A" stopOpacity="0.50" />
-            <stop offset="50%"  stopColor="#C4873A" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#C4873A" stopOpacity="0" />
-          </radialGradient>
-        </defs>
+      {/* ── Map ── */}
+      {/* Border beam wrapper: 1px padding reveals the rotating gradient as a border */}
+      <div style={{ position: "relative", borderRadius: 16, padding: 1, overflow: "hidden" }}>
+        <style>{`
+          @keyframes rsm-ping {
+            0%   { transform: scale(1);   opacity: 0.7; }
+            70%  { transform: scale(2.8); opacity: 0;   }
+            100% { transform: scale(2.8); opacity: 0;   }
+          }
+          .rsm-dot-ring {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: rsm-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+          }
+          @keyframes border-beam-rotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+          }
+          .border-beam-ring {
+            position: absolute;
+            /* large square centred — covers all edges when rotating */
+            width: 200%; height: 200%;
+            top: -50%; left: -50%;
+            background: conic-gradient(
+              from 0deg,
+              transparent 60%,
+              rgba(196,135,58,0.25) 75%,
+              #C4873A 88%,
+              rgba(196,135,58,0.25) 96%,
+              transparent 100%
+            );
+            animation: border-beam-rotate 4s linear infinite;
+            pointer-events: none;
+          }
+        `}</style>
 
-        {/* Warm spotlight on the ground */}
-        <ellipse cx="180" cy="103" rx="168" ry="18" fill="url(#cg-spot)" />
+        {/* Rotating glow layer */}
+        <div className="border-beam-ring" />
 
-        {/* ── Person 1 — far left, back, small, normal ── */}
-        <g transform="translate(40, 98) scale(0.30)">
-          <g className="community-sway-1" opacity="0.36">
-            <Body /><ArmsNormal />
-          </g>
-        </g>
+        {/* Map content — sits above the glow, clips to border-radius */}
+        <div style={{ position: "relative", background: "#000000", borderRadius: 15, overflow: "hidden", lineHeight: 0 }}>
+        <ComposableMap
+          projection="geoNaturalEarth1"
+          projectionConfig={{ scale: 110, center: [0, 0] }}
+          width={800}
+          height={294}
+          style={{ width: "100%", height: "auto", display: "block" }}
+        >
+          {/* Ocean fill — black background */}
+          <rect x={0} y={0} width={800} height={294} fill="#000000" />
 
-        {/* ── Person 2 — center-left, mid-depth, arms raised ── */}
-        <g transform="translate(108, 98) scale(0.43)">
-          <g className="community-sway-2" opacity="0.60">
-            <Body /><ArmsRaised />
-          </g>
-        </g>
+          {/* Country shapes */}
+          <Geographies geography={topology}>
+            {({ geographies }: { geographies: any[] }) =>
+              geographies.map((geo: any) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill="#0f1a2e"
+                  stroke="#1e3a5f"
+                  strokeWidth={0.4}
+                  style={{
+                    default:  { outline: "none" },
+                    hover:    { outline: "none" },
+                    pressed:  { outline: "none" },
+                  }}
+                />
+              ))
+            }
+          </Geographies>
 
-        {/* ── Person 3 — center front, tallest, waving arm ── */}
-        <g transform="translate(184, 98) scale(0.54)">
-          <g className="community-breathe" opacity="0.84">
-            <Body />
-            {/* Left arm static */}
-            <rect x="-24" y="-81" width="10" height="34" rx="5" fill={fill} />
-            {/* Right arm — animated wave */}
-            <rect x="14" y="-81" width="10" height="34" rx="5" fill={fill} className="community-wave-arm" />
-          </g>
-        </g>
-
-        {/* ── Person 4 — center-right, mid-depth, talking ── */}
-        <g transform="translate(258, 98) scale(0.41)">
-          <g className="community-sway-1" opacity="0.54">
-            <Body /><ArmsTalking />
-          </g>
-        </g>
-
-        {/* ── Person 5 — far right, back, small, arms raised ── */}
-        <g transform="translate(318, 98) scale(0.34)">
-          <g className="community-sway-2" opacity="0.38">
-            <Body /><ArmsRaised />
-          </g>
-        </g>
-      </svg>
-
-      {/* Fade to page background */}
-      <div className="absolute inset-x-0 bottom-0 h-10 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
+          {/* Activity dots — pulsing gold */}
+          {ACTIVITY_DOTS.map(({ name, coords }, i) => (
+            <Marker key={name} coordinates={coords}>
+              {/* Expanding ring — staggered delay per dot */}
+              <circle
+                r={3.5}
+                fill="#C4873A"
+                fillOpacity={0.35}
+                className="rsm-dot-ring"
+                style={{ animationDelay: `${(i * 0.18) % 2}s` }}
+              />
+              {/* Solid gold core */}
+              <circle
+                r={2.2}
+                fill="#C4873A"
+                fillOpacity={0.95}
+                style={{ filter: "drop-shadow(0 0 3px #C4873A)" }}
+              />
+            </Marker>
+          ))}
+        </ComposableMap>
+        </div>
+      </div>
     </div>
   );
 }
@@ -303,9 +348,9 @@ function CommunityPage() {
         </p>
       </header>
 
-      {/* ── Hero silhouettes ─────────────────────────────────── */}
+      {/* ── World map hero ───────────────────────────────────── */}
       <div className="fade-up-1">
-        <CommunityHero />
+        <WorldMapHero />
       </div>
 
       {/* ── Room list ────────────────────────────────────────── */}

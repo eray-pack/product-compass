@@ -78,9 +78,10 @@ async function handleChatApi(request: Request, env: Env): Promise<Response> {
     return new Response("Method not allowed", { status: 405 });
   }
 
-  // Priority: Cloudflare binding (wrangler dev / prod) → process.env define (vite build) → import.meta.env (vite dev)
+  // Priority: Cloudflare binding (wrangler/prod) → process.env baked by vite define → import.meta.env (vite dev)
+  // env is undefined in vite dev (no Cloudflare runtime), so use optional chaining.
   const apiKey =
-    env.ANTHROPIC_API_KEY ??
+    env?.ANTHROPIC_API_KEY ??
     process.env.ANTHROPIC_API_KEY ??
     (import.meta.env as Record<string, string>).ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -150,6 +151,7 @@ export default {
     if (url.pathname === "/api/chat") {
       return handleChatApi(request, env);
     }
+
 
     try {
       const handler = await getServerEntry();

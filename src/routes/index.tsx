@@ -1,19 +1,18 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Coins, X, Plus, Lock } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
-import { useAppState, dayCount, activeAddiction, inactivityDays } from "@/lib/store";
-import { triggerPaywall } from "@/lib/paywall";
+import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
 
 const MILESTONES = [
-  { day: 7,  label: "Energy",      short: "E" },
-  { day: 14, label: "Focus",       short: "F" },
-  { day: 30, label: "Confidence",  short: "C" },
-  { day: 60, label: "Regulation",  short: "R" },
-  { day: 90, label: "Reset",       short: "✓" },
+  { day: 7,  label: "Awaken",   short: "A" },
+  { day: 14, label: "Clarity",  short: "C" },
+  { day: 30, label: "Control",  short: "C" },
+  { day: 60, label: "Strength", short: "S" },
+  { day: 90, label: "Reset",    short: "R" },
 ];
 
 const MILESTONE_LABELS: Record<number, string> = {
@@ -30,69 +29,269 @@ function nextMilestone(day: number) {
   return { ...m, fullLabel: MILESTONE_LABELS[m.day], daysAway: m.day - day };
 }
 
-// ── Brain recovery timeline ───────────────────────────────────────────────────
-function BrainTimeline({ day }: { day: number }) {
-  const pct = Math.min(100, (day / 90) * 100);
+// ── Milestone strip ───────────────────────────────────────────────────────────
+const CARD_W = 126;
+
+function MilestoneStrip({ day }: { day: number }) {
+  const stripRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const startX = useRef(0);
+  const startScroll = useRef(0);
+  const dragging = useRef(false);
+
+  const activeIdx = (() => {
+    const i = MILESTONES.findIndex((m) => day < m.day);
+    return i === -1 ? MILESTONES.length - 1 : i;
+  })();
+
+  const snapToCard = (idx: number, smooth = true) => {
+    const card = cardRefs.current[idx];
+    const strip = stripRef.current;
+    if (!card || !strip) return;
+    strip.scrollTo({
+      left: card.offsetLeft + CARD_W / 2 - strip.offsetWidth / 2,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  };
+
+  const snapToNearest = () => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const center = strip.scrollLeft + strip.offsetWidth / 2;
+    let closest = 0, minDist = Infinity;
+    cardRefs.current.forEach((card, i) => {
+      if (!card) return;
+      const dist = Math.abs(card.offsetLeft + CARD_W / 2 - center);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    snapToCard(closest);
+  };
+
+  useEffect(() => { snapToCard(activeIdx, false); }, [activeIdx]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    dragging.current = true;
+    startX.current = e.clientX;
+    startScroll.current = stripRef.current?.scrollLeft ?? 0;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging.current || !stripRef.current) return;
+    stripRef.current.scrollLeft = startScroll.current + (startX.current - e.clientX);
+  };
+
+  const onPointerUp = () => {
+    if (!dragging.current) return;
+    dragging.current = false;
+    snapToNearest();
+  };
+
   return (
-    <div className="mt-3">
-      <div className="relative h-1.5 rounded-full" style={{ background: "oklch(0.22 0.03 265)" }}>
-        <div
-          className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
-        />
-        {MILESTONES.map(({ day: m }) => {
-          const pos = (m / 90) * 100;
-          const reached = day >= m;
+    <>
+      <style>{`.ms-strip::-webkit-scrollbar { display: none; }`}</style>
+      <div
+        ref={stripRef}
+        className="ms-strip flex overflow-x-scroll"
+        style={{
+          position: "relative",
+          scrollbarWidth: "none",
+          paddingLeft: `calc(50% - ${CARD_W / 2}px)`,
+          paddingRight: `calc(50% - ${CARD_W / 2}px)`,
+          gap: 10,
+          paddingTop: 8,
+          paddingBottom: 10,
+          userSelect: "none",
+          touchAction: "none",
+          cursor: "grab",
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        {MILESTONES.map(({ day: m, label }, i) => {
+          const isActive = i === activeIdx;
+          const isReached = day >= m;
+          const daysAway = m - day;
+
           return (
-            <div key={m} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10" style={{ left: `${pos}%` }}>
-              <div
-                className="h-3.5 w-3.5 rounded-full border-2 transition-all"
-                style={{
-                  background: reached ? "var(--primary)" : "oklch(0.13 0.022 265)",
-                  borderColor: reached ? "var(--primary)" : "oklch(0.22 0.03 265)",
-                  boxShadow: reached ? "0 0 10px 2px oklch(0.62 0.22 255 / 0.6)" : "none",
-                }}
-              />
-            </div>
-          );
-        })}
-        {pct < 100 && (
-          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20" style={{ left: `${pct}%` }}>
             <div
-              className="h-4 w-4 rounded-full animate-glow-pulse"
-              style={{ background: "var(--primary)", boxShadow: "0 0 16px 4px oklch(0.62 0.22 255 / 0.7)" }}
-            />
-          </div>
-        )}
-      </div>
-      <div className="relative h-9 mt-0.5">
-        {MILESTONES.map(({ day: m, label }) => {
-          const pos = (m / 90) * 100;
-          const reached = day >= m;
-          return (
-            <div key={m} className="absolute -translate-x-1/2 text-center" style={{ left: `${pos}%` }}>
-              <p className="text-[9px] font-semibold leading-none" style={{ color: reached ? "var(--primary)" : "oklch(0.42 0.018 265)" }}>
+              key={m}
+              ref={(el) => { cardRefs.current[i] = el; }}
+              style={{
+                flexShrink: 0,
+                width: CARD_W,
+                height: 100,
+                borderRadius: 18,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                background: isActive
+                  ? "oklch(0.17 0.04 265 / 0.95)"
+                  : isReached
+                  ? "oklch(0.15 0.025 265 / 0.9)"
+                  : "oklch(0.12 0.02 265 / 0.9)",
+                border: isActive
+                  ? "1.5px solid #C4873A"
+                  : isReached
+                  ? "1px solid rgba(196,135,58,0.20)"
+                  : "1px solid oklch(0.23 0.02 265)",
+                boxShadow: isActive
+                  ? "0 0 0 1px rgba(196,135,58,0.22), 0 0 24px 6px rgba(196,135,58,0.28)"
+                  : "none",
+              }}
+            >
+              <p style={{
+                fontSize: 17,
+                fontWeight: 700,
+                letterSpacing: "-0.01em",
+                lineHeight: 1,
+                color: isActive
+                  ? "#ffffff"
+                  : isReached
+                  ? "rgba(255,255,255,0.38)"
+                  : "rgba(255,255,255,0.18)",
+              }}>
                 {label}
               </p>
-              <p className="text-[8px] mt-0.5 leading-none" style={{ color: reached ? "oklch(0.50 0.18 255)" : "oklch(0.34 0.015 265)" }}>
+
+              <p style={{
+                fontSize: 11,
+                fontWeight: 600,
+                lineHeight: 1,
+                color: isActive
+                  ? "#C4873A"
+                  : isReached
+                  ? "rgba(196,135,58,0.40)"
+                  : "oklch(0.38 0.02 265)",
+              }}>
                 d{m}
               </p>
+
+              {isActive && (
+                <p style={{
+                  fontSize: 9,
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  color: "#C4873A",
+                  opacity: 0.85,
+                  marginTop: 1,
+                }}>
+                  {isReached ? "Complete ✓" : `${daysAway} day${daysAway !== 1 ? "s" : ""} to go`}
+                </p>
+              )}
             </div>
           );
         })}
       </div>
+    </>
+  );
+}
+
+// ── Today's Focus card ───────────────────────────────────────────────────────
+const FOCUS_CACHE_PREFIX = "stopamine.focus.";
+
+function todayCacheKey(name: string) {
+  return FOCUS_CACHE_PREFIX + new Date().toISOString().slice(0, 10) + "." + name.trim().toLowerCase();
+}
+
+function TodaysFocus({
+  name, addiction, costs, triggers, day,
+}: {
+  name: string; addiction: string; costs: string[]; triggers: string[]; day: number;
+}) {
+  const [text, setText] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const displayName = name.trim() || "friend";
+    const key = todayCacheKey(displayName);
+    const cached = localStorage.getItem(key);
+    if (cached) {
+      setText(cached);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+
+    const phase =
+      day <= 7  ? "surviving the first week — cravings are at their peak, every hour counts" :
+      day <= 30 ? "building momentum — the brain is starting to rewire, patterns are forming" :
+      day <= 60 ? "identity change — becoming someone new, not just quitting" :
+      day <= 90 ? "finishing strong — the 90-day reset is in sight, this is where most people slip" :
+                  "maintaining and giving back — past 90 days, locking in the new identity for life";
+
+    const costsStr = costs.length ? costs.join(", ") : "their wellbeing";
+    const triggersStr = triggers.length ? triggers.join(", ") : "various situations";
+
+    const prompt =
+      `Write a Today's Focus message for ${displayName}. ` +
+      `They are on day ${day} of quitting ${addiction}. ` +
+      `It has cost them: ${costsStr}. ` +
+      `Their main triggers are: ${triggersStr}. ` +
+      `Recovery phase: ${phase}. ` +
+      `Write exactly 1 sentence. Maximum 20 words. Start with "Hey ${displayName},". ` +
+      `Be specific to their habit and current day. No comma splices. Hard limit: 20 words total.`;
+
+    fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(`/api/chat ${r.status}`);
+        return r.json();
+      })
+      .then((data: { text?: string; error?: string }) => {
+        if (cancelled) return;
+        if (!data.text) throw new Error(data.error ?? "Empty response");
+        // Purge old cache keys
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith(FOCUS_CACHE_PREFIX) && k !== key)
+          .forEach((k) => localStorage.removeItem(k));
+        localStorage.setItem(key, data.text);
+        setText(data.text);
+      })
+      .catch((err) => {
+        console.error("[TodaysFocus]", err);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div
+      className="mx-6 mt-6 px-4 py-4 rounded-2xl"
+      style={{
+        background: "oklch(0.18 0.03 265 / 0.85)",
+        border: "1px solid rgba(196,135,58,0.35)",
+        boxShadow: "var(--shadow-glow)",
+      }}
+    >
+      <p
+        className="text-[9px] font-bold tracking-[0.25em] uppercase mb-2.5 text-center"
+        style={{ color: "#C4873A" }}
+      >
+        Today's Focus
+      </p>
+      {loading ? (
+        <div className="space-y-2">
+          <div className="h-3 rounded-full animate-pulse" style={{ background: "oklch(0.22 0.02 265)", width: "90%" }} />
+          <div className="h-3 rounded-full animate-pulse" style={{ background: "oklch(0.22 0.02 265)", width: "75%" }} />
+        </div>
+      ) : text ? (
+        <p className="text-[13px] leading-relaxed text-white/90 text-center">{text}</p>
+      ) : (
+        <p className="text-[12px] text-muted-foreground/50 italic">Focus message unavailable.</p>
+      )}
     </div>
   );
 }
 
 // ── Daily check-in ────────────────────────────────────────────────────────────
-const MOODS = [
-  { v: 1, emoji: "😞", label: "Rough" },
-  { v: 2, emoji: "😕", label: "Low" },
-  { v: 3, emoji: "😐", label: "OK" },
-  { v: 4, emoji: "🙂", label: "Good" },
-  { v: 5, emoji: "😤", label: "Strong" },
-];
 
 const VARIABLE_REWARDS = [
   { weight: 50, xp: 10,  message: null },
@@ -136,11 +335,12 @@ function moodResponse(v: number): MoodResponse {
 
 function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   const [, update] = useAppState();
-  const [mood, setMood] = useState<number | null>(null);
+  const [mood, setMood] = useState<number>(3);
+  const [confirmed, setConfirmed] = useState(false);
 
-  const handleMood = (v: number) => {
-    if (mood !== null) return;
-    setMood(v);
+  const handleConfirm = () => {
+    if (confirmed) return;
+    setConfirmed(true);
     const reward = rollReward();
     if (reward.xp > 0) {
       update((s) => ({ points: s.points + reward.xp, treeXP: s.treeXP + Math.floor(reward.xp / 5) }));
@@ -151,42 +351,94 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
     }
   };
 
-  const response = mood !== null ? moodResponse(mood) : null;
-  const isLow = mood !== null && mood <= 2;
-  const isHigh = mood !== null && mood >= 4;
+  const response = confirmed ? moodResponse(mood) : null;
+  const isLow = mood <= 2;
+  const isHigh = mood >= 4;
 
   return (
     <div>
-      {/* Emoji row */}
-      <div className="flex gap-2">
-        {MOODS.map(({ v, emoji, label }) => (
-          <button
-            key={v}
-            onClick={() => handleMood(v)}
-            className={`flex-1 flex flex-col items-center gap-1.5 py-3.5 rounded-2xl text-[10px] font-medium transition-all ${
-              mood !== null
-                ? v === mood
-                  ? "border border-primary/40 active:scale-100 cursor-default"
-                  : "opacity-20 cursor-default"
-                : "border border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary active:scale-95"
-            }`}
-            style={
-              mood !== null && v === mood
-                ? { background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }
-                : mood !== null
-                ? {}
-                : { background: "var(--card)" }
-            }
+      {/* Slider */}
+      <div className="relative pt-6 pb-2">
+        {/* Value above thumb */}
+        <div
+          className="absolute top-0 flex flex-col items-center pointer-events-none"
+          style={{
+            left: `calc(${((mood - 1) / 4) * 100}%)`,
+            transform: "translateX(-50%)",
+            transition: "left 0.1s ease",
+          }}
+        >
+          <span
+            className="text-[11px] font-bold tabular-nums"
+            style={{ color: "var(--primary)" }}
           >
-            <span className="text-xl leading-none">{emoji}</span>
-            {label}
-          </button>
-        ))}
+            {mood}
+          </span>
+        </div>
+
+        {/* Track + thumb via native range */}
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          value={mood}
+          disabled={confirmed}
+          onChange={(e) => setMood(Number(e.target.value))}
+          onMouseUp={handleConfirm}
+          onTouchEnd={handleConfirm}
+          className="w-full appearance-none bg-transparent cursor-pointer disabled:cursor-default"
+          style={{ height: 20 }}
+        />
+
+        {/* Labels */}
+        <div className="flex justify-between mt-1.5">
+          <span className="text-[10px] text-muted-foreground/50 font-medium">Rough</span>
+          <span className="text-[10px] text-muted-foreground/50 font-medium">Strong</span>
+        </div>
       </div>
+
+      {/* Slider track/thumb styles */}
+      <style>{`
+        input[type=range] {
+          --thumb-color: #C4873A;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+          height: 1.5px;
+          background: oklch(0.32 0.03 265 / 0.8);
+          border-radius: 1px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: var(--thumb-color);
+          box-shadow: 0 0 8px 2px #C4873A55;
+          margin-top: -6.25px;
+          transition: box-shadow 0.15s;
+        }
+        input[type=range]:not(:disabled)::-webkit-slider-thumb:active {
+          box-shadow: 0 0 14px 4px #C4873A77;
+        }
+        input[type=range]::-moz-range-track {
+          height: 1.5px;
+          background: oklch(0.32 0.03 265 / 0.8);
+          border-radius: 1px;
+        }
+        input[type=range]::-moz-range-thumb {
+          width: 14px;
+          height: 14px;
+          border: none;
+          border-radius: 50%;
+          background: var(--thumb-color);
+          box-shadow: 0 0 8px 2px #C4873A55;
+        }
+      `}</style>
 
       {/* Contextual response */}
       {response && (
-        <div className="mt-5 fade-up">
+        <div className="mt-4 fade-up">
           <p
             className="text-sm font-semibold leading-snug"
             style={{
@@ -233,71 +485,6 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   );
 }
 
-// ── Cut the Signal game circles ───────────────────────────────────────────────
-function SignalGame({ to, glow, label, icon }: { to: string; glow: string; label: string; icon: React.ReactNode }) {
-  return (
-    <Link to={to} className="flex flex-col items-center gap-3 active:opacity-70 transition-opacity">
-      <div
-        className="h-[68px] w-[68px] rounded-full grid place-items-center"
-        style={{
-          background: "var(--card)",
-          border: `1.5px solid ${glow}44`,
-          boxShadow: `0 0 20px 4px ${glow}35, 0 0 6px 1px ${glow}22`,
-        }}
-      >
-        {icon}
-      </div>
-      <span className="text-[11px] font-semibold text-foreground/70 text-center leading-tight max-w-[72px]">
-        {label}
-      </span>
-    </Link>
-  );
-}
-
-function MindPulseIcon() {
-  return (
-    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="15" r="12" stroke="#6BAED6" strokeWidth="1.2" strokeOpacity="0.5"/>
-      <circle cx="15" cy="15" r="6" fill="#6BAED6" fillOpacity="0.15" stroke="#6BAED6" strokeWidth="1.3"/>
-      <path d="M5 15 L9 15 L11 10 L13 20 L15 13 L17 17 L19 15 L25 15" stroke="#6BAED6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-
-function ImpulseShiftIcon() {
-  return (
-    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="15" r="12" stroke="#C4873A" strokeWidth="1.2" strokeOpacity="0.5"/>
-      <circle cx="15" cy="15" r="7" stroke="#C4873A" strokeWidth="1.2" strokeOpacity="0.65"/>
-      <circle cx="15" cy="15" r="2.2" fill="#C4873A"/>
-      <line x1="15" y1="2" x2="15" y2="6"  stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="15" y1="24" x2="15" y2="28" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="2"  y1="15" x2="6"  y2="15" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="24" y1="15" x2="28" y2="15" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  );
-}
-
-function NeuralLinkIcon() {
-  return (
-    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <line x1="8"  y1="8"  x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="22" y1="8"  x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="8"  y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="22" y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="8"  y1="8"  x2="22" y2="8"  stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="8"  y1="22" x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="8"  y1="8"  x2="8"  y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="22" y1="8"  x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <circle cx="8"  cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="22" cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="8"  cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="22" cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="15" cy="15" r="3.5" fill="#6BAA75" fillOpacity="0.3" stroke="#6BAA75" strokeWidth="1.4"/>
-    </svg>
-  );
-}
-
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/")({
   beforeLoad: () => {
@@ -328,6 +515,15 @@ function Dashboard() {
   const day = active ? dayCount(active.startDate) : 1;
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
   const next = nextMilestone(day);
+
+  useEffect(() => {
+    const fromStorage = loadState();
+    console.log("[Stopamine] Subscription state:", {
+      "state.isPremium (reactive)": state.isPremium,
+      "loadState().isPremium (localStorage direct)": fromStorage.isPremium,
+      "paywallSeen": state.paywallSeen,
+    });
+  }, [state.isPremium]);
 
   useEffect(() => {
     if (!state.onboarding) return;
@@ -421,42 +617,21 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ── Brain recovery timeline ──────────────────────────── */}
-      <section className="px-6 mt-6 fade-up-2 text-center">
-        <div className="flex items-baseline justify-center gap-2 mb-1">
-          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
-            Brain Recovery Timeline
-          </p>
-          <span className="text-[10px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>
-            d{day}
-          </span>
-        </div>
-        <BrainTimeline day={day} />
+      {/* ── Milestone strip ──────────────────────────────────── */}
+      <section className="mt-4 fade-up-2">
+        <MilestoneStrip day={day} />
       </section>
 
-      {/* ── Cut the Signal ──────────────────────────────────── */}
-      <section className="px-6 mt-10 fade-up-3 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-5">
-          Cut the Signal
-        </p>
-        <div className="flex justify-around">
-          <SignalGame to="/tools/breath" glow="#6BAED6" label="Mind Pulse"    icon={<MindPulseIcon />} />
-          <SignalGame to="/tools/tap"    glow="#C4873A" label="Impulse Shift" icon={<ImpulseShiftIcon />} />
-          <SignalGame to="/tools/memory" glow="#6BAA75" label="Neural Link"   icon={<NeuralLinkIcon />} />
-        </div>
-        <button
-          onClick={() => triggerPaywall()}
-          className="mt-4 flex items-center justify-center gap-1.5 w-full active:opacity-70 transition-opacity"
-        >
-          <span
-            className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
-            style={{ color: "var(--primary)", borderColor: "oklch(0.62 0.22 255 / 0.3)", background: "oklch(0.62 0.22 255 / 0.06)" }}
-          >
-            <Lock className="h-3 w-3" /> PRO
-          </span>
-          <span className="text-[11px] text-muted-foreground/60">More games available</span>
-        </button>
-      </section>
+      {/* ── Today's Focus ───────────────────────────────────── */}
+      {state.onboarding && active && (
+        <TodaysFocus
+          name={state.onboarding.name}
+          addiction={active.name}
+          costs={state.onboarding.costs}
+          triggers={state.onboarding.triggers}
+          day={day}
+        />
+      )}
 
       {/* ── Daily check-in ──────────────────────────────────── */}
       <section className="px-6 mt-10 pt-8 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>

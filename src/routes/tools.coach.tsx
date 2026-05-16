@@ -12,6 +12,12 @@ const FIRST_MESSAGE: ChatMessage = {
   content: "Hey. I'm here. How are you holding up today?",
 };
 
+const QUICK_SUGGESTIONS = [
+  "I'm struggling right now",
+  "I need motivation",
+  "Talk me through a craving",
+];
+
 function Coach() {
   const [messages, setMessages] = useState<ChatMessage[]>([FIRST_MESSAGE]);
   const [input, setInput] = useState("");
@@ -23,8 +29,8 @@ function Coach() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  async function handleSend() {
-    const text = input.trim();
+  async function handleSend(override?: string) {
+    const text = (override ?? input).trim();
     if (!text || isTyping) return;
 
     const userMsg: ChatMessage = { role: "user", content: text };
@@ -78,6 +84,26 @@ function Coach() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
+
+        {/* Robot icon */}
+        <svg width="32" height="40" viewBox="0 0 52 66" fill="none" overflow="visible" className="robot-body" style={{ flexShrink: 0 }}>
+          <line x1="26" y1="9" x2="26" y2="2" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="26" cy="2" r="2.5" fill="#C4873A" />
+          <rect x="8" y="9" width="36" height="22" rx="6" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
+          <circle cx="19" cy="20" r="3.5" fill="#C4873A" opacity="0.85" />
+          <circle cx="33" cy="20" r="3.5" fill="#C4873A" opacity="0.85" />
+          <circle cx="20.2" cy="18.5" r="1.2" fill="#f5ede0" opacity="0.55" />
+          <circle cx="34.2" cy="18.5" r="1.2" fill="#f5ede0" opacity="0.55" />
+          <path d="M 20 26 Q 26 30.5 32 26" stroke="#C4873A" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.85" />
+          <rect x="21" y="31" width="10" height="5" rx="2.5" fill="#261F15" />
+          <rect x="5" y="36" width="42" height="26" rx="6" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
+          <rect x="14" y="42" width="24" height="12" rx="3" fill="#261F15" stroke="#C4873A" strokeWidth="0.6" opacity="0.75" />
+          <circle cx="23" cy="48" r="2.5" fill="#C4873A" opacity="0.35" />
+          <circle cx="30" cy="48" r="2.5" fill="#C4873A" opacity="0.9" />
+          <rect x="0" y="38" width="9" height="18" rx="4.5" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
+          <rect x="43" y="38" width="9" height="18" rx="4.5" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" className="robot-wave-arm" />
+        </svg>
+
         <div className="flex-1">
           <p className="font-semibold text-sm leading-tight">Your Recovery Coach</p>
           <p className="text-[11px] mt-0.5" style={{ color: "var(--muted-foreground)" }}>
@@ -119,6 +145,26 @@ function Coach() {
           </div>
         ))}
 
+        {/* Quick suggestion buttons — visible only before the user sends anything */}
+        {messages.length === 1 && !isTyping && (
+          <div className="flex flex-col items-start gap-2 pt-1">
+            {QUICK_SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => handleSend(suggestion)}
+                className="text-sm font-medium px-4 py-2.5 rounded-full text-left active:scale-95 transition-transform"
+                style={{
+                  background: "oklch(0.16 0.025 265 / 0.9)",
+                  border: "1px solid rgba(196,135,58,0.30)",
+                  color: "rgba(255,255,255,0.88)",
+                }}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
+
         {isTyping && (
           <div className="flex justify-start">
             <div
@@ -152,7 +198,7 @@ function Coach() {
             value={input}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder="Say anything…"
+            placeholder="Tell me what's on your mind…"
             className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground leading-relaxed py-1"
             style={{ maxHeight: 120 }}
           />

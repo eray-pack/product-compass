@@ -22,11 +22,19 @@ import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsVoidstareRouteImport } from './routes/tools.voidstare'
 import { Route as ToolsTapRouteImport } from './routes/tools.tap'
+import { Route as ToolsSteadyhandRouteImport } from './routes/tools.steadyhand'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
+import { Route as ToolsNoisefilterRouteImport } from './routes/tools.noisefilter'
 import { Route as ToolsMemoryRouteImport } from './routes/tools.memory'
+import { Route as ToolsIdentitystackRouteImport } from './routes/tools.identitystack'
+import { Route as ToolsEchochamberRouteImport } from './routes/tools.echochamber'
+import { Route as ToolsDarkroomRouteImport } from './routes/tools.darkroom'
+import { Route as ToolsColdswitchRouteImport } from './routes/tools.coldswitch'
 import { Route as ToolsColdRouteImport } from './routes/tools.cold'
 import { Route as ToolsCoachRouteImport } from './routes/tools.coach'
+import { Route as ToolsClarityclimbRouteImport } from './routes/tools.clarityclimb'
 import { Route as ToolsBreathRouteImport } from './routes/tools.breath'
 
 const TreeRoute = TreeRouteImport.update({
@@ -94,9 +102,19 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsVoidstareRoute = ToolsVoidstareRouteImport.update({
+  id: '/voidstare',
+  path: '/voidstare',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsTapRoute = ToolsTapRouteImport.update({
   id: '/tap',
   path: '/tap',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsSteadyhandRoute = ToolsSteadyhandRouteImport.update({
+  id: '/steadyhand',
+  path: '/steadyhand',
   getParentRoute: () => ToolsRoute,
 } as any)
 const ToolsSosRoute = ToolsSosRouteImport.update({
@@ -104,9 +122,34 @@ const ToolsSosRoute = ToolsSosRouteImport.update({
   path: '/sos',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsNoisefilterRoute = ToolsNoisefilterRouteImport.update({
+  id: '/noisefilter',
+  path: '/noisefilter',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsMemoryRoute = ToolsMemoryRouteImport.update({
   id: '/memory',
   path: '/memory',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsIdentitystackRoute = ToolsIdentitystackRouteImport.update({
+  id: '/identitystack',
+  path: '/identitystack',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsEchochamberRoute = ToolsEchochamberRouteImport.update({
+  id: '/echochamber',
+  path: '/echochamber',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsDarkroomRoute = ToolsDarkroomRouteImport.update({
+  id: '/darkroom',
+  path: '/darkroom',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsColdswitchRoute = ToolsColdswitchRouteImport.update({
+  id: '/coldswitch',
+  path: '/coldswitch',
   getParentRoute: () => ToolsRoute,
 } as any)
 const ToolsColdRoute = ToolsColdRouteImport.update({
@@ -117,6 +160,11 @@ const ToolsColdRoute = ToolsColdRouteImport.update({
 const ToolsCoachRoute = ToolsCoachRouteImport.update({
   id: '/coach',
   path: '/coach',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsClarityclimbRoute = ToolsClarityclimbRouteImport.update({
+  id: '/clarityclimb',
+  path: '/clarityclimb',
   getParentRoute: () => ToolsRoute,
 } as any)
 const ToolsBreathRoute = ToolsBreathRouteImport.update({
@@ -139,11 +187,19 @@ export interface FileRoutesByFullPath {
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
+  '/tools/clarityclimb': typeof ToolsClarityclimbRoute
   '/tools/coach': typeof ToolsCoachRoute
   '/tools/cold': typeof ToolsColdRoute
+  '/tools/coldswitch': typeof ToolsColdswitchRoute
+  '/tools/darkroom': typeof ToolsDarkroomRoute
+  '/tools/echochamber': typeof ToolsEchochamberRoute
+  '/tools/identitystack': typeof ToolsIdentitystackRoute
   '/tools/memory': typeof ToolsMemoryRoute
+  '/tools/noisefilter': typeof ToolsNoisefilterRoute
   '/tools/sos': typeof ToolsSosRoute
+  '/tools/steadyhand': typeof ToolsSteadyhandRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/voidstare': typeof ToolsVoidstareRoute
   '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -159,11 +215,19 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
+  '/tools/clarityclimb': typeof ToolsClarityclimbRoute
   '/tools/coach': typeof ToolsCoachRoute
   '/tools/cold': typeof ToolsColdRoute
+  '/tools/coldswitch': typeof ToolsColdswitchRoute
+  '/tools/darkroom': typeof ToolsDarkroomRoute
+  '/tools/echochamber': typeof ToolsEchochamberRoute
+  '/tools/identitystack': typeof ToolsIdentitystackRoute
   '/tools/memory': typeof ToolsMemoryRoute
+  '/tools/noisefilter': typeof ToolsNoisefilterRoute
   '/tools/sos': typeof ToolsSosRoute
+  '/tools/steadyhand': typeof ToolsSteadyhandRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/voidstare': typeof ToolsVoidstareRoute
   '/tools': typeof ToolsIndexRoute
 }
 export interface FileRoutesById {
@@ -181,11 +245,19 @@ export interface FileRoutesById {
   '/tools': typeof ToolsRouteWithChildren
   '/tree': typeof TreeRoute
   '/tools/breath': typeof ToolsBreathRoute
+  '/tools/clarityclimb': typeof ToolsClarityclimbRoute
   '/tools/coach': typeof ToolsCoachRoute
   '/tools/cold': typeof ToolsColdRoute
+  '/tools/coldswitch': typeof ToolsColdswitchRoute
+  '/tools/darkroom': typeof ToolsDarkroomRoute
+  '/tools/echochamber': typeof ToolsEchochamberRoute
+  '/tools/identitystack': typeof ToolsIdentitystackRoute
   '/tools/memory': typeof ToolsMemoryRoute
+  '/tools/noisefilter': typeof ToolsNoisefilterRoute
   '/tools/sos': typeof ToolsSosRoute
+  '/tools/steadyhand': typeof ToolsSteadyhandRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/voidstare': typeof ToolsVoidstareRoute
   '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRouteTypes {
@@ -204,11 +276,19 @@ export interface FileRouteTypes {
     | '/tools'
     | '/tree'
     | '/tools/breath'
+    | '/tools/clarityclimb'
     | '/tools/coach'
     | '/tools/cold'
+    | '/tools/coldswitch'
+    | '/tools/darkroom'
+    | '/tools/echochamber'
+    | '/tools/identitystack'
     | '/tools/memory'
+    | '/tools/noisefilter'
     | '/tools/sos'
+    | '/tools/steadyhand'
     | '/tools/tap'
+    | '/tools/voidstare'
     | '/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -224,11 +304,19 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tree'
     | '/tools/breath'
+    | '/tools/clarityclimb'
     | '/tools/coach'
     | '/tools/cold'
+    | '/tools/coldswitch'
+    | '/tools/darkroom'
+    | '/tools/echochamber'
+    | '/tools/identitystack'
     | '/tools/memory'
+    | '/tools/noisefilter'
     | '/tools/sos'
+    | '/tools/steadyhand'
     | '/tools/tap'
+    | '/tools/voidstare'
     | '/tools'
   id:
     | '__root__'
@@ -245,11 +333,19 @@ export interface FileRouteTypes {
     | '/tools'
     | '/tree'
     | '/tools/breath'
+    | '/tools/clarityclimb'
     | '/tools/coach'
     | '/tools/cold'
+    | '/tools/coldswitch'
+    | '/tools/darkroom'
+    | '/tools/echochamber'
+    | '/tools/identitystack'
     | '/tools/memory'
+    | '/tools/noisefilter'
     | '/tools/sos'
+    | '/tools/steadyhand'
     | '/tools/tap'
+    | '/tools/voidstare'
     | '/tools/'
   fileRoutesById: FileRoutesById
 }
@@ -361,11 +457,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/voidstare': {
+      id: '/tools/voidstare'
+      path: '/voidstare'
+      fullPath: '/tools/voidstare'
+      preLoaderRoute: typeof ToolsVoidstareRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/tap': {
       id: '/tools/tap'
       path: '/tap'
       fullPath: '/tools/tap'
       preLoaderRoute: typeof ToolsTapRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/steadyhand': {
+      id: '/tools/steadyhand'
+      path: '/steadyhand'
+      fullPath: '/tools/steadyhand'
+      preLoaderRoute: typeof ToolsSteadyhandRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/tools/sos': {
@@ -375,11 +485,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsSosRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/noisefilter': {
+      id: '/tools/noisefilter'
+      path: '/noisefilter'
+      fullPath: '/tools/noisefilter'
+      preLoaderRoute: typeof ToolsNoisefilterRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/memory': {
       id: '/tools/memory'
       path: '/memory'
       fullPath: '/tools/memory'
       preLoaderRoute: typeof ToolsMemoryRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/identitystack': {
+      id: '/tools/identitystack'
+      path: '/identitystack'
+      fullPath: '/tools/identitystack'
+      preLoaderRoute: typeof ToolsIdentitystackRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/echochamber': {
+      id: '/tools/echochamber'
+      path: '/echochamber'
+      fullPath: '/tools/echochamber'
+      preLoaderRoute: typeof ToolsEchochamberRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/darkroom': {
+      id: '/tools/darkroom'
+      path: '/darkroom'
+      fullPath: '/tools/darkroom'
+      preLoaderRoute: typeof ToolsDarkroomRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/coldswitch': {
+      id: '/tools/coldswitch'
+      path: '/coldswitch'
+      fullPath: '/tools/coldswitch'
+      preLoaderRoute: typeof ToolsColdswitchRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/tools/cold': {
@@ -396,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsCoachRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/clarityclimb': {
+      id: '/tools/clarityclimb'
+      path: '/clarityclimb'
+      fullPath: '/tools/clarityclimb'
+      preLoaderRoute: typeof ToolsClarityclimbRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/breath': {
       id: '/tools/breath'
       path: '/breath'
@@ -408,21 +560,37 @@ declare module '@tanstack/react-router' {
 
 interface ToolsRouteChildren {
   ToolsBreathRoute: typeof ToolsBreathRoute
+  ToolsClarityclimbRoute: typeof ToolsClarityclimbRoute
   ToolsCoachRoute: typeof ToolsCoachRoute
   ToolsColdRoute: typeof ToolsColdRoute
+  ToolsColdswitchRoute: typeof ToolsColdswitchRoute
+  ToolsDarkroomRoute: typeof ToolsDarkroomRoute
+  ToolsEchochamberRoute: typeof ToolsEchochamberRoute
+  ToolsIdentitystackRoute: typeof ToolsIdentitystackRoute
   ToolsMemoryRoute: typeof ToolsMemoryRoute
+  ToolsNoisefilterRoute: typeof ToolsNoisefilterRoute
   ToolsSosRoute: typeof ToolsSosRoute
+  ToolsSteadyhandRoute: typeof ToolsSteadyhandRoute
   ToolsTapRoute: typeof ToolsTapRoute
+  ToolsVoidstareRoute: typeof ToolsVoidstareRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsBreathRoute: ToolsBreathRoute,
+  ToolsClarityclimbRoute: ToolsClarityclimbRoute,
   ToolsCoachRoute: ToolsCoachRoute,
   ToolsColdRoute: ToolsColdRoute,
+  ToolsColdswitchRoute: ToolsColdswitchRoute,
+  ToolsDarkroomRoute: ToolsDarkroomRoute,
+  ToolsEchochamberRoute: ToolsEchochamberRoute,
+  ToolsIdentitystackRoute: ToolsIdentitystackRoute,
   ToolsMemoryRoute: ToolsMemoryRoute,
+  ToolsNoisefilterRoute: ToolsNoisefilterRoute,
   ToolsSosRoute: ToolsSosRoute,
+  ToolsSteadyhandRoute: ToolsSteadyhandRoute,
   ToolsTapRoute: ToolsTapRoute,
+  ToolsVoidstareRoute: ToolsVoidstareRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
 
