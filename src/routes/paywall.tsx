@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
-import { Lock, Check, X, Sparkles, Crown, Shield, Star } from "lucide-react";
+import { Lock, Check, X, Sparkles, Crown, Shield, Star, Loader2 } from "lucide-react";
 import { useAppState } from "@/lib/store";
+import { purchaseMonthly, restorePurchases } from "@/lib/purchases";
 
 export const Route = createFileRoute("/paywall")({
   component: Paywall,
@@ -51,6 +52,8 @@ function Paywall() {
   const [finalSeconds, setFinalSeconds] = useState(5 * 60);
   const [feedIdx, setFeedIdx] = useState(0);
   const [pickedUpsells, setPickedUpsells] = useState<string[]>([]);
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const tickerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -71,9 +74,34 @@ function Paywall() {
   const fmt = (n: number) =>
     `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
 
-  const subscribe = () => {
-    update({ paywallSeen: true, isPremium: true });
-    setStage("upsell");
+  const subscribe = async () => {
+    setPurchasing(true);
+    try {
+      const success = await purchaseMonthly();
+      if (success) {
+        update({ paywallSeen: true, isPremium: true });
+        setStage("upsell");
+      }
+    } catch (e) {
+      console.error("[Paywall] purchase error", e);
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    try {
+      const success = await restorePurchases();
+      if (success) {
+        update({ paywallSeen: true, isPremium: true });
+        navigate({ to: "/" });
+      } else {
+        alert("No active subscription found.");
+      }
+    } finally {
+      setRestoring(false);
+    }
   };
 
   const continueFree = () => {
@@ -160,10 +188,10 @@ function Paywall() {
             ))}
           </ul>
         </div>
-        <button onClick={subscribe}
-          className="mt-6 h-14 w-full rounded-xl text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)]"
+        <button onClick={subscribe} disabled={purchasing}
+          className="mt-6 h-14 w-full rounded-xl text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)] flex items-center justify-center gap-2 disabled:opacity-70"
           style={{ background: "var(--gradient-primary)" }}>
-          Claim 92% Discount
+          {purchasing ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</> : "Claim 92% Discount"}
         </button>
         <button onClick={continueFree} className="mt-3 h-12 w-full rounded-xl text-sm text-muted-foreground">
           No thanks, continue free
@@ -279,13 +307,17 @@ function Paywall() {
       </div>
 
       {/* CTA */}
-      <button onClick={subscribe}
-        className="h-14 w-full rounded-xl text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)]"
+      <button onClick={subscribe} disabled={purchasing}
+        className="h-14 w-full rounded-xl text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)] flex items-center justify-center gap-2 disabled:opacity-70"
         style={{ background: "var(--gradient-primary)" }}>
-        Start reclaiming your life
+        {purchasing ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</> : "Start reclaiming your life"}
       </button>
       <button onClick={continueFree} className="h-10 w-full rounded-xl text-sm text-muted-foreground">
         Continue with free plan
+      </button>
+      <button onClick={handleRestore} disabled={restoring} className="h-8 w-full text-xs text-muted-foreground/60 flex items-center justify-center gap-1">
+        {restoring ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+        Restore purchases
       </button>
       <p className="text-center text-xs text-muted-foreground inline-flex items-center justify-center gap-1.5">
         <Lock className="h-3 w-3" /> 7-day free trial · Cancel anytime · 256-bit encryption

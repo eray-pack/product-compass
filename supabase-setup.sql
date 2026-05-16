@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.user_state (
   total_returns integer     DEFAULT 0,
   last_login_at bigint      DEFAULT 0,
   onboarding    jsonb,
+  is_premium    boolean     DEFAULT false,
   updated_at    timestamptz DEFAULT now()
 );
 

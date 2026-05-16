@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Coins, X, Plus } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
+import { initPurchases, checkPremium } from "@/lib/purchases";
+import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
@@ -516,14 +518,18 @@ function Dashboard() {
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
   const next = nextMilestone(day);
 
+  // Init RevenueCat and sync premium status on mount
   useEffect(() => {
-    const fromStorage = loadState();
-    console.log("[Stopamine] Subscription state:", {
-      "state.isPremium (reactive)": state.isPremium,
-      "loadState().isPremium (localStorage direct)": fromStorage.isPremium,
-      "paywallSeen": state.paywallSeen,
-    });
-  }, [state.isPremium]);
+    async function syncPremium() {
+      const { data: { session } } = await supabase.auth.getSession();
+      await initPurchases(session?.user?.id);
+      const isPremium = await checkPremium();
+      if (isPremium !== state.isPremium) {
+        update({ isPremium });
+      }
+    }
+    syncPremium();
+  }, []);
 
   useEffect(() => {
     if (!state.onboarding) return;

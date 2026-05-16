@@ -142,7 +142,7 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
   if (!session) return;
   const { data } = await supabase
     .from("user_state")
-    .select("points, tree_xp, badges, total_returns, last_login_at, onboarding")
+    .select("points, tree_xp, badges, total_returns, last_login_at, onboarding, is_premium")
     .eq("user_id", session.user.id)
     .single();
   if (!data) return;
@@ -155,6 +155,7 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
       totalReturns: data.total_returns ?? prev.totalReturns,
       lastLoginAt: data.last_login_at ?? prev.lastLoginAt,
       onboarding: data.onboarding ?? prev.onboarding,
+      isPremium: data.is_premium ?? prev.isPremium,
     };
     saveState(merged);
     return merged;
