@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { X, Check, Lock, Star } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
 
-const RENAG_AFTER_MS = 120_000; // 2 minutes
+const RENAG_AFTER_MS = 24 * 60 * 60 * 1000; // 24 hours
 const TIMER_START = 15 * 60; // 15:00
 
 const BENEFITS = [
@@ -32,24 +32,30 @@ const REVIEWS = [
 
 export function PaywallModal() {
   const open = usePaywallOpen();
-  const [, update] = useAppState();
+  const [state, update] = useAppState();
   const [seconds, setSeconds] = useState(TIMER_START);
   const [plan, setPlan] = useState<"annual" | "monthly">("annual");
+  const hasOpenedRef = useRef(false);
 
   // Re-sync timer whenever modal opens
   useEffect(() => {
     if (!open) return;
+    hasOpenedRef.current = true;
     setSeconds(TIMER_START);
     const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
   }, [open]);
 
-  // Re-nag free users 45s after dismiss
+  // Re-nag after 24h — only after modal has been seen and dismissed at least once
   useEffect(() => {
     if (open) return;
+    if (!hasOpenedRef.current) return;
     const t = setTimeout(() => triggerPaywall(), RENAG_AFTER_MS);
     return () => clearTimeout(t);
   }, [open]);
+
+  // Show final offer variant if user already saw main paywall and is hitting a locked feature
+  const isFinalOffer = state.paywallSeen && !state.isPremium;
 
   if (!open) return null;
 
@@ -58,6 +64,11 @@ export function PaywallModal() {
 
   const claim = () => {
     update({ isPremium: true });
+    closePaywall();
+  };
+
+  const dismiss = () => {
+    update({ paywallSeen: true });
     closePaywall();
   };
 
@@ -76,7 +87,7 @@ export function PaywallModal() {
       >
         {/* Close */}
         <button
-          onClick={closePaywall}
+          onClick={dismiss}
           aria-label="Close"
           className="absolute top-4 right-4 z-10 h-8 w-8 grid place-items-center rounded-full transition-colors"
           style={{ background: "oklch(0.18 0.025 265)", border: "1px solid oklch(0.28 0.025 265 / 0.6)" }}
@@ -110,11 +121,14 @@ export function PaywallModal() {
               className="text-[11px] font-bold tracking-[0.25em] uppercase"
               style={{ color: "oklch(0.65 0.18 60)" }}
             >
-              Unlock PRO
+              {isFinalOffer ? "Final Offer" : "Unlock PRO"}
             </p>
             <h2 className="text-2xl font-bold leading-tight text-white">
-              Your full recovery,<br />unlocked.
+              {isFinalOffer ? <>One last chance.<br />Lowest price ever.</> : <>Your full recovery,<br />unlocked.</>}
             </h2>
+            {isFinalOffer && (
+              <p className="text-sm text-muted-foreground">Only available right now — not in settings.</p>
+            )}
           </div>
 
           {/* ── Plans ──────────────────────────────────────────── */}
@@ -244,11 +258,11 @@ export function PaywallModal() {
           </button>
 
           <button
-            onClick={closePaywall}
+            onClick={dismiss}
             className="w-full py-2 text-xs text-center"
             style={{ color: "oklch(0.42 0.015 265)" }}
           >
-            Maybe later
+            {isFinalOffer ? "No thanks" : "Maybe later"}
           </button>
 
           {/* ── Social proof ───────────────────────────────────── */}

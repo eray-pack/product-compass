@@ -175,7 +175,7 @@ function Paywall() {
   return (
     <div className="min-h-screen mx-auto max-w-md px-6 pt-10 pb-10 flex flex-col gap-5">
       <div className="flex justify-end">
-        <button onClick={() => setStage("final")} className="h-9 w-9 grid place-items-center rounded-full border border-border text-muted-foreground">
+        <button onClick={continueFree} className="h-9 w-9 grid place-items-center rounded-full border border-border text-muted-foreground">
           <X className="h-4 w-4" />
         </button>
       </div>
