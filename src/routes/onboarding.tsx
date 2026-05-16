@@ -1,10 +1,25 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, Check, Lock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
 import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
 import { WolfSittingPreview } from "@/components/avatars/WolfStages";
 
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const G = "#C9A84C";
+const CARD_BG = "#0f0c06";
+const CARD_BORDER = "#1e1a10";
+const BG = "#090705";
+
+// ── Page transition variants ───────────────────────────────────────────────────
+const pageVariants = {
+  initial: { opacity: 0, x: 40 },
+  animate: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 380, damping: 30 } },
+  exit: { opacity: 0, x: -40, transition: { duration: 0.18 } },
+};
+
+// ── Static data ────────────────────────────────────────────────────────────────
 const HABIT_MAP: Record<string, { name: string; emoji: string }> = {
   "Social media doomscrolling": { name: "Social media", emoji: "📱" },
   "Sugar / junk food": { name: "Sugar", emoji: "🍩" },
@@ -16,81 +31,316 @@ const HABIT_MAP: Record<string, { name: string; emoji: string }> = {
   "Procrastination": { name: "Procrastination", emoji: "⏳" },
 };
 
+const durations = [
+  { emoji: "⚡", label: "Less than 6 months" },
+  { emoji: "🔁", label: "1-2 years" },
+  { emoji: "⛓️", label: "3-5 years" },
+  { emoji: "🪨", label: "More than 5 years" },
+];
+
+const costs = [
+  { emoji: "💔", label: "Relationships" },
+  { emoji: "🧠", label: "Focus & work" },
+  { emoji: "🪞", label: "Self-confidence" },
+  { emoji: "🌙", label: "Sleep" },
+  { emoji: "👥", label: "Social life" },
+  { emoji: "🌀", label: "Mental health" },
+];
+
+const triggers = [
+  { emoji: "🌑", label: "Late at night" },
+  { emoji: "😶", label: "When bored" },
+  { emoji: "🌊", label: "When stressed" },
+  { emoji: "🚪", label: "When alone" },
+  { emoji: "💢", label: "After rejection" },
+];
+
+const notifStyleOptions: { id: NotificationStyle; emoji: string; label: string }[] = [
+  { id: "conversational", emoji: "💬", label: "A short message, like a text from a friend" },
+  { id: "curiosity",      emoji: "⚡", label: "A fact or insight that surprises me" },
+  { id: "question",       emoji: "🔍", label: "A question that makes me think" },
+  { id: "quiet",          emoji: "🍃", label: "A quiet nudge — nothing intense" },
+];
+
+const notifAppOptions: { id: NotificationApp; emoji: string; label: string }[] = [
+  { id: "messaging",  emoji: "📱", label: "iMessage / WhatsApp" },
+  { id: "instagram",  emoji: "📸", label: "Instagram" },
+  { id: "email",      emoji: "📧", label: "Email" },
+  { id: "rarely",     emoji: "🔕", label: "I rarely open notifications" },
+];
+
+const otherHabitOptions = [
+  { emoji: "📵", label: "Social media doomscrolling" },
+  { emoji: "🍬", label: "Sugar / junk food" },
+  { emoji: "🍷", label: "Alcohol" },
+  { emoji: "💨", label: "Nicotine / vaping" },
+  { emoji: "🌿", label: "Cannabis" },
+  { emoji: "🎰", label: "Online gambling / betting" },
+  { emoji: "🎮", label: "Video game binges" },
+  { emoji: "⏳", label: "Procrastination" },
+];
+
+const identityOptions = [
+  { emoji: "👑", text: "is in full control of his mind" },
+  { emoji: "🛡️", text: "no longer needs external validation" },
+  { emoji: "💎", text: "chooses discomfort over instant gratification" },
+  { emoji: "🔭", text: "is someone his future self is proud of" },
+  { emoji: "⚔️", text: "shows up with discipline, not mood" },
+];
+
+// ── Micro-components ───────────────────────────────────────────────────────────
+
+function SerifEm({ children }: { children: React.ReactNode }) {
+  return (
+    <em style={{
+      fontFamily: "Cormorant Garamond, Georgia, serif",
+      fontStyle: "italic",
+      color: G,
+      fontSize: "calc(1em + 4px)",
+    }}>
+      {children}
+    </em>
+  );
+}
+
+function EmojiCircle({ emoji }: { emoji: string }) {
+  return (
+    <div style={{
+      width: 36, height: 36, borderRadius: "50%",
+      background: "rgba(201,168,76,0.1)",
+      border: "1px solid rgba(201,168,76,0.15)",
+      fontSize: 16, flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      {emoji}
+    </div>
+  );
+}
+
+function Eyebrow({ step, total }: { step: number; total: number }) {
+  return (
+    <p style={{
+      fontSize: 11, fontWeight: 600, letterSpacing: "2px",
+      color: G, textTransform: "uppercase", marginBottom: 10,
+    }}>
+      Step {step} of {total}
+    </p>
+  );
+}
+
+// Checkmark that springs in
+function SpringCheck() {
+  return (
+    <motion.span
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 500, damping: 25 }}
+      style={{ fontSize: 10, color: BG, fontWeight: 900, lineHeight: 1, userSelect: "none" }}
+    >
+      ✓
+    </motion.span>
+  );
+}
+
+// Single-select option card (radio)
+function OptionCard({ emoji, label, selected, onClick }: {
+  emoji: string; label: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.96 }}
+      animate={{
+        borderColor: selected ? G : CARD_BORDER,
+        backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
+        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+      }}
+      transition={{ duration: 0.2 }}
+      style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 16px", borderRadius: 16,
+        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+      }}
+    >
+      <EmojiCircle emoji={emoji} />
+      <span style={{
+        flex: 1, fontSize: 14, fontWeight: 500,
+        color: selected ? "#fff" : "#5a5040",
+        fontFamily: "DM Sans, sans-serif",
+      }}>
+        {label}
+      </span>
+      {/* Radio circle */}
+      <div style={{
+        width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+        border: `1.5px solid ${selected ? G : "#2a2010"}`,
+        background: selected ? G : "transparent",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "border-color 0.2s, background 0.2s",
+      }}>
+        <AnimatePresence>{selected && <SpringCheck />}</AnimatePresence>
+      </div>
+    </motion.button>
+  );
+}
+
+// Multi-select option card (checkbox)
+function CheckCard({ emoji, label, selected, onClick }: {
+  emoji: string; label: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.96 }}
+      animate={{
+        borderColor: selected ? G : CARD_BORDER,
+        backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
+        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+      }}
+      transition={{ duration: 0.2 }}
+      style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 16px", borderRadius: 16,
+        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+      }}
+    >
+      <EmojiCircle emoji={emoji} />
+      <span style={{
+        flex: 1, fontSize: 14, fontWeight: 500,
+        color: selected ? "#fff" : "#5a5040",
+        fontFamily: "DM Sans, sans-serif",
+      }}>
+        {label}
+      </span>
+      {/* Checkbox square */}
+      <div style={{
+        width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+        border: `1.5px solid ${selected ? G : "#2a2010"}`,
+        background: selected ? G : "transparent",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "border-color 0.2s, background 0.2s",
+      }}>
+        <AnimatePresence>{selected && <SpringCheck />}</AnimatePresence>
+      </div>
+    </motion.button>
+  );
+}
+
+// Identity card (radio, shows full sentence)
+function IdentityCard({ emoji, text, selected, onClick }: {
+  emoji: string; text: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.96 }}
+      animate={{
+        borderColor: selected ? G : CARD_BORDER,
+        backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
+        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+      }}
+      transition={{ duration: 0.2 }}
+      style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 16px", borderRadius: 16,
+        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+      }}
+    >
+      <EmojiCircle emoji={emoji} />
+      <span style={{
+        flex: 1, fontSize: 13, fontWeight: 500, lineHeight: 1.4,
+        color: selected ? "#e0d8c8" : "#5a5040",
+        fontFamily: "DM Sans, sans-serif",
+      }}>
+        I am someone who{" "}
+        <span style={{ color: selected ? G : "#5a5040" }}>{text}</span>
+      </span>
+      <div style={{
+        width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+        border: `1.5px solid ${selected ? G : "#2a2010"}`,
+        background: selected ? G : "transparent",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "border-color 0.2s, background 0.2s",
+      }}>
+        <AnimatePresence>{selected && <SpringCheck />}</AnimatePresence>
+      </div>
+    </motion.button>
+  );
+}
+
+// Gold gradient CTA button
+function GoldButton({ disabled, onClick, children }: {
+  disabled?: boolean; onClick: () => void; children: React.ReactNode;
+}) {
+  return (
+    <motion.button
+      disabled={disabled}
+      onClick={onClick}
+      whileTap={!disabled ? { scale: 0.97 } : undefined}
+      style={{
+        width: "100%", height: 56, borderRadius: 14, border: "none",
+        background: disabled ? "#1a1510" : `linear-gradient(135deg, ${G}, #E8C96A)`,
+        color: disabled ? "#3a3020" : BG,
+        fontFamily: "DM Sans, sans-serif",
+        fontSize: 15, fontWeight: 700,
+        cursor: disabled ? "not-allowed" : "pointer",
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        boxShadow: disabled ? "none" : "0 0 20px rgba(201,168,76,0.25)",
+        marginTop: 20,
+        transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+      }}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+// ── Route ──────────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-const identityOptions = [
-  "is in full control of his mind",
-  "no longer needs external validation",
-  "chooses discomfort over instant gratification",
-  "is someone his future self is proud of",
-  "shows up with discipline, not mood",
-];
-
-const durations = ["Less than 6 months", "1-2 years", "3-5 years", "More than 5 years"];
-const costs = ["Relationships", "Focus & work", "Self-confidence", "Sleep", "Social life", "Mental health"];
-const triggers = ["Late at night", "When bored", "When stressed", "When alone", "After rejection"];
-const otherHabitOptions = [
-  "Social media doomscrolling",
-  "Sugar / junk food",
-  "Alcohol",
-  "Nicotine / vaping",
-  "Cannabis",
-  "Online gambling / betting",
-  "Video game binges",
-  "Procrastination",
-];
-
+// ── Main component ─────────────────────────────────────────────────────────────
 function Onboarding() {
   const [, update] = useAppState();
   const navigate = useNavigate();
+
   const [step, setStep] = useState(0);
   const [duration, setDuration] = useState("");
   const [pickedCosts, setPickedCosts] = useState<string[]>([]);
   const [pickedTriggers, setPickedTriggers] = useState<string[]>([]);
-  const [pickedHabits, setPickedHabits] = useState<string[]>([]);
   const [notifStyles, setNotifStyles] = useState<NotificationStyle[]>([]);
   const [notifApps, setNotifApps] = useState<NotificationApp[]>([]);
+  const [pickedHabits, setPickedHabits] = useState<string[]>([]);
   const [identity, setIdentity] = useState("");
   const [customIdentitySelected, setCustomIdentitySelected] = useState(false);
-  const [name, setName] = useState("");
   const [companion, setCompanion] = useState<CompanionType | null>(null);
+  const [name, setName] = useState("");
 
+  const TOTAL = 9;
   const next = () => setStep((s) => s + 1);
+
+  const toggle = (arr: string[], v: string, setter: (a: string[]) => void) =>
+    setter(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+
   const finish = () => {
     const now = Date.now();
     const mainAddiction: Addiction = {
-      id: "porn",
-      name: "Porn",
-      emoji: "🧠",
-      startDate: now,
-      totalCleanDays: 0,
-      urgesSurvived: 0,
+      id: "porn", name: "Porn", emoji: "🧠",
+      startDate: now, totalCleanDays: 0, urgesSurvived: 0,
     };
     const extraAddictions: Addiction[] = pickedHabits.map((h) => {
       const preset = HABIT_MAP[h] ?? { name: h, emoji: "🔒" };
       return {
         id: preset.name.toLowerCase().replace(/\s+/g, "-"),
-        name: preset.name,
-        emoji: preset.emoji,
-        startDate: now,
-        totalCleanDays: 0,
-        urgesSurvived: 0,
-        premium: true,
+        name: preset.name, emoji: preset.emoji,
+        startDate: now, totalCleanDays: 0, urgesSurvived: 0, premium: true,
       };
     });
     update({
       companion: companion ?? "tree",
-      onboarding: {
-        duration,
-        costs: pickedCosts,
-        triggers: pickedTriggers,
-        identity,
-        name,
-        otherHabits: pickedHabits,
-        completedAt: now,
-      },
+      onboarding: { duration, costs: pickedCosts, triggers: pickedTriggers, identity, name, otherHabits: pickedHabits, completedAt: now },
       notificationStyles: notifStyles,
       notificationApps: notifApps,
       addictions: [mainAddiction, ...extraAddictions],
@@ -99,363 +349,394 @@ function Onboarding() {
     navigate({ to: "/paywall" });
   };
 
-  const toggle = (arr: string[], v: string, setter: (a: string[]) => void) => {
-    setter(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
-  };
-
-  const TOTAL = 8;
-
   return (
-    <div className="min-h-screen mx-auto max-w-md flex flex-col">
-      <div className="px-6 pt-10">
-        <div className="flex gap-1.5">
-          {Array.from({ length: TOTAL }).map((_, i) => (
-            <div
-              key={i}
-              className="h-1 flex-1 rounded-full transition-all"
-              style={{ background: i <= step ? "var(--primary)" : "oklch(0.22 0.03 265)" }}
+    <div style={{ background: BG, minHeight: "100vh", fontFamily: "DM Sans, sans-serif" }}>
+      <div style={{ maxWidth: 448, margin: "0 auto", padding: "0 20px" }}>
+
+        {/* ── Progress bar ──────────────────────────────────────────────── */}
+        <div style={{ paddingTop: 40 }}>
+          <div style={{
+            width: "100%", height: 3,
+            background: "rgba(255,255,255,0.06)",
+            borderRadius: 10, overflow: "hidden", marginBottom: 32,
+          }}>
+            <motion.div
+              key={step}
+              style={{ height: "100%", background: `linear-gradient(90deg, ${G}, #E8C96A)`, borderRadius: 10 }}
+              initial={{ width: `${(step / TOTAL) * 100}%` }}
+              animate={{ width: `${((step + 1) / TOTAL) * 100}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
             />
-          ))}
-        </div>
-      </div>
-
-      <div className="flex-1 px-6 pt-10 pb-8 flex flex-col">
-        {step === 0 && (
-          <Step eyebrow={`Step 1 of ${TOTAL}`} title="Before we start — be honest with yourself"
-            subtitle="How long have you been struggling with this?"
-            cta={duration ? "Continue" : ""} onContinue={next}>
-            <div className="space-y-3">
-              {durations.map((d) => (
-                <Option key={d} selected={duration === d} onClick={() => setDuration(d)}>{d}</Option>
-              ))}
-            </div>
-          </Step>
-        )}
-
-        {step === 1 && (
-          <Step eyebrow={`Step 2 of ${TOTAL}`} title="What does it cost you?"
-            subtitle="Select everything this has taken from you."
-            cta={pickedCosts.length ? "These are the things I'm taking back" : ""} onContinue={next}>
-            <div className="space-y-3">
-              {costs.map((c) => (
-                <CheckOption key={c} selected={pickedCosts.includes(c)} onClick={() => toggle(pickedCosts, c, setPickedCosts)}>{c}</CheckOption>
-              ))}
-            </div>
-          </Step>
-        )}
-
-        {step === 2 && (
-          <Step eyebrow={`Step 3 of ${TOTAL}`} title="Your trigger profile"
-            subtitle="When are you most vulnerable? We'll use this for smart reminders."
-            cta={pickedTriggers.length ? "Continue" : ""} onContinue={next}>
-            <div className="space-y-3">
-              {triggers.map((t) => (
-                <CheckOption key={t} selected={pickedTriggers.includes(t)} onClick={() => toggle(pickedTriggers, t, setPickedTriggers)}>{t}</CheckOption>
-              ))}
-            </div>
-          </Step>
-        )}
-
-        {step === 3 && (
-          <Step eyebrow={`Step 4 of ${TOTAL}`} title="How do you like to be reminded?"
-            subtitle="We'll show up for you in the way that actually works for you — not like a pushy app."
-            cta="Continue" onContinue={next}>
-            <div className="space-y-3 mb-6">
-              {([
-                { id: "conversational", label: "A short message, like a text from a friend" },
-                { id: "curiosity", label: "A fact or insight that surprises me" },
-                { id: "question", label: "A question that makes me think" },
-                { id: "quiet", label: "A quiet nudge — nothing intense" },
-              ] as { id: NotificationStyle; label: string }[]).map(({ id, label }) => (
-                <CheckOption key={id}
-                  selected={notifStyles.includes(id)}
-                  onClick={() => setNotifStyles(notifStyles.includes(id) ? notifStyles.filter(x => x !== id) : [...notifStyles, id])}>
-                  {label}
-                </CheckOption>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">Which apps do you actually open when they notify you?</p>
-            <div className="space-y-3">
-              {([
-                { id: "messaging", label: "iMessage / WhatsApp" },
-                { id: "instagram", label: "Instagram" },
-                { id: "email", label: "Email" },
-                { id: "rarely", label: "I rarely open notifications" },
-              ] as { id: NotificationApp; label: string }[]).map(({ id, label }) => (
-                <CheckOption key={id}
-                  selected={notifApps.includes(id)}
-                  onClick={() => setNotifApps(notifApps.includes(id) ? notifApps.filter(x => x !== id) : [...notifApps, id])}>
-                  {label}
-                </CheckOption>
-              ))}
-            </div>
-            <p className="mt-4 text-[11px] text-muted-foreground">We use this to reach you in a way that feels natural. You're in control — change it anytime.</p>
-          </Step>
-        )}
-
-        {step === 4 && (
-          <Step eyebrow={`Step 5 of ${TOTAL}`} title="Anything else you want to quit?"
-            subtitle="With PRO you can track multiple addictions side-by-side. Pick any you'd like to add later — you can skip and add them anytime."
-            cta="Continue"
-            onContinue={next}>
-            <div className="mb-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-primary bg-primary/10 border border-primary/30 px-2.5 py-1 rounded-full">
-              <Lock className="h-3 w-3" /> Unlocked with PRO
-            </div>
-            <div className="space-y-3">
-              {otherHabitOptions.map((h) => (
-                <CheckOption key={h} selected={pickedHabits.includes(h)} onClick={() => toggle(pickedHabits, h, setPickedHabits)}>{h}</CheckOption>
-              ))}
-            </div>
-          </Step>
-        )}
-
-        {step === 5 && (
-          <div className="flex-1 flex flex-col animate-step-in">
-            {/* Blue label */}
-            <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-primary">
-              IDENTITY · 04
-            </p>
-
-            {/* Heading */}
-            <h1 className="mt-4 text-[2rem] font-bold leading-tight tracking-tight">
-              Choose who you<br />are becoming.
-            </h1>
-
-            {/* Radio options */}
-            <div className="mt-8 flex-1 space-y-3">
-              {identityOptions.map((option) => (
-                <IdentityRadio
-                  key={option}
-                  selected={identity === option && !customIdentitySelected}
-                  onClick={() => {
-                    setIdentity(option);
-                    setCustomIdentitySelected(false);
-                  }}
-                >
-                  {option}
-                </IdentityRadio>
-              ))}
-
-              {/* Write your own */}
-              {customIdentitySelected ? (
-                <div className="flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-primary bg-primary/10 transition-all">
-                  <span className="h-5 w-5 rounded-full border-2 border-primary flex-shrink-0 flex items-center justify-center">
-                    <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                  </span>
-                  <input
-                    autoFocus
-                    value={identity}
-                    onChange={(e) => setIdentity(e.target.value)}
-                    placeholder="e.g. is in full control of his mind"
-                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-                  />
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setCustomIdentitySelected(true);
-                    setIdentity("");
-                  }}
-                  className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-border bg-card hover:border-primary/40 transition-all"
-                >
-                  <span className="h-5 w-5 rounded-full border-2 border-muted-foreground flex-shrink-0" />
-                  <span className="text-sm text-muted-foreground">Write your own...</span>
-                </button>
-              )}
-            </div>
-
-            {/* CTA */}
-            <button
-              disabled={!identity.trim()}
-              onClick={next}
-              className="mt-8 h-14 w-full rounded-2xl text-white font-bold inline-flex items-center justify-center gap-2 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
-              style={{ background: identity.trim() ? "var(--gradient-primary)" : "oklch(0.22 0.03 265)" }}
-            >
-              {identity.trim() ? "This is who I'm becoming" : "Pick an option"}
-              {identity.trim() && <ArrowRight className="h-4 w-4" />}
-            </button>
           </div>
-        )}
+        </div>
 
-        {step === 6 && (
-          <div className="flex-1 flex flex-col animate-step-in">
-            <p className="text-[11px] font-semibold tracking-[0.25em] uppercase" style={{ color: "var(--primary)" }}>
-              COMPANION · Step 7 of {TOTAL}
-            </p>
-            <h1 className="mt-4 text-[2rem] font-bold leading-tight tracking-tight">
-              Choose your<br />recovery companion.
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              They grow alongside you — day by day, stage by stage. This is what you're working toward.
-            </p>
+        {/* ── Steps ─────────────────────────────────────────────────────── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            style={{ paddingBottom: 48 }}
+          >
 
-            {/* Two companion cards */}
-            <div className="mt-8 flex gap-4 flex-1">
-              {(["tree", "wolf"] as CompanionType[]).map((type) => {
-                const { name, tagline } = COMPANION_LABELS[type];
-                const selected = companion === type;
-                return (
-                  <button
-                    key={type}
-                    onClick={() => setCompanion(type)}
-                    className="flex-1 flex flex-col items-center rounded-2xl border-2 transition-all overflow-hidden pb-4"
-                    style={{
-                      borderColor: selected ? "var(--primary)" : "var(--border)",
-                      background: selected ? "var(--primary)" + "12" : "var(--card)",
-                    }}
-                  >
-                    {/* Final-stage preview */}
-                    <div className="w-full flex items-end justify-center pt-2 px-2" style={{ height: "160px" }}>
-                      {type === "wolf"
-                        ? <WolfSittingPreview className="w-full h-full" />
-                        : <CompanionStage type="tree" stage={5} className="w-full h-full" />
-                      }
-                    </div>
-                    {/* Selection indicator dot */}
-                    <span
-                      className="mt-2 h-4 w-4 rounded-full border-2 flex items-center justify-center transition-all"
+            {/* STEP 0 — Duration */}
+            {step === 0 && (
+              <div>
+                <Eyebrow step={1} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  Before we start — be honest with <SerifEm>yourself</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  How long have you been struggling with this?
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {durations.map((d) => (
+                    <OptionCard key={d.label} emoji={d.emoji} label={d.label}
+                      selected={duration === d.label} onClick={() => setDuration(d.label)} />
+                  ))}
+                </div>
+                <GoldButton disabled={!duration} onClick={next}>
+                  {duration ? <><span>Continue</span><ArrowRight size={16} /></> : "Pick an option"}
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 1 — Costs */}
+            {step === 1 && (
+              <div>
+                <Eyebrow step={2} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  What does it cost <SerifEm>you?</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  Select everything this has taken from you.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {costs.map((c) => (
+                    <CheckCard key={c.label} emoji={c.emoji} label={c.label}
+                      selected={pickedCosts.includes(c.label)}
+                      onClick={() => toggle(pickedCosts, c.label, setPickedCosts)} />
+                  ))}
+                </div>
+                <GoldButton disabled={pickedCosts.length === 0} onClick={next}>
+                  {pickedCosts.length
+                    ? <><span>These are the things I'm taking back</span><ArrowRight size={16} /></>
+                    : "Pick at least one"}
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 2 — Triggers */}
+            {step === 2 && (
+              <div>
+                <Eyebrow step={3} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  Your trigger <SerifEm>profile</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  When are you most vulnerable? We'll use this for smart reminders.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {triggers.map((t) => (
+                    <CheckCard key={t.label} emoji={t.emoji} label={t.label}
+                      selected={pickedTriggers.includes(t.label)}
+                      onClick={() => toggle(pickedTriggers, t.label, setPickedTriggers)} />
+                  ))}
+                </div>
+                <GoldButton disabled={pickedTriggers.length === 0} onClick={next}>
+                  {pickedTriggers.length
+                    ? <><span>Continue</span><ArrowRight size={16} /></>
+                    : "Pick at least one"}
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 3 — Notification style */}
+            {step === 3 && (
+              <div>
+                <Eyebrow step={4} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  How do you like to be <SerifEm>reminded?</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  We'll show up in the way that actually works for you.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {notifStyleOptions.map(({ id, emoji, label }) => (
+                    <CheckCard key={id} emoji={emoji} label={label}
+                      selected={notifStyles.includes(id)}
+                      onClick={() => setNotifStyles(
+                        notifStyles.includes(id) ? notifStyles.filter(x => x !== id) : [...notifStyles, id]
+                      )} />
+                  ))}
+                </div>
+                <GoldButton onClick={next}>
+                  <span>Continue</span><ArrowRight size={16} />
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 4 — Notification apps */}
+            {step === 4 && (
+              <div>
+                <Eyebrow step={5} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  Which apps do you actually <SerifEm>open?</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  We'll reach you where you are. You're in control — change it anytime.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {notifAppOptions.map(({ id, emoji, label }) => (
+                    <CheckCard key={id} emoji={emoji} label={label}
+                      selected={notifApps.includes(id)}
+                      onClick={() => setNotifApps(
+                        notifApps.includes(id) ? notifApps.filter(x => x !== id) : [...notifApps, id]
+                      )} />
+                  ))}
+                </div>
+                <GoldButton onClick={next}>
+                  <span>Continue</span><ArrowRight size={16} />
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 5 — Other habits */}
+            {step === 5 && (
+              <div>
+                <Eyebrow step={6} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  Anything else you want to <SerifEm>quit?</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 16, lineHeight: 1.5 }}>
+                  Skip and add them anytime.
+                </p>
+                {/* PRO badge */}
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  background: "rgba(201,168,76,0.1)",
+                  border: "1px solid rgba(201,168,76,0.35)",
+                  borderRadius: 12, padding: "10px 16px",
+                  marginBottom: 16,
+                }}>
+                  <span style={{ fontSize: 18 }}>🔓</span>
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: 1, textTransform: "uppercase", margin: 0 }}>
+                      Unlocked with PRO
+                    </p>
+                    <p style={{ fontSize: 11, color: "#5a5040", margin: 0 }}>
+                      Track multiple addictions side-by-side
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {otherHabitOptions.map((h) => (
+                    <CheckCard key={h.label} emoji={h.emoji} label={h.label}
+                      selected={pickedHabits.includes(h.label)}
+                      onClick={() => toggle(pickedHabits, h.label, setPickedHabits)} />
+                  ))}
+                </div>
+                <GoldButton onClick={next}>
+                  <span>Continue</span><ArrowRight size={16} />
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 6 — Identity */}
+            {step === 6 && (
+              <div>
+                <Eyebrow step={7} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 24px" }}>
+                  Choose who you are <SerifEm>becoming.</SerifEm>
+                </h1>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {identityOptions.map(({ emoji, text }) => (
+                    <IdentityCard key={text} emoji={emoji} text={text}
+                      selected={identity === text && !customIdentitySelected}
+                      onClick={() => { setIdentity(text); setCustomIdentitySelected(false); }} />
+                  ))}
+
+                  {/* Write your own */}
+                  {customIdentitySelected ? (
+                    <motion.div
+                      animate={{
+                        borderColor: G,
+                        backgroundColor: "rgba(201,168,76,0.08)",
+                        boxShadow: "0 0 12px rgba(201,168,76,0.12)",
+                      }}
                       style={{
-                        borderColor: selected ? "var(--primary)" : "var(--border)",
-                        background: selected ? "var(--primary)" : "transparent",
+                        display: "flex", alignItems: "center", gap: 12,
+                        padding: "14px 16px", borderRadius: 16,
+                        borderWidth: 1.5, borderStyle: "solid",
                       }}
                     >
-                      {selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
-                    </span>
-                    <p className="mt-1.5 text-xs font-bold" style={{ color: selected ? "var(--primary)" : "var(--foreground)" }}>
-                      {name}
-                    </p>
-                    <p className="mt-0.5 text-[9px] text-muted-foreground text-center px-2 leading-tight">
-                      {tagline}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+                      <EmojiCircle emoji="✏️" />
+                      <input
+                        autoFocus
+                        value={identity}
+                        onChange={(e) => setIdentity(e.target.value)}
+                        placeholder="e.g. is in full control of his mind"
+                        style={{
+                          flex: 1, background: "transparent", border: "none", outline: "none",
+                          fontSize: 13, color: "#fff", fontFamily: "DM Sans, sans-serif",
+                        }}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.button
+                      onClick={() => { setCustomIdentitySelected(true); setIdentity(""); }}
+                      whileTap={{ scale: 0.96 }}
+                      animate={{ borderColor: CARD_BORDER, backgroundColor: CARD_BG }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 12,
+                        padding: "14px 16px", borderRadius: 16,
+                        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+                      }}
+                    >
+                      <EmojiCircle emoji="✏️" />
+                      <span style={{ fontSize: 13, color: "#5a5040", fontFamily: "DM Sans, sans-serif" }}>
+                        Write your own...
+                      </span>
+                    </motion.button>
+                  )}
+                </div>
+                <GoldButton disabled={!identity.trim()} onClick={next}>
+                  {identity.trim()
+                    ? <><span>This is who I'm becoming</span><ArrowRight size={16} /></>
+                    : "Pick an option"}
+                </GoldButton>
+              </div>
+            )}
 
-            <button
-              disabled={!companion}
-              onClick={next}
-              className="mt-8 h-14 w-full rounded-2xl font-bold inline-flex items-center justify-center gap-2 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
-              style={{
-                background: companion ? "var(--gradient-primary)" : "var(--muted)",
-                color: companion ? "var(--primary-foreground)" : "var(--muted-foreground)",
-              }}
-            >
-              {companion ? `${COMPANION_LABELS[companion].name} — let's go` : "Choose your companion"}
-              {companion && <ArrowRight className="h-4 w-4" />}
-            </button>
-          </div>
-        )}
+            {/* STEP 7 — Companion */}
+            {step === 7 && (
+              <div>
+                <Eyebrow step={8} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  Choose your recovery <SerifEm>companion.</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  They grow alongside you — day by day, stage by stage.
+                </p>
+                <div style={{ display: "flex", gap: 12, marginBottom: 4 }}>
+                  {(["tree", "wolf"] as CompanionType[]).map((type) => {
+                    const { name, tagline } = COMPANION_LABELS[type];
+                    const isSelected = companion === type;
+                    return (
+                      <motion.button
+                        key={type}
+                        onClick={() => setCompanion(type)}
+                        whileTap={{ scale: 0.97 }}
+                        animate={{
+                          borderColor: isSelected ? G : CARD_BORDER,
+                          backgroundColor: isSelected ? "rgba(201,168,76,0.08)" : CARD_BG,
+                          boxShadow: isSelected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+                        }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          flex: 1, borderRadius: 16,
+                          borderWidth: 1.5, borderStyle: "solid",
+                          cursor: "pointer", overflow: "hidden",
+                          display: "flex", flexDirection: "column", alignItems: "center",
+                          paddingBottom: 14,
+                        }}
+                      >
+                        <div style={{ width: "100%", height: 160, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "8px 8px 0" }}>
+                          {type === "wolf"
+                            ? <WolfSittingPreview className="w-full h-full" />
+                            : <CompanionStage type="tree" stage={5} className="w-full h-full" />
+                          }
+                        </div>
+                        <div style={{
+                          marginTop: 10, width: 16, height: 16, borderRadius: "50%",
+                          border: `1.5px solid ${isSelected ? G : "#2a2010"}`,
+                          background: isSelected ? G : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "all 0.2s",
+                        }}>
+                          <AnimatePresence>
+                            {isSelected && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0 }}
+                                style={{ width: 6, height: 6, borderRadius: "50%", background: BG }}
+                              />
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        <p style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: isSelected ? G : "#fff" }}>
+                          {name}
+                        </p>
+                        <p style={{ fontSize: 10, color: "#5a5040", textAlign: "center", padding: "0 8px", lineHeight: 1.3, marginTop: 2 }}>
+                          {tagline}
+                        </p>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                <GoldButton disabled={!companion} onClick={next}>
+                  {companion
+                    ? <><span>{COMPANION_LABELS[companion].name} — let's go</span><ArrowRight size={16} /></>
+                    : "Choose your companion"}
+                </GoldButton>
+              </div>
+            )}
 
-        {step === 7 && (
-          <Step eyebrow={`Step 8 of ${TOTAL}`} title="Your commitment"
-            subtitle="Read it. Sign it. This is who you are now."
-            cta={name.trim() ? "I commit to this" : ""} onContinue={finish}>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Identity</p>
-              <p className="mt-2 text-xl leading-snug">
-                I am becoming someone who <span className="text-primary">{identity || "…"}</span>.
-              </p>
-            </div>
-            <label className="block text-sm text-muted-foreground mt-6 mb-2">Sign with your first name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your first name"
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30" />
-          </Step>
-        )}
+            {/* STEP 8 — Commitment */}
+            {step === 8 && (
+              <div>
+                <Eyebrow step={9} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  Your <SerifEm>commitment.</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                  Read it. Sign it. This is who you are now.
+                </p>
+                <div style={{
+                  borderRadius: 16, border: `1px solid ${CARD_BORDER}`,
+                  background: CARD_BG, padding: "20px", marginBottom: 24,
+                }}>
+                  <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "2px", color: "#5a5040", marginBottom: 8 }}>
+                    Identity
+                  </p>
+                  <p style={{ fontSize: 18, lineHeight: 1.6, color: "#ddd", margin: 0 }}>
+                    I am becoming someone who{" "}
+                    <span style={{ color: G }}>{identity || "…"}</span>.
+                  </p>
+                </div>
+                <label style={{ display: "block", fontSize: 13, color: "#5a5040", marginBottom: 8 }}>
+                  Sign with your first name
+                </label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your first name"
+                  style={{
+                    width: "100%", borderRadius: 16,
+                    border: `1.5px solid ${CARD_BORDER}`,
+                    background: CARD_BG, padding: "14px 16px",
+                    fontSize: 18, color: "#fff",
+                    fontFamily: "DM Sans, sans-serif",
+                    outline: "none", boxSizing: "border-box",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = G; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = CARD_BORDER; }}
+                />
+                <GoldButton disabled={!name.trim()} onClick={finish}>
+                  {name.trim()
+                    ? <><span>I commit to this</span><ArrowRight size={16} /></>
+                    : "Sign your name"}
+                </GoldButton>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
-  );
-}
-
-function Step({ eyebrow, title, subtitle, children, cta, onContinue }: {
-  eyebrow: string; title: string; subtitle?: string;
-  children: React.ReactNode; cta: string; onContinue: () => void;
-}) {
-  return (
-    <div className="flex-1 flex flex-col animate-step-in">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">{eyebrow}</p>
-      <h1 className="mt-3 text-[2rem] font-bold leading-tight tracking-tight">{title}</h1>
-      {subtitle && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{subtitle}</p>}
-      <div className="mt-8 flex-1">{children}</div>
-      <button
-        disabled={!cta}
-        onClick={onContinue}
-        className="mt-8 h-14 w-full rounded-2xl text-primary-foreground font-bold inline-flex items-center justify-center gap-2 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
-        style={{ background: cta ? "var(--gradient-primary)" : "oklch(0.22 0.03 265)" }}
-      >
-        {cta || "Pick an option"}
-        {cta && <ArrowRight className="h-4 w-4" />}
-      </button>
-    </div>
-  );
-}
-
-function Option({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full text-left px-5 py-4 rounded-2xl border-2 transition-all font-medium text-sm"
-      style={{
-        borderColor: selected ? "var(--primary)" : "oklch(0.22 0.03 265)",
-        background: selected ? "oklch(0.62 0.22 255 / 0.10)" : "var(--card)",
-        color: selected ? "var(--foreground)" : "var(--muted-foreground)",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-function IdentityRadio({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all ${
-        selected
-          ? "border-primary bg-primary/10"
-          : "border-border bg-card hover:border-primary/40"
-      }`}
-    >
-      {/* Radio indicator */}
-      <span
-        className={`h-5 w-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-          selected ? "border-primary" : "border-muted-foreground"
-        }`}
-      >
-        {selected && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
-      </span>
-      <span className={`text-sm leading-snug ${selected ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-        I am someone who <span className={selected ? "text-primary" : ""}>{children}</span>
-      </span>
-    </button>
-  );
-}
-
-function CheckOption({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 transition-all text-sm"
-      style={{
-        borderColor: selected ? "var(--primary)" : "oklch(0.22 0.03 265)",
-        background: selected ? "oklch(0.62 0.22 255 / 0.10)" : "var(--card)",
-      }}
-    >
-      <span
-        className="h-5 w-5 rounded-md grid place-items-center border-2 shrink-0 transition-all"
-        style={{
-          background: selected ? "var(--primary)" : "transparent",
-          borderColor: selected ? "var(--primary)" : "oklch(0.30 0.025 265)",
-        }}
-      >
-        {selected && <Check className="h-3.5 w-3.5 text-white" />}
-      </span>
-      <span
-        className="text-left font-medium"
-        style={{ color: selected ? "var(--foreground)" : "var(--muted-foreground)" }}
-      >
-        {children}
-      </span>
-    </button>
   );
 }
