@@ -5,6 +5,8 @@ import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState } from "react";
 import { Tree3D } from "@/components/Tree3D";
+import { Wolf3D } from "@/components/Wolf3D";
+import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
 
 export const Route = createFileRoute("/tree")({
@@ -327,6 +329,16 @@ function WolfPage({
     }));
   };
 
+  const [wolfStyle, setWolfStyle] = useState<"3d" | "cartoon">(() => {
+    try { return (localStorage.getItem("stopamine.wolf-style") as "3d" | "cartoon") ?? "cartoon"; }
+    catch { return "cartoon"; }
+  });
+
+  function toggleWolfStyle(s: "3d" | "cartoon") {
+    setWolfStyle(s);
+    try { localStorage.setItem("stopamine.wolf-style", s); } catch {}
+  }
+
   return (
     <PageShell>
       <header className="px-6 pt-12">
@@ -341,7 +353,7 @@ function WolfPage({
       <section className="px-6 mt-6">
         <div className="rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--shadow-glow)" }}>
           {/* Scene viewport */}
-          <div className="relative" style={{ height: "280px" }}>
+          <div className="relative" style={{ height: "320px" }}>
             <WolfBackground />
 
             {/* Stage badge — top left */}
@@ -351,8 +363,8 @@ function WolfPage({
               </span>
             </div>
 
-            {/* Night badge — top right */}
-            <div className="absolute top-3 right-3 z-20">
+            {/* Top-right: night badge + style toggle */}
+            <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-1.5">
               <span
                 className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full"
                 style={{
@@ -364,6 +376,30 @@ function WolfPage({
               >
                 🌙 Night
               </span>
+              {/* 3D / Cartoon pill toggle */}
+              <div
+                className="inline-flex rounded-full p-0.5"
+                style={{
+                  background: "rgba(0,0,0,0.45)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {(["3d", "cartoon"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => toggleWolfStyle(opt)}
+                    className="px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide transition-all"
+                    style={
+                      wolfStyle === opt
+                        ? { background: "rgba(196,135,58,0.22)", color: "#C4873A", border: "1px solid rgba(196,135,58,0.50)" }
+                        : { color: "rgba(255,255,255,0.45)", border: "1px solid transparent" }
+                    }
+                  >
+                    {opt === "3d" ? "3D" : "Cartoon"}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Rank badge — bottom left */}
@@ -392,31 +428,38 @@ function WolfPage({
               </span>
             </div>
 
-            {/* Wolf on grass platform — centered */}
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 z-10">
-              <div
-                className="companion-3d anim-tree-float"
-                style={{ width: "160px", height: "192px", marginBottom: "-12px" }}
-              >
-                <CompanionAvatar
-                  type="wolf"
-                  day={day}
-                  stage={wolfStage.stage}
-                  relapseCount={state.relapses.length}
-                  className="w-full h-full"
-                />
-              </div>
-              {/* Grass mound */}
-              <div
-                style={{
-                  width: "170px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  background: "radial-gradient(ellipse at 50% 30%, #2d6a3f, #1a4028)",
-                  boxShadow: "0 0 28px 10px rgba(20,80,40,0.28), inset 0 -6px 14px rgba(0,0,0,0.40)",
-                  border: "1px solid rgba(45,110,65,0.40)",
-                }}
-              />
+            {/* Wolf visual — 3D or Cartoon */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              {wolfStyle === "3d" ? (
+                <div className="w-full h-full">
+                  <Wolf3D stage={wolfStage.stage} />
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+                  <div
+                    className="companion-3d anim-tree-float"
+                    style={{ width: "160px", height: "192px", marginBottom: "-12px" }}
+                  >
+                    <CompanionAvatar
+                      type="wolf"
+                      day={day}
+                      stage={wolfStage.stage}
+                      relapseCount={state.relapses.length}
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: "170px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      background: "radial-gradient(ellipse at 50% 30%, #2d6a3f, #1a4028)",
+                      boxShadow: "0 0 28px 10px rgba(20,80,40,0.28), inset 0 -6px 14px rgba(0,0,0,0.40)",
+                      border: "1px solid rgba(45,110,65,0.40)",
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -439,6 +482,23 @@ function WolfPage({
               Your wolf ranks in the{" "}
               <span className="text-success font-semibold">top {WOLF_TOP_PCT_BY_STAGE[wolfStage.stage]}%</span> of all users
             </p>
+          </div>
+
+          {/* Gold divider */}
+          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(196,135,58,0.35) 20%, rgba(196,135,58,0.35) 80%, transparent)" }} />
+
+          {/* Compact leaderboard */}
+          <div className="px-5 py-3" style={{ background: "var(--card)" }}>
+            <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-2.5" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
+            <div className="space-y-2">
+              {HALL_OF_LEGENDS.map((u, i) => (
+                <div key={u.name} className="flex items-center gap-2.5">
+                  <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.70 : 0.50 }} />
+                  <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{u.name}</span>
+                  <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.75)" }}>Day {u.day}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -516,60 +576,6 @@ function WolfPage({
         </div>
       </section>
 
-      {/* Hall of Legends */}
-      <section className="px-6 mt-8">
-        <div className="flex items-center gap-2 mb-1">
-          <Crown className="h-4 w-4" style={{ color: "oklch(0.85 0.16 85)" }} />
-          <h2 className="text-sm font-bold tracking-wide">Hall of Legends</h2>
-        </div>
-        <p className="text-xs text-muted-foreground mb-3">The few who reached Legendary. This is what's possible.</p>
-        <div className="space-y-2">
-          {HALL_OF_LEGENDS.map((u, i) => (
-            <div
-              key={u.name}
-              className="flex items-center gap-3 rounded-2xl p-4"
-              style={{
-                background: "linear-gradient(135deg, oklch(0.24 0.04 80 / 0.5), oklch(0.20 0.025 260 / 0.6))",
-                border: "1px solid oklch(0.78 0.16 85 / 0.45)",
-                boxShadow: "0 0 20px -8px oklch(0.78 0.16 85 / 0.4)",
-              }}
-            >
-              <div
-                className="h-11 w-11 rounded-full grid place-items-center shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, oklch(0.5 0.14 85), oklch(0.35 0.1 75))",
-                  boxShadow: "inset 0 0 6px oklch(0.95 0.1 90 / 0.4)",
-                }}
-              >
-                <Crown className="h-5 w-5" style={{ color: "oklch(0.97 0.12 95)" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold truncate">{u.name}</p>
-                  <span
-                    className="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full"
-                    style={{
-                      color: "oklch(0.95 0.12 90)",
-                      border: "1px solid oklch(0.78 0.16 85 / 0.6)",
-                      background: "oklch(0.5 0.14 85 / 0.15)",
-                    }}
-                  >
-                    Legendary
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Alpha Wolf · Day {u.day}</p>
-              </div>
-              <span className="text-[10px] font-bold shrink-0" style={{ color: "oklch(0.85 0.14 85)" }}>
-                #{i + 1}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="text-[11px] text-center text-muted-foreground mt-3 italic">
-          One day, your name belongs here.
-        </p>
-      </section>
-
       <section className="px-6 mt-6">
         <div className="rounded-2xl border border-border bg-card p-5 text-center mb-4">
           <p className="text-sm text-muted-foreground">
@@ -601,6 +607,16 @@ function LifeTreePage({
   const timeOfDay = getTimeOfDay();
   const skyCfg = SKY_CONFIGS[timeOfDay];
 
+  const [treeStyle, setTreeStyle] = useState<"3d" | "cartoon">(() => {
+    try { return (localStorage.getItem("stopamine.tree-style") as "3d" | "cartoon") ?? "cartoon"; }
+    catch { return "cartoon"; }
+  });
+
+  function toggleTreeStyle(style: "3d" | "cartoon") {
+    setTreeStyle(style);
+    try { localStorage.setItem("stopamine.tree-style", style); } catch {}
+  }
+
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
     if (state.points < cost) return;
@@ -625,7 +641,7 @@ function LifeTreePage({
       <section className="px-6 mt-6">
         <div className="rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--shadow-glow)" }}>
           {/* Sky viewport */}
-          <div className="relative" style={{ height: "280px" }}>
+          <div className="relative" style={{ height: "320px" }}>
             <TreeSkyBackground timeOfDay={timeOfDay} />
 
             {/* Floating stage badge */}
@@ -635,8 +651,8 @@ function LifeTreePage({
               </span>
             </div>
 
-            {/* Time of day badge */}
-            <div className="absolute top-3 right-3 z-20">
+            {/* Top-right: time badge + style toggle */}
+            <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-1.5">
               <span
                 className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full"
                 style={{
@@ -648,6 +664,30 @@ function LifeTreePage({
               >
                 {skyCfg.emoji} {skyCfg.label}
               </span>
+              {/* 3D / Cartoon pill toggle */}
+              <div
+                className="inline-flex rounded-full p-0.5"
+                style={{
+                  background: "rgba(0,0,0,0.45)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {(["3d", "cartoon"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => toggleTreeStyle(opt)}
+                    className="px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide transition-all"
+                    style={
+                      treeStyle === opt
+                        ? { background: "rgba(196,135,58,0.22)", color: "#C4873A", border: "1px solid rgba(196,135,58,0.50)" }
+                        : { color: "rgba(255,255,255,0.45)", border: "1px solid transparent" }
+                    }
+                  >
+                    {opt === "3d" ? "3D" : "Cartoon"}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Rank badge */}
@@ -676,11 +716,17 @@ function LifeTreePage({
               </span>
             </div>
 
-            {/* Rotating tree */}
+            {/* Tree visual — 3D or Cartoon based on toggle */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
-                <Tree3D day={day} />
-              </div>
+              {treeStyle === "3d" ? (
+                <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
+                  <Tree3D day={day} />
+                </div>
+              ) : (
+                <div className="anim-tree-float" style={{ width: "100%", height: "100%" }}>
+                  <CartoonTree day={day} xp={state.treeXP} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -701,6 +747,23 @@ function LifeTreePage({
               Your tree ranks in the{" "}
               <span className="text-success font-semibold">top {TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users
             </p>
+          </div>
+
+          {/* Gold divider */}
+          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(196,135,58,0.35) 20%, rgba(196,135,58,0.35) 80%, transparent)" }} />
+
+          {/* Compact leaderboard */}
+          <div className="px-5 py-3" style={{ background: "var(--card)" }}>
+            <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-2.5" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
+            <div className="space-y-2">
+              {HALL_OF_LEGENDS.map((u, i) => (
+                <div key={u.name} className="flex items-center gap-2.5">
+                  <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.70 : 0.50 }} />
+                  <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{u.name}</span>
+                  <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.75)" }}>Day {u.day}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -777,60 +840,6 @@ function LifeTreePage({
             );
           })}
         </div>
-      </section>
-
-      {/* Hall of Legends */}
-      <section className="px-6 mt-8">
-        <div className="flex items-center gap-2 mb-1">
-          <Crown className="h-4 w-4" style={{ color: "oklch(0.85 0.16 85)" }} />
-          <h2 className="text-sm font-bold tracking-wide">Hall of Legends</h2>
-        </div>
-        <p className="text-xs text-muted-foreground mb-3">The few who reached Ancient tree. This is what's possible.</p>
-        <div className="space-y-2">
-          {HALL_OF_LEGENDS.map((u, i) => (
-            <div
-              key={u.name}
-              className="flex items-center gap-3 rounded-2xl p-4"
-              style={{
-                background: "linear-gradient(135deg, oklch(0.24 0.04 80 / 0.5), oklch(0.20 0.025 260 / 0.6))",
-                border: "1px solid oklch(0.78 0.16 85 / 0.45)",
-                boxShadow: "0 0 20px -8px oklch(0.78 0.16 85 / 0.4)",
-              }}
-            >
-              <div
-                className="h-11 w-11 rounded-full grid place-items-center shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, oklch(0.5 0.14 85), oklch(0.35 0.1 75))",
-                  boxShadow: "inset 0 0 6px oklch(0.95 0.1 90 / 0.4)",
-                }}
-              >
-                <Crown className="h-5 w-5" style={{ color: "oklch(0.97 0.12 95)" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold truncate">{u.name}</p>
-                  <span
-                    className="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full"
-                    style={{
-                      color: "oklch(0.95 0.12 90)",
-                      border: "1px solid oklch(0.78 0.16 85 / 0.6)",
-                      background: "oklch(0.5 0.14 85 / 0.15)",
-                    }}
-                  >
-                    Legendary
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Ancient tree · Day {u.day}</p>
-              </div>
-              <span className="text-[10px] font-bold shrink-0" style={{ color: "oklch(0.85 0.14 85)" }}>
-                #{i + 1}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="text-[11px] text-center text-muted-foreground mt-3 italic">
-          One day, your name belongs here.
-        </p>
       </section>
 
       <section className="px-6 mt-6">
