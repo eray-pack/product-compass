@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount, activeAddiction } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
+import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Send, Lock, Plus, Users, Globe, Book, Dumbbell,
@@ -424,7 +425,7 @@ function CommunityPage() {
       {/* ── Create community ─────────────────────────────────── */}
       <section className="px-6 mt-8 pb-6 fade-up-3">
         <button
-          onClick={() => setShowCreate(true)}
+          onClick={() => state.isPremium ? setShowCreate(true) : triggerPaywall()}
           className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
         >
           <div

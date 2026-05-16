@@ -240,6 +240,70 @@ function ProgressScreen() {
         </p>
       </section>
 
+      {/* ── Relapse Insights (PRO) ──────────────────────────── */}
+      <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">Relapse Insights</p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">When and why it happens</p>
+          </div>
+          {!state.isPremium && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+              style={{ color: "var(--primary)", borderColor: "oklch(0.62 0.22 255 / 0.3)", background: "oklch(0.62 0.22 255 / 0.06)" }}>
+              <Lock className="h-3 w-3" /> PRO
+            </span>
+          )}
+        </div>
+        <div className="relative">
+          <div className={state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}>
+            {(() => {
+              const relapses = state.relapses ?? [];
+              const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+              const dayCounts = Array(7).fill(0);
+              const hourCounts = Array(4).fill(0); // morning/afternoon/evening/night
+              relapses.forEach(r => {
+                const d = new Date(r.ts);
+                dayCounts[d.getDay()]++;
+                const h = d.getHours();
+                if (h < 6) hourCounts[3]++;
+                else if (h < 12) hourCounts[0]++;
+                else if (h < 18) hourCounts[1]++;
+                else hourCounts[2]++;
+              });
+              const peakDay = days[dayCounts.indexOf(Math.max(...dayCounts))];
+              const peakTime = ["Morning", "Afternoon", "Evening", "Night"][hourCounts.indexOf(Math.max(...hourCounts))];
+              const total = relapses.length;
+              return (
+                <div className="space-y-3">
+                  {[
+                    { label: "Total relapses tracked", value: total > 0 ? `${total}` : "None yet" },
+                    { label: "Most vulnerable day", value: total > 0 ? peakDay : "—" },
+                    { label: "Most vulnerable time", value: total > 0 ? peakTime : "—" },
+                    { label: "Avg. days between relapses", value: total > 1
+                      ? `${Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / (1000 * 60 * 60 * 24 * (total - 1)))} days`
+                      : "—" },
+                  ].map(({ label, value }, i, arr) => (
+                    <div key={label} className="flex justify-between items-center py-3"
+                      style={{ borderBottom: i < arr.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.7)" : "none" }}>
+                      <span className="text-sm text-muted-foreground">{label}</span>
+                      <span className="text-sm font-bold">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+          {!state.isPremium && (
+            <button onClick={() => triggerPaywall()} className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs font-semibold border px-3 py-1.5 rounded-full"
+                style={{ color: "var(--primary)", background: "oklch(0.13 0.022 265 / 0.90)", borderColor: "oklch(0.62 0.22 255 / 0.30)" }}>
+                See what triggers your relapses
+              </span>
+            </button>
+          )}
+        </div>
+      </section>
+
       {/* ── Milestones ──────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-5">Milestones</p>
