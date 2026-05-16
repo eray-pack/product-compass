@@ -28,7 +28,6 @@ export default defineConfig({
         external: [
           "@revenuecat/purchases-capacitor",
           "@capacitor/push-notifications",
-          "@capacitor/core",
         ],
       },
     },
