@@ -255,6 +255,25 @@ function CommunityPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [userRooms, setUserRooms] = useState<Room[]>([]);
 
+  useEffect(() => {
+    supabase
+      .from("rooms")
+      .select("id, name, description, member_count")
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (!data) return;
+        const fetched: Room[] = data.map((r) => ({
+          id: r.id,
+          name: r.name,
+          description: r.description,
+          icon: Users,
+          color: "oklch(0.55 0.15 220)",
+          memberCount: r.member_count,
+        }));
+        setUserRooms(fetched);
+      });
+  }, []);
+
   const handleJoin = (room: Room) => {
     if (!joinedRooms.includes(room.id)) setJoinedRooms((prev) => [...prev, room.id]);
     setActiveRoom(room);
