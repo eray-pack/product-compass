@@ -16,14 +16,21 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    // envPrefix tells Vite to expose ANTHROPIC_* vars via import.meta.env in all
-    // processed code (client + server). This is the most reliable dev-mode path.
     envPrefix: ["VITE_", "ANTHROPIC_"],
-    // define bakes the value in at compile time as a process.env fallback.
     define: {
       "process.env.ANTHROPIC_API_KEY": JSON.stringify(
         localEnv.ANTHROPIC_API_KEY ?? "",
       ),
+    },
+    build: {
+      rollupOptions: {
+        // Native Capacitor plugins only run on device — exclude from web bundle
+        external: [
+          "@revenuecat/purchases-capacitor",
+          "@capacitor/push-notifications",
+          "@capacitor/core",
+        ],
+      },
     },
   },
 });

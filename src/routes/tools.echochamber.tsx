@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { loadState } from "@/lib/store";
 
@@ -16,6 +17,20 @@ const BTN_SYMBOLS = ["◆", "●", "■", "▲"];
 const FLASH_MS = 480;
 const GAP_MS = 180;
 const C = "#F97316";
+const BG = "#0a0502";
+
+// Deterministic ripple ring positions
+const RIPPLES = [
+  { r: 110, dur: 3.8, delay: 0 },
+  { r: 170, dur: 4.4, delay: 0.9 },
+  { r: 230, dur: 5.1, delay: 1.8 },
+];
+
+// Particle burst directions for correct tap
+const BURST_DIRS = Array.from({ length: 10 }, (_, i) => ({
+  x: Math.cos((i / 10) * Math.PI * 2) * 52,
+  y: Math.sin((i / 10) * Math.PI * 2) * 52,
+}));
 
 function EchoChamber() {
   const navigate = useNavigate();
@@ -24,7 +39,10 @@ function EchoChamber() {
   const [lives, setLives] = useState(3);
   const [flashBtn, setFlashBtn] = useState<number | null>(null);
   const [pressBtn, setPressBtn] = useState<number | null>(null);
+  const [burstBtn, setBurstBtn] = useState<number | null>(null);
+  const [shakeBtn, setShakeBtn] = useState<number | null>(null);
   const [inputSeq, setInputSeq] = useState<number[]>([]);
+  const [roundKey, setRoundKey] = useState(0);
 
   const phaseRef = useRef<"idle" | "showing" | "input" | "done">("idle");
   const livesRef = useRef(3);
@@ -66,6 +84,7 @@ function EchoChamber() {
     livesRef.current = 3;
     setLives(3);
     setRound(1);
+    setRoundKey((k) => k + 1);
     const seq = [Math.floor(Math.random() * 4)];
     seqRef.current = seq;
     flashSequence(seq, id);
@@ -81,6 +100,8 @@ function EchoChamber() {
       const idx = next.length - 1;
       if (btn !== seqRef.current[idx]) {
         // Wrong
+        setShakeBtn(btn);
+        setTimeout(() => setShakeBtn(null), 500);
         livesRef.current -= 1;
         setLives(livesRef.current);
         if (livesRef.current <= 0) {
@@ -89,17 +110,18 @@ function EchoChamber() {
           setPhase("done");
           return [];
         }
-        // Replay same sequence
         const id = ++playId.current;
         setTimeout(() => flashSequence(seqRef.current, id), 700);
         return [];
       }
-      // Correct so far
+      // Correct
+      setBurstBtn(btn);
+      setTimeout(() => setBurstBtn(null), 400);
       if (next.length === seqRef.current.length) {
-        // Round complete — grow sequence
         const newSeq = [...seqRef.current, Math.floor(Math.random() * 4)];
         seqRef.current = newSeq;
         setRound(newSeq.length);
+        setRoundKey((k) => k + 1);
         const id = ++playId.current;
         setTimeout(() => flashSequence(newSeq, id), 900);
         return [];
@@ -113,21 +135,56 @@ function EchoChamber() {
   const isActive = phase === "showing" || phase === "input";
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)" }}>
-      <button
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: BG }}>
+      {/* Atmospheric background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `radial-gradient(ellipse 70% 55% at 50% 60%, ${C}12 0%, transparent 70%)`,
+        }} />
+        {/* Sound wave ripple rings */}
+        <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.18 }}>
+          {RIPPLES.map((rp, i) => (
+            <circle key={i} cx="50%" cy="58%" r={rp.r}
+              fill="none" stroke={C} strokeWidth="1"
+              style={{ animation: `echoRipple ${rp.dur}s ${rp.delay}s ease-out infinite` }}
+            />
+          ))}
+        </svg>
+      </div>
+
+      <style>{`
+        @keyframes echoRipple {
+          0%   { opacity: 0.5; transform-origin: 50% 58%; transform: scale(0.6); }
+          60%  { opacity: 0.15; }
+          100% { opacity: 0; transform-origin: 50% 58%; transform: scale(1.35); }
+        }
+      `}</style>
+
+      <motion.button
         onClick={() => { playId.current += 1; navigate({ to: "/" }); }}
         className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center"
-        style={{ background: "oklch(0.20 0.03 265 / 0.8)", border: "1px solid var(--border)" }}
+        style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+        whileTap={{ scale: 0.88 }}
       >
         <ArrowLeft className="h-4 w-4" />
-      </button>
+      </motion.button>
 
-      <div className="pt-12 pb-2 px-6 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Echo Chamber</p>
+      <div className="pt-12 pb-2 px-6 text-center relative z-10">
+        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase" style={{ color: `${C}99` }}>Echo Chamber</p>
         {isActive && (
           <div className="flex justify-center gap-8 mt-3">
             <div>
-              <p className="text-2xl font-bold" style={{ color: C }}>{round}</p>
+              <motion.p
+                key={roundKey}
+                className="text-2xl font-bold"
+                style={{ color: C }}
+                initial={{ scale: 1.6, opacity: 0.5 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 22 }}
+              >
+                {round}
+              </motion.p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Round</p>
             </div>
             <div>
@@ -139,28 +196,77 @@ function EchoChamber() {
       </div>
 
       {isActive && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-8">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-8 relative z-10">
+          <motion.p
+            className="text-sm"
+            style={{ color: `${C}99` }}
+            key={phase}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             {phase === "showing" ? "Watch the pattern…" : "Repeat it back"}
-          </p>
+          </motion.p>
+
           <div className="grid grid-cols-2 gap-4 w-full max-w-xs">
             {BTN_COLORS.map((color, i) => {
               const lit = flashBtn === i || pressBtn === i;
+              const bursting = burstBtn === i;
+              const shaking = shakeBtn === i;
               return (
-                <button
+                <motion.div
                   key={i}
-                  onPointerDown={(e) => { e.preventDefault(); tap(i); }}
-                  className="aspect-square rounded-3xl flex items-center justify-center text-4xl transition-all active:scale-95"
-                  style={{
-                    background: lit ? `${color}44` : `${color}12`,
-                    border: `2px solid ${color}${lit ? "FF" : "44"}`,
-                    boxShadow: lit ? `0 0 36px ${color}88` : "none",
-                    color,
-                    touchAction: "none",
-                  }}
+                  className="aspect-square relative"
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={
+                    shaking
+                      ? { x: [0, -10, 10, -7, 7, -4, 4, 0], scale: 1, opacity: 1 }
+                      : { x: 0, scale: 1, opacity: 1 }
+                  }
+                  transition={
+                    shaking
+                      ? { duration: 0.42, ease: "easeInOut" }
+                      : { delay: i * 0.06, type: "spring", stiffness: 320, damping: 20 }
+                  }
                 >
-                  {BTN_SYMBOLS[i]}
-                </button>
+                  {/* Burst particles */}
+                  <AnimatePresence>
+                    {bursting && BURST_DIRS.map((d, pi) => (
+                      <motion.div
+                        key={pi}
+                        className="absolute rounded-full pointer-events-none"
+                        style={{
+                          width: 6, height: 6,
+                          background: color,
+                          top: "50%", left: "50%",
+                          marginTop: -3, marginLeft: -3,
+                        }}
+                        initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                        animate={{ x: d.x, y: d.y, opacity: 0, scale: 0.3 }}
+                        exit={{}}
+                        transition={{ duration: 0.38, ease: "easeOut" }}
+                      />
+                    ))}
+                  </AnimatePresence>
+
+                  <motion.button
+                    onPointerDown={(e) => { e.preventDefault(); tap(i); }}
+                    className="w-full h-full rounded-3xl flex items-center justify-center text-4xl"
+                    style={{
+                      background: lit ? `${color}44` : `${color}12`,
+                      border: `2px solid ${color}${lit ? "FF" : "44"}`,
+                      boxShadow: lit ? `0 0 36px ${color}88, 0 0 72px ${color}44` : "none",
+                      color,
+                      touchAction: "none",
+                    }}
+                    animate={{
+                      scale: lit ? 1.06 : 1,
+                    }}
+                    transition={{ type: "spring", stiffness: 600, damping: 18 }}
+                  >
+                    {BTN_SYMBOLS[i]}
+                  </motion.button>
+                </motion.div>
               );
             })}
           </div>
@@ -168,33 +274,50 @@ function EchoChamber() {
       )}
 
       {!isActive && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6 relative z-10">
           {phase === "done" && (
             <>
-              <div className="text-center space-y-1">
+              <motion.div
+                className="text-center space-y-1"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 250, damping: 18 }}
+              >
                 <p className="text-5xl font-bold" style={{ color: C }}>{round}</p>
                 <p className="text-sm text-muted-foreground">rounds survived</p>
-              </div>
-              <p className="text-lg font-semibold">
+              </motion.div>
+              <motion.p
+                className="text-lg font-semibold"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 {round >= 8 ? "Pattern master." : round >= 5 ? "Sharp memory." : "Keep training."}
-              </p>
+              </motion.p>
             </>
           )}
           {phase === "idle" && (
-            <div className="text-center space-y-2">
+            <motion.div
+              className="text-center space-y-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
               <p className="text-xl font-bold">Copy the pattern.</p>
               <p className="text-sm text-muted-foreground">
                 Watch the sequence light up.<br />Repeat it back in order.<br />Gets longer each round.
               </p>
-            </div>
+            </motion.div>
           )}
-          <button
+          <motion.button
             onClick={start}
-            className="px-10 py-3.5 rounded-2xl text-sm font-bold text-white active:opacity-80"
+            className="px-10 py-3.5 rounded-2xl text-sm font-bold text-white"
             style={{ background: `linear-gradient(135deg, ${C}, #EA580C)`, boxShadow: `0 0 20px ${C}55` }}
+            whileTap={{ scale: 0.93 }}
+            transition={{ type: "spring", stiffness: 500, damping: 20 }}
           >
             {phase === "done" ? "Play again" : "Start"}
-          </button>
+          </motion.button>
         </div>
       )}
     </div>

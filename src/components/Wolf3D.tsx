@@ -1,0 +1,366 @@
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
+
+// ─── Stage configs (0 = Newborn … 7 = Legendary) ─────────────────────────────
+
+type StageCfg = {
+  scale: number;
+  bodyColor: number;
+  accentColor: number;
+  eyeColor: number;
+  rimColor: number;
+  rimIntensity: number;
+  auraColor: number | null;
+  auraOpacity: number;
+};
+
+const STAGES: StageCfg[] = [
+  // 0 – Newborn  (tiny light-grey pup)
+  { scale: 0.40, bodyColor: 0xa8bac8, accentColor: 0xc8d8e4, eyeColor: 0x88bbff, rimColor: 0x4466aa, rimIntensity: 0.25, auraColor: null, auraOpacity: 0 },
+  // 1 – Pup
+  { scale: 0.52, bodyColor: 0x96aabb, accentColor: 0xb8ccd6, eyeColor: 0x77bbff, rimColor: 0x4466aa, rimIntensity: 0.28, auraColor: null, auraOpacity: 0 },
+  // 2 – Young
+  { scale: 0.64, bodyColor: 0x7d95a8, accentColor: 0xa4b8c4, eyeColor: 0x66aaff, rimColor: 0x3355aa, rimIntensity: 0.28, auraColor: null, auraOpacity: 0 },
+  // 3 – Adolescent
+  { scale: 0.78, bodyColor: 0x667888, accentColor: 0x8fa0ae, eyeColor: 0x55aaf0, rimColor: 0x3355aa, rimIntensity: 0.30, auraColor: null, auraOpacity: 0 },
+  // 4 – Adult
+  { scale: 0.93, bodyColor: 0x546070, accentColor: 0x788898, eyeColor: 0x44aae0, rimColor: 0x2244aa, rimIntensity: 0.30, auraColor: null, auraOpacity: 0 },
+  // 5 – Strong  (eyes turn amber)
+  { scale: 1.09, bodyColor: 0x424e5c, accentColor: 0x607080, eyeColor: 0xC4873A, rimColor: 0xC4873A, rimIntensity: 0.35, auraColor: null, auraOpacity: 0 },
+  // 6 – Alpha  (dark fur, gold accents, gold aura)
+  { scale: 1.28, bodyColor: 0x2c3040, accentColor: 0xC4873A, eyeColor: 0xE8A040, rimColor: 0xC4873A, rimIntensity: 0.55, auraColor: 0xC4873A, auraOpacity: 0.10 },
+  // 7 – Legendary  (near-black, bright gold)
+  { scale: 1.50, bodyColor: 0x181820, accentColor: 0xE8C060, eyeColor: 0xFFD060, rimColor: 0xFFAA20, rimIntensity: 0.70, auraColor: 0xFFAA20, auraOpacity: 0.14 },
+];
+
+// ─── Wolf mesh builder ────────────────────────────────────────────────────────
+
+type AnimRefs = {
+  wolfGroup: THREE.Group | null;
+  breathGroup: THREE.Group | null;
+  tailGroup: THREE.Group | null;
+};
+
+function buildWolf(scene: THREE.Scene, stageIdx: number, refs: AnimRefs): THREE.Group {
+  const cfg = STAGES[Math.min(stageIdx, 7)];
+
+  // Materials — flatShading gives low-poly faceted look
+  const bodyMat  = new THREE.MeshLambertMaterial({ color: cfg.bodyColor,  flatShading: true });
+  const accMat   = new THREE.MeshLambertMaterial({ color: cfg.accentColor, flatShading: true });
+  const eyeMat   = new THREE.MeshBasicMaterial({ color: cfg.eyeColor });
+  const noseMat  = new THREE.MeshBasicMaterial({ color: 0x0e0604 });
+
+  const wolfGroup = new THREE.Group();
+  wolfGroup.scale.setScalar(cfg.scale);
+  scene.add(wolfGroup);
+  refs.wolfGroup = wolfGroup;
+
+  // ── Breathe group (torso + haunches breathe together) ──────────────────────
+  const breathGroup = new THREE.Group();
+  wolfGroup.add(breathGroup);
+  refs.breathGroup = breathGroup;
+
+  // Main torso
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.28, 0.56, 0.52), bodyMat);
+  body.position.set(0, 0.82, 0);
+  body.castShadow = true;
+  breathGroup.add(body);
+
+  // Chest block (front thicker)
+  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.60, 0.52), bodyMat);
+  chest.position.set(0.42, 0.80, 0);
+  breathGroup.add(chest);
+
+  // Haunch block (rear slightly taller)
+  const haunch = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.62, 0.54), bodyMat);
+  haunch.position.set(-0.42, 0.81, 0);
+  breathGroup.add(haunch);
+
+  // ── Neck ──────────────────────────────────────────────────────────────────
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.21, 0.33, 6), bodyMat);
+  neck.position.set(0.58, 1.07, 0);
+  neck.rotation.z = -0.55;
+  neck.castShadow = true;
+  wolfGroup.add(neck);
+
+  // ── Head group (does NOT breathe — stays stable) ───────────────────────────
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0.80, 1.28, 0);
+  wolfGroup.add(headGroup);
+
+  // Skull
+  const skull = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.40, 0.36), bodyMat);
+  skull.castShadow = true;
+  headGroup.add(skull);
+
+  // Cheek wedges (low-poly face shape)
+  for (const side of [1, -1]) {
+    const cheek = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.30, 0.14), bodyMat);
+    cheek.position.set(0, -0.04, side * 0.22);
+    headGroup.add(cheek);
+  }
+
+  // Snout
+  const snout = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.19, 0.24), accMat);
+  snout.position.set(0.30, -0.07, 0);
+  headGroup.add(snout);
+
+  // Nose tip
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.055, 0.08), noseMat);
+  nose.position.set(0.45, -0.03, 0);
+  headGroup.add(nose);
+
+  // Eyes
+  for (const side of [1, -1]) {
+    const eye = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.03), eyeMat);
+    eye.position.set(0.20, 0.07, side * 0.14);
+    headGroup.add(eye);
+    // Subtle glow behind eye
+    const glow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.07, 0.07, 0.02),
+      new THREE.MeshBasicMaterial({ color: cfg.eyeColor, transparent: true, opacity: 0.40 })
+    );
+    glow.position.set(0.19, 0.07, side * 0.14);
+    headGroup.add(glow);
+  }
+
+  // Ears
+  for (const side of [1, -1]) {
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.085, 0.21, 3), bodyMat);
+    ear.position.set(0.02, 0.29, side * 0.12);
+    ear.rotation.z = side * 0.16;
+    ear.castShadow = true;
+    headGroup.add(ear);
+    // Inner ear accent
+    const innerEar = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 3), accMat);
+    innerEar.position.set(0.02, 0.29, side * 0.12);
+    innerEar.rotation.z = side * 0.16;
+    headGroup.add(innerEar);
+  }
+
+  // ── Legs (4×) ─────────────────────────────────────────────────────────────
+  const legDefs = [
+    { x: 0.36, z:  0.21 },
+    { x: 0.36, z: -0.21 },
+    { x: -0.36, z:  0.21 },
+    { x: -0.36, z: -0.21 },
+  ];
+
+  for (const { x, z } of legDefs) {
+    // Upper leg (thigh)
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.28, 6), bodyMat);
+    upper.position.set(x, 0.62, z);
+    upper.castShadow = true;
+    wolfGroup.add(upper);
+    // Lower leg
+    const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.058, 0.28, 6), bodyMat);
+    lower.position.set(x, 0.32, z);
+    lower.castShadow = true;
+    wolfGroup.add(lower);
+    // Paw
+    const paw = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.06, 0.12), accMat);
+    paw.position.set(x, 0.06, z);
+    wolfGroup.add(paw);
+  }
+
+  // ── Tail (3 tapered segments, curled up) ───────────────────────────────────
+  const tailGroup = new THREE.Group();
+  tailGroup.position.set(-0.70, 0.80, 0);
+  wolfGroup.add(tailGroup);
+  refs.tailGroup = tailGroup;
+
+  const tail1 = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.095, 0.30, 5), accMat);
+  tail1.rotation.z = 0.90;
+  tail1.position.set(-0.13, 0.12, 0);
+  tailGroup.add(tail1);
+
+  const tail2 = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.055, 0.24, 5), bodyMat);
+  tail2.rotation.z = 1.30;
+  tail2.position.set(-0.24, 0.28, 0);
+  tailGroup.add(tail2);
+
+  const tail3 = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.038, 0.17, 4), accMat);
+  tail3.rotation.z = 1.55;
+  tail3.position.set(-0.31, 0.42, 0);
+  tailGroup.add(tail3);
+
+  // ── Ground disc ───────────────────────────────────────────────────────────
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(1.40, 20),
+    new THREE.MeshLambertMaterial({ color: 0x152218, flatShading: true })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = 0.004;
+  wolfGroup.add(ground);
+
+  // Grass edge ring (darker)
+  const rim = new THREE.Mesh(
+    new THREE.RingGeometry(1.20, 1.50, 20),
+    new THREE.MeshLambertMaterial({ color: 0x0e1a12, side: THREE.DoubleSide })
+  );
+  rim.rotation.x = -Math.PI / 2;
+  rim.position.y = 0.003;
+  wolfGroup.add(rim);
+
+  // ── Aura ring (alpha / legendary only) ───────────────────────────────────
+  if (cfg.auraColor !== null) {
+    const aura = new THREE.Mesh(
+      new THREE.RingGeometry(0.55, 1.30, 28),
+      new THREE.MeshBasicMaterial({
+        color: cfg.auraColor,
+        transparent: true,
+        opacity: cfg.auraOpacity,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      })
+    );
+    aura.rotation.x = -Math.PI / 2;
+    aura.position.y = 0.01;
+    wolfGroup.add(aura);
+  }
+
+  return wolfGroup;
+}
+
+// ─── Stars ────────────────────────────────────────────────────────────────────
+
+function addStars(scene: THREE.Scene) {
+  const pos: number[] = [];
+  for (let i = 0; i < 300; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.random() * Math.PI * 0.48;
+    const r     = 14 + Math.random() * 4;
+    pos.push(
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta),
+    );
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.075, sizeAttenuation: true, transparent: true, opacity: 0.82 });
+  scene.add(new THREE.Points(geo, mat));
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+interface Props {
+  /** 0–7 matching wolfXPStage().stage */
+  stage: number;
+}
+
+export function Wolf3D({ stage }: Props) {
+  const mountRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = mountRef.current;
+    if (!el) return;
+
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+
+    // ── Scene ──────────────────────────────────────────────────────────────
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x020508);
+    scene.fog = new THREE.Fog(0x020810, 7, 18);
+
+    // ── Camera ─────────────────────────────────────────────────────────────
+    const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 50);
+    camera.position.set(0, 1.8, 5.0);
+    camera.lookAt(0, 0.8, 0);
+
+    // ── Renderer ───────────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    el.appendChild(renderer.domElement);
+
+    // ── Lights ─────────────────────────────────────────────────────────────
+    // Cool ambient (night)
+    scene.add(new THREE.AmbientLight(0x1a2a4a, 1.0));
+
+    // Moonlight (key)
+    const moon = new THREE.DirectionalLight(0xc0d0ff, 0.85);
+    moon.position.set(-3, 8, -5);
+    moon.castShadow = true;
+    moon.shadow.mapSize.set(512, 512);
+    scene.add(moon);
+
+    // Soft under-fill
+    const fill = new THREE.PointLight(0x001144, 0.28, 10);
+    fill.position.set(0, -0.5, 0);
+    scene.add(fill);
+
+    // Amber rim — warm and predatory; brighter for higher stages
+    const cfg = STAGES[Math.min(stage, 7)];
+    const rim = new THREE.DirectionalLight(cfg.rimColor, cfg.rimIntensity);
+    rim.position.set(3.5, 2.5, 3.5);
+    scene.add(rim);
+
+    // Stars
+    addStars(scene);
+
+    // ── Wolf ───────────────────────────────────────────────────────────────
+    const refs: AnimRefs = { wolfGroup: null, breathGroup: null, tailGroup: null };
+    const wolfGroup = buildWolf(scene, stage, refs);
+
+    // Auto-fit camera to wolf size
+    const box    = new THREE.Box3().setFromObject(wolfGroup);
+    const size   = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    wolfGroup.position.x -= center.x;
+    wolfGroup.position.z -= center.z;
+    camera.position.y = size.y * 0.65 + 0.8;
+    camera.position.z = size.y * 2.1 + 2.4;
+    camera.lookAt(0, size.y * 0.40, 0);
+
+    // ── Animation ──────────────────────────────────────────────────────────
+    const clock = new THREE.Clock();
+    let animId: number;
+
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // Slow Y rotation (show wolf from all sides)
+      wolfGroup.rotation.y = t * 0.38;
+
+      // Breathing — subtle torso scale
+      if (refs.breathGroup) {
+        const b = 1 + Math.sin(t * 1.85) * 0.021;
+        refs.breathGroup.scale.y = b;
+        refs.breathGroup.position.y = Math.sin(t * 1.85) * 0.009;
+      }
+
+      // Tail wag
+      if (refs.tailGroup) {
+        refs.tailGroup.rotation.y = Math.sin(t * 3.0) * 0.52;
+      }
+
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // ── Resize ─────────────────────────────────────────────────────────────
+    const onResize = () => {
+      const nw = el.clientWidth;
+      const nh = el.clientHeight;
+      camera.aspect = nw / nh;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nw, nh);
+    };
+    const ro = new ResizeObserver(onResize);
+    ro.observe(el);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      ro.disconnect();
+      renderer.dispose();
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+    };
+  }, [stage]);
+
+  return <div ref={mountRef} className="w-full h-full" />;
+}

@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { loadState } from "@/lib/store";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/tools/identitystack")({
 
 const GAME_DURATION = 30;
 const C = "#E11D48";
+const BG = "#080003";
 
 interface CardItem { id: number; text: string; isGood: boolean; }
 
@@ -42,6 +44,15 @@ function makeQueue(): CardItem[] {
   return pool;
 }
 
+// Deterministic background card texture dots
+const BG_DOTS = Array.from({ length: 20 }, (_, i) => ({
+  x: (i * 41 + 7) % 100,
+  y: (i * 53 + 11) % 100,
+  size: 16 + (i % 4) * 10,
+  opacity: 0.018 + (i % 3) * 0.008,
+  rotation: (i * 17) % 360,
+}));
+
 function IdentityStack() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState<"idle" | "playing" | "done">("idle");
@@ -51,6 +62,7 @@ function IdentityStack() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [feedback, setFeedback] = useState<"ok" | "bad" | null>(null);
   const [swipe, setSwipe] = useState<"left" | "right" | null>(null);
+  const [wrongFlash, setWrongFlash] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseRef = useRef<"idle" | "playing" | "done">("idle");
@@ -70,6 +82,7 @@ function IdentityStack() {
     setWrong(0);
     setFeedback(null);
     setSwipe(null);
+    setWrongFlash(false);
     setTimeLeft(GAME_DURATION);
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
@@ -87,7 +100,11 @@ function IdentityStack() {
     setSwipe(keep ? "right" : "left");
     setFeedback(correct ? "ok" : "bad");
     if (correct) setScore((s) => s + 1);
-    else setWrong((w) => w + 1);
+    else {
+      setWrong((w) => w + 1);
+      setWrongFlash(true);
+      setTimeout(() => setWrongFlash(false), 280);
+    }
     setTimeout(() => {
       setSwipe(null);
       setFeedback(null);
@@ -108,119 +125,266 @@ function IdentityStack() {
 
   const card = queue[0];
 
+  // Timer bar: gold → orange → red
+  const timePct = timeLeft / GAME_DURATION;
+  const barColor = timePct > 0.5 ? "#D97706" : timePct > 0.25 ? "#F97316" : "#ef4444";
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)" }}>
-      <button
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: BG }}>
+      {/* Atmospheric background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `radial-gradient(ellipse 65% 50% at 50% 55%, ${C}0e 0%, transparent 68%)`,
+        }} />
+        {/* Faint card texture dots */}
+        {BG_DOTS.map((d, i) => (
+          <div
+            key={i}
+            className="absolute border rounded-lg pointer-events-none"
+            style={{
+              left: `${d.x}%`, top: `${d.y}%`,
+              width: d.size, height: d.size * 1.4,
+              borderColor: `${C}`,
+              opacity: d.opacity,
+              transform: `rotate(${d.rotation}deg)`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Wrong choice flash */}
+      <AnimatePresence>
+        {wrongFlash && (
+          <motion.div
+            className="absolute inset-0 z-40 pointer-events-none"
+            style={{ background: "rgba(239,68,68,0.2)" }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.button
         onClick={() => { clear(); navigate({ to: "/" }); }}
         className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center"
-        style={{ background: "oklch(0.20 0.03 265 / 0.8)", border: "1px solid var(--border)" }}
+        style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+        whileTap={{ scale: 0.88 }}
       >
         <ArrowLeft className="h-4 w-4" />
-      </button>
+      </motion.button>
 
-      <div className="pt-12 pb-2 px-6 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Identity Stack</p>
+      <div className="pt-12 pb-1 px-6 text-center relative z-10">
+        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase" style={{ color: `${C}99` }}>Identity Stack</p>
         {phase === "playing" && (
-          <div className="flex justify-center gap-8 mt-3">
-            <div>
-              <p className="text-2xl font-bold" style={{ color: C }}>{score}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Stacked</p>
+          <>
+            <div className="flex justify-center gap-8 mt-3">
+              <div>
+                <motion.p
+                  key={score}
+                  className="text-2xl font-bold"
+                  style={{ color: C }}
+                  initial={{ scale: 1.6, opacity: 0.5 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                >
+                  {score}
+                </motion.p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Stacked</p>
+              </div>
+              <div>
+                <motion.p
+                  key={timeLeft}
+                  className="text-2xl font-bold"
+                  style={{ color: barColor, transition: "color 0.5s" }}
+                  initial={{ scale: 1.15 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 600, damping: 24 }}
+                >
+                  {timeLeft}s
+                </motion.p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Left</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-red-400">{wrong}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Wrong</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold">{timeLeft}s</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Left</p>
+            {/* Timer bar */}
+            <div className="mx-6 mt-2 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <motion.div
+                className="h-full rounded-full"
+                animate={{ width: `${timePct * 100}%`, background: barColor }}
+                transition={{ duration: 0.6, ease: "linear" }}
+              />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-red-400">{wrong}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Wrong</p>
-            </div>
-          </div>
+          </>
         )}
       </div>
 
       {phase === "playing" && card && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-5">
-          <div className="flex w-full max-w-xs justify-between text-xs px-2" style={{ color: "var(--muted-foreground)", opacity: 0.55 }}>
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-5 relative z-10">
+          <div className="flex w-full max-w-xs justify-between text-xs px-2" style={{ color: "rgba(255,255,255,0.3)" }}>
             <span>← Discard</span>
             <span>Stack →</span>
           </div>
-          {/* Card deck shadow effect */}
+
+          {/* Card stack */}
           <div className="relative w-full max-w-xs">
-            <div className="absolute inset-0 rounded-3xl -translate-y-2 rotate-1 scale-95 opacity-30"
-              style={{ background: "var(--card)", border: "1px solid var(--border)" }}/>
-            <div className="absolute inset-0 rounded-3xl -translate-y-1 -rotate-1 scale-97 opacity-50"
-              style={{ background: "var(--card)", border: "1px solid var(--border)" }}/>
-            <div
-              className="relative rounded-3xl p-8 text-center"
-              style={{
-                background: feedback === "ok" ? `${C}18` : feedback === "bad" ? "rgba(239,68,68,0.12)" : "var(--card)",
-                border: `1.5px solid ${feedback === "ok" ? C : feedback === "bad" ? "#ef4444" : "var(--border)"}`,
-                boxShadow: feedback === "ok" ? `0 0 32px ${C}44` : "none",
-                transform: swipe === "left"
-                  ? "translateX(-72px) rotate(-10deg)"
-                  : swipe === "right"
-                  ? "translateX(72px) rotate(10deg)"
-                  : "none",
-                transition: "transform 0.32s ease, border-color 0.15s, background 0.15s",
-              }}
-            >
-              <p className="text-lg font-bold leading-snug">{card.text}</p>
-              {feedback && (
-                <p className="mt-3 text-sm font-bold" style={{ color: feedback === "ok" ? C : "#ef4444" }}>
-                  {feedback === "ok" ? "✓ Correct!" : "✗ Wrong"}
+            {/* Shadow cards behind */}
+            <div className="absolute inset-0 rounded-3xl -translate-y-2 rotate-1 scale-95"
+              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C}18` }} />
+            <div className="absolute inset-0 rounded-3xl -translate-y-1 -rotate-1"
+              style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${C}22`, transform: "scale(0.97) rotate(-1deg) translateY(-4px)" }} />
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={card.id}
+                className="relative rounded-3xl p-8 text-center"
+                style={{
+                  background: card.isGood
+                    ? "rgba(0,30,15,0.85)"
+                    : "rgba(30,0,8,0.85)",
+                  border: `1.5px solid ${
+                    feedback === "ok" ? "#22C55E" :
+                    feedback === "bad" ? "#ef4444" :
+                    card.isGood ? "#22C55E44" : `${C}44`
+                  }`,
+                  boxShadow: feedback === "ok"
+                    ? "0 0 32px rgba(34,197,94,0.35)"
+                    : feedback === "bad"
+                    ? "0 0 32px rgba(239,68,68,0.3)"
+                    : card.isGood
+                    ? "0 0 18px rgba(34,197,94,0.1)"
+                    : `0 0 18px ${C}18`,
+                  backdropFilter: "blur(12px)",
+                }}
+                initial={{ y: -60, opacity: 0, scale: 0.9, rotate: -3 }}
+                animate={
+                  swipe === "left"
+                    ? { x: -180, rotate: -14, opacity: 0, scale: 0.85 }
+                    : swipe === "right"
+                    ? { x: 180, rotate: 14, opacity: 0, scale: 0.85 }
+                    : feedback === "bad"
+                    ? { x: [0, -11, 11, -7, 7, -3, 3, 0], y: 0, opacity: 1, scale: 1, rotate: 0 }
+                    : { x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }
+                }
+                exit={{ opacity: 0 }}
+                transition={
+                  swipe
+                    ? { duration: 0.32, ease: "easeIn" }
+                    : feedback === "bad"
+                    ? { duration: 0.44, ease: "easeInOut" }
+                    : { type: "spring", stiffness: 300, damping: 22 }
+                }
+              >
+                {/* Good/bad tint overlay */}
+                <div
+                  className="absolute inset-0 rounded-3xl pointer-events-none"
+                  style={{
+                    background: card.isGood
+                      ? "rgba(34,197,94,0.05)"
+                      : `${C}08`,
+                  }}
+                />
+                <p className="text-lg font-bold leading-snug relative z-10" style={{
+                  color: card.isGood ? "rgba(200,255,220,0.95)" : "rgba(255,200,210,0.95)",
+                }}>
+                  {card.text}
                 </p>
-              )}
-            </div>
+                {/* Small good/bad label */}
+                <p className="mt-1 text-[10px] tracking-widest uppercase relative z-10" style={{
+                  color: card.isGood ? "rgba(34,197,94,0.55)" : `${C}66`,
+                }}>
+                  {card.isGood ? "good habit" : "bad habit"}
+                </p>
+                {feedback && (
+                  <motion.p
+                    className="mt-3 text-sm font-bold relative z-10"
+                    style={{ color: feedback === "ok" ? "#22C55E" : "#ef4444" }}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {feedback === "ok" ? "✓ Correct!" : "✗ Wrong"}
+                  </motion.p>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
+
           {/* Buttons */}
           <div className="flex gap-4 w-full max-w-xs">
-            <button
+            <motion.button
               onClick={() => decide(false)}
-              className="flex-1 py-4 rounded-2xl text-sm font-bold active:scale-95 transition-all"
+              className="flex-1 py-4 rounded-2xl text-sm font-bold"
               style={{ background: "rgba(239,68,68,0.10)", border: "1.5px solid rgba(239,68,68,0.30)", color: "#ef4444" }}
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: "spring", stiffness: 500, damping: 20 }}
             >
               ✕ Discard
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={() => decide(true)}
-              className="flex-1 py-4 rounded-2xl text-sm font-bold active:scale-95 transition-all"
+              className="flex-1 py-4 rounded-2xl text-sm font-bold"
               style={{ background: `${C}14`, border: `1.5px solid ${C}50`, color: C }}
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: "spring", stiffness: 500, damping: 20 }}
             >
               ✓ Stack
-            </button>
+            </motion.button>
           </div>
-          <p className="text-[10px] text-muted-foreground/40">{queue.length} cards remaining</p>
+          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.2)" }}>{queue.length} cards remaining</p>
         </div>
       )}
 
       {phase !== "playing" && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6 relative z-10">
           {phase === "done" && (
             <>
-              <div className="text-center space-y-1">
+              <motion.div
+                className="text-center space-y-1"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 250, damping: 18 }}
+              >
                 <p className="text-5xl font-bold" style={{ color: C }}>{score}</p>
                 <p className="text-sm text-muted-foreground">correct sorts · {wrong} wrong</p>
-              </div>
-              <p className="text-lg font-semibold">
+              </motion.div>
+              <motion.p
+                className="text-lg font-semibold"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+              >
                 {score >= 15 ? "Identity locked in." : score >= 8 ? "Strong self-awareness." : "Keep sorting."}
-              </p>
+              </motion.p>
             </>
           )}
           {phase === "idle" && (
-            <div className="text-center space-y-2">
+            <motion.div
+              className="text-center space-y-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
               <p className="text-xl font-bold">Stack your identity.</p>
               <p className="text-sm text-muted-foreground">
                 Keep good habits, discard the bad ones.<br />Choose fast — the timer doesn't wait.
               </p>
-            </div>
+            </motion.div>
           )}
-          <button
+          <motion.button
             onClick={start}
-            className="px-10 py-3.5 rounded-2xl text-sm font-bold text-white active:opacity-80"
+            className="px-10 py-3.5 rounded-2xl text-sm font-bold text-white"
             style={{ background: `linear-gradient(135deg, ${C}, #9F1239)`, boxShadow: `0 0 20px ${C}55` }}
+            whileTap={{ scale: 0.93 }}
+            transition={{ type: "spring", stiffness: 500, damping: 20 }}
           >
             {phase === "done" ? "Play again" : "Start"}
-          </button>
+          </motion.button>
         </div>
       )}
     </div>

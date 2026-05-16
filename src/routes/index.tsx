@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Coins, X, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Coins, X, Plus, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
 import { initPurchases, checkPremium } from "@/lib/purchases";
@@ -9,15 +10,36 @@ import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
 
+// ─── Motion ──────────────────────────────────────────────────────────────────
+const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
+
+const up: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
+};
+
+const fade: Variants = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { duration: 1.0, ease: "easeOut" as const } },
+};
+
+const seq = (delay = 0, gap = 0.1): Variants => ({
+  hidden: {},
+  show:   { transition: { staggerChildren: gap, delayChildren: delay } },
+});
+
+const vp = { once: true, margin: "-24px" } as const;
+
+// ─── Data ────────────────────────────────────────────────────────────────────
 const MILESTONES = [
-  { day: 7,  label: "Awaken",   short: "A" },
-  { day: 14, label: "Clarity",  short: "C" },
-  { day: 30, label: "Control",  short: "C" },
-  { day: 60, label: "Strength", short: "S" },
-  { day: 90, label: "Reset",    short: "R" },
+  { day: 7,  label: "Awaken"   },
+  { day: 14, label: "Clarity"  },
+  { day: 30, label: "Control"  },
+  { day: 60, label: "Strength" },
+  { day: 90, label: "Reset"    },
 ];
 
-const MILESTONE_LABELS: Record<number, string> = {
+const MILESTONE_BENEFIT: Record<number, string> = {
   7:  "Increased energy",
   14: "Sharper focus returns",
   30: "Confidence rebuilding",
@@ -28,274 +50,240 @@ const MILESTONE_LABELS: Record<number, string> = {
 function nextMilestone(day: number) {
   const m = MILESTONES.find((m) => m.day > day);
   if (!m) return null;
-  return { ...m, fullLabel: MILESTONE_LABELS[m.day], daysAway: m.day - day };
+  return { ...m, benefit: MILESTONE_BENEFIT[m.day], daysAway: m.day - day };
 }
 
-// ── Milestone strip ───────────────────────────────────────────────────────────
-const CARD_W = 126;
+// ─── Journey graph ────────────────────────────────────────────────────────────
+// Five milestone points placed on an ascending curve (bottom-left → top-right).
+// SVG coordinate space: 340 × 160 viewBox.
+// Bezier control points derived via Catmull-Rom → cubic conversion (α = 0.28).
 
-function MilestoneStrip({ day }: { day: number }) {
-  const stripRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const startX = useRef(0);
-  const startScroll = useRef(0);
-  const dragging = useRef(false);
+const GRAPH = [
+  { day: 7,  label: "Awaken",   x: 34,  y: 136 },
+  { day: 14, label: "Clarity",  x: 100, y: 106 },
+  { day: 30, label: "Control",  x: 168, y: 76  },
+  { day: 60, label: "Strength", x: 240, y: 46  },
+  { day: 90, label: "Reset",    x: 306, y: 28  },
+];
 
+// Precomputed cubic bezier segments — one per pair of adjacent milestones
+const SEGS = [
+  "M 34,136 C 40,133 87,112 100,106",
+  "M 100,106 C 113,100 155,82 168,76",
+  "M 168,76 C 181,70 227,50 240,46",
+  "M 240,46 C 253,42 300,30 306,28",
+];
+
+const FULL_PATH =
+  "M 34,136 C 40,133 87,112 100,106 " +
+  "C 113,100 155,82 168,76 " +
+  "C 181,70 227,50 240,46 " +
+  "C 253,42 300,30 306,28";
+
+function JourneyGraph({ day }: { day: number }) {
+  // Index of the milestone currently being worked toward
   const activeIdx = (() => {
-    const i = MILESTONES.findIndex((m) => day < m.day);
-    return i === -1 ? MILESTONES.length - 1 : i;
+    const i = GRAPH.findIndex((p) => day < p.day);
+    return i === -1 ? GRAPH.length - 1 : i;
   })();
-
-  const snapToCard = (idx: number, smooth = true) => {
-    const card = cardRefs.current[idx];
-    const strip = stripRef.current;
-    if (!card || !strip) return;
-    strip.scrollTo({
-      left: card.offsetLeft + CARD_W / 2 - strip.offsetWidth / 2,
-      behavior: smooth ? "smooth" : "auto",
-    });
-  };
-
-  const snapToNearest = () => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    const center = strip.scrollLeft + strip.offsetWidth / 2;
-    let closest = 0, minDist = Infinity;
-    cardRefs.current.forEach((card, i) => {
-      if (!card) return;
-      const dist = Math.abs(card.offsetLeft + CARD_W / 2 - center);
-      if (dist < minDist) { minDist = dist; closest = i; }
-    });
-    snapToCard(closest);
-  };
-
-  useEffect(() => { snapToCard(activeIdx, false); }, [activeIdx]);
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    dragging.current = true;
-    startX.current = e.clientX;
-    startScroll.current = stripRef.current?.scrollLeft ?? 0;
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging.current || !stripRef.current) return;
-    stripRef.current.scrollLeft = startScroll.current + (startX.current - e.clientX);
-  };
-
-  const onPointerUp = () => {
-    if (!dragging.current) return;
-    dragging.current = false;
-    snapToNearest();
-  };
+  const allDone = day >= 90;
 
   return (
-    <>
-      <style>{`.ms-strip::-webkit-scrollbar { display: none; }`}</style>
-      <div
-        ref={stripRef}
-        className="ms-strip flex overflow-x-scroll"
-        style={{
-          position: "relative",
-          scrollbarWidth: "none",
-          paddingLeft: `calc(50% - ${CARD_W / 2}px)`,
-          paddingRight: `calc(50% - ${CARD_W / 2}px)`,
-          gap: 10,
-          paddingTop: 8,
-          paddingBottom: 10,
-          userSelect: "none",
-          touchAction: "none",
-          cursor: "grab",
-        }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+    <div className="px-3 pt-1 pb-2">
+      <style>{`
+        @keyframes journey-pulse {
+          0%   { opacity: 0.65; transform: scale(1);   }
+          100% { opacity: 0;    transform: scale(2.2); }
+        }
+        .jp-ring {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: journey-pulse 2.2s cubic-bezier(0,0,0.2,1) infinite;
+        }
+      `}</style>
+
+      <svg
+        viewBox="0 0 340 160"
+        width="100%"
+        style={{ display: "block", overflow: "visible" }}
+        aria-label="Recovery journey"
       >
-        {MILESTONES.map(({ day: m, label }, i) => {
-          const isActive = i === activeIdx;
-          const isReached = day >= m;
-          const daysAway = m - day;
+        {/* Full path in muted grey — drawn first as baseline */}
+        <path
+          d={FULL_PATH}
+          fill="none"
+          stroke="rgba(255,255,255,0.07)"
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
 
+        {/* Gold overlay — covers segments up to (not including) active milestone */}
+        {SEGS.map((d, i) => {
+          if (!allDone && i >= activeIdx) return null;
           return (
-            <div
-              key={m}
-              ref={(el) => { cardRefs.current[i] = el; }}
-              style={{
-                flexShrink: 0,
-                width: CARD_W,
-                height: 100,
-                borderRadius: 18,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 5,
-                background: isActive
-                  ? "oklch(0.17 0.04 265 / 0.95)"
-                  : isReached
-                  ? "oklch(0.15 0.025 265 / 0.9)"
-                  : "oklch(0.12 0.02 265 / 0.9)",
-                border: isActive
-                  ? "1.5px solid #C4873A"
-                  : isReached
-                  ? "1px solid rgba(196,135,58,0.20)"
-                  : "1px solid oklch(0.23 0.02 265)",
-                boxShadow: isActive
-                  ? "0 0 0 1px rgba(196,135,58,0.22), 0 0 24px 6px rgba(196,135,58,0.28)"
-                  : "none",
-              }}
-            >
-              <p style={{
-                fontSize: 17,
-                fontWeight: 700,
-                letterSpacing: "-0.01em",
-                lineHeight: 1,
-                color: isActive
-                  ? "#ffffff"
-                  : isReached
-                  ? "rgba(255,255,255,0.38)"
-                  : "rgba(255,255,255,0.18)",
-              }}>
-                {label}
-              </p>
-
-              <p style={{
-                fontSize: 11,
-                fontWeight: 600,
-                lineHeight: 1,
-                color: isActive
-                  ? "#C4873A"
-                  : isReached
-                  ? "rgba(196,135,58,0.40)"
-                  : "oklch(0.38 0.02 265)",
-              }}>
-                d{m}
-              </p>
-
-              {isActive && (
-                <p style={{
-                  fontSize: 9,
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  color: "#C4873A",
-                  opacity: 0.85,
-                  marginTop: 1,
-                }}>
-                  {isReached ? "Complete ✓" : `${daysAway} day${daysAway !== 1 ? "s" : ""} to go`}
-                </p>
-              )}
-            </div>
+            <path
+              key={i} d={d}
+              fill="none"
+              stroke="#C4873A"
+              strokeWidth={2}
+              strokeLinecap="round"
+              opacity={0.85}
+            />
           );
         })}
-      </div>
-    </>
+
+        {/* Milestone points */}
+        {GRAPH.map((pt, i) => {
+          const done   = allDone || i < activeIdx;
+          const active = !allDone && i === activeIdx;
+          const r      = active ? 7 : 4.5;
+
+          // Label y positions — name sits above, day sits below
+          const nameY = pt.y - r - 6;
+          const dayY  = pt.y + r + 12;
+
+          return (
+            <g key={pt.day}>
+              {/* Soft pulse ring — active milestone only */}
+              {active && (
+                <circle
+                  cx={pt.x} cy={pt.y} r={8}
+                  fill="none"
+                  stroke="#C4873A"
+                  strokeWidth={1.5}
+                  className="jp-ring"
+                />
+              )}
+
+              {/* Core circle */}
+              <circle
+                cx={pt.x} cy={pt.y} r={r}
+                fill={done || active ? "#C4873A" : "rgba(255,255,255,0.06)"}
+                stroke={done || active ? "rgba(196,135,58,0.2)" : "rgba(255,255,255,0.09)"}
+                strokeWidth={1.5}
+              />
+
+              {/* Milestone name */}
+              <text
+                x={pt.x} y={nameY}
+                textAnchor="middle"
+                fontSize={9}
+                fontWeight={active ? 700 : 500}
+                fill={
+                  active ? "rgba(255,255,255,0.9)"  :
+                  done   ? "rgba(255,255,255,0.5)"  :
+                           "rgba(255,255,255,0.18)"
+                }
+              >
+                {pt.label}
+              </text>
+
+              {/* Day number */}
+              <text
+                x={pt.x} y={dayY}
+                textAnchor="middle"
+                fontSize={8}
+                fontWeight={600}
+                fill={
+                  active ? "#C4873A"                  :
+                  done   ? "rgba(196,135,58,0.38)"    :
+                           "rgba(255,255,255,0.13)"
+                }
+                style={{ letterSpacing: "0.06em" }}
+              >
+                d{pt.day}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
-// ── Today's Focus card ───────────────────────────────────────────────────────
-const FOCUS_CACHE_PREFIX = "stopamine.focus.";
+// ─── Today's Focus ────────────────────────────────────────────────────────────
+const FOCUS_PREFIX = "stopamine.focus.";
 
-function todayCacheKey(name: string) {
-  return FOCUS_CACHE_PREFIX + new Date().toISOString().slice(0, 10) + "." + name.trim().toLowerCase();
-}
-
-function TodaysFocus({
-  name, addiction, costs, triggers, day,
-}: {
+function TodaysFocus({ name, addiction, costs, triggers, day }: {
   name: string; addiction: string; costs: string[]; triggers: string[]; day: number;
 }) {
-  const [text, setText] = useState<string | null>(null);
+  const [text, setText]       = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const displayName = name.trim() || "friend";
-    const key = todayCacheKey(displayName);
+    const key    = FOCUS_PREFIX + new Date().toISOString().slice(0, 10) + "." + displayName.toLowerCase();
     const cached = localStorage.getItem(key);
-    if (cached) {
-      setText(cached);
-      setLoading(false);
-      return;
-    }
-    let cancelled = false;
+    if (cached) { setText(cached); setLoading(false); return; }
 
+    let cancelled = false;
     const phase =
       day <= 7  ? "surviving the first week — cravings are at their peak, every hour counts" :
       day <= 30 ? "building momentum — the brain is starting to rewire, patterns are forming" :
       day <= 60 ? "identity change — becoming someone new, not just quitting" :
       day <= 90 ? "finishing strong — the 90-day reset is in sight, this is where most people slip" :
-                  "maintaining and giving back — past 90 days, locking in the new identity for life";
-
-    const costsStr = costs.length ? costs.join(", ") : "their wellbeing";
-    const triggersStr = triggers.length ? triggers.join(", ") : "various situations";
+                  "maintaining — past 90 days, locking in the new identity for life";
 
     const prompt =
       `Write a Today's Focus message for ${displayName}. ` +
       `They are on day ${day} of quitting ${addiction}. ` +
-      `It has cost them: ${costsStr}. ` +
-      `Their main triggers are: ${triggersStr}. ` +
-      `Recovery phase: ${phase}. ` +
-      `Write exactly 1 sentence. Maximum 20 words. Start with "Hey ${displayName},". ` +
-      `Be specific to their habit and current day. No comma splices. Hard limit: 20 words total.`;
+      `It has cost them: ${costs.join(", ") || "their wellbeing"}. ` +
+      `Main triggers: ${triggers.join(", ") || "various situations"}. ` +
+      `Phase: ${phase}. ` +
+      `Write exactly 1 sentence. Max 20 words. Start with "Hey ${displayName},". No comma splices.`;
 
     fetch("/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
     })
-      .then((r) => {
-        if (!r.ok) throw new Error(`/api/chat ${r.status}`);
-        return r.json();
-      })
-      .then((data: { text?: string; error?: string }) => {
-        if (cancelled) return;
-        if (!data.text) throw new Error(data.error ?? "Empty response");
-        // Purge old cache keys
+      .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+      .then((d: { text?: string }) => {
+        if (cancelled || !d.text) return;
         Object.keys(localStorage)
-          .filter((k) => k.startsWith(FOCUS_CACHE_PREFIX) && k !== key)
+          .filter((k) => k.startsWith(FOCUS_PREFIX) && k !== key)
           .forEach((k) => localStorage.removeItem(k));
-        localStorage.setItem(key, data.text);
-        setText(data.text);
+        localStorage.setItem(key, d.text);
+        setText(d.text);
       })
-      .catch((err) => {
-        console.error("[TodaysFocus]", err);
-      })
+      .catch(console.error)
       .finally(() => { if (!cancelled) setLoading(false); });
+
     return () => { cancelled = true; };
   }, []);
 
   return (
-    <div
-      className="mx-6 mt-6 px-4 py-4 rounded-2xl"
-      style={{
-        background: "oklch(0.18 0.03 265 / 0.85)",
-        border: "1px solid rgba(196,135,58,0.35)",
-        boxShadow: "var(--shadow-glow)",
-      }}
-    >
-      <p
-        className="text-[9px] font-bold tracking-[0.25em] uppercase mb-2.5 text-center"
-        style={{ color: "#C4873A" }}
-      >
-        Today's Focus
-      </p>
-      {loading ? (
-        <div className="space-y-2">
-          <div className="h-3 rounded-full animate-pulse" style={{ background: "oklch(0.22 0.02 265)", width: "90%" }} />
-          <div className="h-3 rounded-full animate-pulse" style={{ background: "oklch(0.22 0.02 265)", width: "75%" }} />
-        </div>
-      ) : text ? (
-        <p className="text-[13px] leading-relaxed text-white/90 text-center">{text}</p>
-      ) : (
-        <p className="text-[12px] text-muted-foreground/50 italic">Focus message unavailable.</p>
-      )}
+    <div className="flex gap-5">
+      {/* Left accent bar */}
+      <div
+        className="w-px shrink-0"
+        style={{
+          background: "linear-gradient(to bottom, #C4873A, rgba(196,135,58,0))",
+          minHeight: 48,
+        }}
+      />
+      <div className="flex-1 min-w-0">
+        {loading ? (
+          <div className="space-y-3 pt-1">
+            <div className="h-3.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.05)", width: "88%" }} />
+            <div className="h-3.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.05)", width: "68%" }} />
+          </div>
+        ) : text ? (
+          <p className="text-[15px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
+            {text}
+          </p>
+        ) : (
+          <p className="text-[13px] italic" style={{ color: "rgba(255,255,255,0.25)" }}>
+            Focus unavailable.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
 
-// ── Daily check-in ────────────────────────────────────────────────────────────
-
-const VARIABLE_REWARDS = [
+// ─── Daily check-in ───────────────────────────────────────────────────────────
+const REWARDS = [
   { weight: 50, xp: 10,  message: null },
   { weight: 25, xp: 50,  message: "Unexpected bonus. Consistency pays." },
   { weight: 15, xp: 20,  message: "You just unlocked something rare.", badge: true },
@@ -305,25 +293,16 @@ const VARIABLE_REWARDS = [
 function rollReward() {
   const roll = Math.random() * 100;
   let cum = 0;
-  for (const r of VARIABLE_REWARDS) {
-    cum += r.weight;
-    if (roll < cum) return r;
-  }
-  return VARIABLE_REWARDS[0];
+  for (const r of REWARDS) { cum += r.weight; if (roll < cum) return r; }
+  return REWARDS[0];
 }
 
-type MoodResponse = {
-  message: string;
-  buttons: { label: string; to: string }[];
-};
+type MoodResp = { message: string; buttons: { label: string; to: string }[] };
 
-function moodResponse(v: number): MoodResponse {
+function moodResp(v: number): MoodResp {
   if (v <= 2) return {
     message: "Tough day. That's okay. You showed up anyway.",
-    buttons: [
-      { label: "Cut the Signal", to: "/tools/breath" },
-      { label: "I'm feeling an urge", to: "/tools/sos" },
-    ],
+    buttons: [{ label: "Cut the Signal", to: "/tools/breath" }, { label: "I'm feeling an urge", to: "/tools/sos" }],
   };
   if (v === 3) return {
     message: "Steady is strength. Most people quit on days like this.",
@@ -336,187 +315,145 @@ function moodResponse(v: number): MoodResponse {
 }
 
 function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
-  const [, update] = useAppState();
-  const [mood, setMood] = useState<number>(3);
+  const [, update]  = useAppState();
+  const [mood, setMood]           = useState(3);
   const [confirmed, setConfirmed] = useState(false);
 
-  const handleConfirm = () => {
+  const confirm = () => {
     if (confirmed) return;
     setConfirmed(true);
-    const reward = rollReward();
-    if (reward.xp > 0) {
-      update((s) => ({ points: s.points + reward.xp, treeXP: s.treeXP + Math.floor(reward.xp / 5) }));
-    }
-    if (reward.message) {
-      onReward(reward.message);
-      setTimeout(() => onReward(""), 3000);
-    }
+    const r = rollReward();
+    if (r.xp > 0) update((s) => ({ points: s.points + r.xp, treeXP: s.treeXP + Math.floor(r.xp / 5) }));
+    if (r.message) { onReward(r.message); setTimeout(() => onReward(""), 3200); }
   };
 
-  const response = confirmed ? moodResponse(mood) : null;
+  const resp  = confirmed ? moodResp(mood) : null;
   const isLow = mood <= 2;
-  const isHigh = mood >= 4;
+  const isHi  = mood >= 4;
 
   return (
     <div>
-      {/* Slider */}
-      <div className="relative pt-6 pb-2">
-        {/* Value above thumb */}
-        <div
-          className="absolute top-0 flex flex-col items-center pointer-events-none"
-          style={{
-            left: `calc(${((mood - 1) / 4) * 100}%)`,
-            transform: "translateX(-50%)",
-            transition: "left 0.1s ease",
-          }}
-        >
-          <span
-            className="text-[11px] font-bold tabular-nums"
-            style={{ color: "var(--primary)" }}
-          >
-            {mood}
-          </span>
-        </div>
+      <style>{`
+        .ci-range{--tc:#C4873A}
+        .ci-range::-webkit-slider-runnable-track{height:1px;background:rgba(255,255,255,0.1);border-radius:1px}
+        .ci-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--tc);box-shadow:0 0 10px 2px rgba(196,135,58,0.4);margin-top:-7.5px;transition:box-shadow 0.15s}
+        .ci-range:not(:disabled)::-webkit-slider-thumb:active{box-shadow:0 0 18px 4px rgba(196,135,58,0.55)}
+        .ci-range::-moz-range-track{height:1px;background:rgba(255,255,255,0.1);border-radius:1px}
+        .ci-range::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--tc);box-shadow:0 0 10px 2px rgba(196,135,58,0.4)}
+      `}</style>
 
-        {/* Track + thumb via native range */}
+      {/* Value indicator */}
+      <div className="relative pt-5 pb-1">
+        <div
+          className="absolute top-0 pointer-events-none"
+          style={{ left: `calc(${((mood - 1) / 4) * 100}%)`, transform: "translateX(-50%)", transition: "left 0.1s ease" }}
+        >
+          <span className="text-[11px] font-bold tabular-nums" style={{ color: "#C4873A" }}>{mood}</span>
+        </div>
         <input
-          type="range"
-          min={1}
-          max={5}
-          step={1}
-          value={mood}
-          disabled={confirmed}
-          onChange={(e) => setMood(Number(e.target.value))}
-          onMouseUp={handleConfirm}
-          onTouchEnd={handleConfirm}
-          className="w-full appearance-none bg-transparent cursor-pointer disabled:cursor-default"
+          type="range" min={1} max={5} step={1}
+          value={mood} disabled={confirmed}
+          onChange={(e) => setMood(+e.target.value)}
+          onMouseUp={confirm} onTouchEnd={confirm}
+          className="ci-range w-full appearance-none bg-transparent cursor-pointer disabled:cursor-default"
           style={{ height: 20 }}
         />
-
-        {/* Labels */}
-        <div className="flex justify-between mt-1.5">
-          <span className="text-[10px] text-muted-foreground/50 font-medium">Rough</span>
-          <span className="text-[10px] text-muted-foreground/50 font-medium">Strong</span>
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] tracking-wide" style={{ color: "rgba(255,255,255,0.22)" }}>Rough</span>
+          <span className="text-[10px] tracking-wide" style={{ color: "rgba(255,255,255,0.22)" }}>Strong</span>
         </div>
       </div>
 
-      {/* Slider track/thumb styles */}
-      <style>{`
-        input[type=range] {
-          --thumb-color: #C4873A;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-          height: 1.5px;
-          background: oklch(0.32 0.03 265 / 0.8);
-          border-radius: 1px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: var(--thumb-color);
-          box-shadow: 0 0 8px 2px #C4873A55;
-          margin-top: -6.25px;
-          transition: box-shadow 0.15s;
-        }
-        input[type=range]:not(:disabled)::-webkit-slider-thumb:active {
-          box-shadow: 0 0 14px 4px #C4873A77;
-        }
-        input[type=range]::-moz-range-track {
-          height: 1.5px;
-          background: oklch(0.32 0.03 265 / 0.8);
-          border-radius: 1px;
-        }
-        input[type=range]::-moz-range-thumb {
-          width: 14px;
-          height: 14px;
-          border: none;
-          border-radius: 50%;
-          background: var(--thumb-color);
-          box-shadow: 0 0 8px 2px #C4873A55;
-        }
-      `}</style>
-
-      {/* Contextual response */}
-      {response && (
-        <div className="mt-4 fade-up">
-          <p
-            className="text-sm font-semibold leading-snug"
-            style={{
-              color: isLow
-                ? "oklch(0.78 0.12 25)"
-                : isHigh
-                ? "oklch(0.78 0.14 150)"
-                : "var(--foreground)",
-            }}
+      <AnimatePresence>
+        {resp && (
+          <motion.div
+            className="mt-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: EASE }}
           >
-            {response.message}
-          </p>
-          <div className="mt-4 flex gap-2 flex-wrap">
-            {response.buttons.map(({ label, to }) => (
-              <Link
-                key={label}
-                to={to}
-                className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-opacity active:opacity-70"
-                style={{
-                  background: isLow
-                    ? "oklch(0.30 0.10 25 / 0.5)"
-                    : "oklch(0.62 0.22 255 / 0.08)",
-                  border: `1px solid ${
-                    isLow
-                      ? "oklch(0.55 0.20 25 / 0.35)"
-                      : isHigh
-                      ? "oklch(0.60 0.18 150 / 0.35)"
-                      : "oklch(0.62 0.22 255 / 0.28)"
-                  }`,
-                  color: isLow
-                    ? "oklch(0.80 0.14 25)"
-                    : isHigh
-                    ? "oklch(0.75 0.18 150)"
-                    : "var(--primary)",
-                }}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+            <p
+              className="text-[14px] font-semibold leading-snug"
+              style={{
+                color: isLow ? "oklch(0.78 0.12 25)" : isHi ? "oklch(0.78 0.14 150)" : "rgba(255,255,255,0.88)",
+              }}
+            >
+              {resp.message}
+            </p>
+            <div className="mt-4 flex gap-2 flex-wrap">
+              {resp.buttons.map(({ label, to }) => (
+                <Link
+                  key={label} to={to}
+                  className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold"
+                  style={{
+                    background: isLow ? "oklch(0.28 0.10 25 / 0.45)" : "rgba(255,255,255,0.05)",
+                    border: `1px solid ${isLow ? "oklch(0.50 0.18 25 / 0.35)" : isHi ? "oklch(0.55 0.16 150 / 0.35)" : "rgba(255,255,255,0.1)"}`,
+                    color:  isLow ? "oklch(0.80 0.14 25)" : isHi ? "oklch(0.75 0.18 150)" : "rgba(255,255,255,0.7)",
+                  }}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+// ─── Route ────────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/")({
   beforeLoad: () => {
     if (typeof window === "undefined") return;
     let needsOnboarding = false;
     try {
-      const raw = localStorage.getItem("stopamine.v2");
-      const saved = raw ? JSON.parse(raw) : null;
+      const saved = JSON.parse(localStorage.getItem("stopamine.v2") ?? "null");
       needsOnboarding = !saved?.onboarding || !saved?.addictions?.length;
-    } catch {
-      needsOnboarding = true;
-    }
+    } catch { needsOnboarding = true; }
     if (needsOnboarding) throw redirect({ to: "/onboarding" });
   },
   component: Dashboard,
 });
 
+// ─── Thin separator ───────────────────────────────────────────────────────────
+function Hairline() {
+  return (
+    <motion.div
+      className="mx-6"
+      style={{ height: 1, background: "rgba(255,255,255,0.055)" }}
+      initial="hidden" whileInView="show" viewport={vp} variants={fade}
+    />
+  );
+}
+
+// ─── Section label ────────────────────────────────────────────────────────────
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      className="text-[9px] font-bold tracking-[0.38em] uppercase mb-3"
+      style={{ color: "rgba(255,255,255,0.28)" }}
+    >
+      {children}
+    </p>
+  );
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 function Dashboard() {
   const [state, update] = useAppState();
-  const navigate = useNavigate();
-  const [showRelapse, setShowRelapse] = useState(false);
-  const [rewardMsg, setRewardMsg] = useState<string | null>(null);
+  const navigate        = useNavigate();
+  const [showRelapse,  setShowRelapse]  = useState(false);
+  const [rewardMsg,    setRewardMsg]    = useState<string | null>(null);
   const [showIdentity, setShowIdentity] = useState(false);
-  const [reEntryDays, setReEntryDays] = useState(0);
+  const [reEntryDays,  setReEntryDays]  = useState(0);
   const [showAddHabit, setShowAddHabit] = useState(false);
 
-  const active = activeAddiction(state);
-  const day = active ? dayCount(active.startDate) : 1;
+  const active      = activeAddiction(state);
+  const day         = active ? dayCount(active.startDate) : 1;
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
-  const next = nextMilestone(day);
+  const next        = nextMilestone(day);
 
   // Init RevenueCat and sync premium status on mount
   useEffect(() => {
@@ -536,20 +473,19 @@ function Dashboard() {
     const inactive = inactivityDays(state.lastLoginAt);
     if (inactive >= 30) setReEntryDays(inactive);
     update((s) => ({
-      lastLoginAt: Date.now(),
+      lastLoginAt:  Date.now(),
       loginHistory: [...(s.loginHistory ?? []).slice(-89), Date.now()],
     }));
   }, [state.onboarding]);
 
   useEffect(() => {
     if (!state.onboarding?.identity) return;
-    const weekMs = 7 * 86400000;
-    if (Date.now() - (state.lastIdentityShown ?? 0) > weekMs) setShowIdentity(true);
+    if (Date.now() - (state.lastIdentityShown ?? 0) > 7 * 86400000) setShowIdentity(true);
   }, [state.onboarding, state.lastIdentityShown]);
 
-  const relapses = [...state.relapses].sort((a, b) => a.ts - b.ts);
-  const points = [active?.startDate ?? Date.now(), ...relapses.map((r) => r.ts), Date.now()];
-  const gaps = points.slice(1).map((t, i) => (t - points[i]) / 86400000);
+  const relapses   = [...state.relapses].sort((a, b) => a.ts - b.ts);
+  const points     = [active?.startDate ?? Date.now(), ...relapses.map((r) => r.ts), Date.now()];
+  const gaps       = points.slice(1).map((t, i) => (t - points[i]) / 86400000);
   const bestStreak = Math.max(day, ...gaps.map((g) => Math.floor(g)));
   const streakLine =
     day >= bestStreak && relapses.length > 0
@@ -558,181 +494,358 @@ function Dashboard() {
 
   return (
     <PageShell>
-      {/* ── Header ──────────────────────────────────────────── */}
-      <header className="px-6 pt-12 pb-2 relative flex items-center justify-center fade-up">
-        <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-muted-foreground/60">
+
+      {/* ── NAV ──────────────────────────────────────────────── */}
+      <motion.header
+        className="px-6 pt-12 pb-3 flex items-center justify-between"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        <span
+          className="text-[10px] font-bold tracking-[0.45em] uppercase"
+          style={{ color: "rgba(255,255,255,0.3)" }}
+        >
           Stopamine
         </span>
-        <Link
-          to="/challenges"
-          className="absolute right-6 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
-          style={{ color: "var(--primary)", borderColor: "rgba(196,135,58,0.28)", background: "rgba(196,135,58,0.06)" }}
-        >
-          <Coins className="h-3 w-3" /> {state.points}
-        </Link>
-      </header>
 
-      {/* ── Hero: day number ────────────────────────────────── */}
-      <section className="relative px-6 pt-8 pb-4 text-center overflow-hidden fade-up-1">
-        {/* Ambient glow orb behind number */}
+        <div className="flex items-center gap-3">
+          <motion.button
+            onClick={() => setShowAddHabit(true)}
+            whileHover={{ opacity: 0.7 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ duration: 0.15 }}
+            className="h-7 w-7 rounded-full grid place-items-center"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
+          >
+            <Plus className="h-3 w-3" />
+          </motion.button>
+
+          <motion.div whileHover={{ opacity: 0.7 }} whileTap={{ scale: 0.96 }} transition={{ duration: 0.15 }}>
+            <Link
+              to="/challenges"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
+              style={{
+                color: "#C4873A",
+                background: "rgba(196,135,58,0.07)",
+                border: "1px solid rgba(196,135,58,0.2)",
+              }}
+            >
+              <Coins className="h-3 w-3" />
+              {state.points}
+            </Link>
+          </motion.div>
+        </div>
+      </motion.header>
+
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <motion.section
+        className="relative px-6 pt-8 pb-5 text-center overflow-hidden"
+        initial="hidden"
+        animate="show"
+        variants={seq(0.1, 0.1)}
+      >
+        {/* Ambient light — behind the number */}
         <div
+          aria-hidden
           className="pointer-events-none absolute ambient-drift"
           style={{
-            top: "5%", left: "50%",
-            width: 300, height: 300,
+            top: "0%", left: "50%",
+            width: 340, height: 340,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(196,135,58,0.13) 0%, transparent 70%)",
-            filter: "blur(40px)",
+            background: "radial-gradient(circle, rgba(196,135,58,0.09) 0%, transparent 68%)",
+            filter: "blur(50px)",
           }}
-          aria-hidden
         />
-        <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-muted-foreground/50">Day</p>
-        <p className="day-monument font-bold leading-none tabular-nums" style={{ fontSize: "8rem" }}>
-          {day}
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground">
-          {active?.name ?? "recovery"} ·{" "}
-          <span className="font-semibold text-foreground/90">{recoveryPct}%</span>{" "}
-          to brain reset
-          <button
-            onClick={() => setShowAddHabit(true)}
-            className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full border transition-colors"
-            style={{ color: "var(--primary)", borderColor: "rgba(196,135,58,0.30)", background: "oklch(0.62 0.22 255 / 0.06)" }}
+
+        {/* Eyebrow */}
+        <motion.p
+          className="text-[9px] font-bold tracking-[0.5em] uppercase"
+          style={{ color: "rgba(196,135,58,0.45)" }}
+          variants={fade}
+        >
+          Day
+        </motion.p>
+
+        {/* The number — singular focus */}
+        <motion.div
+          className="relative inline-block"
+          variants={{
+            hidden: { opacity: 0, y: 30, scale: 0.95 },
+            show:   { opacity: 1, y: 0,  scale: 1,   transition: { duration: 1.1, ease: EASE } },
+          }}
+        >
+          <span
+            className="day-monument font-bold leading-none tabular-nums select-none"
+            style={{ fontSize: "clamp(6rem, 28vw, 9.5rem)" }}
           >
-            <Plus className="h-2.5 w-2.5" /> Add habit
-          </button>
-        </p>
-        <p className="mt-1.5 text-xs italic" style={{ color: "oklch(0.52 0.015 265 / 0.7)" }}>
+            {day}
+          </span>
+        </motion.div>
+
+        {/* Habit context */}
+        <motion.div
+          className="mt-3 flex items-center justify-center gap-3"
+          variants={up}
+        >
+          <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+          <span
+            className="text-[10px] font-bold tracking-[0.3em] uppercase"
+            style={{ color: "rgba(255,255,255,0.4)" }}
+          >
+            {active?.name ?? "Recovery"}
+          </span>
+          <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+        </motion.div>
+
+        {/* Streak line */}
+        <motion.p
+          className="mt-3 text-[12px]"
+          style={{ color: "rgba(255,255,255,0.25)" }}
+          variants={fade}
+        >
           {streakLine}
-        </p>
-      </section>
+        </motion.p>
+      </motion.section>
 
-      {/* ── Inline stats ────────────────────────────────────── */}
-      <div className="px-6 mt-1 mb-2 flex divide-x fade-up-2" style={{ borderColor: "var(--border)" }}>
-        <div className="flex-1 text-center py-3">
-          <p className="text-[22px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>{recoveryPct}%</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Recovery</p>
-        </div>
-        <div className="flex-1 text-center py-3">
-          <p className="text-[22px] font-bold tabular-nums">{bestStreak}d</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Best streak</p>
-        </div>
-        <div className="flex-1 text-center py-3">
-          <p className="text-[22px] font-bold tabular-nums">{state.relapses.length}</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Relapses</p>
-        </div>
-      </div>
+      {/* ── STATS ─────────────────────────────────────────────── */}
+      <motion.div
+        className="mx-6 mb-7 grid grid-cols-3"
+        style={{
+          border: "1px solid rgba(255,255,255,0.055)",
+          borderRadius: 16,
+          overflow: "hidden",
+        }}
+        initial="hidden"
+        animate="show"
+        variants={seq(0.45, 0.08)}
+      >
+        {[
+          { value: `${recoveryPct}%`, sub: "Recovery",    gold: true  },
+          { value: `${bestStreak}d`,  sub: "Best streak", gold: false },
+          { value: state.relapses.length, sub: "Relapses", gold: false },
+        ].map(({ value, sub, gold }, i) => (
+          <motion.div
+            key={sub}
+            className="flex flex-col items-center justify-center py-5"
+            style={{
+              borderRight: i < 2 ? "1px solid rgba(255,255,255,0.055)" : undefined,
+            }}
+            variants={up}
+            whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" }}
+            transition={{ duration: 0.2 }}
+          >
+            <span
+              className="text-[24px] font-bold tabular-nums leading-none"
+              style={{ color: gold ? "#C4873A" : "rgba(255,255,255,0.88)" }}
+            >
+              {value}
+            </span>
+            <span
+              className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-1.5"
+              style={{ color: "rgba(255,255,255,0.25)" }}
+            >
+              {sub}
+            </span>
+          </motion.div>
+        ))}
+      </motion.div>
 
-      {/* ── Milestone strip ──────────────────────────────────── */}
-      <section className="mt-4 fade-up-2">
-        <MilestoneStrip day={day} />
-      </section>
+      <Hairline />
 
-      {/* ── Today's Focus ───────────────────────────────────── */}
+      {/* ── JOURNEY ───────────────────────────────────────────── */}
+      <motion.section
+        className="mt-7 mb-6"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <div className="px-6 mb-1">
+          <Label>The Journey</Label>
+        </div>
+        <JourneyGraph day={day} />
+      </motion.section>
+
+      <Hairline />
+
+      {/* ── TODAY'S FOCUS ─────────────────────────────────────── */}
       {state.onboarding && active && (
-        <TodaysFocus
-          name={state.onboarding.name}
-          addiction={active.name}
-          costs={state.onboarding.costs}
-          triggers={state.onboarding.triggers}
-          day={day}
-        />
+        <motion.section
+          className="px-6 mt-7 mb-6"
+          initial="hidden" whileInView="show" viewport={vp} variants={up}
+        >
+          <Label>Today's Focus</Label>
+          <TodaysFocus
+            name={state.onboarding.name}
+            addiction={active.name}
+            costs={state.onboarding.costs}
+            triggers={state.onboarding.triggers}
+            day={day}
+          />
+        </motion.section>
       )}
 
-      {/* ── Daily check-in ──────────────────────────────────── */}
-      <section className="px-6 mt-10 pt-8 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-2">
-          Daily Check-in
-        </p>
-        <p className="text-base font-semibold mb-5">How are you feeling today?</p>
-        <CheckIn onReward={setRewardMsg} />
-      </section>
+      <Hairline />
 
-      {/* ── Motivation pull quote ────────────────────────────── */}
-      <section className="px-6 mt-8 fade-up-5">
-        <p className="text-[13px] leading-relaxed italic" style={{ color: "oklch(0.60 0.018 265 / 0.75)" }}>
+      {/* ── DAILY CHECK-IN ────────────────────────────────────── */}
+      <motion.section
+        className="px-6 mt-7 mb-6"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <Label>Daily Check-in</Label>
+        <p className="text-[20px] font-semibold leading-tight mb-5"
+           style={{ letterSpacing: "-0.02em" }}>
+          How are you<br />holding up today?
+        </p>
+        <CheckIn onReward={setRewardMsg} />
+      </motion.section>
+
+      <Hairline />
+
+      {/* ── MOTIVATION ────────────────────────────────────────── */}
+      <motion.section
+        className="px-6 mt-6 mb-5"
+        initial="hidden" whileInView="show" viewport={{ once: true, margin: "-16px" }} variants={fade}
+      >
+        <p
+          className="text-[15px] leading-relaxed"
+          style={{ color: "rgba(255,255,255,0.36)", fontStyle: "italic" }}
+        >
           You started this for{" "}
-          <span className="not-italic font-medium" style={{ color: "oklch(0.75 0.025 265 / 0.85)" }}>
+          <em
+            className="not-italic font-semibold"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
             {state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self"}
-          </span>
+          </em>
           . That person is still watching.
         </p>
-      </section>
+      </motion.section>
 
-      {/* ── Next milestone ──────────────────────────────────── */}
+      {/* ── NEXT MILESTONE ────────────────────────────────────── */}
       {next && (
-        <section className="px-6 mt-7 flex items-center gap-4">
-          <div className="flex-1 h-px" style={{ background: "oklch(0.22 0.03 265 / 0.7)" }} />
-          <div className="text-center shrink-0">
-            <p className="text-[11px] text-muted-foreground/70">
-              Next · <span className="font-semibold text-foreground/80">Day {next.day} — {next.fullLabel}</span>
-            </p>
-            <p className="text-[10px] font-bold mt-0.5" style={{ color: "var(--primary)" }}>
-              {next.daysAway} days away
-            </p>
+        <motion.section
+          className="mx-6 mb-6"
+          initial="hidden" whileInView="show" viewport={vp} variants={up}
+        >
+          <div
+            className="flex items-center justify-between px-5 py-5 rounded-2xl"
+            style={{
+              background: "rgba(255,255,255,0.025)",
+              border: "1px solid rgba(255,255,255,0.055)",
+            }}
+          >
+            <div>
+              <p className="text-[9px] font-bold tracking-[0.35em] uppercase mb-2"
+                 style={{ color: "rgba(255,255,255,0.25)" }}>
+                Next milestone
+              </p>
+              <p className="text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+                Day {next.day} — {next.benefit}
+              </p>
+            </div>
+            <div className="text-right ml-4 shrink-0">
+              <p className="text-[28px] font-bold tabular-nums leading-none" style={{ color: "#C4873A" }}>
+                {next.daysAway}
+              </p>
+              <p className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-1"
+                 style={{ color: "rgba(255,255,255,0.25)" }}>
+                days away
+              </p>
+            </div>
           </div>
-          <div className="flex-1 h-px" style={{ background: "oklch(0.22 0.03 265 / 0.7)" }} />
-        </section>
+        </motion.section>
       )}
 
-      {/* ── SOS ─────────────────────────────────────────────── */}
-      <section className="px-6 mt-6">
-        <Link
-          to="/tools/sos"
-          className="flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-semibold transition-opacity active:opacity-75"
-          style={{
-            background: "linear-gradient(135deg, oklch(0.35 0.15 25 / 0.18), oklch(0.25 0.1 25 / 0.12))",
-            border: "1px solid oklch(0.62 0.24 25 / 0.28)",
-            color: "oklch(0.72 0.18 25)",
-          }}
+      {/* ── EMERGENCY ─────────────────────────────────────────── */}
+      <motion.section
+        className="mx-6 mb-3"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <motion.div
+          whileHover={{ scale: 1.012 }}
+          whileTap={{ scale: 0.987 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          style={{ borderRadius: 18, overflow: "hidden" }}
         >
-          Feeling an urge right now?
-        </Link>
-      </section>
+          <Link
+            to="/tools/sos"
+            className="flex items-center justify-between px-6 py-6"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.17 0.055 20), oklch(0.13 0.04 20))",
+              border: "1px solid oklch(0.32 0.12 20 / 0.45)",
+            }}
+          >
+            <div>
+              <p
+                className="text-[9px] font-bold tracking-[0.38em] uppercase mb-2"
+                style={{ color: "oklch(0.62 0.14 20 / 0.75)" }}
+              >
+                Emergency
+              </p>
+              <p className="text-[18px] font-semibold leading-tight" style={{ color: "oklch(0.87 0.06 20)" }}>
+                Feeling an urge<br />right now?
+              </p>
+              <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.55 0.08 20)" }}>
+                Immediate support available
+              </p>
+            </div>
+            <ArrowRight
+              className="h-5 w-5 shrink-0 ml-4"
+              style={{ color: "oklch(0.50 0.12 20)" }}
+            />
+          </Link>
+        </motion.div>
+      </motion.section>
 
-      {/* ── Log relapse ─────────────────────────────────────── */}
-      <section className="px-6 mt-2 pb-8">
-        <button
+      {/* ── LOG RELAPSE ───────────────────────────────────────── */}
+      <motion.section
+        className="px-6 pb-10"
+        initial="hidden" whileInView="show" viewport={vp} variants={fade}
+      >
+        <motion.button
           onClick={() => setShowRelapse(true)}
-          className="w-full py-3 rounded-2xl text-center text-[13px] font-medium transition-opacity active:opacity-60"
-          style={{
-            color: "oklch(0.75 0.010 265)",
-            border: "1px solid oklch(0.28 0.020 265 / 0.8)",
-            background: "oklch(0.15 0.015 265 / 0.5)",
-          }}
+          className="w-full py-4 text-center text-[11px] font-medium tracking-wide"
+          style={{ color: "rgba(255,255,255,0.2)" }}
+          whileHover={{ color: "rgba(255,255,255,0.45)" }}
+          transition={{ duration: 0.2 }}
         >
           I relapsed — log it honestly
-        </button>
-      </section>
+        </motion.button>
+      </motion.section>
 
-      {/* ── Modals ──────────────────────────────────────────── */}
+      {/* ── MODALS ────────────────────────────────────────────── */}
       {showAddHabit && <AddAddictionModal onClose={() => setShowAddHabit(false)} />}
-      {showRelapse && (
+      {showRelapse  && (
         <RelapseModal onClose={() => setShowRelapse(false)} totalCleanDays={state.totalCleanDays} />
       )}
       {reEntryDays >= 30 && (
         <ReEntryScreen inactiveDays={reEntryDays} onDone={() => setReEntryDays(0)} />
       )}
       {showIdentity && state.onboarding?.identity && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-6">
-          <div
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end justify-center p-6 pb-10">
+          <motion.div
             className="rounded-3xl border border-primary/20 p-7 w-full max-w-sm space-y-5 text-center relative"
             style={{ background: "var(--card)" }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: EASE }}
           >
             <button
               onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
-              className="absolute top-4 right-4 text-muted-foreground"
+              className="absolute top-4 right-4"
+              style={{ color: "rgba(255,255,255,0.3)" }}
             >
               <X className="h-4 w-4" />
             </button>
-            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--primary)" }}>
+            <p className="text-[9px] font-bold uppercase tracking-[0.3em]" style={{ color: "#C4873A" }}>
               You made a promise.
             </p>
-            <p className="text-2xl font-bold leading-snug">
+            <p className="text-[22px] font-bold leading-snug">
               I am becoming someone who{" "}
-              <span style={{ color: "var(--primary)" }}>{state.onboarding.identity}</span>.
+              <span style={{ color: "#C4873A" }}>{state.onboarding.identity}</span>.
             </p>
-            <p className="text-sm text-muted-foreground">You're still becoming that person.</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+              You're still becoming that person.
+            </p>
             <button
               onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
               className="w-full h-12 rounded-2xl text-sm font-bold text-primary-foreground"
@@ -740,14 +853,26 @@ function Dashboard() {
             >
               I'm still in.
             </button>
-          </div>
+          </motion.div>
         </div>
       )}
-      {rewardMsg && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-primary/30 bg-card px-5 py-3 text-sm font-semibold shadow-lg" style={{ color: "var(--primary)" }}>
-          {rewardMsg}
-        </div>
-      )}
+
+      {/* ── REWARD TOAST ──────────────────────────────────────── */}
+      <AnimatePresence>
+        {rewardMsg && (
+          <motion.div
+            className="fixed bottom-24 z-50 rounded-full border border-primary/25 bg-card px-5 py-3 text-[13px] font-semibold shadow-xl"
+            style={{ left: "50%", color: "#C4873A" }}
+            initial={{ opacity: 0, y: 14, x: "-50%" }}
+            animate={{ opacity: 1, y: 0,  x: "-50%" }}
+            exit={{    opacity: 0, y: 6,   x: "-50%" }}
+            transition={{ duration: 0.45, ease: EASE }}
+          >
+            {rewardMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </PageShell>
   );
 }
