@@ -432,7 +432,7 @@ export function WolfSittingPreview({ className }: { className?: string }) {
       {/* ── Ground shadow ─────────────────────────────────────────────── */}
       <ellipse cx="80" cy="202" rx="50" ry="6" fill="#000" opacity="0.09"/>
 
-      {/* ── Tail — animated wag, rotates around base (110, 168) ──────── */}
+      {/* ── Tail — thick bushy wolf tail, three layered fur paths ─────── */}
       <g>
         {/* @ts-ignore — SMIL animateTransform */}
         <animateTransform
@@ -445,46 +445,46 @@ export function WolfSittingPreview({ className }: { className?: string }) {
           calcMode="spline"
           keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
         />
-        {/* Dark outer silhouette — gives crisp fur-edge definition */}
-        <path d="M 108 168 Q 106 138 120 106 Q 130 80 146 64 Q 157 61 157 74 Q 149 80 140 106 Q 130 136 132 170 Q 120 175 108 168 Z"
-          fill="#4A5A6E"/>
-        {/* Mid-grey main fur body */}
-        <path d="M 112 166 Q 110 138 122 108 Q 132 84 147 68 Q 153 67 153 77 Q 146 83 136 108 Q 127 136 128 168 Q 120 173 112 166 Z"
+        {/* Widest outer dark silhouette — defines the fluffy edge */}
+        <path d="M 104 170 Q 92 148 98 112 Q 104 80 122 56 Q 136 36 156 30 Q 164 42 154 52 Q 136 56 122 82 Q 108 110 108 142 Q 108 164 126 174 Q 116 180 104 170 Z"
+          fill="#3A4A5C"/>
+        {/* Second dark layer — slightly narrower */}
+        <path d="M 108 167 Q 98 144 104 110 Q 110 78 128 54 Q 140 36 155 32 Q 161 44 151 53 Q 134 58 120 84 Q 108 112 108 142 Q 108 162 124 172 Q 116 178 108 167 Z"
+          fill="#566882" opacity="0.88"/>
+        {/* Main mid-grey fur body */}
+        <path d="M 112 164 Q 104 142 110 110 Q 116 80 132 58 Q 144 40 156 36 Q 160 48 150 56 Q 134 62 122 88 Q 112 116 112 142 Q 112 160 126 170 Q 119 176 112 164 Z"
           fill="#7888A2"/>
-        {/* Light centre fur stripe — adds volume and depth */}
-        <path d="M 116 158 Q 114 132 125 106 Q 133 86 144 72"
-          stroke="#A8B8CC" strokeWidth="8" strokeLinecap="round" fill="none" opacity="0.55"/>
-        {/* Fur texture cross-strokes */}
-        <path d="M 120 142 Q 130 133 136 140" stroke="#96AABE" strokeWidth="2" fill="none" opacity="0.55"/>
-        <path d="M 119 120 Q 130 110 138 117" stroke="#96AABE" strokeWidth="2" fill="none" opacity="0.50"/>
-        <path d="M 122 98 Q 132 90 138 97"  stroke="#96AABE" strokeWidth="2" fill="none" opacity="0.44"/>
-        {/* White fluffy tip */}
-        <ellipse cx="148" cy="68" rx="12" ry="10" fill="#D4E0F2" opacity="0.82"/>
-        <ellipse cx="147" cy="66" rx="7"  ry="6"  fill="#E8F2FA" opacity="0.68"/>
+        {/* Light centre fur stripe — volume */}
+        <path d="M 116 154 Q 110 132 116 106 Q 122 82 134 62 Q 142 46 152 40"
+          stroke="#A8B8CC" strokeWidth="10" strokeLinecap="round" fill="none" opacity="0.52"/>
+        {/* Fur cross-strokes — bushy texture */}
+        <path d="M 116 146 Q 127 136 136 143" stroke="#96AABE" strokeWidth="3" fill="none" opacity="0.58"/>
+        <path d="M 114 124 Q 126 113 135 120" stroke="#96AABE" strokeWidth="3" fill="none" opacity="0.52"/>
+        <path d="M 116 102 Q 128 92 136 99"  stroke="#96AABE" strokeWidth="2.5" fill="none" opacity="0.46"/>
+        <path d="M 120 80  Q 131 71 138 78"  stroke="#96AABE" strokeWidth="2" fill="none" opacity="0.38"/>
+        {/* Large fluffy white tip — wolves have a white tail tip */}
+        <ellipse cx="153" cy="44" rx="16" ry="14" fill="#C8D8EE" opacity="0.92"/>
+        <ellipse cx="152" cy="41" rx="11" ry="10" fill="#DDE8F8" opacity="0.78"/>
+        <ellipse cx="149" cy="37" rx="8"  ry="7"  fill="#EAF3FC" opacity="0.64"/>
+        {/* Extra tip puff */}
+        <ellipse cx="158" cy="47" rx="9" ry="7" fill="#D0E2F4" opacity="0.55"/>
       </g>
 
       {/* ── Body — static ────────────────────────────────────────────── */}
-      {/* Back — slightly darker */}
       <ellipse cx="76" cy="155" rx="44" ry="42" fill="#6A7A8C"/>
-      {/* Body main coat */}
       <ellipse cx="80" cy="158" rx="40" ry="40" fill="#8898AA"/>
 
       {/* ── White chest / belly ───────────────────────────────────────── */}
       <ellipse cx="80" cy="168" rx="27" ry="34" fill="#DCE8F6"/>
-      {/* Subtle inner chest highlight */}
       <ellipse cx="80" cy="172" rx="18" ry="24" fill="#EAF0FA" opacity="0.60"/>
 
       {/* ── Front paws — static ───────────────────────────────────────── */}
-      {/* Dark base */}
       <ellipse cx="57" cy="194" rx="18" ry="9" fill="#5E6E80"/>
       <ellipse cx="103" cy="194" rx="18" ry="9" fill="#5E6E80"/>
-      {/* Mid-grey top */}
       <ellipse cx="57" cy="190" rx="14" ry="7" fill="#8090A2"/>
       <ellipse cx="103" cy="190" rx="14" ry="7" fill="#8090A2"/>
-      {/* Light knuckle highlight */}
       <ellipse cx="57" cy="187" rx="9" ry="4" fill="#A0AEBA" opacity="0.60"/>
       <ellipse cx="103" cy="187" rx="9" ry="4" fill="#A0AEBA" opacity="0.60"/>
-      {/* Toe dividers — subtle */}
       <path d="M 50 188 Q 57 184 64 188" stroke="#7080A0" strokeWidth="1.2" fill="none" opacity="0.5"/>
       <path d="M 96 188 Q 103 184 110 188" stroke="#7080A0" strokeWidth="1.2" fill="none" opacity="0.5"/>
 
@@ -506,83 +506,73 @@ export function WolfSittingPreview({ className }: { className?: string }) {
         {/* ── Neck ──────────────────────────────────────────────────── */}
         <ellipse cx="80" cy="120" rx="30" ry="18" fill="#8898AA"/>
 
-        {/* ── Ear backs (drawn before head so head overlaps base) ────── */}
-        {/* Left ear back */}
-        <polygon points="40,70 28,12 68,52" fill="#5A6A7C"/>
+        {/* ── Ear backs — TALL pointed wolf ears, wide base ─────────── */}
+        {/* Left ear back: base wide at head, narrows sharply to tip at top */}
+        <polygon points="34,78 16,0 72,50" fill="#5A6A7C"/>
         {/* Right ear back */}
-        <polygon points="120,70 132,12 92,52" fill="#5A6A7C"/>
+        <polygon points="126,78 144,0 88,50" fill="#5A6A7C"/>
 
-        {/* ── Head ──────────────────────────────────────────────────── */}
-        <ellipse cx="80" cy="76" rx="50" ry="46" fill="#8898AA"/>
+        {/* ── Head — taller/narrower oval for a wolf (not round cat head) */}
+        <ellipse cx="80" cy="76" rx="46" ry="52" fill="#8898AA"/>
 
-        {/* Top-of-head darker saddle marking — classic wolf coloring */}
-        <path d="M 32 66 Q 56 44 80 48 Q 104 44 128 66 Q 108 50 80 50 Q 52 50 32 66Z"
-          fill="#5A6A7C" opacity="0.70"/>
+        {/* Top-of-head darker saddle — classic wolf dorsal stripe */}
+        <path d="M 36 62 Q 58 38 80 42 Q 102 38 124 62 Q 106 44 80 44 Q 54 44 36 62Z"
+          fill="#5A6A7C" opacity="0.72"/>
 
-        {/* ── Ear inner (on top of head but inside ear shape) ──────── */}
-        {/* Left inner ear */}
-        <polygon points="44,68 34,18 64,54" fill="#C4A0A8" opacity="0.65"/>
-        {/* Right inner ear */}
-        <polygon points="116,68 126,18 96,54" fill="#C4A0A8" opacity="0.65"/>
+        {/* ── Ear inner — pink-tinted, tall ─────────────────────────── */}
+        <polygon points="38,76 22,4 68,52" fill="#C4A0A8" opacity="0.65"/>
+        <polygon points="122,76 138,4 92,52" fill="#C4A0A8" opacity="0.65"/>
         {/* Ear inner lighter tip */}
-        <polygon points="46,54 38,22 60,48" fill="#DCC0C4" opacity="0.40"/>
-        <polygon points="114,54 122,22 100,48" fill="#DCC0C4" opacity="0.40"/>
+        <polygon points="40,58 28,12 62,48" fill="#DCC0C4" opacity="0.40"/>
+        <polygon points="120,58 132,12 98,48" fill="#DCC0C4" opacity="0.40"/>
 
-        {/* ── Face lighter zone — cheeks and brow ────────────────────── */}
-        {/* Brow lighter band just above eyes */}
-        <ellipse cx="80" cy="68" rx="42" ry="12" fill="#9AAAB8" opacity="0.40"/>
-        {/* Cheek puffs */}
-        <ellipse cx="46" cy="88" rx="18" ry="15" fill="#9AAAB8" opacity="0.35"/>
-        <ellipse cx="114" cy="88" rx="18" ry="15" fill="#9AAAB8" opacity="0.35"/>
+        {/* ── Brow band ─────────────────────────────────────────────── */}
+        <ellipse cx="80" cy="66" rx="40" ry="10" fill="#9AAAB8" opacity="0.35"/>
 
-        {/* ── Snout / muzzle ─────────────────────────────────────────── */}
-        {/* Snout base — flush with muzzle puff bottom so no grey chin peeks out */}
-        <ellipse cx="80" cy="102" rx="26" ry="18" fill="#96A4B4"/>
-        {/* White muzzle puffs (two cheeks) — key wolf feature */}
-        <ellipse cx="65" cy="106" rx="17" ry="14" fill="#D8E2F0"/>
-        <ellipse cx="95" cy="106" rx="17" ry="14" fill="#D8E2F0"/>
-        {/* Muzzle centre bridge */}
-        <ellipse cx="80" cy="100" rx="12" ry="10" fill="#D0DAE8"/>
+        {/* ── Heavy angular wolf brow lines — prominent furrow ─────── */}
+        <path d="M 42 67 Q 56 58 66 63" stroke="#3A4A62" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.55"/>
+        <path d="M 118 67 Q 104 58 94 63" stroke="#3A4A62" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.55"/>
 
         {/* ── Eyes — almond-shaped blue eyes ─────────────────────────── */}
-        {/* Socket shadow — wide and shallow */}
         <ellipse cx="58" cy="72" rx="13" ry="8"  fill="#1A2E48" opacity="0.28"/>
         <ellipse cx="102" cy="72" rx="13" ry="8"  fill="#1A2E48" opacity="0.28"/>
-        {/* Outer eye — dark surround, almond proportions */}
         <ellipse cx="58" cy="72" rx="11" ry="7"  fill="#12181E"/>
         <ellipse cx="102" cy="72" rx="11" ry="7"  fill="#12181E"/>
-        {/* Blue iris */}
         <ellipse cx="58" cy="72" rx="8"  ry="5.5" fill="#3474C0"/>
         <ellipse cx="102" cy="72" rx="8"  ry="5.5" fill="#3474C0"/>
-        {/* Inner iris highlight */}
         <ellipse cx="58" cy="72" rx="4.5" ry="3"   fill="#60A0E8" opacity="0.88"/>
         <ellipse cx="102" cy="72" rx="4.5" ry="3"   fill="#60A0E8" opacity="0.88"/>
-        {/* Pupil — slightly vertical for natural look */}
         <ellipse cx="58" cy="73" rx="2.5" ry="3"   fill="#0A0E14"/>
         <ellipse cx="102" cy="73" rx="2.5" ry="3"   fill="#0A0E14"/>
-        {/* Catchlight */}
         <circle cx="61" cy="69" r="2.5" fill="#FFFFFF" opacity="0.75"/>
         <circle cx="105" cy="69" r="2.5" fill="#FFFFFF" opacity="0.75"/>
 
-        {/* ── Nose ───────────────────────────────────────────────────── */}
-        <ellipse cx="80" cy="92" rx="11" ry="8.5" fill="#10161E"/>
-        {/* Nose ridge */}
-        <path d="M 73 92 Q 80 88 87 92" stroke="#1E2A36" strokeWidth="1.5" fill="none" opacity="0.5"/>
-        {/* Nose shine */}
-        <ellipse cx="76" cy="89" rx="4" ry="2.5" fill="#FFFFFF" opacity="0.22"/>
+        {/* ── Muzzle — elongated angular wolf snout (replaces cat cheeks) */}
+        {/* Gray outer muzzle block — wider at top, slight taper */}
+        <path d="M 54 88 Q 80 82 106 88 L 104 122 Q 80 130 56 122 Z" fill="#96A4B4"/>
+        {/* White inner muzzle — the pale snout area distinctive to wolves */}
+        <path d="M 58 93 Q 80 87 102 93 L 100 120 Q 80 127 60 120 Z" fill="#D4DFF2"/>
+        {/* Muzzle centre ridge (philtrum) */}
+        <path d="M 77 88 Q 80 84 83 88 L 83 104 Q 80 107 77 104 Z" fill="#B8C8DC" opacity="0.65"/>
 
-        {/* ── Mouth — gentle closed smile, no teeth ──────────────────── */}
-        {/* Single ∪ curve: corners at y=112, belly dips to ~y=120 — reads as smile */}
-        <path d="M 68 112 Q 80 120 92 112"
+        {/* ── Nose — large, dark, unmistakably wolf ──────────────────── */}
+        <ellipse cx="80" cy="91" rx="15" ry="11" fill="#0E1420"/>
+        {/* Nose arch ridge */}
+        <path d="M 68 91 Q 80 83 92 91" stroke="#1A2436" strokeWidth="2" fill="none" opacity="0.55"/>
+        {/* Nose shine */}
+        <ellipse cx="74" cy="86" rx="5.5" ry="3.5" fill="#FFFFFF" opacity="0.22"/>
+
+        {/* ── Mouth — set lower on the long muzzle ──────────────────── */}
+        <path d="M 67 117 Q 80 126 93 117"
           stroke="#4A5A70" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
 
         {/* ── Whisker dots ───────────────────────────────────────────── */}
-        <circle cx="52" cy="108" r="2" fill="#A0AEBA" opacity="0.55"/>
-        <circle cx="44" cy="104" r="2" fill="#A0AEBA" opacity="0.45"/>
-        <circle cx="36" cy="108" r="2" fill="#A0AEBA" opacity="0.38"/>
-        <circle cx="108" cy="108" r="2" fill="#A0AEBA" opacity="0.55"/>
-        <circle cx="116" cy="104" r="2" fill="#A0AEBA" opacity="0.45"/>
-        <circle cx="124" cy="108" r="2" fill="#A0AEBA" opacity="0.38"/>
+        <circle cx="50" cy="108" r="2" fill="#A0AEBA" opacity="0.55"/>
+        <circle cx="42" cy="103" r="2" fill="#A0AEBA" opacity="0.45"/>
+        <circle cx="34" cy="109" r="2" fill="#A0AEBA" opacity="0.38"/>
+        <circle cx="110" cy="108" r="2" fill="#A0AEBA" opacity="0.55"/>
+        <circle cx="118" cy="103" r="2" fill="#A0AEBA" opacity="0.45"/>
+        <circle cx="126" cy="109" r="2" fill="#A0AEBA" opacity="0.38"/>
       </g>
 
     </svg>
