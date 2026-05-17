@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Coins, X, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { type TFunction } from "i18next";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState, type Addiction } from "@/lib/store";
@@ -34,56 +36,41 @@ const vp = { once: true, margin: "-24px" } as const;
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const MILESTONES = [
-  { day: 7,  label: "Awaken"   },
-  { day: 14, label: "Clarity"  },
-  { day: 30, label: "Control"  },
-  { day: 60, label: "Strength" },
-  { day: 90, label: "Reset"    },
+  { day: 7,  key: "awaken"   },
+  { day: 14, key: "clarity"  },
+  { day: 30, key: "control"  },
+  { day: 60, key: "strength" },
+  { day: 90, key: "reset"    },
 ];
 
-const MILESTONE_BENEFIT: Record<number, string> = {
-  7:  "Increased energy",
-  14: "Sharper focus returns",
-  30: "Confidence rebuilding",
-  60: "Emotional regulation",
-  90: "Full dopamine reset",
+const MILESTONE_BENEFIT_KEY: Record<number, string> = {
+  7:  "benefit_7",
+  14: "benefit_14",
+  30: "benefit_30",
+  60: "benefit_60",
+  90: "benefit_90",
 };
 
 function nextMilestone(day: number) {
   const m = MILESTONES.find((m) => m.day > day);
   if (!m) return null;
-  return { ...m, benefit: MILESTONE_BENEFIT[m.day], daysAway: m.day - day };
+  return { ...m, benefitKey: MILESTONE_BENEFIT_KEY[m.day], daysAway: m.day - day };
 }
 
 // ─── Today's Focus ────────────────────────────────────────────────────────────
-const DAILY_FOCUS = [
-  "The urge will pass. Your identity won't. Choose who you're becoming.",
-  "Dopamine reset is not about willpower — it's about rebuilding your reward circuit one day at a time.",
-  "Every hour you hold means your brain is rewiring. The discomfort is the progress.",
-  "You didn't come this far to only come this far. The streak is the proof.",
-  "Cravings peak at 20 minutes. Outlast them — you always have before.",
-  "The version of you who quit is still watching. Don't let them down today.",
-  "Boredom is not an emergency. Sit with it. That's where the rewiring happens.",
-  "Recovery isn't a straight line, but every clean day moves the baseline up.",
-  "What you resist persists. Acknowledge the urge, then let it pass like weather.",
-  "Your future self is being built right now, in this exact moment of resistance.",
-  "Discipline is remembering what you want most over what you want right now.",
-  "The brain that got you here can heal. Give it the silence it needs today.",
-  "One decision away from a relapse, one decision away from your best day. Choose.",
-  "Showing up on the hard days is what separates a streak from a lifestyle.",
-] as const;
+const DAILY_FOCUS_COUNT = 14;
 
-function todaysFocusText(): string {
-  const dayOfYear = Math.floor(Date.now() / 86_400_000); // days since epoch
-  return DAILY_FOCUS[dayOfYear % DAILY_FOCUS.length];
+function todaysFocusText(t: TFunction): string {
+  const dayOfYear = Math.floor(Date.now() / 86_400_000);
+  return t(`home.focus.${dayOfYear % DAILY_FOCUS_COUNT}`);
 }
 
 // ─── Daily check-in ───────────────────────────────────────────────────────────
 const REWARDS = [
-  { weight: 50, xp: 10,  message: null },
-  { weight: 25, xp: 50,  message: "Unexpected bonus. Consistency pays." },
-  { weight: 15, xp: 20,  message: "You just unlocked something rare.", badge: true },
-  { weight: 10, xp: 0,   message: null },
+  { weight: 50, xp: 10,  messageKey: null },
+  { weight: 25, xp: 50,  messageKey: "home.reward.bonus" },
+  { weight: 15, xp: 20,  messageKey: "home.reward.rare", badge: true },
+  { weight: 10, xp: 0,   messageKey: null },
 ];
 
 function rollReward() {
@@ -95,29 +82,32 @@ function rollReward() {
 
 type MoodResp = { message: string; buttons: { label: string; to: string }[] };
 
-function moodResp(v: number): MoodResp {
+function moodResp(v: number, t: TFunction): MoodResp {
   if (v <= 2) return {
-    message: "Tough day. That's okay. You showed up anyway.",
-    buttons: [{ label: "Cut the Signal", to: "/tools/breath" }, { label: "I'm feeling an urge", to: "/tools/sos" }],
+    message: t("home.mood.low.message"),
+    buttons: [
+      { label: t("home.mood.low.btn1"), to: "/tools/breath" },
+      { label: t("home.mood.low.btn2"), to: "/tools/sos" },
+    ],
   };
   if (v === 3) return {
-    message: "Steady is strength. Most people quit on days like this.",
-    buttons: [{ label: "Check your progress", to: "/progress" }],
+    message: t("home.mood.mid.message"),
+    buttons: [{ label: t("home.mood.mid.btn1"), to: "/progress" }],
   };
   return {
-    message: "You're rewiring. Keep this energy — it compounds.",
-    buttons: [{ label: "See your streak", to: "/progress" }],
+    message: t("home.mood.high.message"),
+    buttons: [{ label: t("home.mood.high.btn1"), to: "/progress" }],
   };
 }
 
-// Dynamic label per mood score
-function moodLabel(v: number): string {
-  if (v <= 2) return "Rough day, holding the line";
-  if (v <= 4) return "Slightly challenged, staying focused";
-  return "Feeling strong and unstoppable";
+function moodLabel(v: number, t: TFunction): string {
+  if (v <= 2) return t("home.moodLabel.low");
+  if (v <= 4) return t("home.moodLabel.mid");
+  return t("home.moodLabel.high");
 }
 
 function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
+  const { t } = useTranslation();
   const [, update]  = useAppState();
   const [mood, setMood]           = useState(3);
   const [confirmed, setConfirmed] = useState(false);
@@ -127,10 +117,10 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
     setConfirmed(true);
     const r = rollReward();
     if (r.xp > 0) update((s) => ({ points: s.points + r.xp, treeXP: s.treeXP + Math.floor(r.xp / 5) }));
-    if (r.message) { onReward(r.message); setTimeout(() => onReward(""), 3200); }
+    if (r.messageKey) { onReward(t(r.messageKey)); setTimeout(() => onReward(""), 3200); }
   };
 
-  const resp  = confirmed ? moodResp(mood) : null;
+  const resp  = confirmed ? moodResp(mood, t) : null;
   const isLow = mood <= 2;
   const isHi  = mood >= 4;
 
@@ -270,7 +260,7 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
 
       {/* ── Side labels + dynamic status ─────────────────────────── */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
-        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>Rough</span>
+        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>{t("home.moodLabel.low").split(",")[0]}</span>
         <span style={{
           fontSize: 11,
           fontWeight: 600,
@@ -280,9 +270,9 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
           flex: 1,
           padding: "0 8px",
         }}>
-          {moodLabel(mood)}
+          {moodLabel(mood, t)}
         </span>
-        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>Strong</span>
+        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>{t("home.moodLabel.high").split(" ")[0]}</span>
       </div>
 
       <AnimatePresence>
@@ -639,6 +629,7 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
 }
 
 function Dashboard() {
+  const { t } = useTranslation();
   const [state, update] = useAppState();
   const navigate        = useNavigate();
   const [showRelapse,  setShowRelapse]  = useState(false);
@@ -767,9 +758,9 @@ function Dashboard() {
         variants={seq(0.45, 0.08)}
       >
         {[
-          { value: `${recoveryPct}%`, sub: "Recovery",    gold: true  },
-          { value: `${bestStreak}d`,  sub: "Best streak", gold: false },
-          { value: state.relapses.length, sub: "Relapses", gold: false },
+          { value: `${recoveryPct}%`, sub: t("progress.stats.streak"),  gold: true  },
+          { value: `${bestStreak}d`,  sub: t("progress.stats.best"),    gold: false },
+          { value: state.relapses.length, sub: "Relapses",              gold: false },
         ].map(({ value, sub, gold }, i) => (
           <motion.div
             key={sub}
@@ -804,7 +795,7 @@ function Dashboard() {
         className="px-6 mt-7 mb-6"
         initial="hidden" whileInView="show" viewport={vp} variants={up}
       >
-        <SectionTitle>Today's Focus</SectionTitle>
+        <SectionTitle>{t("home.sections.todaysFocus")}</SectionTitle>
         <div style={{ marginTop: 12 }} />
         <div className="flex gap-5">
           <div
@@ -815,7 +806,7 @@ function Dashboard() {
             }}
           />
           <p style={{ fontSize: 17, fontWeight: 500, lineHeight: 1.6, color: "#f0ece4", margin: 0 }}>
-            {todaysFocusText()}
+            {todaysFocusText(t)}
           </p>
         </div>
       </motion.section>
@@ -827,10 +818,10 @@ function Dashboard() {
         className="px-6 mt-7 mb-6"
         initial="hidden" whileInView="show" viewport={vp} variants={up}
       >
-        <SectionTitle>Daily Check-in</SectionTitle>
+        <SectionTitle>{t("home.checkin.title")}</SectionTitle>
         <p className="text-[24px] font-semibold leading-tight mb-6"
            style={{ letterSpacing: "-0.02em" }}>
-          How are you<br />holding up today?
+          {t("home.checkin.subtitle")}
         </p>
         <CheckIn onReward={setRewardMsg} />
       </motion.section>
@@ -889,13 +880,13 @@ function Dashboard() {
                 className="text-[9px] font-bold tracking-[0.38em] uppercase mb-1.5"
                 style={{ color: "oklch(0.62 0.14 20 / 0.75)" }}
               >
-                Emergency
+                {t("home.sections.emergency")}
               </p>
               <p className="text-[18px] font-semibold leading-tight" style={{ color: "oklch(0.87 0.06 20)" }}>
-                Feeling an urge<br />right now?
+                {t("home.emergency.subtitle")}
               </p>
               <p className="text-[11px] mt-1" style={{ color: "oklch(0.52 0.08 20)" }}>
-                Immediate support available
+                {t("home.emergency.cta")}
               </p>
             </div>
             <ArrowRight
@@ -922,10 +913,10 @@ function Dashboard() {
             <div>
               <p className="text-[9px] font-bold tracking-[0.35em] uppercase mb-1"
                  style={{ color: "rgba(255,255,255,0.25)" }}>
-                Next milestone
+                {t("home.sections.nextMilestone")}
               </p>
               <p className="text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
-                Day {next.day} — {next.benefit}
+                {t("common.day")} {next.day} — {t(`home.milestone.${next.benefitKey}`)}
               </p>
             </div>
             <div className="text-right ml-4 shrink-0">
@@ -934,7 +925,7 @@ function Dashboard() {
               </p>
               <p className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-0.5"
                  style={{ color: "rgba(255,255,255,0.25)" }}>
-                days away
+                {t("common.days")}
               </p>
             </div>
           </div>
@@ -960,7 +951,7 @@ function Dashboard() {
           }}
           transition={{ duration: 0.2 }}
         >
-          I relapsed — log it honestly
+          {t("home.relapse")}
         </motion.button>
       </motion.section>
 

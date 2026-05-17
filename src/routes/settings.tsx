@@ -28,6 +28,9 @@ import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
+import { useTranslation } from "react-i18next";
+import { setLanguage } from "@/lib/i18n";
+import i18n from "@/lib/i18n";
 
 export const Route = createFileRoute("/settings")({
   component: Settings,
@@ -475,28 +478,32 @@ function PrivacySection({ state }: { state: ReturnType<typeof useAppState>[0] })
 }
 
 function LanguageSection() {
-  const [language, setLanguage] = useState("en");
+  const { t } = useTranslation();
+  const [language, setLang] = useState(i18n.language ?? "en");
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const lang = e.target.value;
+    setLang(lang);
+    setLanguage(lang);
+  };
 
   return (
     <section>
-      <SectionLabel>Language</SectionLabel>
+      <SectionLabel>{t("settings.sections.language")}</SectionLabel>
       <Card>
         <div className="flex items-center gap-3 px-4 py-3.5">
           <span className="h-8 w-8 rounded-xl grid place-items-center shrink-0 bg-foreground/[0.06]">
             <Globe className="h-4 w-4 text-foreground" />
           </span>
-          <span className="flex-1 text-sm font-medium">Language</span>
+          <span className="flex-1 text-sm font-medium">{t("settings.sections.language")}</span>
           <select
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="text-sm bg-transparent text-muted-foreground focus:outline-none cursor-pointer pr-1"
+            onChange={handleChange}
+            className="text-sm bg-transparent focus:outline-none cursor-pointer pr-1"
+            style={{ background: "#0D0A08", color: "rgba(255,255,255,0.55)" }}
           >
             <option value="en">English</option>
             <option value="nl">Nederlands</option>
-            <option value="es">Español</option>
-            <option value="de">Deutsch</option>
-            <option value="fr">Français</option>
-            <option value="pt">Português</option>
           </select>
         </div>
       </Card>

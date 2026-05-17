@@ -4,6 +4,7 @@ import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown } from "lucide-rea
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/tools/")({
   component: Tools,
@@ -43,14 +44,7 @@ const ICON_WRAP = (color: string): React.CSSProperties => ({
   flexShrink: 0,
 });
 
-// ── Reframes ──────────────────────────────────────────────────────────────────
-const reframes = [
-  "Every time you resist, you literally grow new neural pathways.",
-  "The urge isn't you — it's old wiring asking for one more hit.",
-  "Discomfort now is your prefrontal cortex coming back online.",
-  "Each clean day raises your dopamine baseline by a measurable amount.",
-  "You're not giving something up. You're getting yourself back.",
-];
+const REFRAME_COUNT = 5;
 
 // ── CoachRobot SVG ────────────────────────────────────────────────────────────
 function CoachRobot() {
@@ -212,20 +206,21 @@ function IdentityStackIcon() {
 }
 
 const PRO_GAMES = [
-  { to: "/tools/coldswitch",    glow: "#00BCD4", label: "Cold Switch",    icon: <ColdSwitchIcon /> },
-  { to: "/tools/voidstare",     glow: "#7B2FBE", label: "Void Stare",     icon: <VoidStareIcon /> },
-  { to: "/tools/clarityclimb",  glow: "#10B981", label: "Clarity Climb",  icon: <ClarityClimbIcon /> },
-  { to: "/tools/echochamber",   glow: "#F97316", label: "Echo Chamber",   icon: <EchoChamberIcon /> },
-  { to: "/tools/darkroom",      glow: "#4F46E5", label: "Dark Room",      icon: <DarkRoomIcon /> },
-  { to: "/tools/noisefilter",   glow: "#2563EB", label: "Noise Filter",   icon: <NoiseFilterIcon /> },
-  { to: "/tools/steadyhand",    glow: "#D97706", label: "Steady Hand",    icon: <SteadyHandIcon /> },
-  { to: "/tools/identitystack", glow: "#E11D48", label: "Identity Stack", icon: <IdentityStackIcon /> },
+  { to: "/tools/coldswitch",    glow: "#00BCD4", labelKey: "tools.coldswitch.name",    icon: <ColdSwitchIcon /> },
+  { to: "/tools/voidstare",     glow: "#7B2FBE", labelKey: "tools.voidstare.name",     icon: <VoidStareIcon /> },
+  { to: "/tools/clarityclimb",  glow: "#10B981", labelKey: "tools.clarityclimb.name",  icon: <ClarityClimbIcon /> },
+  { to: "/tools/echochamber",   glow: "#F97316", labelKey: "tools.echochamber.name",   icon: <EchoChamberIcon /> },
+  { to: "/tools/darkroom",      glow: "#4F46E5", labelKey: "tools.darkroom.name",      icon: <DarkRoomIcon /> },
+  { to: "/tools/noisefilter",   glow: "#2563EB", labelKey: "tools.noisefilter.name",   icon: <NoiseFilterIcon /> },
+  { to: "/tools/steadyhand",    glow: "#D97706", labelKey: "tools.steadyhand.name",    icon: <SteadyHandIcon /> },
+  { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon /> },
 ] as const;
 
 // ── Main component ────────────────────────────────────────────────────────────
 function Tools() {
+  const { t } = useTranslation();
   const [state] = useAppState();
-  const [reframe, setReframe] = useState<string | null>(null);
+  const [reframeIdx, setReframeIdx] = useState<number | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [trigger, setTrigger] = useState("");
@@ -258,8 +253,8 @@ function Tools() {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2">
-        <SectionTitle>Tools</SectionTitle>
-        <h1 className="mt-2 text-3xl font-bold">Use what works.</h1>
+        <SectionTitle>{t("nav.tools")}</SectionTitle>
+        <h1 className="mt-2 text-3xl font-bold">{t("tools.indexSubtitle")}</h1>
       </header>
 
       {/* ── SOS hero — breathing pulse circle ───────────────────────────── */}
@@ -276,10 +271,10 @@ function Tools() {
           }}
         >
           <p style={{ fontSize: 15, fontWeight: 700, color: "#f5ede0", lineHeight: 1.4, padding: "0 32px" }}>
-            Urge hitting?<br />We've got you.
+            {t("tools.sos.heroLine1")}<br />{t("tools.sos.heroLine2")}
           </p>
           <p style={{ marginTop: 8, fontSize: 11, color: "oklch(0.65 0.07 25)", lineHeight: 1.5, padding: "0 24px" }}>
-            Tap to start urge surfing · 3 min
+            {t("tools.sos.heroSub")}
           </p>
         </Link>
       </section>
@@ -305,8 +300,8 @@ function Tools() {
               </svg>
             </div>
             <div className="flex-1">
-              <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0" }}>Cut the Signal Games</p>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", marginTop: 2 }}>Train your brain. Beat the urge.</p>
+              <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0" }}>{t("tools.gamesTitle")}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
             </div>
             <ChevronDown
               style={{ height: 16, width: 16, color: "rgba(255,255,255,0.35)", transition: "transform 0.2s", transform: gamesOpen ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
@@ -316,14 +311,14 @@ function Tools() {
           {gamesOpen && (
             <div className="mt-5">
               <div className="flex justify-around">
-                <SignalGame to="/tools/breath" glow="#6BAED6" label="Mind Pulse"    icon={<MindPulseIcon />} />
-                <SignalGame to="/tools/tap"    glow="#C9A84C" label="Impulse Shift" icon={<ImpulseShiftIcon />} />
-                <SignalGame to="/tools/memory" glow="#6BAA75" label="Neural Link"   icon={<NeuralLinkIcon />} />
+                <SignalGame to="/tools/breath" glow="#6BAED6" label={t("tools.mindPulse")}    icon={<MindPulseIcon />} />
+                <SignalGame to="/tools/tap"    glow="#C9A84C" label={t("tools.impulseShift")} icon={<ImpulseShiftIcon />} />
+                <SignalGame to="/tools/memory" glow="#6BAA75" label={t("tools.neuralLink")}   icon={<NeuralLinkIcon />} />
               </div>
               {state.isPremium === true ? (
                 <div className="mt-7 grid grid-cols-3 gap-y-6 place-items-center">
-                  {PRO_GAMES.map(({ to, glow, label, icon }) => (
-                    <SignalGame key={to} to={to} glow={glow} label={label} icon={icon} />
+                  {PRO_GAMES.map(({ to, glow, labelKey, icon }) => (
+                    <SignalGame key={to} to={to} glow={glow} label={t(labelKey)} icon={icon} />
                   ))}
                 </div>
               ) : (
@@ -334,11 +329,11 @@ function Tools() {
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999, color: "#C9A84C", border: "1px solid rgba(201,168,76,0.35)", background: "rgba(201,168,76,0.08)" }}>
                     <Lock style={{ height: 10, width: 10 }} /> PRO
                   </span>
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>More games available</span>
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{t("tools.moreGames")}</span>
                   <span className="flex items-center gap-1">
-                    {PRO_GAMES.map(({ label, glow }) => (
-                      <span key={label} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 8, fontWeight: 700, width: 16, height: 16, background: `${glow}22`, border: `1px solid ${glow}66`, color: glow }}>
-                        {label[0]}
+                    {PRO_GAMES.map(({ labelKey, glow }) => (
+                      <span key={labelKey} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 8, fontWeight: 700, width: 16, height: 16, background: `${glow}22`, border: `1px solid ${glow}66`, color: glow }}>
+                        {t(labelKey)[0]}
                       </span>
                     ))}
                   </span>
@@ -351,8 +346,8 @@ function Tools() {
         {/* Recovery Coach — full-width card */}
         <Link to="/tools/coach" style={{ ...CARD, border: "1px solid rgba(201,168,76,0.45)", display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px", gap: 4, textDecoration: "none" }} className="active:scale-[0.98] transition-transform">
           <CoachRobot />
-          <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0", marginTop: 8 }}>Recovery Coach</p>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)" }}>Talk it through. No judgment.</p>
+          <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0", marginTop: 8 }}>{t("tools.coach.name")}</p>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)" }}>{t("tools.coach.tagline")}</p>
         </Link>
 
         {/* Reframe + Cold Exposure — two-column grid */}
@@ -364,18 +359,18 @@ function Tools() {
               <div style={ICON_WRAP("#C9A84C")}>
                 <Brain style={{ height: 16, width: 16 }} />
               </div>
-              <p style={{ fontWeight: 600, fontSize: 13, color: "#f5ede0" }}>Reframe</p>
+              <p style={{ fontWeight: 600, fontSize: 13, color: "#f5ede0" }}>{t("tools.reframeTitle")}</p>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", lineHeight: 1.45 }}>Rewire your reaction in one thought.</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", lineHeight: 1.45 }}>{t("tools.reframeDesc")}</p>
             <button
-              onClick={() => setReframe(reframes[Math.floor(Math.random() * reframes.length)])}
+              onClick={() => setReframeIdx(Math.floor(Math.random() * REFRAME_COUNT))}
               style={GOLD_OUTLINE}
             >
-              Show me one
+              {t("tools.reframeCta")}
             </button>
-            {reframe && (
+            {reframeIdx !== null && (
               <p style={{ fontSize: 12, lineHeight: 1.55, fontStyle: "italic", color: "rgba(245,237,224,0.80)", marginTop: 2 }}>
-                "{reframe}"
+                "{t(`tools.reframes.${reframeIdx}`)}"
               </p>
             )}
           </div>
@@ -386,11 +381,11 @@ function Tools() {
               <div style={ICON_WRAP("oklch(0.65 0.18 220)")}>
                 <Snowflake style={{ height: 16, width: 16 }} />
               </div>
-              <p style={{ fontWeight: 600, fontSize: 13, color: "#f5ede0" }}>Cold Exposure</p>
+              <p style={{ fontWeight: 600, fontSize: 13, color: "#f5ede0" }}>{t("tools.coldTitle")}</p>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", lineHeight: 1.45 }}>2-min guided cold shower breathing.</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", lineHeight: 1.45 }}>{t("tools.coldDesc")}</p>
             <span style={{ ...GOLD_OUTLINE, display: "inline-block", textAlign: "center" }}>
-              Start →
+              {t("tools.coldCta")}
             </span>
           </Link>
         </div>
@@ -403,12 +398,12 @@ function Tools() {
                 <GitBranch style={{ height: 16, width: 16 }} />
               </div>
               <div>
-                <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0" }}>Implementation Plan</p>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", marginTop: 2 }}>If/then strategies for your triggers.</p>
+                <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0" }}>{t("tools.planTitle")}</p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", marginTop: 2 }}>{t("tools.planDesc")}</p>
               </div>
             </div>
             <button onClick={() => setPlanOpen((v) => !v)} style={GOLD_OUTLINE}>
-              {planOpen ? "Close" : "Add plan"}
+              {planOpen ? t("tools.planClose") : t("tools.planAdd")}
             </button>
           </div>
 
@@ -428,9 +423,9 @@ function Tools() {
                     color: "rgba(245,237,224,0.75)",
                   }}
                 >
-                  <span>If I </span>
+                  <span>{t("tools.planIfI")} </span>
                   <span style={{ fontWeight: 600, color: "#f5ede0" }}>{p.trigger}</span>
-                  <span>, I will </span>
+                  <span>, {t("tools.planIWill")} </span>
                   <span style={{ fontWeight: 600, color: "#C9A84C" }}>{p.action}</span>
                   <span>.</span>
                 </li>
@@ -444,7 +439,7 @@ function Tools() {
               <input
                 value={trigger}
                 onChange={(e) => setTrigger(e.target.value)}
-                placeholder="If I feel… (trigger)"
+                placeholder={t("tools.planTriggerPlaceholder")}
                 style={{
                   width: "100%", borderRadius: 10, fontSize: 13, padding: "10px 14px", outline: "none",
                   background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.25)",
@@ -454,7 +449,7 @@ function Tools() {
               <input
                 value={action}
                 onChange={(e) => setAction(e.target.value)}
-                placeholder="…I will (action)"
+                placeholder={t("tools.planActionPlaceholder")}
                 style={{
                   width: "100%", borderRadius: 10, fontSize: 13, padding: "10px 14px", outline: "none",
                   background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.25)",
@@ -475,7 +470,7 @@ function Tools() {
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 }}
               >
-                <Plus style={{ height: 16, width: 16 }} /> Save plan
+                <Plus style={{ height: 16, width: 16 }} /> {t("tools.planSave")}
               </button>
             </div>
           )}

@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 import appCss from "../styles.css?url";
+import "@/lib/i18n"; // initialise i18next before any route renders
 import { PaywallModal } from "@/components/PaywallModal";
 import { BrainLoadingScreen } from "@/components/BrainLoadingScreen";
 

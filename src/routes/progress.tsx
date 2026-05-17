@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 const GOLD = "#C9A84C";
 
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/progress")({
 });
 
 // ── Recovery ring SVG ─────────────────────────────────────────────────────────
-function RecoveryRing({ pct, day }: { pct: number; day: number }) {
+function RecoveryRing({ pct, day, t }: { pct: number; day: number; t: TFunction }) {
   const R = 76;
   const C = 2 * Math.PI * R;
   const offset = C * (1 - pct / 100);
@@ -89,7 +91,7 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
           className="ring-text-secondary"
           fontFamily="'Space Grotesk', sans-serif"
         >
-          day {day}
+          {t("progress.ring.day")} {day}
         </text>
         <text
           x="98" y="124"
@@ -97,7 +99,7 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
           className="ring-text-tertiary"
           fontFamily="'Space Grotesk', sans-serif"
         >
-          to reset
+          {t("progress.ring.toReset")}
         </text>
       </svg>
     </div>
@@ -106,6 +108,7 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 function ProgressScreen() {
+  const { t } = useTranslation();
   const [state] = useAppState();
   const active = activeAddiction(state);
   if (!active) return null;
@@ -125,30 +128,31 @@ function ProgressScreen() {
   });
 
   const urgesSurvived = state.urgesSurvived ?? 0;
+  const rem7 = Math.max(0, 7 - day);
   const milestones = [
     {
-      name: "First Week",
+      name: t("progress.milestones.firstWeek"),
       icon: "🛡️",
       earned: day >= 7,
-      hint: `${Math.max(0, 7 - day)} day${Math.max(0, 7 - day) !== 1 ? "s" : ""} to go`,
+      hint: rem7 === 0 ? t("progress.milestones.done") : rem7 === 1 ? t("progress.milestones.firstWeek_remaining", { count: rem7 }) : t("progress.milestones.firstWeek_remaining_plural", { count: rem7 }),
     },
     {
-      name: "30 Days",
+      name: t("progress.milestones.thirtyDays"),
       icon: "🎖️",
       earned: day >= 30,
-      hint: `${Math.max(0, 30 - day)} days to go`,
+      hint: day >= 30 ? t("progress.milestones.done") : t("progress.milestones.thirtyDays_remaining", { count: Math.max(0, 30 - day) }),
     },
     {
-      name: "Survived 10 Urges",
+      name: t("progress.milestones.tenUrges"),
       icon: "🔥",
       earned: urgesSurvived >= 10,
-      hint: `Complete ${Math.max(0, 10 - urgesSurvived)} more urges`,
+      hint: urgesSurvived >= 10 ? t("progress.milestones.done") : Math.max(0, 10 - urgesSurvived) === 1 ? t("progress.milestones.tenUrges_remaining", { count: 1 }) : t("progress.milestones.tenUrges_remaining_plural", { count: Math.max(0, 10 - urgesSurvived) }),
     },
     {
-      name: "90 Day Warrior",
+      name: t("progress.milestones.ninetyDays"),
       icon: "👑",
       earned: day >= 90,
-      hint: `${Math.max(0, 90 - day)} days to go`,
+      hint: day >= 90 ? t("progress.milestones.done") : t("progress.milestones.ninetyDays_remaining", { count: Math.max(0, 90 - day) }),
     },
   ];
   const unlockedCount = milestones.filter((m) => m.earned).length;
@@ -157,19 +161,19 @@ function ProgressScreen() {
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <SectionTitle>Progress</SectionTitle>
+        <SectionTitle>{t("nav.progress")}</SectionTitle>
         <p style={{ fontSize: 13, color: "#ffffff", opacity: 0.45, marginTop: 4, fontFamily: "DM Sans, sans-serif", fontWeight: 400 }}>
-          Track your recovery, day by day.
+          {t("progress.header")}
         </p>
       </header>
 
       {/* ── Recovery ring hero ──────────────────────────────── */}
       <section className="flex flex-col items-center pt-6 pb-4 px-6 fade-up-1">
-        <RecoveryRing pct={recoveryPct} day={day} />
+        <RecoveryRing pct={recoveryPct} day={day} t={t} />
         <p className="mt-5 text-sm text-muted-foreground text-center max-w-[220px]">
           {recoveryPct < 100
-            ? `${90 - day} days remaining to full brain reset`
-            : "Full dopamine reset achieved. You did it."}
+            ? t("progress.ring.daysRemaining", { count: 90 - day })
+            : t("progress.ring.achieved")}
         </p>
       </section>
 
@@ -177,22 +181,22 @@ function ProgressScreen() {
       <div className="px-6 mt-2 flex divide-x fade-up-2" style={{ borderColor: "var(--border)" }}>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>{day}d</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Streak</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.streak")}</p>
         </div>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums">{longest}d</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Best</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.best")}</p>
         </div>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums">{state.totalCleanDays}</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Total clean</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.total")}</p>
         </div>
       </div>
 
       {/* ── Streak calendar ─────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-center justify-between mb-4">
-          <SectionTitle>Consistency</SectionTitle>
+          <SectionTitle>{t("progress.consistency.title")}</SectionTitle>
           {!state.isPremium && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -202,7 +206,7 @@ function ProgressScreen() {
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground/60 mb-4">Last 12 weeks</p>
+        <p className="text-xs text-muted-foreground/60 mb-4">{t("progress.consistency.subtitle")}</p>
         <div className="relative">
           <div
             className={`grid grid-flow-col grid-rows-7 gap-1 ${
@@ -233,32 +237,32 @@ function ProgressScreen() {
                   borderColor: "oklch(0.62 0.22 255 / 0.30)",
                 }}
               >
-                Tap to see your full streak
+                {t("progress.paywall")}
               </span>
             </button>
           )}
         </div>
         <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
-          Less
+          {t("progress.consistency.less")}
           {["rgba(255,255,255,0.06)", "#1a4d2e", "#2d8a4e", "#3fb86a"].map((bg) => (
             <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
           ))}
-          More
+          {t("progress.consistency.more")}
         </div>
       </section>
 
       {/* ── Your story ──────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <SectionTitle>Your Story</SectionTitle>
-        <p className="text-xs text-muted-foreground/60 mb-5">This is not a streak. This is your history.</p>
+        <SectionTitle>{t("progress.story.title")}</SectionTitle>
+        <p className="text-xs text-muted-foreground/60 mb-5">{t("progress.story.subtitle")}</p>
         <div className="space-y-0">
           {[
-            { label: "Days since you started",   value: `${daysSinceStart}` },
-            { label: "Total clean days, ever",   value: `${state.totalCleanDays}` },
-            { label: "Longest clean period",     value: `${longest} days` },
-            { label: "Times you came back",      value: `${state.totalReturns}` },
-            { label: "Relapses logged honestly", value: `${state.relapses?.length ?? 0}` },
-            { label: "App sessions",             value: `${totalLogins}` },
+            { label: t("progress.story.daysSince"),  value: `${daysSinceStart}` },
+            { label: t("progress.story.totalClean"), value: `${state.totalCleanDays}` },
+            { label: t("progress.story.longest"),    value: t("progress.story.longestValue", { count: longest }) },
+            { label: t("progress.story.timesBack"),  value: `${state.totalReturns}` },
+            { label: t("progress.story.relapses"),   value: `${state.relapses?.length ?? 0}` },
+            { label: t("progress.story.sessions"),   value: `${totalLogins}` },
           ].map(({ label, value }, i, arr) => (
             <div
               key={label}
@@ -271,7 +275,7 @@ function ProgressScreen() {
           ))}
         </div>
         <p className="mt-5 text-[12px] italic leading-relaxed" style={{ color: "oklch(0.52 0.015 265 / 0.65)" }}>
-          "Every chapter counts. Every time you came back was a choice. Most people stop choosing."
+          "{t("progress.story.quote")}"
         </p>
       </section>
 
@@ -279,8 +283,8 @@ function ProgressScreen() {
       <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">Relapse Insights</p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">When and why it happens</p>
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">{t("progress.insights.title")}</p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">{t("progress.insights.subtitle")}</p>
           </div>
           {!state.isPremium && (
             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -293,7 +297,7 @@ function ProgressScreen() {
           <div className={state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}>
             {(() => {
               const relapses = state.relapses ?? [];
-              const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+              const dowKeys = [0,1,2,3,4,5,6].map(i => t(`progress.insights.dow.${i}`));
               const dayCounts = Array(7).fill(0);
               const hourCounts = Array(4).fill(0); // morning/afternoon/evening/night
               relapses.forEach(r => {
@@ -305,18 +309,23 @@ function ProgressScreen() {
                 else if (h < 18) hourCounts[1]++;
                 else hourCounts[2]++;
               });
-              const peakDay = days[dayCounts.indexOf(Math.max(...dayCounts))];
-              const peakTime = ["Morning", "Afternoon", "Evening", "Night"][hourCounts.indexOf(Math.max(...hourCounts))];
+              const peakDay = dowKeys[dayCounts.indexOf(Math.max(...dayCounts))];
+              const peakTime = [
+                t("progress.insights.morning"),
+                t("progress.insights.afternoon"),
+                t("progress.insights.evening"),
+                t("progress.insights.night"),
+              ][hourCounts.indexOf(Math.max(...hourCounts))];
               const total = relapses.length;
               return (
                 <div className="space-y-3">
                   {[
-                    { label: "Total relapses tracked", value: total > 0 ? `${total}` : "None yet" },
-                    { label: "Most vulnerable day", value: total > 0 ? peakDay : "—" },
-                    { label: "Most vulnerable time", value: total > 0 ? peakTime : "—" },
-                    { label: "Avg. days between relapses", value: total > 1
-                      ? `${Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / (1000 * 60 * 60 * 24 * (total - 1)))} days`
-                      : "—" },
+                    { label: t("progress.insights.total"),     value: total > 0 ? `${total}` : t("progress.insights.none") },
+                    { label: t("progress.insights.peakDay"),   value: total > 0 ? peakDay : t("progress.insights.na") },
+                    { label: t("progress.insights.peakTime"),  value: total > 0 ? peakTime : t("progress.insights.na") },
+                    { label: t("progress.insights.avgBetween"), value: total > 1
+                      ? t("progress.insights.avgValue", { count: Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / (1000 * 60 * 60 * 24 * (total - 1))) })
+                      : t("progress.insights.na") },
                   ].map(({ label, value }, i, arr) => (
                     <div key={label} className="flex justify-between items-center py-3"
                       style={{ borderBottom: i < arr.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.7)" : "none" }}>
@@ -332,7 +341,7 @@ function ProgressScreen() {
             <button onClick={() => triggerPaywall()} className="absolute inset-0 flex items-center justify-center">
               <span className="text-xs font-semibold border px-3 py-1.5 rounded-full"
                 style={{ color: "var(--primary)", background: "oklch(0.13 0.022 265 / 0.90)", borderColor: "oklch(0.62 0.22 255 / 0.30)" }}>
-                See what triggers your relapses
+                {t("progress.insights.paywallCta")}
               </span>
             </button>
           )}
@@ -343,9 +352,9 @@ function ProgressScreen() {
       <section className="px-6 mt-8 pt-7 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         {/* Section header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <SectionTitle>Milestones</SectionTitle>
+          <SectionTitle>{t("progress.milestonesTitle")}</SectionTitle>
           <p style={{ fontSize: 11, color: "#3a3020", margin: 0 }}>
-            {unlockedCount} of {milestones.length} unlocked
+            {t("progress.milestonesUnlocked", { count: unlockedCount, total: milestones.length })}
           </p>
         </div>
 
@@ -446,7 +455,7 @@ function ProgressScreen() {
                     color: GOLD,
                   }}
                 >
-                  ✓ Achieved
+                  {t("progress.achieved")}
                 </div>
               ) : (
                 <p style={{ marginTop: 6, marginBottom: 0, fontSize: 11, color: "#3a3020" }}>

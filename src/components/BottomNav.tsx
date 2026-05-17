@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
 import { loadState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 function useScrollHide() {
   const [hidden, setHidden] = useState(false);
@@ -85,24 +86,25 @@ function WolfIcon({ strokeWidth }: { strokeWidth: number }) {
 
 const COMPANION_ICONS = { tree: TreeIcon, wolf: WolfIcon } as const;
 
-const BASE_NAV = [
-  { to: "/",          label: "Home",     Icon: Home      },
-  { to: "/tools",     label: "Tools",    Icon: Wrench    },
-  { to: "/community", label: "Community",Icon: Users     },
-  { to: "/progress",  label: "Progress", Icon: BarChart2 },
+const BASE_NAV_KEYS = [
+  { to: "/",          labelKey: "nav.home",      Icon: Home      },
+  { to: "/tools",     labelKey: "nav.tools",     Icon: Wrench    },
+  { to: "/community", labelKey: "nav.community", Icon: Users     },
+  { to: "/progress",  labelKey: "nav.progress",  Icon: BarChart2 },
 ] as const;
 
 export function BottomNav() {
+  const { t } = useTranslation();
   const path         = useRouterState({ select: (r) => r.location.pathname });
   const hidden       = useScrollHide();
   const companion    = loadState().companion ?? "tree";
   const CompanionIcon  = COMPANION_ICONS[companion];
-  const companionLabel = companion === "wolf" ? "Companion" : "Tree";
+  const companionLabelKey = companion === "wolf" ? "nav.companion" : "nav.tree";
 
   const navItems = [
-    BASE_NAV[0],
-    { to: "/tree" as const, label: companionLabel, Icon: null as unknown as typeof Home },
-    ...BASE_NAV.slice(1),
+    { ...BASE_NAV_KEYS[0], label: t(BASE_NAV_KEYS[0].labelKey) },
+    { to: "/tree" as const, label: t(companionLabelKey), Icon: null as unknown as typeof Home },
+    ...BASE_NAV_KEYS.slice(1).map((n) => ({ ...n, label: t(n.labelKey) })),
   ];
 
   return (

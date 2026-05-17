@@ -1,0 +1,468 @@
+{
+  "nav": {
+    "home": "Thuis",
+    "tools": "Tools",
+    "community": "Gemeenschap",
+    "progress": "Voortgang",
+    "tree": "Boom",
+    "companion": "Metgezel"
+  },
+  "common": {
+    "day": "Dag",
+    "days": "dagen",
+    "day_singular": "dag",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "back": "Terug",
+    "next": "Volgende",
+    "done": "Klaar",
+    "continue": "Doorgaan",
+    "confirm": "Bevestigen",
+    "delete": "Verwijderen",
+    "upgrade": "Upgraden",
+    "yes": "Ja",
+    "no": "Nee",
+    "loading": "Laden",
+    "active": "Actief",
+    "locked": "Vergrendeld",
+    "pro": "PRO",
+    "free": "Gratis",
+    "or": "of",
+    "toGo": "te gaan",
+    "unchanged": "ongewijzigd",
+    "daysAway": "{{count}} dagen weg",
+    "dayAway": "{{count}} dag weg"
+  },
+  "home": {
+    "milestone": {
+      "awaken": "Ontwaken",
+      "clarity": "Helderheid",
+      "control": "Controle",
+      "strength": "Kracht",
+      "reset": "Reset",
+      "benefit_7": "Meer energie",
+      "benefit_14": "Scherpere focus",
+      "benefit_30": "Zelfvertrouwen groeit",
+      "benefit_60": "Emotionele regulatie",
+      "benefit_90": "Volledig dopamine herstel"
+    },
+    "focus": {
+      "0": "De drang gaat voorbij. Jouw identiteit niet. Kies wie je aan het worden bent.",
+      "1": "Dopamine herstel gaat niet over wilskracht — het gaat over het heropbouwen van je beloningscircuit, dag voor dag.",
+      "2": "Elk uur dat je volhoudt betekent dat je brein zich herprogrammeert. Het ongemak is de vooruitgang.",
+      "3": "Je bent niet zo ver gekomen om alleen maar zo ver te komen. De streak is het bewijs.",
+      "4": "Hunkering bereikt zijn hoogtepunt na 20 minuten. Overleef het — dat heb je altijd gedaan.",
+      "5": "De versie van jou die stopte kijkt nog steeds toe. Laat ze vandaag niet teleur.",
+      "6": "Verveling is geen noodgeval. Zit ermee. Daar gebeurt de herprogrammering.",
+      "7": "Herstel is geen rechte lijn, maar elke schone dag verhoogt de basis.",
+      "8": "Wat je weerstaat, bestaat. Erken de drang en laat het voorbijgaan als weer.",
+      "9": "Jouw toekomstige zelf wordt nu opgebouwd, in dit exacte moment van weerstand.",
+      "10": "Discipline is onthouden wat je het meest wilt boven wat je nu wilt.",
+      "11": "Het brein dat je hier heeft gebracht kan genezen. Geef het de stilte die het vandaag nodig heeft.",
+      "12": "Één beslissing verwijderd van een terugval, één beslissing verwijderd van je beste dag. Kies.",
+      "13": "Opkomen op de moeilijke dagen scheidt een streak van een levensstijl."
+    },
+    "mood": {
+      "low": {
+        "message": "Zware dag. Dat is oké. Je bent er toch.",
+        "btn1": "Verbreek het Signaal",
+        "btn2": "Ik voel een drang"
+      },
+      "mid": {
+        "message": "Standvastigheid is kracht. De meesten stoppen op zulke dagen.",
+        "btn1": "Bekijk je voortgang"
+      },
+      "high": {
+        "message": "Je herprogrammeert je brein. Houd deze energie vast — het werkt door.",
+        "btn1": "Zie je streak"
+      }
+    },
+    "moodLabel": {
+      "low": "Zware dag, ik houd stand",
+      "mid": "Licht uitgedaagd, blijf gefocust",
+      "high": "Sterk en onstopbaar"
+    },
+    "reward": {
+      "bonus": "Onverwachte bonus. Consistentie loont.",
+      "rare": "Je hebt iets zeldzaams ontgrendeld."
+    },
+    "checkin": {
+      "title": "Dagelijkse Check-in",
+      "subtitle": "Hoe voel je je vandaag?",
+      "confirm": "Bevestigen"
+    },
+    "sections": {
+      "todaysFocus": "Focus van Vandaag",
+      "emergency": "Noodgeval SOS",
+      "nextMilestone": "Volgende Mijlpaal",
+      "motivation": "Motivatie"
+    },
+    "emergency": {
+      "title": "Noodgeval SOS",
+      "subtitle": "Ik voel nu een drang",
+      "cta": "Open SOS Tools"
+    },
+    "relapse": "Ik had een terugval — noteer het eerlijk"
+  },
+  "progress": {
+    "header": "Volg je herstel, dag na dag.",
+    "stats": {
+      "streak": "Streak",
+      "best": "Best",
+      "total": "Totaal schoon"
+    },
+    "ring": {
+      "daysRemaining": "{{count}} dagen tot volledig brein herstel",
+      "achieved": "Volledig dopamine herstel bereikt. Gelukt!",
+      "day": "dag",
+      "toReset": "te resetten"
+    },
+    "milestones": {
+      "firstWeek": "Eerste Week",
+      "thirtyDays": "30 Dagen",
+      "tenUrges": "10 Dranggevoelens Doorstaan",
+      "ninetyDays": "90-Daagse Strijder",
+      "firstWeek_remaining": "{{count}} dag te gaan",
+      "firstWeek_remaining_plural": "{{count}} dagen te gaan",
+      "thirtyDays_remaining": "{{count}} dagen te gaan",
+      "ninetyDays_remaining": "{{count}} dagen te gaan",
+      "tenUrges_remaining": "Nog {{count}} drang overwinnen",
+      "tenUrges_remaining_plural": "Nog {{count}} dranggevoelens overwinnen",
+      "done": "Voltooid!"
+    },
+    "consistency": {
+      "title": "Consistentie",
+      "subtitle": "Laatste 12 weken",
+      "less": "Minder",
+      "more": "Meer"
+    },
+    "paywall": "Tik om je volledige streak te zien",
+    "story": {
+      "title": "Jouw Verhaal",
+      "subtitle": "Dit is geen streak. Dit is jouw geschiedenis.",
+      "daysSince": "Dagen sinds je begon",
+      "totalClean": "Totaal schone dagen ooit",
+      "longest": "Langste schone periode",
+      "longestValue": "{{count}} dagen",
+      "timesBack": "Keer dat je terugkwam",
+      "relapses": "Eerlijk gelogde terugvallen",
+      "sessions": "App sessies",
+      "quote": "Elk hoofdstuk telt. Elke keer dat je terugkwam was een keuze. De meeste mensen stoppen met kiezen."
+    },
+    "insights": {
+      "title": "Terugval Inzichten",
+      "subtitle": "Wanneer en waarom het gebeurt",
+      "total": "Totaal bijgehouden terugvallen",
+      "peakDay": "Meest kwetsbare dag",
+      "peakTime": "Meest kwetsbare tijd",
+      "avgBetween": "Gem. dagen tussen terugvallen",
+      "none": "Nog geen",
+      "na": "—",
+      "avgValue": "{{count}} dagen",
+      "paywallCta": "Zie wat jouw terugvallen triggert",
+      "morning": "Ochtend",
+      "afternoon": "Middag",
+      "evening": "Avond",
+      "night": "Nacht",
+      "dow": { "0": "Zo", "1": "Ma", "2": "Di", "3": "Wo", "4": "Do", "5": "Vr", "6": "Za" }
+    },
+    "milestonesTitle": "Mijlpalen",
+    "milestonesUnlocked": "{{count}} van {{total}} ontgrendeld",
+    "achieved": "✓ Behaald"
+  },
+  "tools": {
+    "header": "Hersteltools",
+    "subtitle": "Kies je wapen tegen de drang.",
+    "indexSubtitle": "Gebruik wat werkt.",
+    "reframes": {
+      "0": "Elke keer dat je weerstand biedt, groei je letterlijk nieuwe neurale paden.",
+      "1": "De drang ben jij niet — het is oude bedrading die om nog één treffer vraagt.",
+      "2": "Ongemak nu betekent dat je prefrontale cortex weer online komt.",
+      "3": "Elke schone dag verhoogt je dopamine basislijn met een meetbare hoeveelheid.",
+      "4": "Je geeft niets op. Je krijgt jezelf terug."
+    },
+    "coach": {
+      "name": "Herstelcoach",
+      "desc": "AI-ondersteunde 1-op-1 begeleiding",
+      "tagline": "Praat het door. Geen oordeel."
+    },
+    "sos": {
+      "name": "Noodgeval SOS",
+      "desc": "Directe drang interventie",
+      "heroLine1": "Drang gevoel?",
+      "heroLine2": "We helpen je.",
+      "heroSub": "Tik om drang surfing te starten · 3 min"
+    },
+    "gamesTitle": "Verbreek het Signaal Spellen",
+    "gamesDesc": "Train je brein. Versla de drang.",
+    "mindPulse": "Geest Puls",
+    "impulseShift": "Impuls Verschuiving",
+    "neuralLink": "Neuraal Netwerk",
+    "moreGames": "Meer spellen beschikbaar",
+    "reframeTitle": "Herkadering",
+    "reframeDesc": "Herprogrammeer je reactie in één gedachte.",
+    "reframeCta": "Laat me er een zien",
+    "coldTitle": "Koude Blootstelling",
+    "coldDesc": "2-min begeleide koude douche ademhaling.",
+    "coldCta": "Start →",
+    "planTitle": "Implementatieplan",
+    "planDesc": "Als/dan strategieën voor jouw triggers.",
+    "planAdd": "Plan toevoegen",
+    "planClose": "Sluiten",
+    "planTriggerPlaceholder": "Als ik me… (trigger)",
+    "planActionPlaceholder": "…ga ik (actie)",
+    "planSave": "Plan opslaan",
+    "planIfI": "Als ik",
+    "planIWill": "ga ik",
+    "breath": {
+      "name": "Ademen",
+      "desc": "Box ademhaling om te resetten"
+    },
+    "cold": {
+      "name": "Koud Douchen",
+      "desc": "Dopamine boost protocol"
+    },
+    "tap": {
+      "name": "Drang Tapper",
+      "desc": "Tap tot het verdwijnt"
+    },
+    "memory": {
+      "name": "Geheugenpaleis",
+      "desc": "Verankerd je sterkste reden"
+    },
+    "darkroom": {
+      "name": "Donkere Kamer",
+      "desc": "Zintuiglijke deprivatiemodus"
+    },
+    "voidstare": {
+      "name": "Leegte Staren",
+      "desc": "Staar in de leegte"
+    },
+    "noisefilter": {
+      "name": "Ruisfilter",
+      "desc": "Bruin ruis focusveld"
+    },
+    "echochamber": {
+      "name": "Echokamer",
+      "desc": "Hoor je eigen overtuiging"
+    },
+    "identitystack": {
+      "name": "Identiteitslaag",
+      "desc": "Wie je aan het worden bent"
+    },
+    "clarityclimb": {
+      "name": "Helderheidsklim",
+      "desc": "Mindfulness trap"
+    },
+    "coldswitch": {
+      "name": "Koude Schakelaar",
+      "desc": "Noodgeval temp verlaging"
+    },
+    "steadyhand": {
+      "name": "Vaste Hand",
+      "desc": "Precisie focus oefening"
+    }
+  },
+  "settings": {
+    "title": "Instellingen",
+    "sections": {
+      "account": "Account",
+      "billing": "Facturering & Plan",
+      "language": "Taal",
+      "notifications": "Meldingen",
+      "privacy": "Privacy & Gegevens",
+      "habits": "Bijgehouden Gewoonten",
+      "startDate": "Startdatum Herstel",
+      "badges": "Badges",
+      "about": "Over"
+    },
+    "account": {
+      "profilePhoto": "Profielfoto",
+      "takePhoto": "Foto Nemen",
+      "chooseLibrary": "Kies uit Bibliotheek",
+      "name": "Naam",
+      "email": "E-mail",
+      "changePassword": "Wachtwoord Wijzigen",
+      "notSet": "Niet ingesteld",
+      "notConnected": "Niet verbonden"
+    },
+    "billing": {
+      "currentPlan": "Huidig Plan",
+      "paymentMethod": "Betaalmethode",
+      "noCard": "Geen kaart op file",
+      "promo": "PRO ontgrendelt volledige analyses · €39,99/jaar (~€3,33/mo) · 7 dagen gratis proberen.",
+      "restore": "Aankoop herstellen"
+    },
+    "notifications": {
+      "push": "Pushmeldingen",
+      "pushSub": "Drangwaarschuwingen, mijlpalen & streaks",
+      "email": "E-mailmeldingen",
+      "emailSub": "Hersteltips en updates",
+      "weekly": "Wekelijks voortgangsrapport",
+      "weeklySub": "Elke zondagochtend verstuurd"
+    },
+    "privacy": {
+      "export": "Mijn gegevens exporteren",
+      "exportHelp": "Exporteren downloadt een JSON-bestand met al je app-gegevens.",
+      "delete": "Account verwijderen",
+      "deleteConfirm": "Tik nogmaals om de verwijdering te bevestigen"
+    },
+    "habits": {
+      "add": "Toevoegen",
+      "empty": "Nog geen gewoonten bijgehouden.",
+      "dayLabel": "Dag {{day}}"
+    },
+    "startDate": {
+      "label": "Startdatum",
+      "modalTitle": "Wanneer ben je voor het laatst gereset?",
+      "modalDesc": "Kies de datum waarop je deze streak begon. Dit kan slechts één keer worden ingesteld.",
+      "confirmBtn": "Startdatum Bevestigen",
+      "helpText": "Stel een vroegere datum in als je al schoon was voordat je de app installeerde."
+    },
+    "badges": {
+      "dayThreshold": "Dag {{day}}",
+      "legend": "{{earned}}/{{total}} ontgrendeld",
+      "next": "Volgend: {{name}} over {{days}}d"
+    },
+    "about": {
+      "version": "App Versie",
+      "terms": "Gebruiksvoorwaarden",
+      "privacy": "Privacybeleid"
+    }
+  },
+  "onboarding": {
+    "habits": {
+      "porn": "Pornografie",
+      "socialMedia": "Eindeloos scrollen op social media",
+      "sugar": "Suiker / junkfood",
+      "alcohol": "Alcohol",
+      "nicotine": "Nicotine / vapen",
+      "cannabis": "Cannabis",
+      "gambling": "Online gokken / wedden",
+      "gaming": "Videogame verslaving",
+      "procrastination": "Uitstellen"
+    },
+    "durations": {
+      "short": "Minder dan 6 maanden",
+      "medium": "1-2 jaar",
+      "long": "3-5 jaar",
+      "veryLong": "Meer dan 5 jaar"
+    },
+    "costs": {
+      "relationships": "Relaties",
+      "focus": "Focus & werk",
+      "confidence": "Zelfvertrouwen",
+      "sleep": "Slaap",
+      "social": "Sociaal leven",
+      "mental": "Mentale gezondheid"
+    },
+    "triggers": {
+      "lateNight": "Laat op de avond",
+      "bored": "Als ik me verveel",
+      "stressed": "Als ik gestrest ben",
+      "alone": "Als ik alleen ben",
+      "rejection": "Na afwijzing"
+    },
+    "identity": {
+      "control": "heeft volledige controle over zijn geest",
+      "validation": "heeft geen externe validatie meer nodig",
+      "discomfort": "kiest ongemak boven instant bevrediging",
+      "proud": "is iemand waar zijn toekomstige zelf trots op is",
+      "discipline": "verschijnt met discipline, niet met stemming"
+    },
+    "notifications": {
+      "styles": {
+        "friend": "Een kort bericht, zoals een sms van een vriend",
+        "insight": "Een feit of inzicht dat me verrast",
+        "question": "Een vraag die me aan het denken zet",
+        "quiet": "Een zachte herinnering — niets intens"
+      },
+      "apps": {
+        "imessage": "iMessage / WhatsApp",
+        "instagram": "Instagram",
+        "email": "E-mail",
+        "rarely": "Ik open zelden meldingen"
+      }
+    },
+    "step": "Stap {{step}} van {{total}}"
+  },
+  "tree": {
+    "yourCompanion": "Jouw Metgezel",
+    "ranks": {
+      "beginning": "Begin",
+      "awakening": "Ontwaking",
+      "building": "Opbouw",
+      "established": "Gevestigd",
+      "rising": "Stijgend",
+      "legendary": "Legendarisch"
+    },
+    "wolfRanks": {
+      "beginning": "Begin",
+      "awakening": "Ontwaking",
+      "building": "Opbouw",
+      "established": "Gevestigd",
+      "rising": "Stijgend",
+      "fierce": "Fel",
+      "dominant": "Dominant",
+      "legendary": "Legendarisch"
+    },
+    "stageNames": {
+      "day1": "Dag 1",
+      "week1": "Week 1",
+      "twoWeeks": "2 Weken",
+      "month1": "Maand 1",
+      "twoMonths": "2 Maanden",
+      "ninetyDays": "90 Dagen"
+    },
+    "wolfStages": {
+      "newborn": "Pasgeboren",
+      "pup": "Pup",
+      "young": "Jong",
+      "adolescent": "Adolescent",
+      "adult": "Volwassen",
+      "strong": "Sterk",
+      "alpha": "Alfa",
+      "legendary": "Legendarisch"
+    },
+    "upgrades": {
+      "sacredGround": "Heilige Grond"
+    },
+    "hallOfLegends": "Hal der Legendes",
+    "sky": {
+      "morning": "Ochtend",
+      "afternoon": "Middag",
+      "evening": "Avond",
+      "night": "Nacht"
+    }
+  },
+  "relapse": {
+    "confirm": {
+      "title": "Had je een terugval?",
+      "body": "Wees eerlijk met jezelf. Het noteren is een daad van moed — je teller blijft precies waar hij is.",
+      "yes": "Ja, noteer het eerlijk",
+      "no": "Nee, ik ben nog schoon"
+    },
+    "trigger": {
+      "step": "Stap 1 van 2",
+      "title": "Wat gebeurde er vlak daarvoor?",
+      "subtitle": "Wees specifiek. Dit vormt je herkadering.",
+      "stressed": "Ik was gestrest",
+      "bored": "Ik verveelde me",
+      "alone": "Ik was alleen",
+      "late": "Het was laat op de avond",
+      "online": "Iets triggerde me online",
+      "unknown": "Ik weet het niet"
+    },
+    "reframe": {
+      "readThis": "Lees dit.",
+      "analysing": "Je patroon analyseren…",
+      "totalClean": "Totaal schone dagen",
+      "cta": "Dag 1 begint nu. Ga door."
+    },
+    "done": {
+      "title": "Je bent nog steeds in het spel.",
+      "body": "Het noteren vergde lef. Sluit dit, open de SOS tools en identificeer wat het triggerde. Dat is het werk.",
+      "cta": "Terug naar dashboard"
+    }
+  }
+}
