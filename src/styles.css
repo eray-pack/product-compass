@@ -51,9 +51,9 @@
   --popover-foreground: #f5ede0;
 
   /* ── Amber / gold — earned, sacred ───────────────────── */
-  --primary:           #C4873A;
+  --primary:           #C9A84C;
   --primary-foreground: #1F1408;
-  --primary-glow:      #D4A76A;
+  --primary-glow:      #C9A84C;
 
   --secondary:           #261F15;
   --secondary-foreground: #f5ede0;
@@ -71,7 +71,7 @@
   --success:           #1A4A4A;
   --success-foreground: #f5ede0;
 
-  --warning:           #D4A76A;
+  --warning:           #C9A84C;
   --warning-foreground: #1F1408;
 
   --border: #3a2e1f;
@@ -79,15 +79,15 @@
   --ring:   #C4873A;
 
   /* ── Amber tints ──────────────────────────────────────── */
-  --primary-tint-08: rgba(196,135,58,0.08);
-  --primary-tint-10: rgba(196,135,58,0.10);
-  --primary-tint-30: rgba(196,135,58,0.30);
+  --primary-tint-08: rgba(201,168,76,0.08);
+  --primary-tint-10: rgba(201,168,76,0.10);
+  --primary-tint-30: rgba(201,168,76,0.30);
   --border-soft:     rgba(58,46,31,0.6);
 
   /* ── Gradients & shadows ──────────────────────────────── */
-  --gradient-primary: linear-gradient(135deg, #C4873A, #8B5E20);
+  --gradient-primary: linear-gradient(135deg, #C9A84C, #E8C96A);
   --gradient-surface: linear-gradient(180deg, #1C170F, #0D0A08);
-  --shadow-glow: 0 0 0 1px rgba(196,135,58,0.40), 0 0 28px rgba(196,135,58,0.45);
+  --shadow-glow: 0 0 0 1px rgba(201,168,76,0.40), 0 0 28px rgba(201,168,76,0.45);
   --shadow-sos:  0 0 60px -10px oklch(0.62 0.24 25 / 0.6);
 
   /* ── Extended radius scale ────────────────────────────── */
@@ -96,12 +96,12 @@
   --radius-pill: 9999px;
 
   /* ── Primary tints ────────────────────────────────────── */
-  --primary-tint-08: oklch(0.62 0.22 255 / 0.08);
-  --primary-tint-10: oklch(0.62 0.22 255 / 0.10);
-  --primary-tint-30: oklch(0.62 0.22 255 / 0.30);
+  --primary-tint-08: rgba(201,168,76,0.08);
+  --primary-tint-10: rgba(201,168,76,0.10);
+  --primary-tint-30: rgba(201,168,76,0.30);
 
   /* ── Border soft ──────────────────────────────────────── */
-  --border-soft: oklch(0.22 0.03 265 / 0.6);
+  --border-soft: rgba(201,168,76,0.15);
 
   /* ── Type scale ───────────────────────────────────────── */
   --fs-day:  8rem;
@@ -239,8 +239,8 @@ html.light {
 
 /* Amber glow pulse on timeline indicator */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(196,135,58,0.4), 0 0 14px rgba(196,135,58,0.7); }
-  50%       { box-shadow: 0 0 0 5px rgba(196,135,58,0.5), 0 0 22px rgba(196,135,58,0.95); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(201,168,76,0.4), 0 0 14px rgba(201,168,76,0.7); }
+  50%       { box-shadow: 0 0 0 5px rgba(201,168,76,0.5), 0 0 22px rgba(201,168,76,0.95); }
 }
 .animate-glow-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
 
@@ -265,30 +265,30 @@ html.light {
 /* Neural mesh backgrounds */
 .neural-mesh {
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(196,135,58,0.14) 1px, transparent 1px),
-    radial-gradient(circle at 50% 50%, rgba(196,135,58,0.05), transparent 60%);
+    radial-gradient(circle at 1px 1px, rgba(201,168,76,0.14) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(201,168,76,0.05), transparent 60%);
   background-size: 22px 22px, 100% 100%;
 }
 .neural-mesh-fine {
-  background-image: radial-gradient(circle at 1px 1px, rgba(196,135,58,0.10) 1px, transparent 1px);
+  background-image: radial-gradient(circle at 1px 1px, rgba(201,168,76,0.10) 1px, transparent 1px);
   background-size: 14px 14px;
 }
 
 /* Monumental day number — warm amber halo */
 .day-monument {
   text-shadow:
-    0 0 24px rgba(196,135,58,0.55),
-    0 0 60px rgba(196,135,58,0.30),
+    0 0 24px rgba(201,168,76,0.55),
+    0 0 60px rgba(201,168,76,0.30),
     0 2px 0 rgba(255,255,255,0.04);
 }
 
 /* Tree stage — sunrise glow from below */
 .tree-stage {
   background:
-    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(196,135,58,0.45), transparent 65%),
-    radial-gradient(ellipse 60% 80% at 50% 60%, rgba(196,135,58,0.18), transparent 70%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(201,168,76,0.45), transparent 65%),
+    radial-gradient(ellipse 60% 80% at 50% 60%, rgba(201,168,76,0.18), transparent 70%),
     linear-gradient(180deg, #0D0A08 0%, #1A1108 60%, #2a1a0a 100%) !important;
-  border-color: rgba(196,135,58,0.30) !important;
+  border-color: rgba(201,168,76,0.30) !important;
 }
 
 /* ── Companion stage animations ─────────────────────────────────────────── */
@@ -450,8 +450,8 @@ html.light {
 
 /* Recovery ring glow */
 @keyframes ring-glow {
-  0%, 100% { filter: drop-shadow(0 0 6px rgba(196,135,58,0.4)); }
-  50%       { filter: drop-shadow(0 0 14px rgba(196,135,58,0.7)); }
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(201,168,76,0.4)); }
+  50%       { filter: drop-shadow(0 0 14px rgba(201,168,76,0.7)); }
 }
 .ring-glow { animation: ring-glow 3s ease-in-out infinite; }
 

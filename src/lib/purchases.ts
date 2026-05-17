@@ -9,7 +9,7 @@ let initialized = false;
 
 async function getPlugin() {
   if (!Capacitor.isNativePlatform()) return null;
-  const { Purchases } = await import("@revenuecat/purchases-capacitor");
+  const { Purchases } = await import(/* @vite-ignore */ "@revenuecat/purchases-capacitor");
   return Purchases;
 }
 

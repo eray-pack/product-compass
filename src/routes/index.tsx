@@ -271,6 +271,49 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
+// ─── Floating emoji background ───────────────────────────────────────────────
+const FLOAT_PARTICLES = Array.from({ length: 14 }, (_, i) => ({
+  size:  18 + (i * 9) % 30,
+  x:     (i * 41 + 7) % 100,
+  y:     (i * 59 + 13) % 130,
+  dur:   18 + (i * 4) % 16,
+  delay: -(i * 3.1)   % 22,
+  drift: (i % 2 === 0 ? 1 : -1) * (6 + (i * 7) % 18),
+}));
+
+function FloatingHabitBg({ emoji }: { emoji: string }) {
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+      <style>{`
+        @keyframes habit-float {
+          0%   { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(-110vh) translateX(var(--hdrift)) rotate(var(--hrot)); opacity: 0; }
+        }
+      `}</style>
+      {FLOAT_PARTICLES.map((p, i) => (
+        <span
+          key={i}
+          style={{
+            position:  "fixed",
+            left:      `${p.x}%`,
+            top:       `${p.y}%`,
+            fontSize:  `${p.size}px`,
+            opacity:   0,
+            "--hdrift": `${p.drift}px`,
+            "--hrot":   `${p.drift * 1.2}deg`,
+            animation: `habit-float ${p.dur}s ${p.delay}s linear infinite`,
+            filter:    "opacity(0.09)",
+          } as React.CSSProperties}
+        >
+          {emoji}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // ─── Thin separator ───────────────────────────────────────────────────────────
 function Hairline() {
   return (
@@ -369,14 +412,18 @@ function HabitSwitcher({
 }
 
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
-function BadgeCarousel({ day, addictionName }: { day: number; addictionName: string }) {
+function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addictionName: string; addictionId: string }) {
   const earnedCount = BADGES.filter((b) => day >= b.day).length;
-  // Start on the latest earned badge (or 0)
   const [idx, setIdx]             = useState(() => Math.max(0, earnedCount - 1));
   const touchStartX               = useRef(0);
   const touchStartY               = useRef(0);
   const [dragging, setDragging]   = useState(false);
   const [dragDelta, setDragDelta] = useState(0);
+
+  // Snap to latest earned badge whenever the active habit changes
+  useEffect(() => {
+    setIdx(Math.max(0, BADGES.filter((b) => day >= b.day).length - 1));
+  }, [addictionId]);
 
   const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
 
@@ -538,10 +585,18 @@ function Dashboard() {
     if (!state.onboarding) return;
     const inactive = inactivityDays(state.lastLoginAt);
     if (inactive >= 30) setReEntryDays(inactive);
-    update((s) => ({
-      lastLoginAt:  Date.now(),
-      loginHistory: [...(s.loginHistory ?? []).slice(-89), Date.now()],
-    }));
+    const today = new Date().toISOString().slice(0, 10);
+    update((s) => {
+      const waterToday = s.lastTreeWaterDate !== today && s.addictions.length > 0;
+      return {
+        lastLoginAt:       Date.now(),
+        loginHistory:      [...(s.loginHistory ?? []).slice(-89), Date.now()],
+        ...(waterToday ? {
+          treeXP:            s.treeXP + s.addictions.length * 10,
+          lastTreeWaterDate: today,
+        } : {}),
+      };
+    });
   }, [state.onboarding]);
 
   useEffect(() => {
@@ -560,6 +615,7 @@ function Dashboard() {
 
   return (
     <PageShell>
+      <FloatingHabitBg emoji={active?.emoji ?? "🧠"} />
 
       {/* ── NAV ──────────────────────────────────────────────── */}
       <motion.header
@@ -606,13 +662,10 @@ function Dashboard() {
             activeId={state.activeAddictionId}
             isPremium={state.isPremium}
             onSwitch={(id) => update({ activeAddictionId: id })}
-            onAdd={() => {
-              if (state.isPremium) setShowAddHabit(true);
-              else triggerPaywall();
-            }}
+            onAdd={() => setShowAddHabit(true)}
           />
         </div>
-        <BadgeCarousel day={day} addictionName={active?.name ?? "Recovery"} />
+        <BadgeCarousel day={day} addictionName={active?.name ?? "Recovery"} addictionId={active?.id ?? ""} />
       </motion.div>
 
       {/* ── STATS ─────────────────────────────────────────────── */}
@@ -807,7 +860,17 @@ function Dashboard() {
       </motion.section>
 
       {/* ── MODALS ────────────────────────────────────────────── */}
-      {showAddHabit && <AddAddictionModal onClose={() => setShowAddHabit(false)} />}
+      {showAddHabit && (
+        <AddAddictionModal
+          trackedIds={new Set(state.addictions.map((a) => a.id))}
+          onClose={() => setShowAddHabit(false)}
+          onAdd={(addiction) => {
+            if (!state.isPremium) { triggerPaywall(); return; }
+            update((s) => ({ addictions: [...s.addictions, addiction] }));
+            setShowAddHabit(false);
+          }}
+        />
+      )}
       {showRelapse  && (
         <RelapseModal onClose={() => setShowRelapse(false)} totalCleanDays={state.totalCleanDays} />
       )}
