@@ -23,11 +23,8 @@ import {
   Calendar,
 } from "lucide-react";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
-<<<<<<< HEAD
 import { SectionTitle } from "@/components/BottomNav";
-=======
 import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
->>>>>>> cbfac333b5dcd84ede91bdc197247a648fa88047
 import { triggerPaywall } from "@/lib/paywall";
 import { useTheme } from "@/lib/theme";
 import { AddAddictionModal } from "@/components/AddAddictionModal";

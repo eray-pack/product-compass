@@ -1,20 +1,29 @@
 // RevenueCat integration for Stopamine
-// Uses dynamic imports so the native plugin never loads in the browser.
-import { Capacitor } from "@capacitor/core";
+// All Capacitor/RevenueCat imports are fully dynamic so the web build is unaffected.
 
 const RC_API_KEY_IOS = "test_lpSpiHnqWYUyBaEYCWfJQqnWupe";
 const ENTITLEMENT_ID = "Stopamine Pro";
 
 let initialized = false;
 
+/** Returns true only when running inside a native Capacitor shell. */
+async function isNative(): Promise<boolean> {
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
 async function getPlugin() {
-  if (!Capacitor.isNativePlatform()) return null;
+  if (!(await isNative())) return null;
   const { Purchases } = await import("@revenuecat/purchases-capacitor");
   return Purchases;
 }
 
 export async function initPurchases(userId?: string) {
-  if (!Capacitor.isNativePlatform()) return;
+  if (!(await isNative())) return;
   if (initialized) return;
   try {
     const Purchases = await getPlugin();
@@ -30,7 +39,7 @@ export async function initPurchases(userId?: string) {
 }
 
 export async function checkPremium(): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!(await isNative())) return false;
   try {
     const Purchases = await getPlugin();
     if (!Purchases) return false;
@@ -42,7 +51,7 @@ export async function checkPremium(): Promise<boolean> {
 }
 
 export async function purchaseMonthly(): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!(await isNative())) return false;
   try {
     const Purchases = await getPlugin();
     if (!Purchases) return false;
@@ -58,7 +67,7 @@ export async function purchaseMonthly(): Promise<boolean> {
 }
 
 export async function restorePurchases(): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!(await isNative())) return false;
   try {
     const Purchases = await getPlugin();
     if (!Purchases) return false;
