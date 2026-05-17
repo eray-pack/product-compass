@@ -1012,11 +1012,11 @@ function Settings() {
   const [state, update] = useAppState();
 
   return (
-    <div className="min-h-screen bg-background pb-16 mx-auto max-w-md">
+    <div className="min-h-screen pb-16 mx-auto max-w-md" style={{ background: "#0D0A08" }}>
       {/* Sticky header */}
       <header
         className="sticky top-0 z-20 flex items-center gap-3 px-4 h-14 border-b border-border/50 backdrop-blur-xl"
-        style={{ background: "var(--background)" }}
+        style={{ background: "#0D0A08" }}
       >
         <button
           onClick={() => navigate({ to: "/" })}

@@ -17,11 +17,11 @@ import { BrainLoadingScreen } from "@/components/BrainLoadingScreen";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "#0D0A08", color: "#f5ede0" }}>
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold">404</h1>
-        <p className="mt-4 text-muted-foreground">This page doesn't exist.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+        <p className="mt-4" style={{ color: "rgba(255,255,255,0.50)" }}>This page doesn't exist.</p>
+        <Link to="/" className="mt-6 inline-flex rounded-md px-4 py-2 text-sm font-medium" style={{ background: "#C9A84C", color: "#1F1408" }}>
           Go home
         </Link>
       </div>
@@ -33,13 +33,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "#0D0A08", color: "#f5ede0" }}>
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.50)" }}>{error.message}</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
-          className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          className="mt-6 rounded-md px-4 py-2 text-sm font-medium"
+          style={{ background: "#C9A84C", color: "#1F1408" }}
         >
           Try again
         </button>
@@ -75,13 +76,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" style={{ colorScheme: "dark", background: "#0D0A08" }}>
       <head>
-        {/* Runs synchronously before paint — prevents theme flash */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('stopamine.theme')||'dark';document.documentElement.className=t;}catch(e){}})();` }} />
+        {/* Always force dark — runs synchronously before paint, before any CSS loads */}
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.className='dark';document.documentElement.style.background='#0D0A08';document.documentElement.style.colorScheme='dark';` }} />
         <HeadContent />
       </head>
-      <body className="bg-background text-foreground">{children}<Scripts /></body>
+      <body style={{ background: "#0D0A08", color: "#f5ede0", colorScheme: "dark" }}>{children}<Scripts /></body>
     </html>
   );
 }

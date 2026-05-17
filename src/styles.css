@@ -37,6 +37,7 @@
 }
 
 :root {
+  color-scheme: dark; /* Prevent browser from applying any light-mode native styling */
   --radius: 0.875rem;
 
   /* ── Warm black #0D0A08 ───────────────────────────────── */
@@ -122,49 +123,42 @@
   --tracking-tight:      -0.01em;
 }
 
-/* ── Light theme ────────────────────────────────────────── */
+/* ── Light theme disabled — app is dark-only ────────────── */
+/* html.light block intentionally overridden back to dark values.
+   The class is never set (inline script always writes "dark"),
+   but this ensures no flash even if something sets it. */
 html.light {
-  --background:   oklch(0.985 0 0);
-  --surface:      oklch(1 0 0);
-  --surface-2:    oklch(0.96 0 0);
-  --foreground:   oklch(0.10 0 0);
-
-  --card:              oklch(1 0 0);
-  --card-foreground:   oklch(0.10 0 0);
-  --popover:           oklch(1 0 0);
-  --popover-foreground: oklch(0.10 0 0);
-
-  /* Dark grey #2D2D2D replaces electric blue */
-  --primary:           oklch(0.22 0 0);
-  --primary-foreground: oklch(0.98 0 0);
-  --primary-glow:      oklch(0.35 0 0);
-
-  --secondary:           oklch(0.94 0 0);
-  --secondary-foreground: oklch(0.10 0 0);
-
-  --muted:           oklch(0.95 0 0);
-  --muted-foreground: oklch(0.46 0 0);
-
-  --accent:           oklch(0.93 0 0);
-  --accent-foreground: oklch(0.10 0 0);
-
-  --destructive:           oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-
-  --success:           oklch(0.52 0.14 150);
-  --success-foreground: oklch(0.98 0 0);
-
-  --warning:           oklch(0.58 0.14 60);
-  --warning-foreground: oklch(0.98 0 0);
-
-  --border: oklch(0.88 0 0);
-  --input:  oklch(0.92 0 0);
-  --ring:   oklch(0.22 0 0);
-
-  --gradient-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.32 0 0));
-  --gradient-surface: linear-gradient(180deg, oklch(1 0 0), oklch(0.975 0 0));
-  --shadow-glow: 0 0 40px -10px oklch(0.22 0 0 / 0.15);
-  --shadow-sos:  0 0 60px -10px oklch(0.55 0.22 25 / 0.35);
+  color-scheme: dark;
+  --background:   #0D0A08;
+  --surface:      #15110D;
+  --surface-2:    #261F15;
+  --foreground:   #f5ede0;
+  --card:              #1C170F;
+  --card-foreground:   #f5ede0;
+  --popover:           #1C170F;
+  --popover-foreground: #f5ede0;
+  --primary:           #C9A84C;
+  --primary-foreground: #1F1408;
+  --primary-glow:      #C9A84C;
+  --secondary:           #261F15;
+  --secondary-foreground: #f5ede0;
+  --muted:           #1C170F;
+  --muted-foreground: #a89580;
+  --accent:           #322819;
+  --accent-foreground: #f5ede0;
+  --destructive:           oklch(0.62 0.24 25);
+  --destructive-foreground: #f5ede0;
+  --success:           #1A4A4A;
+  --success-foreground: #f5ede0;
+  --warning:           #C9A84C;
+  --warning-foreground: #1F1408;
+  --border: #3a2e1f;
+  --input:  #2a2218;
+  --ring:   #C4873A;
+  --gradient-primary: linear-gradient(135deg, #C9A84C, #E8C96A);
+  --gradient-surface: linear-gradient(180deg, #1C170F, #0D0A08);
+  --shadow-glow: 0 0 0 1px rgba(201,168,76,0.40), 0 0 28px rgba(201,168,76,0.45);
+  --shadow-sos:  0 0 60px -10px oklch(0.62 0.24 25 / 0.6);
 }
 
 /* ── Semantic type helpers ───────────────────────────────── */
@@ -550,13 +544,23 @@ html.light {
 /* ── Base ───────────────────────────────────────────────── */
 @layer base {
   * { border-color: var(--color-border); }
-  html, body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+  html {
+    /* Hardcoded dark — never resolved via CSS variable, cannot be overridden by OS */
+    background-color: #0D0A08;
+    color-scheme: dark;
   }
   body {
+    background-color: #0D0A08;
+    color: #f5ede0;
+    color-scheme: dark;
     font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "cv11", "ss01";
   }
+}
+
+/* ── Force dark even when OS is in light mode ────────────── */
+@media (prefers-color-scheme: light) {
+  :root { color-scheme: dark; }
+  html, body { background-color: #0D0A08; color: #f5ede0; }
 }
