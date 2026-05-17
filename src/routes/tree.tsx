@@ -342,7 +342,7 @@ function WolfPage({
   return (
     <PageShell>
       <header className="px-6 pt-12">
-        <p style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 700, fontStyle: "italic", color: "#f5ede0", letterSpacing: 0, margin: 0 }}>Your Companion</p>
+        <p style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 700, fontStyle: "italic", color: "#C9A84C", letterSpacing: 0, margin: 0 }}>Your Companion</p>
         <h1 className="mt-2 text-3xl font-bold">Your Wolf</h1>
         <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
           This wolf is yours. Every clean day makes it stronger.
