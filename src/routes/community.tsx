@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageShell } from "@/components/BottomNav";
+import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount, activeAddiction } from "@/lib/store";
 import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";
@@ -349,7 +349,7 @@ function CommunityPage() {
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Community</p>
+        <SectionTitle>Community</SectionTitle>
         <h1 className="mt-2 text-3xl font-bold">You're not alone.</h1>
         <p className="mt-2 text-sm leading-relaxed" style={{ color: "oklch(0.60 0.018 265 / 0.75)" }}>
           Real people, doing the same work, right now.
