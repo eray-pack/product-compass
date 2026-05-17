@@ -215,10 +215,10 @@ function ProgressScreen() {
                 className="h-3 w-3 rounded-[3px]"
                 style={{
                   backgroundColor:
-                    v === 0 ? "rgba(201,168,76,0.12)"
-                    : v === 1 ? "rgba(201,168,76,0.35)"
-                    : v === 2 ? "rgba(201,168,76,0.60)"
-                    : "#C9A84C",
+                    v === 0 ? "rgba(255,255,255,0.06)"
+                    : v === 1 ? "#1a4d2e"
+                    : v === 2 ? "#2d8a4e"
+                    : "#3fb86a",
                 }}
               />
             ))}
@@ -240,7 +240,7 @@ function ProgressScreen() {
         </div>
         <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
           Less
-          {["rgba(201,168,76,0.12)", "rgba(201,168,76,0.35)", "rgba(201,168,76,0.60)", "#C9A84C"].map((bg) => (
+          {["rgba(255,255,255,0.06)", "#1a4d2e", "#2d8a4e", "#3fb86a"].map((bg) => (
             <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
           ))}
           More
