@@ -263,17 +263,19 @@ function AvatarStack({ roomId, memberCount, isGlobal }: { roomId: string; member
 
   return (
     <div className="flex items-center gap-2 mt-2">
-      {/* Overlapping circles */}
+      {/* Overlapping circles — classic avatar stack */}
       <div className="flex">
         {shown.map((av, i) => (
           <div
             key={i}
-            className="h-5 w-5 rounded-full grid place-items-center text-[8px] font-bold text-white border border-card"
+            className="h-5 w-5 rounded-full grid place-items-center text-[8px] font-bold text-white"
             style={{
               background: av.bg,
-              marginLeft: i > 0 ? -6 : 0,
+              marginLeft: i > 0 ? -7 : 0,
               zIndex: shown.length - i,
               position: "relative",
+              border: "1.5px solid #090705",
+              boxSizing: "content-box",
             }}
           >
             {av.initial}
@@ -372,7 +374,7 @@ function CommunityPage() {
                 key={room.id}
                 onClick={() => handleJoin(room)}
                 className="w-full text-left flex items-start gap-4 py-4 transition-opacity active:opacity-70"
-                style={{ borderBottom: i < all.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.6)" : "none" }}
+                style={{ borderBottom: i < all.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
               >
                 {/* Icon */}
                 <div
@@ -406,14 +408,14 @@ function CommunityPage() {
                     {joined ? (
                       <div
                         className="text-[11px] font-semibold px-3 py-1 rounded-full shrink-0 mt-0.5"
-                        style={{ border: "1px solid oklch(0.28 0.03 265 / 0.55)", color: "var(--muted-foreground)", background: "oklch(0.18 0.02 265 / 0.5)" }}
+                        style={{ border: "1px solid rgba(201,168,76,0.45)", color: "#C9A84C", background: "rgba(201,168,76,0.06)" }}
                       >
                         Open
                       </div>
                     ) : (
                       <div
                         className="text-[11px] font-semibold px-3 py-1 rounded-full shrink-0 mt-0.5"
-                        style={{ border: "1px solid #C4873A66", color: "#C4873A", background: "rgba(196,135,58,0.08)" }}
+                        style={{ border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.50)", background: "rgba(255,255,255,0.04)" }}
                       >
                         Join
                       </div>
