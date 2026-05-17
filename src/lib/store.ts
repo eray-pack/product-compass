@@ -190,6 +190,14 @@ export function activeAddiction(s: AppState): Addiction | undefined {
   return s.addictions.find((a) => a.id === s.activeAddictionId) ?? s.addictions[0];
 }
 
+/** The addiction with the most clean days — used for community badge, profile rank, etc. */
+export function flagshipAddiction(s: AppState): Addiction | undefined {
+  if (!s.addictions.length) return undefined;
+  return s.addictions.reduce((best, a) =>
+    dayCount(a.startDate) > dayCount(best.startDate) ? a : best
+  );
+}
+
 export function longestCleanPeriod(s: AppState): number {
   const active = activeAddiction(s);
   if (s.relapses.length === 0) return dayCount(active.startDate);

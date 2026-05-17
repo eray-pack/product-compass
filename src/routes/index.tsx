@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Coins, X, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
-import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
+import { useAppState, dayCount, activeAddiction, inactivityDays, loadState, type Addiction } from "@/lib/store";
 import { BADGES, currentBadge, nextBadge, badgeSplit } from "@/lib/badges";
 import { initPurchases, checkPremium } from "@/lib/purchases";
 import { supabase } from "@/lib/supabase";
@@ -282,8 +282,46 @@ function Hairline() {
 }
 
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-// ─── Badge Carousel ───────────────────────────────────────────────────────────
+// ─── Habit Switcher ───────────────────────────────────────────────────────────
+function HabitSwitcher({
+  addictions, activeId, onSwitch,
+}: { addictions: Addiction[]; activeId: string; onSwitch: (id: string) => void }) {
+  if (addictions.length <= 1) {
+    const a = addictions[0];
+    if (!a) return null;
+    return (
+      <p className="text-center text-[11px] font-bold tracking-[0.3em] uppercase"
+         style={{ color: "rgba(255,255,255,0.28)" }}>
+        {a.emoji} {a.name}
+      </p>
+    );
+  }
+  return (
+    <div className="flex justify-center gap-2 flex-wrap">
+      {addictions.map((a) => {
+        const isActive = a.id === activeId;
+        return (
+          <button
+            key={a.id}
+            onClick={() => onSwitch(a.id)}
+            style={{
+              padding: "5px 16px", borderRadius: 20,
+              fontSize: 12, fontWeight: isActive ? 700 : 500,
+              background: isActive ? "rgba(196,135,58,0.14)" : "rgba(255,255,255,0.05)",
+              border: `1px solid ${isActive ? "rgba(196,135,58,0.38)" : "rgba(255,255,255,0.08)"}`,
+              color: isActive ? "#C4873A" : "rgba(255,255,255,0.35)",
+              transition: "all 0.2s ease",
+              cursor: "pointer",
+            }}
+          >
+            {a.emoji} {a.name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
 function BadgeCarousel({ day, addictionName }: { day: number; addictionName: string }) {
   const earnedCount = BADGES.filter((b) => day >= b.day).length;
@@ -398,7 +436,7 @@ function BadgeCarousel({ day, addictionName }: { day: number; addictionName: str
         <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
         <span className="text-[13px] font-bold tracking-[0.3em] uppercase tabular-nums"
               style={{ color: "rgba(255,255,255,0.5)" }}>
-          Day {day} · {addictionName}
+          Day {day}
         </span>
         <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
       </div>
@@ -518,12 +556,19 @@ function Dashboard() {
         </div>
       </motion.header>
 
-      {/* ── BADGE CAROUSEL — swipeable ───────────────────────── */}
+      {/* ── HABIT SWITCHER + BADGE CAROUSEL ──────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: EASE }}
       >
+        <div className="px-6 pb-3 pt-1">
+          <HabitSwitcher
+            addictions={state.addictions}
+            activeId={state.activeAddictionId}
+            onSwitch={(id) => update({ activeAddictionId: id })}
+          />
+        </div>
         <BadgeCarousel day={day} addictionName={active?.name ?? "Recovery"} />
       </motion.div>
 
