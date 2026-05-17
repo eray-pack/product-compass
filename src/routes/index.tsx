@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Coins, X, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { PageShell } from "@/components/BottomNav";
+import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
@@ -49,154 +49,6 @@ function nextMilestone(day: number) {
   const m = MILESTONES.find((m) => m.day > day);
   if (!m) return null;
   return { ...m, benefit: MILESTONE_BENEFIT[m.day], daysAway: m.day - day };
-}
-
-// ─── Journey graph ────────────────────────────────────────────────────────────
-// Five milestone points placed on an ascending curve (bottom-left → top-right).
-// SVG coordinate space: 340 × 160 viewBox.
-// Bezier control points derived via Catmull-Rom → cubic conversion (α = 0.28).
-
-const GRAPH = [
-  { day: 7,  label: "Awaken",   x: 34,  y: 136 },
-  { day: 14, label: "Clarity",  x: 100, y: 106 },
-  { day: 30, label: "Control",  x: 168, y: 76  },
-  { day: 60, label: "Strength", x: 240, y: 46  },
-  { day: 90, label: "Reset",    x: 306, y: 28  },
-];
-
-// Precomputed cubic bezier segments — one per pair of adjacent milestones
-const SEGS = [
-  "M 34,136 C 40,133 87,112 100,106",
-  "M 100,106 C 113,100 155,82 168,76",
-  "M 168,76 C 181,70 227,50 240,46",
-  "M 240,46 C 253,42 300,30 306,28",
-];
-
-const FULL_PATH =
-  "M 34,136 C 40,133 87,112 100,106 " +
-  "C 113,100 155,82 168,76 " +
-  "C 181,70 227,50 240,46 " +
-  "C 253,42 300,30 306,28";
-
-function JourneyGraph({ day }: { day: number }) {
-  // Index of the milestone currently being worked toward
-  const activeIdx = (() => {
-    const i = GRAPH.findIndex((p) => day < p.day);
-    return i === -1 ? GRAPH.length - 1 : i;
-  })();
-  const allDone = day >= 90;
-
-  return (
-    <div className="px-3 pt-1 pb-2">
-      <style>{`
-        @keyframes journey-pulse {
-          0%   { opacity: 0.65; transform: scale(1);   }
-          100% { opacity: 0;    transform: scale(2.2); }
-        }
-        .jp-ring {
-          transform-box: fill-box;
-          transform-origin: center;
-          animation: journey-pulse 2.2s cubic-bezier(0,0,0.2,1) infinite;
-        }
-      `}</style>
-
-      <svg
-        viewBox="0 0 340 160"
-        width="100%"
-        style={{ display: "block", overflow: "visible" }}
-        aria-label="Recovery journey"
-      >
-        {/* Full path in muted grey — drawn first as baseline */}
-        <path
-          d={FULL_PATH}
-          fill="none"
-          stroke="rgba(255,255,255,0.07)"
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
-
-        {/* Gold overlay — covers segments up to (not including) active milestone */}
-        {SEGS.map((d, i) => {
-          if (!allDone && i >= activeIdx) return null;
-          return (
-            <path
-              key={i} d={d}
-              fill="none"
-              stroke="#C4873A"
-              strokeWidth={2}
-              strokeLinecap="round"
-              opacity={0.85}
-            />
-          );
-        })}
-
-        {/* Milestone points */}
-        {GRAPH.map((pt, i) => {
-          const done   = allDone || i < activeIdx;
-          const active = !allDone && i === activeIdx;
-          const r      = active ? 7 : 4.5;
-
-          // Label y positions — name sits above, day sits below
-          const nameY = pt.y - r - 6;
-          const dayY  = pt.y + r + 12;
-
-          return (
-            <g key={pt.day}>
-              {/* Soft pulse ring — active milestone only */}
-              {active && (
-                <circle
-                  cx={pt.x} cy={pt.y} r={8}
-                  fill="none"
-                  stroke="#C4873A"
-                  strokeWidth={1.5}
-                  className="jp-ring"
-                />
-              )}
-
-              {/* Core circle */}
-              <circle
-                cx={pt.x} cy={pt.y} r={r}
-                fill={done || active ? "#C4873A" : "rgba(255,255,255,0.06)"}
-                stroke={done || active ? "rgba(196,135,58,0.2)" : "rgba(255,255,255,0.09)"}
-                strokeWidth={1.5}
-              />
-
-              {/* Milestone name */}
-              <text
-                x={pt.x} y={nameY}
-                textAnchor="middle"
-                fontSize={9}
-                fontWeight={active ? 700 : 500}
-                fill={
-                  active ? "rgba(255,255,255,0.9)"  :
-                  done   ? "rgba(255,255,255,0.5)"  :
-                           "rgba(255,255,255,0.18)"
-                }
-              >
-                {pt.label}
-              </text>
-
-              {/* Day number */}
-              <text
-                x={pt.x} y={dayY}
-                textAnchor="middle"
-                fontSize={8}
-                fontWeight={600}
-                fill={
-                  active ? "#C4873A"                  :
-                  done   ? "rgba(196,135,58,0.38)"    :
-                           "rgba(255,255,255,0.13)"
-                }
-                style={{ letterSpacing: "0.06em" }}
-              >
-                d{pt.day}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
 }
 
 // ─── Today's Focus ────────────────────────────────────────────────────────────
@@ -426,17 +278,6 @@ function Hairline() {
   );
 }
 
-// ─── Section label ────────────────────────────────────────────────────────────
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="text-[9px] font-bold tracking-[0.38em] uppercase mb-3"
-      style={{ color: "rgba(255,255,255,0.28)" }}
-    >
-      {children}
-    </p>
-  );
-}
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 function Dashboard() {
@@ -646,26 +487,13 @@ function Dashboard() {
 
       <Hairline />
 
-      {/* ── JOURNEY ───────────────────────────────────────────── */}
-      <motion.section
-        className="mt-7 mb-6"
-        initial="hidden" whileInView="show" viewport={vp} variants={up}
-      >
-        <div className="px-6 mb-1">
-          <Label>The Journey</Label>
-        </div>
-        <JourneyGraph day={day} />
-      </motion.section>
-
-      <Hairline />
-
       {/* ── TODAY'S FOCUS ─────────────────────────────────────── */}
       {state.onboarding && active && (
         <motion.section
           className="px-6 mt-7 mb-6"
           initial="hidden" whileInView="show" viewport={vp} variants={up}
         >
-          <Label>Today's Focus</Label>
+          <SectionTitle>Today's Focus</SectionTitle>
           <TodaysFocus
             name={state.onboarding.name}
             addiction={active.name}
@@ -683,7 +511,7 @@ function Dashboard() {
         className="px-6 mt-7 mb-6"
         initial="hidden" whileInView="show" viewport={vp} variants={up}
       >
-        <Label>Daily Check-in</Label>
+        <SectionTitle>Daily Check-in</SectionTitle>
         <p className="text-[20px] font-semibold leading-tight mb-5"
            style={{ letterSpacing: "-0.02em" }}>
           How are you<br />holding up today?

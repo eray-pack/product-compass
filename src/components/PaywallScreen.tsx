@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SectionTitle } from "@/components/BottomNav";
 
 // ── Variants ──────────────────────────────────────────────────────────────────
 const containerVariants = {
@@ -288,7 +289,7 @@ export function PaywallScreen({ onSubscribe, onDismiss }: PaywallScreenProps) {
 
       {/* 3. HEADLINE */}
       <motion.div variants={item} className="text-center">
-        <p className="text-[11px] tracking-[2.5px] text-[#C9A84C] uppercase mb-1">Unlock Pro</p>
+        <div style={{ marginBottom: 4 }}><SectionTitle>Unlock Pro</SectionTitle></div>
         <h1
           style={{
             fontFamily: "Cormorant Garamond, Georgia, serif",

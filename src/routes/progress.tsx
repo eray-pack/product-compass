@@ -1,8 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Award, Flame, Shield, Trophy, Lock } from "lucide-react";
-import { PageShell } from "@/components/BottomNav";
+import { Lock } from "lucide-react";
+import { motion } from "framer-motion";
+import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+
+const GOLD = "#C9A84C";
+
+const msContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+const msItem = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+};
 
 export const Route = createFileRoute("/progress")({
   component: ProgressScreen,
@@ -112,18 +124,43 @@ function ProgressScreen() {
     return r > 0.7 ? 2 : r > 0.4 ? 1 : 0;
   });
 
-  const badges = [
-    { name: "First Week",        icon: Shield, earned: day >= 7  },
-    { name: "30 Days",           icon: Award,  earned: day >= 30 },
-    { name: "Survived 10 Urges", icon: Flame,  earned: state.urgesSurvived >= 10 },
-    { name: "90 Day Warrior",    icon: Trophy, earned: day >= 90 },
+  const urgesSurvived = state.urgesSurvived ?? 0;
+  const milestones = [
+    {
+      name: "First Week",
+      icon: "🛡️",
+      earned: day >= 7,
+      hint: `${Math.max(0, 7 - day)} day${Math.max(0, 7 - day) !== 1 ? "s" : ""} to go`,
+    },
+    {
+      name: "30 Days",
+      icon: "🎖️",
+      earned: day >= 30,
+      hint: `${Math.max(0, 30 - day)} days to go`,
+    },
+    {
+      name: "Survived 10 Urges",
+      icon: "🔥",
+      earned: urgesSurvived >= 10,
+      hint: `Complete ${Math.max(0, 10 - urgesSurvived)} more urges`,
+    },
+    {
+      name: "90 Day Warrior",
+      icon: "👑",
+      earned: day >= 90,
+      hint: `${Math.max(0, 90 - day)} days to go`,
+    },
   ];
+  const unlockedCount = milestones.filter((m) => m.earned).length;
 
   return (
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Progress</p>
+        <SectionTitle>Progress</SectionTitle>
+        <p style={{ fontSize: 13, color: "#ffffff", opacity: 0.45, marginTop: 4, fontFamily: "DM Sans, sans-serif", fontWeight: 400 }}>
+          Track your recovery, day by day.
+        </p>
       </header>
 
       {/* ── Recovery ring hero ──────────────────────────────── */}
@@ -155,9 +192,7 @@ function ProgressScreen() {
       {/* ── Streak calendar ─────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-center justify-between mb-4">
-          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
-            Consistency
-          </p>
+          <SectionTitle>Consistency</SectionTitle>
           {!state.isPremium && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -180,10 +215,10 @@ function ProgressScreen() {
                 className="h-3 w-3 rounded-[3px]"
                 style={{
                   backgroundColor:
-                    v === 0 ? "oklch(0.22 0.025 265)"
-                    : v === 1 ? "oklch(0.35 0.15 255)"
-                    : v === 2 ? "oklch(0.50 0.20 255)"
-                    : "oklch(0.62 0.22 255)",
+                    v === 0 ? "rgba(201,168,76,0.12)"
+                    : v === 1 ? "rgba(201,168,76,0.35)"
+                    : v === 2 ? "rgba(201,168,76,0.60)"
+                    : "#C9A84C",
                 }}
               />
             ))}
@@ -205,7 +240,7 @@ function ProgressScreen() {
         </div>
         <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
           Less
-          {["oklch(0.22 0.025 265)", "oklch(0.35 0.15 255)", "oklch(0.50 0.20 255)", "oklch(0.62 0.22 255)"].map((bg) => (
+          {["rgba(201,168,76,0.12)", "rgba(201,168,76,0.35)", "rgba(201,168,76,0.60)", "#C9A84C"].map((bg) => (
             <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
           ))}
           More
@@ -214,7 +249,7 @@ function ProgressScreen() {
 
       {/* ── Your story ──────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-1">Your Story</p>
+        <SectionTitle>Your Story</SectionTitle>
         <p className="text-xs text-muted-foreground/60 mb-5">This is not a streak. This is your history.</p>
         <div className="space-y-0">
           {[
@@ -242,24 +277,136 @@ function ProgressScreen() {
 
       {/* ── Milestones ──────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-5">Milestones</p>
-        <div className="grid grid-cols-2 gap-3">
-          {badges.map(({ name, icon: Icon, earned }) => (
-            <div
+        {/* Section header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <SectionTitle>Milestones</SectionTitle>
+          <p style={{ fontSize: 11, color: "#3a3020", margin: 0 }}>
+            {unlockedCount} of {milestones.length} unlocked
+          </p>
+        </div>
+
+        {/* Cards grid */}
+        <motion.div
+          className="grid grid-cols-2 gap-3"
+          variants={msContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          {milestones.map(({ name, icon, earned, hint }, i) => (
+            <motion.div
               key={name}
-              className="rounded-2xl p-4 transition-all"
+              // Unlocked: keyframe pop animation with staggered delay
+              // Locked: stagger variant
+              variants={earned ? undefined : msItem}
+              initial={earned ? { scale: 0.9, opacity: 0 } : "hidden"}
+              animate={earned ? { scale: [0.9, 1.05, 1], opacity: 1 } : "visible"}
+              transition={
+                earned
+                  ? { duration: 0.5, times: [0, 0.6, 1], delay: i * 0.1 }
+                  : { type: "spring", stiffness: 320, damping: 26 }
+              }
+              whileTap={{ scale: 0.97 }}
               style={{
-                background: earned ? "oklch(0.62 0.22 255 / 0.06)" : "transparent",
-                border: earned ? "1px solid oklch(0.62 0.22 255 / 0.22)" : "1px solid oklch(0.22 0.025 265 / 0.6)",
-                opacity: earned ? 1 : 0.4,
+                position: "relative",
+                overflow: "hidden",
+                borderRadius: 16,
+                padding: 16,
+                background: earned ? "rgba(201,168,76,0.08)" : "#0f0c06",
+                border: earned
+                  ? "1.5px solid rgba(201,168,76,0.4)"
+                  : "1px solid #1e1a10",
+                boxShadow: earned ? "0 0 20px rgba(201,168,76,0.08)" : "none",
+                opacity: earned ? 1 : 0.5,
               }}
             >
-              <Icon className="h-6 w-6" style={{ color: earned ? "var(--primary)" : "var(--muted-foreground)" }} />
-              <p className="mt-3 text-sm font-semibold">{name}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{earned ? "Earned" : "Locked"}</p>
-            </div>
+              {/* Gold shimmer — unlocked only */}
+              {earned && (
+                <motion.div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    pointerEvents: "none",
+                    background:
+                      "linear-gradient(105deg, transparent 40%, rgba(201,168,76,0.08) 50%, transparent 60%)",
+                    borderRadius: 16,
+                  }}
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+                />
+              )}
+
+              {/* Icon circle */}
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  background: earned ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
+                  border: earned ? "1px solid rgba(201,168,76,0.3)" : "1px solid #2a2010",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                  filter: earned ? "none" : "grayscale(1)",
+                }}
+              >
+                {icon}
+              </div>
+
+              {/* Name */}
+              <p
+                style={{
+                  marginTop: 10,
+                  marginBottom: 0,
+                  fontSize: 14,
+                  fontWeight: earned ? 700 : 600,
+                  color: earned ? "#fff" : "#555",
+                  lineHeight: 1.3,
+                }}
+              >
+                {name}
+              </p>
+
+              {/* Status */}
+              {earned ? (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    marginTop: 6,
+                    background: "rgba(201,168,76,0.15)",
+                    border: "1px solid rgba(201,168,76,0.3)",
+                    borderRadius: 20,
+                    padding: "2px 10px",
+                    fontSize: 10,
+                    color: GOLD,
+                  }}
+                >
+                  ✓ Achieved
+                </div>
+              ) : (
+                <p style={{ marginTop: 6, marginBottom: 0, fontSize: 11, color: "#3a3020" }}>
+                  {hint}
+                </p>
+              )}
+
+              {/* Lock icon — locked only */}
+              {!earned && (
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: 12,
+                    right: 12,
+                    fontSize: 12,
+                    color: "#2a2010",
+                  }}
+                >
+                  🔒
+                </span>
+              )}
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
     </PageShell>
   );

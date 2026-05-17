@@ -1,6 +1,25 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
 import { loadState } from "@/lib/store";
+import type { ReactNode } from "react";
+
+export function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2
+      style={{
+        fontFamily: "Cormorant Garamond, Georgia, serif",
+        fontSize: 16,
+        fontWeight: 700,
+        fontStyle: "italic",
+        color: "#C9A84C",
+        letterSpacing: 0,
+        margin: 0,
+      }}
+    >
+      {children}
+    </h2>
+  );
+}
 
 // ── Companion icons ───────────────────────────────────────────────────────────
 

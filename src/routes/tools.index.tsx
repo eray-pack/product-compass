@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown } from "lucide-react";
-import { PageShell } from "@/components/BottomNav";
+import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 
@@ -257,7 +257,7 @@ function Tools() {
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground">Tools</p>
+        <SectionTitle>Tools</SectionTitle>
         <h1 className="mt-2 text-3xl font-bold">Use what works.</h1>
       </header>
 

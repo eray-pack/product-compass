@@ -22,6 +22,7 @@ import {
   Plus,
 } from "lucide-react";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
+import { SectionTitle } from "@/components/BottomNav";
 import { triggerPaywall } from "@/lib/paywall";
 import { useTheme } from "@/lib/theme";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
@@ -33,11 +34,7 @@ export const Route = createFileRoute("/settings")({
 // ── Primitive layout pieces ───────────────────────────────────────────────────
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="px-1 mb-2 text-[11px] font-bold tracking-[0.2em] uppercase text-muted-foreground">
-      {children}
-    </p>
-  );
+  return <div className="px-1 mb-3"><SectionTitle>{children}</SectionTitle></div>;
 }
 
 function Card({ children }: { children: React.ReactNode }) {

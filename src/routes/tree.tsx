@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
-import { PageShell } from "@/components/BottomNav";
+import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState } from "react";
@@ -630,7 +630,7 @@ function LifeTreePage({
   return (
     <PageShell>
       <header className="px-6 pt-12">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Sacred Ground</p>
+        <SectionTitle>Sacred Ground</SectionTitle>
         <h1 className="mt-2 text-3xl font-bold">Your Life Tree</h1>
         <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
           This tree is sacred. Every clean day is permanently etched into it.
