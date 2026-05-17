@@ -56,84 +56,26 @@ function nextMilestone(day: number) {
 }
 
 // ─── Today's Focus ────────────────────────────────────────────────────────────
-const FOCUS_PREFIX = "stopamine.focus.";
+const DAILY_FOCUS = [
+  "The urge will pass. Your identity won't. Choose who you're becoming.",
+  "Dopamine reset is not about willpower — it's about rebuilding your reward circuit one day at a time.",
+  "Every hour you hold means your brain is rewiring. The discomfort is the progress.",
+  "You didn't come this far to only come this far. The streak is the proof.",
+  "Cravings peak at 20 minutes. Outlast them — you always have before.",
+  "The version of you who quit is still watching. Don't let them down today.",
+  "Boredom is not an emergency. Sit with it. That's where the rewiring happens.",
+  "Recovery isn't a straight line, but every clean day moves the baseline up.",
+  "What you resist persists. Acknowledge the urge, then let it pass like weather.",
+  "Your future self is being built right now, in this exact moment of resistance.",
+  "Discipline is remembering what you want most over what you want right now.",
+  "The brain that got you here can heal. Give it the silence it needs today.",
+  "One decision away from a relapse, one decision away from your best day. Choose.",
+  "Showing up on the hard days is what separates a streak from a lifestyle.",
+] as const;
 
-function TodaysFocus({ name, addiction, costs, triggers, day }: {
-  name: string; addiction: string; costs: string[]; triggers: string[]; day: number;
-}) {
-  const [text, setText]       = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const displayName = name.trim() || "friend";
-    const key    = FOCUS_PREFIX + new Date().toISOString().slice(0, 10) + "." + displayName.toLowerCase();
-    const cached = localStorage.getItem(key);
-    if (cached) { setText(cached); setLoading(false); return; }
-
-    let cancelled = false;
-    const phase =
-      day <= 7  ? "surviving the first week — cravings are at their peak, every hour counts" :
-      day <= 30 ? "building momentum — the brain is starting to rewire, patterns are forming" :
-      day <= 60 ? "identity change — becoming someone new, not just quitting" :
-      day <= 90 ? "finishing strong — the 90-day reset is in sight, this is where most people slip" :
-                  "maintaining — past 90 days, locking in the new identity for life";
-
-    const prompt =
-      `Write a Today's Focus message for ${displayName}. ` +
-      `They are on day ${day} of quitting ${addiction}. ` +
-      `It has cost them: ${costs.join(", ") || "their wellbeing"}. ` +
-      `Main triggers: ${triggers.join(", ") || "various situations"}. ` +
-      `Phase: ${phase}. ` +
-      `Write exactly 1 sentence. Max 20 words. Start with "Hey ${displayName},". No comma splices.`;
-
-    fetch("/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
-    })
-      .then((r) => r.ok ? r.json() : Promise.reject(r.status))
-      .then((d: { text?: string }) => {
-        if (cancelled || !d.text) return;
-        Object.keys(localStorage)
-          .filter((k) => k.startsWith(FOCUS_PREFIX) && k !== key)
-          .forEach((k) => localStorage.removeItem(k));
-        localStorage.setItem(key, d.text);
-        setText(d.text);
-      })
-      .catch(console.error)
-      .finally(() => { if (!cancelled) setLoading(false); });
-
-    return () => { cancelled = true; };
-  }, []);
-
-  return (
-    <div className="flex gap-5">
-      {/* Left accent bar */}
-      <div
-        className="w-px shrink-0"
-        style={{
-          background: "linear-gradient(to bottom, #C4873A, rgba(196,135,58,0))",
-          minHeight: 48,
-        }}
-      />
-      <div className="flex-1 min-w-0">
-        {loading ? (
-          <div className="space-y-3 pt-1">
-            <div className="h-3.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.05)", width: "88%" }} />
-            <div className="h-3.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.05)", width: "68%" }} />
-          </div>
-        ) : text ? (
-          <p className="text-[17px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
-            {text}
-          </p>
-        ) : (
-          <p className="text-[13px] italic" style={{ color: "rgba(255,255,255,0.25)" }}>
-            Focus unavailable.
-          </p>
-        )}
-      </div>
-    </div>
-  );
+function todaysFocusText(): string {
+  const dayOfYear = Math.floor(Date.now() / 86_400_000); // days since epoch
+  return DAILY_FOCUS[dayOfYear % DAILY_FOCUS.length];
 }
 
 // ─── Daily check-in ───────────────────────────────────────────────────────────
@@ -713,25 +655,6 @@ function Dashboard() {
 
       <Hairline />
 
-      {/* ── TODAY'S FOCUS ─────────────────────────────────────── */}
-      {state.onboarding && active && (
-        <motion.section
-          className="px-6 mt-7 mb-6"
-          initial="hidden" whileInView="show" viewport={vp} variants={up}
-        >
-          <SectionTitle>Today's Focus</SectionTitle>
-          <TodaysFocus
-            name={state.onboarding.name}
-            addiction={active.name}
-            costs={state.onboarding.costs}
-            triggers={state.onboarding.triggers}
-            day={day}
-          />
-        </motion.section>
-      )}
-
-      <Hairline />
-
       {/* ── DAILY CHECK-IN ────────────────────────────────────── */}
       <motion.section
         className="px-6 mt-7 mb-6"
@@ -842,6 +765,29 @@ function Dashboard() {
           </Link>
         </motion.div>
       </motion.section>
+
+      {/* ── TODAY'S FOCUS ─────────────────────────────────────── */}
+      <motion.section
+        className="px-6 mt-7 mb-6"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <SectionTitle>Today's Focus</SectionTitle>
+        <div style={{ marginTop: 12 }} />
+        <div className="flex gap-5">
+          <div
+            className="w-px shrink-0"
+            style={{
+              background: "linear-gradient(to bottom, #C9A84C, rgba(201,168,76,0))",
+              minHeight: 48,
+            }}
+          />
+          <p style={{ fontSize: 17, fontWeight: 500, lineHeight: 1.6, color: "#f0ece4", margin: 0 }}>
+            {todaysFocusText()}
+          </p>
+        </div>
+      </motion.section>
+
+      <Hairline />
 
       {/* ── LOG RELAPSE ───────────────────────────────────────── */}
       <motion.section
