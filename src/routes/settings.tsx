@@ -22,9 +22,10 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
+import { motion, useAnimation } from "framer-motion";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { SectionTitle } from "@/components/BottomNav";
-import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
+import { BADGES, currentBadge, badgeSplit, type Badge } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
@@ -865,100 +866,330 @@ function StartDateSection({
   );
 }
 
+// ── Coin Card ─────────────────────────────────────────────────────────────────
+
+function CoinCard({
+  badge,
+  earned,
+  index,
+}: {
+  badge: Badge;
+  earned: boolean;
+  index: number;
+}) {
+  const controls = useAnimation();
+  const dimGlow = badge.glow.replace(/,[\d.]+\)$/, ",0.10)");
+
+  const handleFlip = async () => {
+    if (!earned) return;
+    await controls.start({
+      rotateY: [0, 180, 360],
+      transition: { duration: 0.58, ease: [0.4, 0, 0.2, 1] },
+    });
+    controls.set({ rotateY: 0 });
+  };
+
+  return (
+    <motion.div
+      className="flex flex-col items-center select-none"
+      style={{ gap: 10, cursor: earned ? "pointer" : "default" }}
+      initial={{ opacity: 0, scale: 0.60, y: 32 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{
+        delay: index * 0.068,
+        duration: 0.54,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      whileHover={earned ? { scale: 1.07, y: -8 } : {}}
+      whileTap={earned ? { scale: 0.93 } : {}}
+      onClick={handleFlip}
+    >
+      {/* Perspective wrapper gives rotateY real depth */}
+      <div style={{ perspective: 700, width: 82, height: 82 }}>
+        {/* Spinning element — rotateY is applied here */}
+        <motion.div
+          animate={controls}
+          style={{ width: 82, height: 82, transformStyle: "preserve-3d" }}
+        >
+          {/* Coin face — overflow:hidden lives here (separate from preserve-3d) */}
+          <div
+            style={{
+              width: 82,
+              height: 82,
+              borderRadius: "50%",
+              overflow: "hidden",
+              position: "relative",
+              background: earned
+                ? `radial-gradient(circle at 36% 30%, ${badge.color}f2 0%, ${badge.color}88 38%, ${badge.color}24 66%, #060402 100%)`
+                : "radial-gradient(circle at 36% 30%, #1d1710 0%, #0c0906 100%)",
+              border: earned
+                ? `2px solid ${badge.color}75`
+                : "2px solid rgba(255,255,255,0.07)",
+              boxShadow: earned
+                ? [
+                    `0 0 0 1px ${badge.color}14`,
+                    `0 0 18px 5px ${badge.glow}`,
+                    `0 0 52px 12px ${dimGlow}`,
+                    `0 5px 28px rgba(0,0,0,0.60)`,
+                  ].join(", ")
+                : "0 3px 10px rgba(0,0,0,0.38)",
+            }}
+          >
+            {/* Inner engraved ring — earned only */}
+            {earned && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 7,
+                  borderRadius: "50%",
+                  border: "1px solid rgba(255,255,255,0.20)",
+                  pointerEvents: "none",
+                  zIndex: 1,
+                }}
+              />
+            )}
+
+            {/* Shimmer sweep — earned only, staggered per coin */}
+            {earned && (
+              <div
+                className="coin-shimmer-bar"
+                style={{ animationDelay: `${(index * 0.41) % 4}s` }}
+              />
+            )}
+
+            {/* Symbol — centered */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 30,
+                  lineHeight: 1,
+                  color: earned ? "#ffffff" : "rgba(255,255,255,0.07)",
+                  filter: earned
+                    ? `drop-shadow(0 0 9px ${badge.color}) drop-shadow(0 2px 4px rgba(0,0,0,0.7))`
+                    : "blur(3.5px)",
+                  userSelect: "none",
+                }}
+              >
+                {badge.symbol}
+              </span>
+            </div>
+
+            {/* Earned check pip — bottom-right corner */}
+            {earned && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 5,
+                  right: 5,
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  background: badge.color,
+                  border: "1.5px solid #080604",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 8,
+                  fontWeight: 900,
+                  color: "#080604",
+                  zIndex: 3,
+                  boxShadow: `0 0 8px ${badge.glow}`,
+                }}
+              >
+                ✓
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Badge name */}
+      <p
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: "0.04em",
+          textAlign: "center",
+          lineHeight: 1.2,
+          color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.17)",
+        }}
+      >
+        {badge.name}
+      </p>
+
+      {/* Day threshold pill */}
+      <div
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: "0.10em",
+          textTransform: "uppercase" as const,
+          color: earned ? badge.color : "rgba(255,255,255,0.12)",
+          background: earned ? `${badge.color}1a` : "transparent",
+          border: `1px solid ${earned ? badge.color + "30" : "transparent"}`,
+          borderRadius: 20,
+          padding: "1px 8px",
+          lineHeight: 1.7,
+        }}
+      >
+        D{badge.day}
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Badge Section ─────────────────────────────────────────────────────────────
 
 function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
-  const active = activeAddiction(state);
-  const day    = active ? dayCount(active.startDate) : 0;
-  const badge  = currentBadge(day);
+  const active  = activeAddiction(state);
+  const day     = active ? dayCount(active.startDate) : 0;
+  const badge   = currentBadge(day);
   const { earned, upcoming } = badgeSplit(day);
 
   return (
     <section>
-      <div className="flex items-baseline justify-between mb-2">
+      {/* ── Shimmer keyframes ───────────────────────────────────────────── */}
+      <style>{`
+        @keyframes coin-shimmer {
+          0%   { transform: translateX(-220%) rotate(22deg); opacity: 0; }
+          4%   { opacity: 1; }
+          30%  { transform: translateX(290%) rotate(22deg); opacity: 1; }
+          31%  { opacity: 0; }
+          100% { transform: translateX(290%) rotate(22deg); opacity: 0; }
+        }
+        .coin-shimmer-bar {
+          position: absolute;
+          top: -80%;
+          left: -5%;
+          width: 32%;
+          height: 260%;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255,255,255,0.28) 40%,
+            rgba(255,255,255,0.18) 60%,
+            transparent 100%
+          );
+          animation: coin-shimmer 4s ease-in-out infinite;
+          pointer-events: none;
+          z-index: 4;
+        }
+      `}</style>
+
+      {/* ── Section header ──────────────────────────────────────────────── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
+          padding: "0 4px",
+        }}
+      >
         <SectionLabel>Badges</SectionLabel>
-        {badge && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span
-            className="text-[10px] font-bold mb-2 px-2 py-0.5 rounded-full"
             style={{
-              color: badge.color,
-              background: `${badge.glow}`,
-              border: `1px solid ${badge.color}40`,
+              fontSize: 10,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.28)",
+              letterSpacing: "0.04em",
             }}
           >
-            {badge.symbol} {badge.name}
+            {earned.length}/{BADGES.length}
           </span>
-        )}
+          {badge && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: badge.color,
+                background: badge.glow,
+                border: `1px solid ${badge.color}40`,
+                borderRadius: 999,
+                padding: "2px 10px",
+                letterSpacing: "0.03em",
+              }}
+            >
+              {badge.symbol} {badge.name}
+            </span>
+          )}
+        </div>
       </div>
 
+      {/* ── Coin grid card ──────────────────────────────────────────────── */}
       <div
-        className="rounded-2xl border border-border/70 overflow-hidden p-4"
-        style={{ background: "var(--card)" }}
+        style={{
+          background: "linear-gradient(158deg, #100d08 0%, #080604 100%)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 28,
+          padding: "28px 14px 22px",
+        }}
       >
-        <div className="grid grid-cols-3 gap-3">
-          {BADGES.map((b) => {
-            const isEarned = day >= b.day;
-            return (
-              <div
-                key={b.name}
-                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl"
-                style={{
-                  background: isEarned ? `${b.glow}` : "rgba(255,255,255,0.025)",
-                  border: `1px solid ${isEarned ? b.color + "40" : "rgba(255,255,255,0.06)"}`,
-                }}
-              >
-                {/* Icon */}
-                <div
-                  className="text-[22px] font-bold leading-none"
-                  style={{
-                    color: isEarned ? b.color : "rgba(255,255,255,0.1)",
-                    filter: isEarned ? "none" : "blur(3px)",
-                    textShadow: isEarned ? `0 0 12px ${b.glow}` : "none",
-                  }}
-                >
-                  {b.symbol}
-                </div>
-                {/* Name */}
-                <p
-                  className="text-[11px] font-bold text-center leading-tight"
-                  style={{ color: isEarned ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.2)" }}
-                >
-                  {b.name}
-                </p>
-                {/* Day threshold */}
-                <p
-                  className="text-[9px] font-semibold tracking-wider"
-                  style={{ color: isEarned ? `${b.color}90` : "rgba(255,255,255,0.12)" }}
-                >
-                  Day {b.day}
-                </p>
-                {/* Earned checkmark */}
-                {isEarned && (
-                  <div
-                    className="h-3.5 w-3.5 rounded-full grid place-items-center"
-                    style={{ background: b.color + "30", border: `1px solid ${b.color}60` }}
-                  >
-                    <div className="text-[8px] font-bold" style={{ color: b.color }}>✓</div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div
+          className="grid grid-cols-3"
+          style={{ gap: "30px 6px" }}
+        >
+          {BADGES.map((b, i) => (
+            <CoinCard
+              key={b.name}
+              badge={b}
+              earned={day >= b.day}
+              index={i}
+            />
+          ))}
         </div>
 
-        {/* Legend */}
-        <div className="flex items-center gap-2 mt-4 justify-center">
-          <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#C4873A" }} />
-          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-            {earned.length}/{BADGES.length} unlocked
-          </p>
-          {upcoming.length > 0 && (
+        {/* ── Next badge footer ────────────────────────────────────────── */}
+        <div
+          style={{
+            marginTop: 26,
+            paddingTop: 16,
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}
+        >
+          {upcoming.length > 0 ? (
             <>
-              <div className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
-              <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Next: {upcoming[0].name} in {upcoming[0].day - day}d
-              </p>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.20)" }}>
+                Next
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: upcoming[0].color,
+                }}
+              >
+                {upcoming[0].symbol} {upcoming[0].name}
+              </span>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.20)" }}>
+                in {upcoming[0].day - day} day{upcoming[0].day - day !== 1 ? "s" : ""}
+              </span>
             </>
+          ) : (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: "#D4AF37",
+                letterSpacing: "0.06em",
+              }}
+            >
+              ♛ All badges unlocked. Legend.
+            </span>
           )}
         </div>
       </div>
