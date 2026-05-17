@@ -173,19 +173,7 @@ function FeatureIcon({ icon, label, index }: { icon: string; label: string; inde
         display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
       }}
     >
-      {/* Gold checkmark — anchored to cell, fully inside */}
-      <div style={{
-        position: "absolute", top: 0, right: 0,
-        width: 14, height: 14, borderRadius: "50%",
-        background: GOLD,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: "0 0 6px rgba(201,168,76,0.45)",
-      }}>
-        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-          <path d="M1.5 4L3 5.5L6.5 2.5" stroke="#090705" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-
+      {/* Icon — unchanged */}
       <div style={{
         width: 40, height: 40, borderRadius: "50%",
         background: "rgba(201,168,76,0.1)",
@@ -195,7 +183,7 @@ function FeatureIcon({ icon, label, index }: { icon: string; label: string; inde
         {icon}
       </div>
       <span style={{ fontSize: 10, color: MUTED, textAlign: "center", lineHeight: 1.2 }}>
-        {label}
+        <span style={{ color: GOLD, fontWeight: 700, marginRight: 2 }}>✓</span>{label}
       </span>
     </motion.div>
   );
