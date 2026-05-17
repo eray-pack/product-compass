@@ -164,7 +164,7 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
 }
 
 export function useAppState() {
-  const [state, setState] = useState<AppState>(defaultState);
+  const [state, setState] = useState<AppState>(loadState);
   useEffect(() => {
     setState(loadState());
     loadFromSupabase(setState);
