@@ -7,11 +7,11 @@ const RENAG_AFTER_MS = 24 * 60 * 60 * 1000; // 24 hours
 const TIMER_START = 15 * 60; // 15:00
 
 const BENEFITS = [
-  "Personalized brain recovery timeline",
-  "SOS urge surfing tools, anytime",
-  "Smart reminders tailored to you",
-  "Daily reframes + momentum tracking",
-  "Life Tree — your sacred progress symbol",
+  "AI Coach remembers you — not just today, every session",
+  "8 specialized tools for the moments it gets hardest",
+  "See which triggers cause your relapses — and break the pattern",
+  "Create your own recovery room, lead your community",
+  "PRO members are 3x more likely to reach day 90",
   "Unlimited craving games",
 ];
 

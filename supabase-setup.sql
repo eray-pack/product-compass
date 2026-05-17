@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.user_state (
   total_returns integer     DEFAULT 0,
   last_login_at bigint      DEFAULT 0,
   onboarding    jsonb,
+  is_premium    boolean     DEFAULT false,
   updated_at    timestamptz DEFAULT now()
 );
 
@@ -72,6 +73,15 @@ CREATE TABLE IF NOT EXISTS public.room_memberships (
   PRIMARY KEY (room_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS public.device_tokens (
+  id         uuid        DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+  user_id    uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  token      text        NOT NULL,
+  platform   text        NOT NULL DEFAULT 'ios',
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE (user_id, token)
+);
+
 -- ── RLS ───────────────────────────────────────────────────────────────────────
 
 ALTER TABLE public.profiles           ENABLE ROW LEVEL SECURITY;
@@ -79,6 +89,7 @@ ALTER TABLE public.user_state         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.addictions         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.relapses           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.community_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.device_tokens      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rooms              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.room_memberships   ENABLE ROW LEVEL SECURITY;
 

@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount, activeAddiction } from "@/lib/store";
+import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";
+import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Send, Lock, Plus, Users, Globe, Book, Dumbbell,
@@ -62,19 +64,19 @@ function makeMockMessages(): Record<string, Message[]> {
   const now = Date.now();
   return {
     global: [
-      { id: "1", userId: "u1", name: "Marcus",  initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Elite",       text: "day 61 checking in. feeling sharp today.", ts: now - 1000 * 60 * 4 },
-      { id: "2", userId: "u2", name: "Arjun",   initial: "A", avatarColor: "oklch(0.50 0.15 290)", rank: "Legendary",   text: "112 days. the urges barely register anymore. it gets easier.", ts: now - 1000 * 60 * 3 },
-      { id: "3", userId: "u3", name: "Timo",    initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Disciplined", text: "used the sos button last night. worked. still going.", ts: now - 1000 * 60 * 2 },
-      { id: "4", userId: "u4", name: "Noah",    initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awakened",    text: "first week done. harder than i thought but i'm here", ts: now - 1000 * 60 * 1 },
-      { id: "5", userId: "u5", name: "Jaylen",  initial: "J", avatarColor: "oklch(0.52 0.16 145)", rank: "Respected",   text: "relapsed on day 28 but came back day 29. momentum never stopped.", ts: now - 1000 * 30 },
+      { id: "1", userId: "u1", name: "Marcus",  initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Titan",    text: "day 61 checking in. feeling sharp today.", ts: now - 1000 * 60 * 4 },
+      { id: "2", userId: "u2", name: "Arjun",   initial: "A", avatarColor: "oklch(0.50 0.15 290)", rank: "Legend",   text: "112 days. the urges barely register anymore. it gets easier.", ts: now - 1000 * 60 * 3 },
+      { id: "3", userId: "u3", name: "Timo",    initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Ironmind", text: "used the sos button last night. worked. still going.", ts: now - 1000 * 60 * 2 },
+      { id: "4", userId: "u4", name: "Noah",    initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awaken",   text: "first week done. harder than i thought but i'm here", ts: now - 1000 * 60 * 1 },
+      { id: "5", userId: "u5", name: "Jaylen",  initial: "J", avatarColor: "oklch(0.52 0.16 145)", rank: "Warrior",  text: "relapsed on day 28 but came back day 29. momentum never stopped.", ts: now - 1000 * 30 },
     ],
     bible: [
-      { id: "b1", userId: "u6", name: "Samuel",  initial: "S", avatarColor: "oklch(0.55 0.17 60)", rank: "Elite",     text: "praying for everyone here tonight. you're not alone in this.", ts: now - 1000 * 60 * 5 },
-      { id: "b2", userId: "u7", name: "Dimitri", initial: "D", avatarColor: "oklch(0.56 0.16 60)", rank: "Legendary", text: "1 Cor 10:13 — he will not let you be tempted beyond what you can bear.", ts: now - 1000 * 60 * 2 },
+      { id: "b1", userId: "u6", name: "Samuel",  initial: "S", avatarColor: "oklch(0.55 0.17 60)", rank: "Titan",  text: "praying for everyone here tonight. you're not alone in this.", ts: now - 1000 * 60 * 5 },
+      { id: "b2", userId: "u7", name: "Dimitri", initial: "D", avatarColor: "oklch(0.56 0.16 60)", rank: "Legend", text: "1 Cor 10:13 — he will not let you be tempted beyond what you can bear.", ts: now - 1000 * 60 * 2 },
     ],
     fitness: [
-      { id: "f1", userId: "u8", name: "Kenji",  initial: "K", avatarColor: "oklch(0.54 0.14 180)", rank: "Elite", text: "replaced the urge with a cold shower + 20 pushups. works every time.", ts: now - 1000 * 60 * 8 },
-      { id: "f2", userId: "u9", name: "Marcus", initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Elite", text: "ran 5k this morning. day 61. body feels different.", ts: now - 1000 * 60 * 3 },
+      { id: "f1", userId: "u8", name: "Kenji",  initial: "K", avatarColor: "oklch(0.54 0.14 180)", rank: "Titan", text: "replaced the urge with a cold shower + 20 pushups. works every time.", ts: now - 1000 * 60 * 8 },
+      { id: "f2", userId: "u9", name: "Marcus", initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Titan", text: "ran 5k this morning. day 61. body feels different.", ts: now - 1000 * 60 * 3 },
     ],
     relationships: [],
     mental: [
@@ -84,13 +86,19 @@ function makeMockMessages(): Record<string, Message[]> {
   };
 }
 
-const RANK_COLORS: Record<string, string> = {
-  Legendary:   "text-amber-400 bg-amber-400/10 border-amber-400/30",
-  Elite:       "text-primary bg-primary/10 border-primary/30",
-  Respected:   "text-success bg-success/10 border-success/30",
-  Disciplined: "text-blue-400 bg-blue-400/10 border-blue-400/30",
-  Awakened:    "text-muted-foreground bg-secondary border-border",
-  Beginner:    "text-muted-foreground bg-secondary border-border",
+// Badge name → color (matches BADGES in badges.ts)
+const BADGE_COLORS: Record<string, { color: string; glow: string }> = {
+  Spark:    { color: "#E07A45", glow: "rgba(224,122,69,0.15)"  },
+  Riser:   { color: "#D06030", glow: "rgba(208,96,48,0.15)"   },
+  Awaken:  { color: "#9060C8", glow: "rgba(144,96,200,0.15)"  },
+  Clarity: { color: "#4A8FCC", glow: "rgba(74,143,204,0.15)"  },
+  Warrior: { color: "#7050C0", glow: "rgba(112,80,192,0.15)"  },
+  Ironmind:{ color: "#3870B0", glow: "rgba(56,112,176,0.15)"  },
+  Forge:   { color: "#B84830", glow: "rgba(184,72,48,0.15)"   },
+  Titan:   { color: "#507090", glow: "rgba(80,112,144,0.15)"  },
+  Gorilla: { color: "#2E7A50", glow: "rgba(46,122,80,0.15)"   },
+  Apex:    { color: "#C4873A", glow: "rgba(196,135,58,0.15)"  },
+  Legend:  { color: "#D4AF37", glow: "rgba(212,175,55,0.15)"  },
 };
 
 const COOLDOWN_SECS = 10;
@@ -424,7 +432,7 @@ function CommunityPage() {
       {/* ── Create community ─────────────────────────────────── */}
       <section className="px-6 mt-8 pb-6 fade-up-3">
         <button
-          onClick={() => setShowCreate(true)}
+          onClick={() => state.isPremium ? setShowCreate(true) : triggerPaywall()}
           className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
         >
           <div
@@ -459,12 +467,8 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
 
   const userName = state.onboarding?.name ?? "You";
   const userInitial = userName[0]?.toUpperCase() ?? "Y";
-  const userRank = stage.name === "Ancient tree" ? "Legendary"
-    : stage.name === "Strong tree" ? "Elite"
-    : stage.name === "Young tree" ? "Respected"
-    : stage.name === "Sapling" ? "Disciplined"
-    : stage.name === "Sprout" ? "Awakened"
-    : "Beginner";
+  const userBadge = currentBadge(day);
+  const userRank  = userBadge?.name ?? "Spark";
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
@@ -546,10 +550,24 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
                 {!isMe && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-medium">{msg.name}</span>
-                    <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${RANK_COLORS[msg.rank]}`}>
-                      {msg.rank}
-                    </span>
-                    {msg.rank === "Legendary" && <Crown className="h-3 w-3 text-amber-400" />}
+                    {(() => {
+                      const bc = BADGE_COLORS[msg.rank];
+                      if (!bc) return null;
+                      const badge = BADGES.find(b => b.name === msg.rank);
+                      return (
+                        <span
+                          className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                          style={{
+                            color: bc.color,
+                            background: bc.glow,
+                            border: `1px solid ${bc.color}40`,
+                            textShadow: `0 0 8px ${bc.color}80`,
+                          }}
+                        >
+                          {badge?.symbol} {msg.rank}
+                        </span>
+                      );
+                    })()}
                   </div>
                 )}
                 <div

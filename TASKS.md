@@ -20,14 +20,13 @@
 
 ## Weekly Tasks
 
-### Week of May 16 — Foundation & AI Coach
+### Week of May 16 — Foundation & AI Coach ✅
 
 **Eray**
-- [ ] Set `ANTHROPIC_API_KEY` secret in Wrangler so `/api/chat` works in prod (`wrangler secret put ANTHROPIC_API_KEY`)
-- [ ] Test AI Coach end-to-end: dev server → coach screen → real Claude response *(Fortune handles this locally with his Claude Console API key)*
+- [x] Set `ANTHROPIC_API_KEY` secret in Wrangler so `/api/chat` works in prod
 - [x] Fix auth signup bug — turned off email confirmation in Supabase (re-enable before launch)
-- [ ] Push community.tsx rebase to GitHub (already resolved locally)
-- [ ] Paywall walkthrough — run dev server, screenshot each step, fix weak copy/layout
+- [x] Push community.tsx rebase to GitHub
+- [x] Paywall copy rewritten — sharper, more conversion-focused
 
 **Fortune**
 - [ ] Design the AI Coach screen header / empty state (currently bare)
@@ -40,7 +39,7 @@
 ### Week of May 23 — Auth & Data Persistence ✅
 
 **Eray**
-- [x] Wire signup/login fully to Supabase — fixed by disabling email confirmation (re-enable before launch)
+- [x] Wire signup/login fully to Supabase
 - [x] Move streak + XP from localStorage → Supabase (`user_state` table)
 - [x] Fetch user's created rooms from Supabase on community page load
 - [x] Regenerate `supabase-setup.sql` from live DB schema
@@ -53,12 +52,14 @@
 
 ---
 
-### Week of May 30 — Paywall & Monetisation
+### Week of May 30 — Paywall & Monetisation ✅
 
 **Eray**
-- [ ] Integrate RevenueCat for subscription handling (mobile-first, works with App Store)
-- [ ] Wire paywall gate — lock features behind real subscription check (replace `isPremium` localStorage flag)
-- [ ] Set up Supabase Edge Function for RevenueCat webhook (payment events → update user role in DB)
+- [x] Integrate RevenueCat for subscription handling (mobile-first, works with App Store)
+- [x] Wire paywall gate — lock features behind real subscription check (replace `isPremium` localStorage flag)
+- [x] Set up Supabase Edge Function for RevenueCat webhook (payment events → update user role in DB)
+- [x] AI Coach free limit — 3 messages/day for free users, paywall trigger after
+- [x] Feature gating — room creation, relapse insights, PRO tools all properly gated
 - [ ] Re-enable email confirmation in Supabase before any real users sign up
 
 **Fortune**
@@ -66,3 +67,26 @@
 - [ ] App Store screenshots / marketing visuals (start early, takes time)
 
 **Deadline: Friday June 6**
+
+---
+
+### Week of June 6 — iOS & Launch Prep
+
+**Eray**
+- [ ] Enroll Apple Developer Program ($99/year) → developer.apple.com
+- [ ] Update macOS → install Xcode
+- [ ] Create APNs key in Apple portal → add secrets to Supabase Edge Functions
+- [ ] Add Push Notifications capability in Xcode → `npx cap sync`
+- [ ] Swap RevenueCat test key → production key
+- [ ] Re-enable email confirmation in Supabase
+- [ ] App Store listing — bundle ID `com.stopamine.app`, age rating 17+, privacy policy URL
+
+**Fortune**
+- [ ] PaywallModal design polish (contextual pop-up, currently unstyled)
+- [ ] ReEntryScreen design (shows after 30+ days inactive — logic built, never designed)
+- [ ] AI Coach screen header / empty state
+- [ ] Community room cards for user-created rooms
+- [ ] Post-purchase screen
+- [ ] App Store screenshots + marketing visuals
+
+**Deadline: Friday June 13**

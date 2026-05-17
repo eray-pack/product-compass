@@ -7,7 +7,7 @@ import { loadState } from "@/lib/store";
 export const Route = createFileRoute("/tools/echochamber")({
   beforeLoad: () => {
     if (typeof window === "undefined") return;
-    if (!loadState().isPremium) throw redirect({ to: "/" });
+    if (!loadState().isPremium) throw redirect({ to: "/paywall" });
   },
   component: EchoChamber,
 });

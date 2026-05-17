@@ -4,6 +4,9 @@ import { Coins, X, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
+import { BADGES, currentBadge, nextBadge, badgeSplit } from "@/lib/badges";
+import { initPurchases, checkPremium } from "@/lib/purchases";
+import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
@@ -280,6 +283,191 @@ function Hairline() {
 
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── Badge Carousel ───────────────────────────────────────────────────────────
+function BadgeCarousel({ day }: { day: number }) {
+  // Start on the current earned badge (or 0 if nothing earned yet)
+  const earnedCount = BADGES.filter((b) => day >= b.day).length;
+  const startIdx    = Math.max(0, earnedCount - 1);
+
+  const [idx, setIdx]           = useState(startIdx);
+  const touchStartX             = useRef(0);
+  const touchStartY             = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const [dragDelta, setDragDelta] = useState(0);
+
+  const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    setDragging(true);
+    setDragDelta(0);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
+    setDragDelta(dx);
+  };
+  const onTouchEnd = () => {
+    setDragging(false);
+    if (dragDelta < -44) go(idx + 1);
+    else if (dragDelta > 44) go(idx - 1);
+    setDragDelta(0);
+  };
+
+  const badge   = BADGES[idx];
+  const earned  = day >= badge.day;
+  const daysAway = badge.day - day;
+
+  return (
+    <div
+      className="select-none"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Card viewport */}
+      <div className="overflow-hidden">
+        <motion.div
+          style={{ display: "flex" }}
+          animate={{ x: `calc(-${idx * 100}% + ${dragging ? dragDelta : 0}px)` }}
+          transition={dragging
+            ? { duration: 0 }
+            : { type: "spring", damping: 30, stiffness: 300, mass: 0.85 }
+          }
+        >
+          {BADGES.map((b, i) => {
+            const isEarned   = day >= b.day;
+            const isCurrent  = i === idx;
+            const dAway      = b.day - day;
+
+            return (
+              <div
+                key={b.name}
+                style={{ minWidth: "100%", width: "100%" }}
+                className="relative px-6 pt-8 pb-3 text-center"
+              >
+                {/* Ambient glow — only for earned */}
+                {isEarned && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute"
+                    style={{
+                      top: "0%", left: "50%", transform: "translateX(-50%)",
+                      width: 300, height: 300,
+                      borderRadius: "50%",
+                      background: `radial-gradient(circle, ${b.glow.replace("0.40","0.13")} 0%, transparent 68%)`,
+                      filter: "blur(40px)",
+                    }}
+                  />
+                )}
+
+                {/* Eyebrow */}
+                <p
+                  className="text-[9px] font-bold tracking-[0.5em] uppercase mb-2"
+                  style={{ color: isEarned ? `${b.color}80` : "rgba(255,255,255,0.18)" }}
+                >
+                  {isEarned
+                    ? i === earnedCount - 1 ? "Your rank" : "Earned"
+                    : i === earnedCount ? "Next badge" : "Coming up"}
+                </p>
+
+                {/* Badge symbol — the hero */}
+                <div
+                  className="font-bold leading-none tabular-nums select-none mx-auto"
+                  style={{
+                    fontSize: "clamp(5.5rem, 24vw, 8.5rem)",
+                    color: isEarned ? b.color : "rgba(255,255,255,0.08)",
+                    filter: isEarned ? "none" : "blur(6px)",
+                    textShadow: isEarned
+                      ? `0 0 60px ${b.glow}, 0 0 120px ${b.glow.replace("0.40","0.25")}`
+                      : "none",
+                    transition: "color 0.4s, filter 0.4s",
+                  }}
+                >
+                  {b.symbol}
+                </div>
+
+                {/* Badge name */}
+                <p
+                  className="mt-3 text-[22px] font-bold leading-tight tracking-tight"
+                  style={{ color: isEarned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.2)" }}
+                >
+                  {b.name}
+                </p>
+
+                {/* Day info */}
+                <div className="mt-2 flex items-center justify-center gap-3">
+                  <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
+                  <span
+                    className="text-[11px] font-bold tracking-[0.25em] uppercase tabular-nums"
+                    style={{ color: isEarned ? `${b.color}90` : "rgba(255,255,255,0.22)" }}
+                  >
+                    {isEarned && i === earnedCount - 1
+                      ? `Day ${day}`        // current badge → show actual days
+                      : isEarned
+                        ? `Day ${b.day} ✓`  // past badge → show unlock day
+                        : `Day ${b.day}`    // future badge → show requirement
+                    }
+                  </span>
+                  <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
+                </div>
+
+                {/* Days away pill — upcoming only */}
+                {!isEarned && (
+                  <div className="mt-3 flex justify-center">
+                    <span
+                      className="text-[10px] font-bold px-3 py-1 rounded-full"
+                      style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "rgba(255,255,255,0.25)",
+                      }}
+                    >
+                      {dAway} day{dAway !== 1 ? "s" : ""} away
+                    </span>
+                  </div>
+                )}
+
+                {/* Spacer so card height is consistent */}
+                {isEarned && <div className="mt-3 h-7" />}
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      {/* Dots — tap to jump */}
+      <div className="flex justify-center gap-1.5 pb-3 pt-1">
+        {BADGES.map((_, i) => {
+          const isEarned = day >= BADGES[i].day;
+          return (
+            <button
+              key={i}
+              onClick={() => go(i)}
+              style={{
+                width: i === idx ? 16 : 4,
+                height: 4,
+                borderRadius: 2,
+                background: i === idx
+                  ? BADGES[i].color
+                  : isEarned
+                    ? `${BADGES[i].color}50`
+                    : "rgba(255,255,255,0.12)",
+                transition: "all 0.25s ease",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const [state, update] = useAppState();
   const navigate        = useNavigate();
@@ -294,13 +482,18 @@ function Dashboard() {
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
   const next        = nextMilestone(day);
 
+  // Init RevenueCat and sync premium status on mount
   useEffect(() => {
-    const fromStorage = loadState();
-    console.log("[Stopamine] Subscription state:", {
-      "state.isPremium (reactive)": state.isPremium,
-      "loadState().isPremium (localStorage direct)": fromStorage.isPremium,
-    });
-  }, [state.isPremium]);
+    async function syncPremium() {
+      const { data: { session } } = await supabase.auth.getSession();
+      await initPurchases(session?.user?.id);
+      const isPremium = await checkPremium();
+      if (isPremium !== state.isPremium) {
+        update({ isPremium });
+      }
+    }
+    syncPremium();
+  }, []);
 
   useEffect(() => {
     if (!state.onboarding) return;
@@ -372,75 +565,14 @@ function Dashboard() {
         </div>
       </motion.header>
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <motion.section
-        className="relative px-6 pt-8 pb-5 text-center overflow-hidden"
-        initial="hidden"
-        animate="show"
-        variants={seq(0.1, 0.1)}
+      {/* ── HERO — Badge carousel ─────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
       >
-        {/* Ambient light — behind the number */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute ambient-drift"
-          style={{
-            top: "0%", left: "50%",
-            width: 340, height: 340,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(196,135,58,0.09) 0%, transparent 68%)",
-            filter: "blur(50px)",
-          }}
-        />
-
-        {/* Eyebrow */}
-        <motion.p
-          className="text-[9px] font-bold tracking-[0.5em] uppercase"
-          style={{ color: "rgba(196,135,58,0.45)" }}
-          variants={fade}
-        >
-          Day
-        </motion.p>
-
-        {/* The number — singular focus */}
-        <motion.div
-          className="relative inline-block"
-          variants={{
-            hidden: { opacity: 0, y: 30, scale: 0.95 },
-            show:   { opacity: 1, y: 0,  scale: 1,   transition: { duration: 1.1, ease: EASE } },
-          }}
-        >
-          <span
-            className="day-monument font-bold leading-none tabular-nums select-none"
-            style={{ fontSize: "clamp(6rem, 28vw, 9.5rem)" }}
-          >
-            {day}
-          </span>
-        </motion.div>
-
-        {/* Habit context */}
-        <motion.div
-          className="mt-3 flex items-center justify-center gap-3"
-          variants={up}
-        >
-          <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
-          <span
-            className="text-[10px] font-bold tracking-[0.3em] uppercase"
-            style={{ color: "rgba(255,255,255,0.4)" }}
-          >
-            {active?.name ?? "Recovery"}
-          </span>
-          <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
-        </motion.div>
-
-        {/* Streak line */}
-        <motion.p
-          className="mt-3 text-[12px]"
-          style={{ color: "rgba(255,255,255,0.25)" }}
-          variants={fade}
-        >
-          {streakLine}
-        </motion.p>
-      </motion.section>
+        <BadgeCarousel day={day} />
+      </motion.div>
 
       {/* ── STATS ─────────────────────────────────────────────── */}
       <motion.div

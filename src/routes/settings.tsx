@@ -20,9 +20,14 @@ import {
   FileText,
   ShieldCheck,
   Plus,
+  Calendar,
 } from "lucide-react";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
+<<<<<<< HEAD
 import { SectionTitle } from "@/components/BottomNav";
+=======
+import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
+>>>>>>> cbfac333b5dcd84ede91bdc197247a648fa88047
 import { triggerPaywall } from "@/lib/paywall";
 import { useTheme } from "@/lib/theme";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
@@ -596,6 +601,222 @@ function TrackedHabitsSection({
   );
 }
 
+// ── Start Date Section ────────────────────────────────────────────────────────
+
+function StartDateSection({
+  state,
+  update,
+}: {
+  state: ReturnType<typeof useAppState>[0];
+  update: ReturnType<typeof useAppState>[1];
+}) {
+  const active = activeAddiction(state);
+  const [showPicker, setShowPicker] = useState(false);
+  const [dateValue, setDateValue]   = useState("");
+
+  if (!active) return null;
+
+  const locked = active.startDateLocked ?? false;
+  const currentDateStr = new Date(active.startDate).toLocaleDateString("en-US", {
+    year: "numeric", month: "long", day: "numeric",
+  });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const minDate  = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
+
+  const handleConfirm = () => {
+    if (!dateValue) return;
+    const chosen = new Date(dateValue + "T00:00:00").getTime();
+    if (chosen > Date.now()) return; // no future dates
+    // Update active addiction's startDate and lock it
+    const updated = state.addictions.map((a) =>
+      a.id === active.id
+        ? { ...a, startDate: chosen, startDateLocked: true }
+        : a
+    );
+    update({ addictions: updated });
+    setShowPicker(false);
+  };
+
+  return (
+    <section>
+      <SectionLabel>Recovery Start Date</SectionLabel>
+      <Card>
+        <Row
+          icon={Calendar}
+          label="Start Date"
+          value={currentDateStr}
+          onClick={locked ? undefined : () => { setDateValue(""); setShowPicker(true); }}
+          chevron={!locked}
+        >
+          {locked && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-muted-foreground"
+                  style={{ background: "var(--muted)", border: "1px solid var(--border)" }}>
+              Locked
+            </span>
+          )}
+        </Row>
+      </Card>
+      {!locked && (
+        <p className="mt-1.5 px-1 text-xs text-muted-foreground">
+          Set a past date if you were already clean before downloading. Can only be changed once.
+        </p>
+      )}
+
+      {/* Date picker sheet */}
+      {showPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end"
+          style={{ background: "oklch(0 0 0 / 0.6)" }}
+          onClick={() => setShowPicker(false)}
+        >
+          <div
+            className="w-full mx-auto max-w-md rounded-t-3xl p-5 pb-8 space-y-4"
+            style={{ background: "var(--card)", borderTop: "1px solid var(--border)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-center text-xs font-semibold text-muted-foreground tracking-widest uppercase pt-1">
+              When did you last reset?
+            </p>
+            <p className="text-[13px] text-center" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Pick the date you started this streak. This can only be set once.
+            </p>
+            <input
+              type="date"
+              value={dateValue}
+              max={todayStr}
+              min={minDate}
+              onChange={(e) => setDateValue(e.target.value)}
+              className="w-full h-12 rounded-2xl px-4 text-sm font-medium focus:outline-none"
+              style={{
+                background: "var(--muted)",
+                border: "1px solid var(--border)",
+                color: "var(--foreground)",
+                colorScheme: "dark",
+              }}
+            />
+            <button
+              onClick={handleConfirm}
+              disabled={!dateValue}
+              className="w-full h-12 rounded-2xl text-sm font-bold text-primary-foreground disabled:opacity-40 transition-opacity"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              Confirm Start Date
+            </button>
+            <button
+              onClick={() => setShowPicker(false)}
+              className="w-full py-2 text-sm font-semibold text-muted-foreground"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ── Badge Section ─────────────────────────────────────────────────────────────
+
+function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
+  const active = activeAddiction(state);
+  const day    = active ? dayCount(active.startDate) : 0;
+  const badge  = currentBadge(day);
+  const { earned, upcoming } = badgeSplit(day);
+
+  return (
+    <section>
+      <div className="flex items-baseline justify-between mb-2">
+        <SectionLabel>Badges</SectionLabel>
+        {badge && (
+          <span
+            className="text-[10px] font-bold mb-2 px-2 py-0.5 rounded-full"
+            style={{
+              color: badge.color,
+              background: `${badge.glow}`,
+              border: `1px solid ${badge.color}40`,
+            }}
+          >
+            {badge.symbol} {badge.name}
+          </span>
+        )}
+      </div>
+
+      <div
+        className="rounded-2xl border border-border/70 overflow-hidden p-4"
+        style={{ background: "var(--card)" }}
+      >
+        <div className="grid grid-cols-3 gap-3">
+          {BADGES.map((b) => {
+            const isEarned = day >= b.day;
+            return (
+              <div
+                key={b.name}
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl"
+                style={{
+                  background: isEarned ? `${b.glow}` : "rgba(255,255,255,0.025)",
+                  border: `1px solid ${isEarned ? b.color + "40" : "rgba(255,255,255,0.06)"}`,
+                }}
+              >
+                {/* Icon */}
+                <div
+                  className="text-[22px] font-bold leading-none"
+                  style={{
+                    color: isEarned ? b.color : "rgba(255,255,255,0.1)",
+                    filter: isEarned ? "none" : "blur(3px)",
+                    textShadow: isEarned ? `0 0 12px ${b.glow}` : "none",
+                  }}
+                >
+                  {b.symbol}
+                </div>
+                {/* Name */}
+                <p
+                  className="text-[11px] font-bold text-center leading-tight"
+                  style={{ color: isEarned ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.2)" }}
+                >
+                  {b.name}
+                </p>
+                {/* Day threshold */}
+                <p
+                  className="text-[9px] font-semibold tracking-wider"
+                  style={{ color: isEarned ? `${b.color}90` : "rgba(255,255,255,0.12)" }}
+                >
+                  Day {b.day}
+                </p>
+                {/* Earned checkmark */}
+                {isEarned && (
+                  <div
+                    className="h-3.5 w-3.5 rounded-full grid place-items-center"
+                    style={{ background: b.color + "30", border: `1px solid ${b.color}60` }}
+                  >
+                    <div className="text-[8px] font-bold" style={{ color: b.color }}>✓</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-2 mt-4 justify-center">
+          <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#C4873A" }} />
+          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+            {earned.length}/{BADGES.length} unlocked
+          </p>
+          {upcoming.length > 0 && (
+            <>
+              <div className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
+              <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Next: {upcoming[0].name} in {upcoming[0].day - day}d
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 function Settings() {
@@ -622,10 +843,12 @@ function Settings() {
       {/* Content */}
       <div className="px-5 pt-6 space-y-7 pb-12">
         <AccountSection state={state} update={update} />
+        <BadgesSection state={state} />
         <BillingSection state={state} />
         <AppearanceSection />
         <NotificationsSection />
         <TrackedHabitsSection state={state} update={update} />
+        <StartDateSection state={state} update={update} />
         <PrivacySection state={state} />
         <LanguageSection />
         <AboutSection />
