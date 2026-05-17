@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Check, X, Sparkles, Crown, Shield, Star, Loader2 } from "lucide-react";
 import { useAppState } from "@/lib/store";
@@ -73,7 +73,7 @@ const UPSELLS = [
   { id: "elite",  icon: Crown,  title: "Elite Status",      desc: "Black card + Hall of Legends eligibility",       price: "$9.99/mo" },
 ];
 
-type Stage = "main" | "upsell";
+type Stage = "main" | "final" | "upsell";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function fmt(n: number) {
@@ -176,14 +176,18 @@ function Paywall() {
   const navigate       = useNavigate();
   const [stage, setStage]       = useState<Stage>("main");
   const [plan, setPlan]         = useState<"annual" | "monthly">("annual");
-  const [seconds, setSeconds]   = useState(14 * 60 + 59);
+  const [seconds, setSeconds]         = useState(14 * 60 + 59);
+  const [finalSeconds, setFinalSeconds] = useState(5 * 60);
   const [feedIdx, setFeedIdx]   = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring]   = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => Math.max(0, s - 1)), 1000);
+    const t = setInterval(() => {
+      setSeconds((s) => Math.max(0, s - 1));
+      setFinalSeconds((s) => Math.max(0, s - 1));
+    }, 1000);
     return () => clearInterval(t);
   }, []);
 
@@ -210,7 +214,8 @@ function Paywall() {
     } finally { setRestoring(false); }
   };
 
-  const continueFree = () => { update({ paywallSeen: true }); navigate({ to: "/" }); };
+  const continueFree    = () => setStage("final");
+  const skipForReal     = () => { update({ paywallSeen: true }); navigate({ to: "/" }); };
   const finishUpsell = () => {
     if (selected === "shield") update({ momentumShieldDays: 3 });
     navigate({ to: "/" });
@@ -321,6 +326,116 @@ function Paywall() {
     );
   }
 
+  // ── FINAL (last-chance discount) ───────────────────────────────────────────
+  if (stage === "final") {
+    return (
+      <div style={{ minHeight: "100svh", background: BG, fontFamily: "DM Sans, sans-serif" }}>
+        <motion.div className="mx-auto w-full max-w-md px-5 pt-10 pb-12 flex flex-col gap-6"
+          variants={stagger} initial="hidden" animate="show">
+
+          {/* Close — this one actually exits */}
+          <motion.div variants={up} className="flex justify-end">
+            <button onClick={skipForReal}
+              style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
+                border: `1px solid rgba(255,255,255,0.1)`, color: TEXT_SUB, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+
+          {/* Badge */}
+          <motion.div variants={up} className="flex justify-center">
+            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.25em] uppercase"
+              style={{ background: "rgba(196,58,58,0.12)", border: "1px solid rgba(196,58,58,0.35)", color: "#E07070" }}>
+              ⚡ Final Offer
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.div variants={up} className="text-center space-y-2">
+            <h1 style={{ fontFamily: "Cormorant Garamond, Georgia, serif",
+              fontSize: "clamp(2rem, 8vw, 2.6rem)", fontWeight: 700, lineHeight: 1.15, color: TEXT }}>
+              Wait — one last thing.
+            </h1>
+            <p style={{ fontSize: 14, color: TEXT_SUB }}>
+              Lowest price we'll ever offer. Only on this screen.
+            </p>
+          </motion.div>
+
+          {/* Countdown */}
+          <motion.div variants={up} className="flex justify-center">
+            <div style={{ borderRadius: 24, background: "rgba(196,58,58,0.08)", border: "1px solid rgba(196,58,58,0.30)",
+              padding: "7px 18px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
+                style={{ background: "#E07070", boxShadow: "0 0 6px rgba(224,112,112,0.6)" }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#E07070", fontVariantNumeric: "tabular-nums" }}>
+                Expires in {fmt(finalSeconds)}
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Offer card */}
+          <motion.div variants={up} style={{
+            borderRadius: 20, padding: "22px 20px",
+            background: G_MUTED, border: `1px solid ${G}55`,
+            boxShadow: `0 0 32px ${G_GLOW}`,
+          }}>
+            <div className="flex items-center justify-between mb-1">
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: G }}>
+                Annual — 92% off
+              </p>
+              <p style={{ fontSize: 11, color: TEXT_DIM, textDecoration: "line-through" }}>$39.99/yr</p>
+            </div>
+            <p style={{ fontSize: 44, fontWeight: 800, color: TEXT, lineHeight: 1 }}>
+              $1.49<span style={{ fontSize: 15, fontWeight: 400, color: TEXT_SUB }}>/month</span>
+            </p>
+            <p style={{ fontSize: 12, color: TEXT_DIM, marginTop: 4 }}>$17.88 billed once a year</p>
+
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+              {["Everything in the full PRO plan", "Locked-in price for life", "Cancel anytime"].map((f) => (
+                <div key={f} className="flex items-center gap-3">
+                  <div style={{ width: 18, height: 18, borderRadius: "50%", background: G_MUTED,
+                    border: `1px solid ${G}44`, display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0 }}>
+                    <Check style={{ width: 10, height: 10, color: G, strokeWidth: 3 }} />
+                  </div>
+                  <p style={{ fontSize: 13, color: TEXT_SUB }}>{f}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div variants={up} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <motion.button onClick={subscribe} disabled={purchasing} whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              style={{
+                width: "100%", height: 58, borderRadius: 18, fontSize: 16, fontWeight: 700,
+                background: `linear-gradient(135deg, ${G}, #E8A84A)`,
+                color: BG, border: "none", cursor: "pointer",
+                boxShadow: `0 4px 32px ${G_GLOW}`,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                opacity: purchasing ? 0.7 : 1,
+              }}>
+              {purchasing
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
+                : "Claim 92% Discount"}
+            </motion.button>
+
+            <button onClick={skipForReal} style={{
+              width: "100%", height: 44, borderRadius: 14, fontSize: 13,
+              background: "none", border: `1px solid rgba(255,255,255,0.07)`,
+              color: TEXT_DIM, cursor: "pointer",
+            }}>
+              No thanks, continue free
+            </button>
+          </motion.div>
+
+        </motion.div>
+      </div>
+    );
+  }
+
   // ── MAIN ───────────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100svh", background: BG, fontFamily: "DM Sans, sans-serif" }}>
@@ -329,7 +444,7 @@ function Paywall() {
 
         {/* Close */}
         <motion.div variants={up} className="flex justify-end">
-          <button onClick={continueFree}
+          <button onClick={finishUpsell}
             style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
               border: `1px solid rgba(255,255,255,0.1)`, color: TEXT_SUB, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center" }}>
