@@ -349,7 +349,7 @@ function Tools() {
         </div>
 
         {/* Recovery Coach — full-width card */}
-        <Link to="/tools/coach" style={{ ...CARD, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px", gap: 4, textDecoration: "none" }} className="active:scale-[0.98] transition-transform">
+        <Link to="/tools/coach" style={{ ...CARD, border: "1px solid rgba(201,168,76,0.45)", display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px", gap: 4, textDecoration: "none" }} className="active:scale-[0.98] transition-transform">
           <CoachRobot />
           <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0", marginTop: 8 }}>Recovery Coach</p>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)" }}>Talk it through. No judgment.</p>
