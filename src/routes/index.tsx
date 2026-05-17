@@ -110,6 +110,13 @@ function moodResp(v: number): MoodResp {
   };
 }
 
+// Dynamic label per mood score
+function moodLabel(v: number): string {
+  if (v <= 2) return "Rough day, holding the line";
+  if (v <= 4) return "Slightly challenged, staying focused";
+  return "Feeling strong and unstoppable";
+}
+
 function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   const [, update]  = useAppState();
   const [mood, setMood]           = useState(3);
@@ -127,37 +134,155 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   const isLow = mood <= 2;
   const isHi  = mood >= 4;
 
+  // Track geometry
+  const TRACK_H   = 10;
+  const THUMB_D   = 44;
+  const fillPct   = ((mood - 1) / 4) * 100;
+
   return (
     <div>
       <style>{`
-        .ci-range{--tc:#C4873A}
-        .ci-range::-webkit-slider-runnable-track{height:1px;background:rgba(255,255,255,0.1);border-radius:1px}
-        .ci-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--tc);box-shadow:0 0 10px 2px rgba(196,135,58,0.4);margin-top:-7.5px;transition:box-shadow 0.15s}
-        .ci-range:not(:disabled)::-webkit-slider-thumb:active{box-shadow:0 0 18px 4px rgba(196,135,58,0.55)}
-        .ci-range::-moz-range-track{height:1px;background:rgba(255,255,255,0.1);border-radius:1px}
-        .ci-range::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--tc);box-shadow:0 0 10px 2px rgba(196,135,58,0.4)}
+        .ci-range-v2 {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 100%;
+          height: ${TRACK_H}px;
+          background: transparent;
+          cursor: pointer;
+          outline: none;
+          position: relative;
+          z-index: 2;
+        }
+        .ci-range-v2:disabled { cursor: default; }
+        /* Hide native thumb — we render our own orb */
+        .ci-range-v2::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: ${THUMB_D}px;
+          height: ${THUMB_D}px;
+          border-radius: 50%;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          margin-top: ${-(THUMB_D - TRACK_H) / 2}px;
+        }
+        .ci-range-v2::-moz-range-thumb {
+          width: ${THUMB_D}px;
+          height: ${THUMB_D}px;
+          border-radius: 50%;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+        }
+        /* Hide native track */
+        .ci-range-v2::-webkit-slider-runnable-track { background: transparent; height: ${TRACK_H}px; }
+        .ci-range-v2::-moz-range-track              { background: transparent; height: ${TRACK_H}px; }
+        .ci-range-v2::-moz-range-progress           { background: transparent; }
       `}</style>
 
-      {/* Value indicator */}
-      <div className="relative pt-5 pb-1">
-        <div
-          className="absolute top-0 pointer-events-none"
-          style={{ left: `calc(${((mood - 1) / 4) * 100}%)`, transform: "translateX(-50%)", transition: "left 0.1s ease" }}
-        >
-          <span className="text-[11px] font-bold tabular-nums" style={{ color: "#C4873A" }}>{mood}</span>
+      {/* ── Slider assembly ─────────────────────────────────────── */}
+      <div style={{ position: "relative", paddingTop: THUMB_D / 2, paddingBottom: THUMB_D / 2 }}>
+
+        {/* Track container — sits behind everything */}
+        <div style={{
+          position: "absolute",
+          left: 0, right: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+          height: TRACK_H,
+          borderRadius: TRACK_H / 2,
+          background: "rgba(255,255,255,0.07)",
+          boxShadow: "inset 0 2px 4px rgba(0,0,0,0.45)",
+          overflow: "hidden",
+          zIndex: 0,
+        }}>
+          {/* Filled gradient */}
+          <div style={{
+            position: "absolute",
+            left: 0, top: 0, bottom: 0,
+            width: `${fillPct}%`,
+            background: "linear-gradient(90deg, #8B5E2A, #C9A84C)",
+            borderRadius: TRACK_H / 2,
+            transition: "width 0.15s ease",
+            boxShadow: "0 0 10px rgba(201,168,76,0.35)",
+          }} />
         </div>
+
+        {/* Tick dots — 5 positions along the track */}
+        {[0, 25, 50, 75, 100].map((pct, i) => {
+          const active = i + 1 <= mood;
+          return (
+            <div key={pct} style={{
+              position: "absolute",
+              left: `${pct}%`,
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: active ? "rgba(201,168,76,0.80)" : "rgba(255,255,255,0.18)",
+              transition: "background 0.15s ease",
+              zIndex: 1,
+              pointerEvents: "none",
+            }} />
+          );
+        })}
+
+        {/* Glowing orb thumb — absolutely positioned, pointer-events none */}
+        <div style={{
+          position: "absolute",
+          left: `${fillPct}%`,
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: THUMB_D,
+          height: THUMB_D,
+          borderRadius: "50%",
+          background: "radial-gradient(circle at 38% 35%, #E8C96A, #C9A84C 55%, #8B5E2A)",
+          boxShadow: "0 0 0 3px rgba(201,168,76,0.20), 0 0 18px 6px rgba(201,168,76,0.40), 0 4px 12px rgba(0,0,0,0.50)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "left 0.15s ease",
+          zIndex: 3,
+          pointerEvents: "none",
+        }}>
+          <span style={{
+            fontSize: 16,
+            fontWeight: 800,
+            color: "#1a1206",
+            lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
+            letterSpacing: "-0.02em",
+          }}>
+            {mood}
+          </span>
+        </div>
+
+        {/* Invisible native range — sits on top for interaction */}
         <input
           type="range" min={1} max={5} step={1}
           value={mood} disabled={confirmed}
           onChange={(e) => setMood(+e.target.value)}
           onMouseUp={confirm} onTouchEnd={confirm}
-          className="ci-range w-full appearance-none bg-transparent cursor-pointer disabled:cursor-default"
-          style={{ height: 20 }}
+          className="ci-range-v2"
+          style={{ display: "block", opacity: 0, position: "absolute", left: 0, right: 0, top: 0, bottom: 0, width: "100%", height: "100%", margin: 0 }}
         />
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px] tracking-wide" style={{ color: "rgba(255,255,255,0.22)" }}>Rough</span>
-          <span className="text-[10px] tracking-wide" style={{ color: "rgba(255,255,255,0.22)" }}>Strong</span>
-        </div>
+      </div>
+
+      {/* ── Side labels + dynamic status ─────────────────────────── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>Rough</span>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: isLow ? "rgba(220,120,80,0.85)" : isHi ? "rgba(180,220,140,0.85)" : "rgba(255,255,255,0.50)",
+          transition: "color 0.3s ease",
+          textAlign: "center",
+          flex: 1,
+          padding: "0 8px",
+        }}>
+          {moodLabel(mood)}
+        </span>
+        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>Strong</span>
       </div>
 
       <AnimatePresence>
