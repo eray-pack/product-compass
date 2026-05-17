@@ -655,6 +655,29 @@ function Dashboard() {
 
       <Hairline />
 
+      {/* ── TODAY'S FOCUS ─────────────────────────────────────── */}
+      <motion.section
+        className="px-6 mt-7 mb-6"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <SectionTitle>Today's Focus</SectionTitle>
+        <div style={{ marginTop: 12 }} />
+        <div className="flex gap-5">
+          <div
+            className="w-px shrink-0"
+            style={{
+              background: "linear-gradient(to bottom, #C9A84C, rgba(201,168,76,0))",
+              minHeight: 48,
+            }}
+          />
+          <p style={{ fontSize: 17, fontWeight: 500, lineHeight: 1.6, color: "#f0ece4", margin: 0 }}>
+            {todaysFocusText()}
+          </p>
+        </div>
+      </motion.section>
+
+      <Hairline />
+
       {/* ── DAILY CHECK-IN ────────────────────────────────────── */}
       <motion.section
         className="px-6 mt-7 mb-6"
@@ -765,29 +788,6 @@ function Dashboard() {
           </Link>
         </motion.div>
       </motion.section>
-
-      {/* ── TODAY'S FOCUS ─────────────────────────────────────── */}
-      <motion.section
-        className="px-6 mt-7 mb-6"
-        initial="hidden" whileInView="show" viewport={vp} variants={up}
-      >
-        <SectionTitle>Today's Focus</SectionTitle>
-        <div style={{ marginTop: 12 }} />
-        <div className="flex gap-5">
-          <div
-            className="w-px shrink-0"
-            style={{
-              background: "linear-gradient(to bottom, #C9A84C, rgba(201,168,76,0))",
-              minHeight: 48,
-            }}
-          />
-          <p style={{ fontSize: 17, fontWeight: 500, lineHeight: 1.6, color: "#f0ece4", margin: 0 }}>
-            {todaysFocusText()}
-          </p>
-        </div>
-      </motion.section>
-
-      <Hairline />
 
       {/* ── LOG RELAPSE ───────────────────────────────────────── */}
       <motion.section
