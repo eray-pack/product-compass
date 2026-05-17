@@ -504,6 +504,11 @@ function LanguageSection() {
           >
             <option value="en">English</option>
             <option value="nl">Nederlands</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+            <option value="pt">Português</option>
+            <option value="it">Italiano</option>
           </select>
         </div>
       </Card>
