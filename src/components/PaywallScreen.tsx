@@ -168,8 +168,24 @@ function FeatureIcon({ icon, label, index }: { icon: string; label: string; inde
       initial={{ opacity: 0, scale: 0.7 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05, type: "spring", stiffness: 400, damping: 24 }}
-      style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
+      style={{
+        position: "relative",
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+      }}
     >
+      {/* Gold checkmark — anchored to cell, fully inside */}
+      <div style={{
+        position: "absolute", top: 0, right: 0,
+        width: 14, height: 14, borderRadius: "50%",
+        background: GOLD,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: "0 0 6px rgba(201,168,76,0.45)",
+      }}>
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+          <path d="M1.5 4L3 5.5L6.5 2.5" stroke="#090705" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+
       <div style={{
         width: 40, height: 40, borderRadius: "50%",
         background: "rgba(201,168,76,0.1)",
