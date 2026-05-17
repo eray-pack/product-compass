@@ -156,8 +156,7 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
       totalReturns: data.total_returns ?? prev.totalReturns,
       lastLoginAt: data.last_login_at ?? prev.lastLoginAt,
       onboarding: data.onboarding ?? prev.onboarding,
-      // Only let Supabase grant premium — never revoke it (RC is source of truth on native)
-      isPremium: prev.isPremium || data.is_premium === true,
+      isPremium: data.is_premium ?? prev.isPremium,
     };
     saveState(merged);
     return merged;

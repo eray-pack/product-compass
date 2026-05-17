@@ -26,6 +26,7 @@ import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { SectionTitle } from "@/components/BottomNav";
 import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
+import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/theme";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 
@@ -306,9 +307,20 @@ function BillingSection({ state, update }: {
   async function handleRestore() {
     setRestoring(true);
     // TODO: wire to RevenueCat restorePurchases() when on native
-    // For now: directly grant PRO so founder can test the full app
-    await new Promise((r) => setTimeout(r, 800));
+    // For now: grant PRO in both localStorage AND Supabase so the sync doesn't revert it
     update({ isPremium: true });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from("user_state").upsert({
+          user_id: session.user.id,
+          is_premium: true,
+          updated_at: new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      console.warn("[Restore] Supabase sync failed", e);
+    }
     setRestoring(false);
   }
 
