@@ -270,7 +270,7 @@ function TodaysFocus({ name, addiction, costs, triggers, day }: {
             <div className="h-3.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.05)", width: "68%" }} />
           </div>
         ) : text ? (
-          <p className="text-[15px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
+          <p className="text-[17px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
             {text}
           </p>
         ) : (
@@ -433,7 +433,7 @@ function Hairline() {
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className="text-[9px] font-bold tracking-[0.38em] uppercase mb-3"
+      className="text-[11px] font-bold tracking-[0.35em] uppercase mb-4"
       style={{ color: "rgba(255,255,255,0.28)" }}
     >
       {children}
@@ -550,17 +550,20 @@ function BadgeCarousel({ day }: { day: number }) {
 
                 {/* Badge name */}
                 <p
-                  className="mt-3 text-[22px] font-bold leading-tight tracking-tight"
-                  style={{ color: isEarned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.2)" }}
+                  className="mt-4 font-bold leading-tight tracking-tight"
+                  style={{
+                    fontSize: "clamp(1.6rem, 7vw, 2.2rem)",
+                    color: isEarned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.2)",
+                  }}
                 >
                   {b.name}
                 </p>
 
                 {/* Day info */}
-                <div className="mt-2 flex items-center justify-center gap-3">
+                <div className="mt-3 flex items-center justify-center gap-3">
                   <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
                   <span
-                    className="text-[11px] font-bold tracking-[0.25em] uppercase tabular-nums"
+                    className="text-[13px] font-bold tracking-[0.25em] uppercase tabular-nums"
                     style={{ color: isEarned ? `${b.color}90` : "rgba(255,255,255,0.22)" }}
                   >
                     {isEarned && i === earnedCount - 1
@@ -761,13 +764,13 @@ function Dashboard() {
             transition={{ duration: 0.2 }}
           >
             <span
-              className="text-[24px] font-bold tabular-nums leading-none"
+              className="text-[28px] font-bold tabular-nums leading-none"
               style={{ color: gold ? "#C4873A" : "rgba(255,255,255,0.88)" }}
             >
               {value}
             </span>
             <span
-              className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-1.5"
+              className="text-[10px] font-semibold tracking-[0.2em] uppercase mt-2"
               style={{ color: "rgba(255,255,255,0.25)" }}
             >
               {sub}
@@ -816,7 +819,7 @@ function Dashboard() {
         initial="hidden" whileInView="show" viewport={vp} variants={up}
       >
         <Label>Daily Check-in</Label>
-        <p className="text-[20px] font-semibold leading-tight mb-5"
+        <p className="text-[24px] font-semibold leading-tight mb-6"
            style={{ letterSpacing: "-0.02em" }}>
           How are you<br />holding up today?
         </p>
@@ -831,7 +834,7 @@ function Dashboard() {
         initial="hidden" whileInView="show" viewport={{ once: true, margin: "-16px" }} variants={fade}
       >
         <p
-          className="text-[15px] leading-relaxed"
+          className="text-[17px] leading-relaxed"
           style={{ color: "rgba(255,255,255,0.36)", fontStyle: "italic" }}
         >
           You started this for{" "}
@@ -863,7 +866,7 @@ function Dashboard() {
                  style={{ color: "rgba(255,255,255,0.25)" }}>
                 Next milestone
               </p>
-              <p className="text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+              <p className="text-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
                 Day {next.day} — {next.benefit}
               </p>
             </div>
