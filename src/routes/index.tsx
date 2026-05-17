@@ -519,11 +519,13 @@ function Dashboard() {
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
   const next        = nextMilestone(day);
 
-  // Init RevenueCat and sync premium status on mount
+  // Init RevenueCat and sync premium status on mount (native only)
+  // On web, checkPremium() always returns false — don't let it override localStorage
   useEffect(() => {
     async function syncPremium() {
       const { data: { session } } = await supabase.auth.getSession();
       await initPurchases(session?.user?.id);
+      if (typeof window !== "undefined" && !(window as any).Capacitor?.isNativePlatform?.()) return;
       const isPremium = await checkPremium();
       if (isPremium !== state.isPremium) {
         update({ isPremium });
