@@ -7,8 +7,6 @@ import {
   Lock,
   Crown,
   CreditCard,
-  Moon,
-  Sun,
   Bell,
   BarChart2,
   Download,
@@ -29,7 +27,6 @@ import { SectionTitle } from "@/components/BottomNav";
 import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
-import { useTheme } from "@/lib/theme";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 
 export const Route = createFileRoute("/settings")({
@@ -369,54 +366,6 @@ function BillingSection({ state, update }: {
   );
 }
 
-function AppearanceSection() {
-  const [theme, setTheme] = useTheme();
-
-  return (
-    <section>
-      <SectionLabel>Appearance</SectionLabel>
-      <Card>
-        <div className="flex items-center gap-3 px-4 py-3.5">
-          <span className="h-8 w-8 rounded-xl grid place-items-center shrink-0 bg-foreground/[0.06]">
-            {theme === "dark" ? (
-              <Moon className="h-4 w-4 text-foreground" />
-            ) : (
-              <Sun className="h-4 w-4 text-foreground" />
-            )}
-          </span>
-          <span className="flex-1 text-sm font-medium">Theme</span>
-          {/* Segmented pill */}
-          <div
-            className="flex rounded-xl overflow-hidden border border-border/70 shrink-0 p-0.5 gap-0.5"
-            style={{ background: "var(--muted)" }}
-          >
-            {(["dark", "light"] as const).map((t) => {
-              const active = theme === t;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setTheme(t)}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all"
-                  style={
-                    active
-                      ? {
-                          background: "var(--primary)",
-                          color: "var(--primary-foreground)",
-                          boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.2)",
-                        }
-                      : { color: "var(--muted-foreground)" }
-                  }
-                >
-                  {t === "dark" ? "Dark" : "Light"}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </Card>
-    </section>
-  );
-}
 
 function NotificationsSection() {
   const [notifs, setNotifs] = useState({
@@ -1033,7 +982,6 @@ function Settings() {
         <AccountSection state={state} update={update} />
         <BadgesSection state={state} />
         <BillingSection state={state} update={update} />
-        <AppearanceSection />
         <NotificationsSection />
         <TrackedHabitsSection state={state} update={update} />
         <StartDateSection state={state} update={update} />

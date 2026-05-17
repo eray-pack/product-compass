@@ -1,30 +1,19 @@
-import { useEffect, useState } from "react";
+// Theme is permanently dark — no user-facing toggle exists.
+// This file is kept as a stub so any legacy import doesn't break compilation.
 
-const THEME_KEY = "stopamine.theme";
-export type Theme = "dark" | "light";
+export type Theme = "dark";
 
-export function applyTheme(theme: Theme) {
-  document.documentElement.classList.remove("dark", "light");
-  document.documentElement.classList.add(theme);
-  localStorage.setItem(THEME_KEY, theme);
+export function applyTheme(_theme: Theme) {
+  document.documentElement.className = "dark";
+  document.documentElement.style.background = "#0D0A08";
+  document.documentElement.style.colorScheme = "dark";
+  localStorage.removeItem("stopamine.theme");
 }
 
 export function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
-  return (localStorage.getItem(THEME_KEY) as Theme) ?? "dark";
+  return "dark";
 }
 
 export function useTheme(): [Theme, (t: Theme) => void] {
-  const [theme, setThemeState] = useState<Theme>("dark");
-
-  useEffect(() => {
-    setThemeState(getStoredTheme());
-  }, []);
-
-  const changeTheme = (t: Theme) => {
-    setThemeState(t);
-    applyTheme(t);
-  };
-
-  return [theme, changeTheme];
+  return ["dark", applyTheme];
 }
