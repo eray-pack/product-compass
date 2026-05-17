@@ -284,48 +284,11 @@ function Hairline() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
-// ─── Day Counter Bubble ───────────────────────────────────────────────────────
-function DayCounter({ day, addictionName }: { day: number; addictionName: string }) {
-  return (
-    <div className="mx-6 pt-10 pb-2 text-center">
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2"
-        style={{
-          width: 300, height: 300,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(196,135,58,0.08) 0%, transparent 68%)",
-          filter: "blur(40px)",
-        }}
-      />
-
-      <p className="text-[9px] font-bold tracking-[0.55em] uppercase" style={{ color: "rgba(196,135,58,0.5)" }}>
-        Day
-      </p>
-      <p
-        className="day-monument font-bold leading-none tabular-nums select-none"
-        style={{ fontSize: "clamp(6.5rem, 30vw, 10rem)" }}
-      >
-        {day}
-      </p>
-      <div className="mt-2 flex items-center justify-center gap-3">
-        <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.2)" }} />
-        <span className="text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>
-          {addictionName}
-        </span>
-        <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.2)" }} />
-      </div>
-    </div>
-  );
-}
-
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
-function BadgeCarousel({ day }: { day: number }) {
+function BadgeCarousel({ day, addictionName }: { day: number; addictionName: string }) {
   const earnedCount = BADGES.filter((b) => day >= b.day).length;
-  const startIdx    = Math.max(0, earnedCount - 1);
-
-  const [idx, setIdx]             = useState(startIdx);
+  // Start on the latest earned badge (or 0)
+  const [idx, setIdx]             = useState(() => Math.max(0, earnedCount - 1));
   const touchStartX               = useRef(0);
   const touchStartY               = useRef(0);
   const [dragging, setDragging]   = useState(false);
@@ -342,7 +305,7 @@ function BadgeCarousel({ day }: { day: number }) {
   const onTouchMove = (e: React.TouchEvent) => {
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
-    if (Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
+    if (Math.abs(dy) > Math.abs(dx)) return;
     setDragDelta(dx);
   };
   const onTouchEnd = () => {
@@ -352,153 +315,108 @@ function BadgeCarousel({ day }: { day: number }) {
     setDragDelta(0);
   };
 
-  const badge   = BADGES[idx];
-  const earned  = day >= badge.day;
-  const daysAway = badge.day - day;
+  const b       = BADGES[idx];
+  const isEarned = day >= b.day;
 
   return (
-    <div
-      className="select-none"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      {/* Card viewport */}
-      <div className="overflow-hidden">
+    <div className="select-none text-center">
+
+      {/* ── Swipeable badge area ── */}
+      <div
+        className="overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <motion.div
           style={{ display: "flex" }}
           animate={{ x: `calc(-${idx * 100}% + ${dragging ? dragDelta : 0}px)` }}
-          transition={dragging
-            ? { duration: 0 }
-            : { type: "spring", damping: 30, stiffness: 300, mass: 0.85 }
-          }
+          transition={dragging ? { duration: 0 } : { type: "spring", damping: 30, stiffness: 300, mass: 0.85 }}
         >
           {BADGES.map((b, i) => {
-            const isEarned   = day >= b.day;
-            const isCurrent  = i === idx;
-            const dAway      = b.day - day;
-
+            const earned = day >= b.day;
             return (
-              <div
-                key={b.name}
-                style={{ minWidth: "100%", width: "100%" }}
-                className="relative px-6 pt-8 pb-3 text-center"
-              >
-                {/* Ambient glow — only for earned */}
-                {isEarned && (
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute"
-                    style={{
-                      top: "0%", left: "50%", transform: "translateX(-50%)",
-                      width: 300, height: 300,
-                      borderRadius: "50%",
-                      background: `radial-gradient(circle, ${b.glow.replace("0.40","0.13")} 0%, transparent 68%)`,
-                      filter: "blur(40px)",
-                    }}
-                  />
+              <div key={b.name} style={{ minWidth: "100%", width: "100%" }} className="relative pt-8 pb-2 flex flex-col items-center">
+                {/* Ambient glow */}
+                {earned && (
+                  <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
+                    style={{ width: 280, height: 280, borderRadius: "50%",
+                      background: `radial-gradient(circle, ${b.glow.replace("0.40","0.12")} 0%, transparent 68%)`,
+                      filter: "blur(40px)" }} />
                 )}
 
                 {/* Eyebrow */}
-                <p
-                  className="text-[9px] font-bold tracking-[0.45em] uppercase mb-3"
-                  style={{ color: isEarned ? `${b.color}70` : "rgba(255,255,255,0.15)" }}
-                >
-                  {isEarned
+                <p className="text-[9px] font-bold tracking-[0.45em] uppercase mb-3"
+                   style={{ color: earned ? `${b.color}70` : "rgba(255,255,255,0.15)" }}>
+                  {earned
                     ? i === earnedCount - 1 ? "Your rank" : "Earned"
-                    : i === earnedCount ? "Next badge" : "Coming up"}
+                    : i === earnedCount     ? "Next badge" : "Coming up"}
                 </p>
 
-                {/* Badge symbol */}
-                <div className="relative inline-flex items-center justify-center mx-auto">
-                  <div
-                    className="font-bold leading-none select-none"
+                {/* Badge symbol with lock overlay */}
+                <div className="relative inline-flex items-center justify-center">
+                  <span className="font-bold leading-none select-none"
                     style={{
-                      fontSize: "clamp(4.5rem, 20vw, 7rem)",
-                      color: isEarned ? b.color : "rgba(255,255,255,0.06)",
-                      filter: isEarned ? "none" : "blur(8px)",
-                      textShadow: isEarned
-                        ? `0 0 50px ${b.glow}, 0 0 100px ${b.glow.replace("0.40","0.2")}`
-                        : "none",
-                      transition: "color 0.4s, filter 0.4s",
+                      fontSize: "clamp(5rem, 22vw, 7.5rem)",
+                      color: earned ? b.color : "rgba(255,255,255,0.06)",
+                      filter: earned ? "none" : "blur(9px)",
+                      textShadow: earned ? `0 0 55px ${b.glow}, 0 0 110px ${b.glow.replace("0.40","0.2")}` : "none",
+                      transition: "color 0.35s, filter 0.35s",
                       userSelect: "none",
-                    }}
-                  >
+                    }}>
                     {b.symbol}
-                  </div>
-
-                  {/* "Unlocks at Day X" overlaid on locked symbol */}
-                  {!isEarned && (
+                  </span>
+                  {!earned && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                      <span
-                        className="text-[10px] font-bold tracking-[0.25em] uppercase"
-                        style={{ color: "rgba(255,255,255,0.38)" }}
-                      >
-                        Unlocks at
-                      </span>
-                      <span
-                        className="text-[20px] font-bold tabular-nums"
-                        style={{ color: "rgba(255,255,255,0.52)" }}
-                      >
-                        Day {b.day}
-                      </span>
+                      <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
+                            style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
+                      <span className="text-[20px] font-bold tabular-nums"
+                            style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Badge name */}
-                <p
-                  className="mt-3 font-bold leading-tight tracking-tight"
-                  style={{
-                    fontSize: "clamp(1.4rem, 6vw, 1.9rem)",
-                    color: isEarned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.18)",
-                  }}
-                >
+                <p className="mt-3 font-bold leading-tight"
+                   style={{ fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
+                            color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.18)" }}>
                   {b.name}
                 </p>
-
-                {/* Past earned marker */}
-                {isEarned && i < earnedCount - 1 && (
-                  <p className="mt-1.5 text-[10px] font-semibold tracking-wider"
-                     style={{ color: `${b.color}55` }}>
+                {earned && i < earnedCount - 1 && (
+                  <p className="mt-1 text-[10px] font-semibold tracking-wider" style={{ color: `${b.color}55` }}>
                     ✓ Day {b.day}
                   </p>
                 )}
-
-                <div className="h-4" />
               </div>
             );
           })}
         </motion.div>
       </div>
 
-      {/* Dots — tap to jump */}
-      <div className="flex justify-center gap-1.5 pb-3 pt-1">
+      {/* ── Fixed day display — outside the swipe area ── */}
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+        <span className="text-[13px] font-bold tracking-[0.3em] uppercase tabular-nums"
+              style={{ color: "rgba(255,255,255,0.5)" }}>
+          Day {day} · {addictionName}
+        </span>
+        <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+      </div>
+
+      {/* ── Dots ── */}
+      <div className="flex justify-center gap-1.5 pt-4 pb-2">
         {BADGES.map((_, i) => {
-          const isEarned = day >= BADGES[i].day;
+          const earned = day >= BADGES[i].day;
           return (
-            <button
-              key={i}
-              onClick={() => go(i)}
+            <button key={i} onClick={() => go(i)}
               style={{
-                width: i === idx ? 16 : 4,
-                height: 4,
-                borderRadius: 2,
-                background: i === idx
-                  ? BADGES[i].color
-                  : isEarned
-                    ? `${BADGES[i].color}50`
-                    : "rgba(255,255,255,0.12)",
-                transition: "all 0.25s ease",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-              }}
-            />
+                width: i === idx ? 16 : 4, height: 4, borderRadius: 2,
+                background: i === idx ? BADGES[i].color : earned ? `${BADGES[i].color}45` : "rgba(255,255,255,0.12)",
+                transition: "all 0.25s ease", border: "none", padding: 0, cursor: "pointer",
+              }} />
           );
         })}
       </div>
-
     </div>
   );
 }
@@ -600,23 +518,13 @@ function Dashboard() {
         </div>
       </motion.header>
 
-      {/* ── DAY COUNTER — fixed, always visible ──────────────── */}
+      {/* ── BADGE CAROUSEL — swipeable ───────────────────────── */}
       <motion.div
-        className="relative"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: EASE }}
       >
-        <DayCounter day={day} addictionName={active?.name ?? "Recovery"} />
-      </motion.div>
-
-      {/* ── BADGE CAROUSEL — swipeable, separate ─────────────── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        <BadgeCarousel day={day} />
+        <BadgeCarousel day={day} addictionName={active?.name ?? "Recovery"} />
       </motion.div>
 
       {/* ── STATS ─────────────────────────────────────────────── */}
