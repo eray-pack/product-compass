@@ -1,7 +1,25 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
 import { loadState } from "@/lib/store";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
+function useScrollHide() {
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastY.current + 4) setHidden(true);
+      else if (y < lastY.current - 4) setHidden(false);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return hidden;
+}
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
@@ -89,6 +107,7 @@ const BASE_NAV = [
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
+  const hidden = useScrollHide();
 
   // Read companion from localStorage — same source as the rest of the app.
   // loadState() is synchronous and cheap (just a JSON.parse).
@@ -106,7 +125,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 backdrop-blur-2xl"
+      className={`fixed bottom-0 inset-x-0 z-40 backdrop-blur-2xl transition-transform duration-300 ${hidden ? "translate-y-full" : "translate-y-0"}`}
       style={{
         background: "oklch(0.11 0.018 265 / 0.92)",
         borderTop: "1px solid oklch(0.20 0.025 265 / 0.6)",
