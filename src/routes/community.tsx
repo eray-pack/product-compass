@@ -305,6 +305,7 @@ function AvatarStack({ roomId, memberCount, isGlobal }: { roomId: string; member
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 function CommunityPage() {
+  const [state] = useAppState();
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [joinedRooms, setJoinedRooms] = useState<string[]>(["global"]);
   const [showCreate, setShowCreate] = useState(false);

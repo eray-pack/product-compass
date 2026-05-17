@@ -203,6 +203,7 @@ export function flagshipAddiction(s: AppState): Addiction | undefined {
 
 export function longestCleanPeriod(s: AppState): number {
   const active = activeAddiction(s);
+  if (!active) return 0;
   if (s.relapses.length === 0) return dayCount(active.startDate);
   const sorted = [...s.relapses].sort((a, b) => a.ts - b.ts);
   const points = [active.startDate, ...sorted.map(r => r.ts), Date.now()];

@@ -46,10 +46,15 @@ export async function purchaseMonthly(): Promise<boolean> {
   try {
     const Purchases = await getPlugin();
     if (!Purchases) return false;
-    const { offerings } = await Purchases.getOfferings();
+    const result = await Purchases.getOfferings();
+    // RevenueCat SDK shape varies by version — cast through unknown for safety
+    const offerings = ((result as unknown as Record<string, unknown>).offerings ?? result) as {
+      current?: { monthly?: unknown };
+    };
     const monthly = offerings.current?.monthly;
     if (!monthly) throw new Error("No monthly package found");
-    const { customerInfo } = await Purchases.purchasePackage({ aPackage: monthly });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { customerInfo } = await Purchases.purchasePackage({ aPackage: monthly as any });
     return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
   } catch (e: any) {
     if (e?.userCancelled) return false;

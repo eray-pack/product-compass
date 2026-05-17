@@ -11,59 +11,68 @@
 // 4. Add push capability in Xcode:
 //    Target → Signing & Capabilities → + Capability → Push Notifications
 // 5. Run `npx cap sync` after adding capability
+// 6. Install @capacitor/push-notifications: `bun add @capacitor/push-notifications`
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { PushNotifications } from "@capacitor/push-notifications";
 import { Capacitor } from "@capacitor/core";
 import { supabase } from "./supabase";
 
-export async function registerPushNotifications(userId: string): Promise<void> {
-  if (!Capacitor.isNativePlatform()) return;
+// Typed stub so the rest of the file type-checks without the package installed.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PushPlugin = any;
 
-  // Request permission
+async function getPushPlugin(): Promise<PushPlugin | null> {
+  if (!Capacitor.isNativePlatform()) return null;
+  try {
+    // @ts-ignore — @capacitor/push-notifications is a native-only peer dep
+    const mod = await import("@capacitor/push-notifications");
+    return mod.PushNotifications as PushPlugin;
+  } catch {
+    return null;
+  }
+}
+
+export async function registerPushNotifications(userId: string): Promise<void> {
+  const PushNotifications = await getPushPlugin();
+  if (!PushNotifications) return;
+
   const { receive } = await PushNotifications.requestPermissions();
   if (receive !== "granted") {
     console.warn("[Push] Permission denied");
     return;
   }
 
-  // Register with APNs / FCM — triggers 'registration' event below
   await PushNotifications.register();
 
-  // Listen for token
-  PushNotifications.addListener("registration", async (token) => {
+  PushNotifications.addListener("registration", async (token: { value: string }) => {
     console.log("[Push] Token received:", token.value);
     await saveTokenToSupabase(userId, token.value);
   });
 
-  PushNotifications.addListener("registrationError", (err) => {
+  PushNotifications.addListener("registrationError", (err: unknown) => {
     console.error("[Push] Registration error:", err);
   });
 
-  // Handle foreground notifications
-  PushNotifications.addListener("pushNotificationReceived", (notification) => {
+  PushNotifications.addListener("pushNotificationReceived", (notification: unknown) => {
     console.log("[Push] Received in foreground:", notification);
   });
 
-  // Handle notification tap
-  PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
+  PushNotifications.addListener("pushNotificationActionPerformed", (action: { notification: unknown }) => {
     console.log("[Push] Tapped:", action.notification);
     // TODO: navigate to relevant screen based on action.notification.data
   });
 }
 
 async function saveTokenToSupabase(userId: string, token: string): Promise<void> {
-  const platform = Capacitor.getPlatform(); // 'ios' | 'android'
-  await supabase.from("device_tokens").upsert({
-    user_id: userId,
-    token,
-    platform,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: "user_id,token" });
+  const platform = Capacitor.getPlatform();
+  await supabase.from("device_tokens").upsert(
+    { user_id: userId, token, platform, updated_at: new Date().toISOString() },
+    { onConflict: "user_id,token" },
+  );
 }
 
-export async function unregisterPushNotifications(userId: string): Promise<void> {
-  if (!Capacitor.isNativePlatform()) return;
+export async function unregisterPushNotifications(_userId: string): Promise<void> {
+  const PushNotifications = await getPushPlugin();
+  if (!PushNotifications) return;
   await PushNotifications.removeAllListeners();
-  // Token stays in DB — APNs handles invalid tokens gracefully
 }
