@@ -284,16 +284,42 @@ function Hairline() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
-function BadgeCarousel({ day }: { day: number }) {
-  // Start on the current earned badge (or 0 if nothing earned yet)
+type AppStateReturn = ReturnType<typeof useAppState>;
+function BadgeCarousel({
+  day,
+  state,
+  update,
+}: {
+  day: number;
+  state: AppStateReturn[0];
+  update: AppStateReturn[1];
+}) {
   const earnedCount = BADGES.filter((b) => day >= b.day).length;
   const startIdx    = Math.max(0, earnedCount - 1);
 
-  const [idx, setIdx]           = useState(startIdx);
-  const touchStartX             = useRef(0);
-  const touchStartY             = useRef(0);
-  const [dragging, setDragging] = useState(false);
+  const [idx, setIdx]             = useState(startIdx);
+  const touchStartX               = useRef(0);
+  const touchStartY               = useRef(0);
+  const [dragging, setDragging]   = useState(false);
   const [dragDelta, setDragDelta] = useState(0);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateValue, setDateValue]           = useState("");
+
+  const active     = state.addictions.find((a) => a.id === state.activeAddictionId) ?? state.addictions[0];
+  const dateLocked = active?.startDateLocked ?? false;
+  const todayStr   = new Date().toISOString().slice(0, 10);
+  const minDate    = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
+
+  const handleConfirmDate = () => {
+    if (!dateValue || !active) return;
+    const chosen = new Date(dateValue + "T00:00:00").getTime();
+    if (chosen > Date.now()) return;
+    const updated = state.addictions.map((a) =>
+      a.id === active.id ? { ...a, startDate: chosen, startDateLocked: true } : a
+    );
+    update({ addictions: updated });
+    setShowDatePicker(false);
+  };
 
   const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
 
@@ -400,32 +426,79 @@ function BadgeCarousel({ day }: { day: number }) {
                   {b.name}
                 </p>
 
-                {/* Day info */}
-                <div className="mt-3 flex items-center justify-center gap-3">
-                  <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
-                  <span
-                    className="text-[13px] font-bold tracking-[0.25em] uppercase tabular-nums"
-                    style={{ color: isEarned ? `${b.color}90` : "rgba(255,255,255,0.22)" }}
+                {/* ── Day pill — the main number, tappable on current card ── */}
+                {isCurrent && isEarned ? (
+                  // Current badge → big tappable pill showing actual days
+                  <button
+                    onClick={() => !dateLocked && setShowDatePicker(true)}
+                    className="mt-4 mx-auto flex flex-col items-center rounded-3xl px-10 py-4 transition-all active:scale-95"
+                    style={{
+                      background: `${b.color}14`,
+                      border: `1.5px solid ${b.color}45`,
+                      boxShadow: `0 0 28px ${b.glow}`,
+                      cursor: dateLocked ? "default" : "pointer",
+                    }}
                   >
-                    {isEarned && i === earnedCount - 1
-                      ? `Day ${day}`        // current badge → show actual days
-                      : isEarned
-                        ? `Day ${b.day} ✓`  // past badge → show unlock day
-                        : `Day ${b.day}`    // future badge → show requirement
-                    }
-                  </span>
-                  <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
-                </div>
-
-                {/* Days away pill — upcoming only */}
-                {!isEarned && (
-                  <div className="mt-3 flex justify-center">
+                    <span
+                      className="font-bold tabular-nums leading-none"
+                      style={{ fontSize: "clamp(3.2rem, 16vw, 5rem)", color: b.color, textShadow: `0 0 32px ${b.glow}` }}
+                    >
+                      {day}
+                    </span>
+                    <span
+                      className="text-[10px] font-bold tracking-[0.4em] uppercase mt-1"
+                      style={{ color: `${b.color}70` }}
+                    >
+                      {dateLocked ? "days clean" : "days clean · tap to set date"}
+                    </span>
+                  </button>
+                ) : isCurrent && !isEarned ? (
+                  // On the very first card before day 1 badge
+                  <button
+                    onClick={() => !dateLocked && setShowDatePicker(true)}
+                    className="mt-4 mx-auto flex flex-col items-center rounded-3xl px-10 py-4 transition-all active:scale-95"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1.5px solid rgba(255,255,255,0.10)",
+                      cursor: dateLocked ? "default" : "pointer",
+                    }}
+                  >
+                    <span className="font-bold tabular-nums leading-none"
+                          style={{ fontSize: "clamp(3.2rem, 16vw, 5rem)", color: "rgba(255,255,255,0.25)" }}>
+                      {day}
+                    </span>
+                    <span className="text-[10px] font-bold tracking-[0.4em] uppercase mt-1"
+                          style={{ color: "rgba(255,255,255,0.2)" }}>
+                      {dateLocked ? "days clean" : "days clean · tap to set date"}
+                    </span>
+                  </button>
+                ) : isEarned ? (
+                  // Past earned badge — show unlock day, not tappable
+                  <div className="mt-4 flex items-center justify-center gap-3">
+                    <div className="h-px w-6" style={{ background: `${b.color}30` }} />
+                    <span className="text-[12px] font-bold tracking-[0.2em] uppercase"
+                          style={{ color: `${b.color}60` }}>
+                      Earned day {b.day} ✓
+                    </span>
+                    <div className="h-px w-6" style={{ background: `${b.color}30` }} />
+                  </div>
+                ) : (
+                  // Upcoming — show days required + countdown
+                  <div className="mt-4 flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-px w-6" style={{ background: "rgba(255,255,255,0.06)" }} />
+                      <span className="text-[13px] font-bold tracking-[0.2em] uppercase tabular-nums"
+                            style={{ color: "rgba(255,255,255,0.2)" }}>
+                        Day {b.day}
+                      </span>
+                      <div className="h-px w-6" style={{ background: "rgba(255,255,255,0.06)" }} />
+                    </div>
                     <span
                       className="text-[10px] font-bold px-3 py-1 rounded-full"
                       style={{
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.08)",
-                        color: "rgba(255,255,255,0.25)",
+                        color: "rgba(255,255,255,0.22)",
                       }}
                     >
                       {dAway} day{dAway !== 1 ? "s" : ""} away
@@ -433,8 +506,8 @@ function BadgeCarousel({ day }: { day: number }) {
                   </div>
                 )}
 
-                {/* Spacer so card height is consistent */}
-                {isEarned && <div className="mt-3 h-7" />}
+                {/* Spacer */}
+                <div className="h-4" />
               </div>
             );
           })}
@@ -467,6 +540,54 @@ function BadgeCarousel({ day }: { day: number }) {
           );
         })}
       </div>
+
+      {/* ── Date picker bottom sheet ── */}
+      {showDatePicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: "rgba(0,0,0,0.65)" }}
+          onClick={() => setShowDatePicker(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl p-5 pb-10 space-y-4"
+            style={{ background: "oklch(0.13 0.020 265)", border: "1px solid oklch(0.22 0.025 265 / 0.6)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full mx-auto" style={{ background: "rgba(255,255,255,0.15)" }} />
+            <p className="text-center text-[11px] font-bold tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>
+              When did you start?
+            </p>
+            <p className="text-center text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Already had days before downloading?<br />Set your real start date here.
+            </p>
+            <input
+              type="date"
+              value={dateValue}
+              max={todayStr}
+              min={minDate}
+              onChange={(e) => setDateValue(e.target.value)}
+              className="w-full h-13 rounded-2xl px-4 py-3.5 text-sm font-medium focus:outline-none"
+              style={{
+                background: "oklch(0.18 0.022 265)",
+                border: "1px solid oklch(0.28 0.03 265)",
+                color: "var(--foreground)",
+                colorScheme: "dark",
+              }}
+            />
+            <button
+              onClick={handleConfirmDate}
+              disabled={!dateValue}
+              className="w-full h-13 rounded-2xl py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-35 transition-opacity"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              Set Start Date
+            </button>
+            <p className="text-center text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>
+              This can only be set once and locks your streak.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -574,7 +695,7 @@ function Dashboard() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <BadgeCarousel day={day} />
+        <BadgeCarousel day={day} state={state} update={update} />
       </motion.div>
 
       {/* ── STATS ─────────────────────────────────────────────── */}
