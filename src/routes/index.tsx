@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Coins, X, Plus, ArrowRight } from "lucide-react";
+import { Coins, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState, type Addiction } from "@/lib/store";
@@ -285,20 +285,16 @@ function Hairline() {
 
 // ─── Habit Switcher ───────────────────────────────────────────────────────────
 function HabitSwitcher({
-  addictions, activeId, onSwitch,
-}: { addictions: Addiction[]; activeId: string; onSwitch: (id: string) => void }) {
-  if (addictions.length <= 1) {
-    const a = addictions[0];
-    if (!a) return null;
-    return (
-      <p className="text-center text-[11px] font-bold tracking-[0.3em] uppercase"
-         style={{ color: "rgba(255,255,255,0.28)" }}>
-        {a.emoji} {a.name}
-      </p>
-    );
-  }
-  return (
-    <div className="flex justify-center gap-2 flex-wrap">
+  addictions, activeId, isPremium, onSwitch, onAdd,
+}: {
+  addictions: Addiction[];
+  activeId: string;
+  isPremium: boolean;
+  onSwitch: (id: string) => void;
+  onAdd: () => void;
+}) {
+  const pills = (
+    <div className="flex justify-center items-center gap-2 flex-wrap">
       {addictions.map((a) => {
         const isActive = a.id === activeId;
         return (
@@ -319,8 +315,57 @@ function HabitSwitcher({
           </button>
         );
       })}
+
+      {/* + button — PRO gate */}
+      <button
+        onClick={onAdd}
+        style={{
+          width: 28, height: 28, borderRadius: "50%",
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(255,255,255,0.04)",
+          color: "rgba(255,255,255,0.35)",
+          fontSize: 16, lineHeight: 1,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", flexShrink: 0,
+          transition: "all 0.2s ease",
+        }}
+        aria-label="Add habit"
+      >
+        +
+      </button>
     </div>
   );
+
+  if (addictions.length <= 1) {
+    const a = addictions[0];
+    if (!a) return null;
+    // Single habit: show name label + add button
+    return (
+      <div className="flex justify-center items-center gap-2">
+        <span className="text-[11px] font-bold tracking-[0.3em] uppercase"
+              style={{ color: "rgba(255,255,255,0.28)" }}>
+          {a.emoji} {a.name}
+        </span>
+        <button
+          onClick={onAdd}
+          style={{
+            width: 22, height: 22, borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.04)",
+            color: "rgba(255,255,255,0.30)",
+            fontSize: 14, lineHeight: 1,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", flexShrink: 0,
+          }}
+          aria-label="Add habit"
+        >
+          +
+        </button>
+      </div>
+    );
+  }
+
+  return pills;
 }
 
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
@@ -529,22 +574,6 @@ function Dashboard() {
         </span>
 
         <div className="flex items-center gap-3">
-          <motion.button
-            onClick={() => {
-              if (state.isPremium) {
-                setShowAddHabit(true);
-              } else {
-                triggerPaywall();
-              }
-            }}
-            whileHover={{ opacity: 0.7 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ duration: 0.15 }}
-            className="h-7 w-7 rounded-full grid place-items-center"
-            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
-          >
-            <Plus className="h-3 w-3" />
-          </motion.button>
 
           <motion.div whileHover={{ opacity: 0.7 }} whileTap={{ scale: 0.96 }} transition={{ duration: 0.15 }}>
             <Link
@@ -573,7 +602,12 @@ function Dashboard() {
           <HabitSwitcher
             addictions={state.addictions}
             activeId={state.activeAddictionId}
+            isPremium={state.isPremium}
             onSwitch={(id) => update({ activeAddictionId: id })}
+            onAdd={() => {
+              if (state.isPremium) setShowAddHabit(true);
+              else triggerPaywall();
+            }}
           />
         </div>
         <BadgeCarousel day={day} addictionName={active?.name ?? "Recovery"} />

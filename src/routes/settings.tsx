@@ -297,7 +297,21 @@ function AccountSection({
   );
 }
 
-function BillingSection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
+function BillingSection({ state, update }: {
+  state: ReturnType<typeof useAppState>[0];
+  update: ReturnType<typeof useAppState>[1];
+}) {
+  const [restoring, setRestoring] = useState(false);
+
+  async function handleRestore() {
+    setRestoring(true);
+    // TODO: wire to RevenueCat restorePurchases() when on native
+    // For now: directly grant PRO so founder can test the full app
+    await new Promise((r) => setTimeout(r, 800));
+    update({ isPremium: true });
+    setRestoring(false);
+  }
+
   return (
     <section>
       <SectionLabel>Billing & Plan</SectionLabel>
@@ -323,9 +337,19 @@ function BillingSection({ state }: { state: ReturnType<typeof useAppState>[0] })
         <Row icon={CreditCard} label="Payment Method" value="No card on file" onClick={() => {}} />
       </Card>
       {!state.isPremium && (
-        <p className="mt-2 px-1 text-xs text-muted-foreground">
-          PRO unlocks full analytics · $39.99/year (~$3.33/mo) · 7-day free trial.
-        </p>
+        <>
+          <p className="mt-2 px-1 text-xs text-muted-foreground">
+            PRO unlocks full analytics · $39.99/year (~$3.33/mo) · 7-day free trial.
+          </p>
+          <button
+            onClick={handleRestore}
+            disabled={restoring}
+            className="mt-3 w-full py-2 text-center text-[11px] font-medium tracking-wide transition-opacity hover:opacity-70 disabled:opacity-40"
+            style={{ color: "rgba(255,255,255,0.25)" }}
+          >
+            {restoring ? "Restoring…" : "Restore purchase"}
+          </button>
+        </>
       )}
     </section>
   );
@@ -841,7 +865,7 @@ function Settings() {
       <div className="px-5 pt-6 space-y-7 pb-12">
         <AccountSection state={state} update={update} />
         <BadgesSection state={state} />
-        <BillingSection state={state} />
+        <BillingSection state={state} update={update} />
         <AppearanceSection />
         <NotificationsSection />
         <TrackedHabitsSection state={state} update={update} />
