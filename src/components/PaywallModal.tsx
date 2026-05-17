@@ -230,7 +230,7 @@ export function PaywallContent({
           >
             <span style={{ fontSize: 22 }}>{icon}</span>
             <p style={{ fontSize: 11, color: MUTED, margin: 0, textAlign: "center", lineHeight: 1.2 }}>
-              {label}
+              <span style={{ color: GOLD, fontWeight: 700, marginRight: 2 }}>✓</span>{label}
             </p>
           </motion.div>
         ))}
