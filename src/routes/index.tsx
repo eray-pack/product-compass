@@ -857,33 +857,82 @@ function Dashboard() {
         </p>
       </motion.section>
 
+      {/* ── EMERGENCY — acute urges take priority ─────────────── */}
+      <style>{`
+        @keyframes sos-border-breathe {
+          0%, 100% { box-shadow: 0 0 0 0 oklch(0.50 0.18 20 / 0), 0 0 18px 4px oklch(0.45 0.20 20 / 0.18); }
+          50%       { box-shadow: 0 0 0 3px oklch(0.50 0.18 20 / 0.12), 0 0 32px 10px oklch(0.45 0.20 20 / 0.32); }
+        }
+        .sos-breathe-border { animation: sos-border-breathe 3.2s ease-in-out infinite; }
+      `}</style>
+      <motion.section
+        className="mx-6 mb-4"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <motion.div
+          whileHover={{ scale: 1.012 }}
+          whileTap={{ scale: 0.987 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          className="sos-breathe-border"
+          style={{ borderRadius: 18, overflow: "hidden" }}
+        >
+          <Link
+            to="/tools/sos"
+            className="flex items-center justify-between px-6 py-5"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.17 0.055 20), oklch(0.13 0.04 20))",
+              border: "1px solid oklch(0.36 0.14 20 / 0.55)",
+            }}
+          >
+            <div>
+              <p
+                className="text-[9px] font-bold tracking-[0.38em] uppercase mb-1.5"
+                style={{ color: "oklch(0.62 0.14 20 / 0.75)" }}
+              >
+                Emergency
+              </p>
+              <p className="text-[18px] font-semibold leading-tight" style={{ color: "oklch(0.87 0.06 20)" }}>
+                Feeling an urge<br />right now?
+              </p>
+              <p className="text-[11px] mt-1" style={{ color: "oklch(0.52 0.08 20)" }}>
+                Immediate support available
+              </p>
+            </div>
+            <ArrowRight
+              className="h-5 w-5 shrink-0 ml-4"
+              style={{ color: "oklch(0.52 0.14 20)" }}
+            />
+          </Link>
+        </motion.div>
+      </motion.section>
+
       {/* ── NEXT MILESTONE ────────────────────────────────────── */}
       {next && (
         <motion.section
-          className="mx-6 mb-6"
+          className="mx-6 mb-4"
           initial="hidden" whileInView="show" viewport={vp} variants={up}
         >
           <div
-            className="flex items-center justify-between px-5 py-5 rounded-2xl"
+            className="flex items-center justify-between px-5 py-4 rounded-2xl"
             style={{
               background: "rgba(255,255,255,0.025)",
               border: "1px solid rgba(255,255,255,0.055)",
             }}
           >
             <div>
-              <p className="text-[9px] font-bold tracking-[0.35em] uppercase mb-2"
+              <p className="text-[9px] font-bold tracking-[0.35em] uppercase mb-1"
                  style={{ color: "rgba(255,255,255,0.25)" }}>
                 Next milestone
               </p>
-              <p className="text-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+              <p className="text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
                 Day {next.day} — {next.benefit}
               </p>
             </div>
             <div className="text-right ml-4 shrink-0">
-              <p className="text-[28px] font-bold tabular-nums leading-none" style={{ color: "#C4873A" }}>
+              <p className="text-[26px] font-bold tabular-nums leading-none" style={{ color: "#C4873A" }}>
                 {next.daysAway}
               </p>
-              <p className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-1"
+              <p className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-0.5"
                  style={{ color: "rgba(255,255,255,0.25)" }}>
                 days away
               </p>
@@ -892,47 +941,6 @@ function Dashboard() {
         </motion.section>
       )}
 
-      {/* ── EMERGENCY ─────────────────────────────────────────── */}
-      <motion.section
-        className="mx-6 mb-3"
-        initial="hidden" whileInView="show" viewport={vp} variants={up}
-      >
-        <motion.div
-          whileHover={{ scale: 1.012 }}
-          whileTap={{ scale: 0.987 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          style={{ borderRadius: 18, overflow: "hidden" }}
-        >
-          <Link
-            to="/tools/sos"
-            className="flex items-center justify-between px-6 py-6"
-            style={{
-              background: "linear-gradient(135deg, oklch(0.17 0.055 20), oklch(0.13 0.04 20))",
-              border: "1px solid oklch(0.32 0.12 20 / 0.45)",
-            }}
-          >
-            <div>
-              <p
-                className="text-[9px] font-bold tracking-[0.38em] uppercase mb-2"
-                style={{ color: "oklch(0.62 0.14 20 / 0.75)" }}
-              >
-                Emergency
-              </p>
-              <p className="text-[18px] font-semibold leading-tight" style={{ color: "oklch(0.87 0.06 20)" }}>
-                Feeling an urge<br />right now?
-              </p>
-              <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.55 0.08 20)" }}>
-                Immediate support available
-              </p>
-            </div>
-            <ArrowRight
-              className="h-5 w-5 shrink-0 ml-4"
-              style={{ color: "oklch(0.50 0.12 20)" }}
-            />
-          </Link>
-        </motion.div>
-      </motion.section>
-
       {/* ── LOG RELAPSE ───────────────────────────────────────── */}
       <motion.section
         className="px-6 pb-10"
@@ -940,9 +948,16 @@ function Dashboard() {
       >
         <motion.button
           onClick={() => setShowRelapse(true)}
-          className="w-full py-4 text-center text-[11px] font-medium tracking-wide"
-          style={{ color: "rgba(255,255,255,0.2)" }}
-          whileHover={{ color: "rgba(255,255,255,0.45)" }}
+          className="w-full py-3 text-center text-[12px] font-medium tracking-[0.04em] rounded-xl"
+          style={{
+            color: "rgba(255,255,255,0.30)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.02)",
+          }}
+          whileHover={{
+            color: "rgba(255,255,255,0.55)",
+            borderColor: "rgba(255,255,255,0.16)",
+          }}
           transition={{ duration: 0.2 }}
         >
           I relapsed — log it honestly
