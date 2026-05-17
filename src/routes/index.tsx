@@ -214,6 +214,25 @@ export const Route = createFileRoute("/")({
 });
 
 // ─── Floating emoji background ───────────────────────────────────────────────
+// Safe, trigger-free recovery emoji per addiction category.
+// Matched by lowercase addiction id (name.toLowerCase().replace(/\s+/g, "-")).
+// Falls back to ✨ for any custom/unrecognised habit.
+const RECOVERY_EMOJI: Record<string, string> = {
+  "porn":            "✨",
+  "social-media":    "🎯",
+  "sugar":           "💪",
+  "alcohol":         "🧠",
+  "nicotine":        "🌬️",
+  "cannabis":        "🌅",
+  "gambling":        "📈",
+  "gaming":          "🌍",
+  "procrastination": "🔥",
+};
+
+function recoveryEmoji(id: string): string {
+  return RECOVERY_EMOJI[id] ?? "✨";
+}
+
 const FLOAT_PARTICLES = Array.from({ length: 14 }, (_, i) => ({
   size:  18 + (i * 9) % 30,
   x:     (i * 41 + 7) % 100,
@@ -557,7 +576,7 @@ function Dashboard() {
 
   return (
     <PageShell>
-      <FloatingHabitBg emoji={active?.emoji ?? "🧠"} />
+      <FloatingHabitBg emoji={recoveryEmoji(active?.id ?? "")} />
 
       {/* ── NAV ──────────────────────────────────────────────── */}
       <motion.header
