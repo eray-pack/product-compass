@@ -6,6 +6,7 @@ import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState, type Addiction } from "@/lib/store";
 import { BADGES, currentBadge, nextBadge, badgeSplit } from "@/lib/badges";
 import { initPurchases, checkPremium } from "@/lib/purchases";
+import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
@@ -529,7 +530,13 @@ function Dashboard() {
 
         <div className="flex items-center gap-3">
           <motion.button
-            onClick={() => setShowAddHabit(true)}
+            onClick={() => {
+              if (state.isPremium) {
+                setShowAddHabit(true);
+              } else {
+                triggerPaywall();
+              }
+            }}
             whileHover={{ opacity: 0.7 }}
             whileTap={{ scale: 0.94 }}
             transition={{ duration: 0.15 }}
