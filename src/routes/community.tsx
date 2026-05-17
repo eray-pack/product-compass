@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
-import { useAppState, treeStage, dayCount, activeAddiction } from "@/lib/store";
+import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
 import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";
 import { triggerPaywall } from "@/lib/paywall";
@@ -454,8 +454,9 @@ function CommunityPage() {
 // ─── Chat screen ──────────────────────────────────────────────────────────────
 function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const [state] = useAppState();
-  const active = activeAddiction(state);
-  const day = active ? dayCount(active.startDate) : 1;
+  // Flagship = addiction with most days — shown in community regardless of active tab
+  const flagship = flagshipAddiction(state);
+  const day = flagship ? dayCount(flagship.startDate) : 1;
   const stage = treeStage(state.treeXP);
 
   const [messages, setMessages] = useState<Message[]>(() => makeMockMessages()[room.id] ?? []);

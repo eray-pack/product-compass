@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Coins, X, Plus, ArrowRight } from "lucide-react";
+import { Coins, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
-import { useAppState, dayCount, activeAddiction, inactivityDays, loadState } from "@/lib/store";
+import { useAppState, dayCount, activeAddiction, inactivityDays, loadState, type Addiction } from "@/lib/store";
 import { BADGES, currentBadge, nextBadge, badgeSplit } from "@/lib/badges";
 import { initPurchases, checkPremium } from "@/lib/purchases";
+import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
@@ -122,7 +123,7 @@ function TodaysFocus({ name, addiction, costs, triggers, day }: {
             <div className="h-3.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.05)", width: "68%" }} />
           </div>
         ) : text ? (
-          <p className="text-[15px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
+          <p className="text-[17px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
             {text}
           </p>
         ) : (
@@ -270,6 +271,49 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
+// ─── Floating emoji background ───────────────────────────────────────────────
+const FLOAT_PARTICLES = Array.from({ length: 14 }, (_, i) => ({
+  size:  18 + (i * 9) % 30,
+  x:     (i * 41 + 7) % 100,
+  y:     (i * 59 + 13) % 130,
+  dur:   18 + (i * 4) % 16,
+  delay: -(i * 3.1)   % 22,
+  drift: (i % 2 === 0 ? 1 : -1) * (6 + (i * 7) % 18),
+}));
+
+function FloatingHabitBg({ emoji }: { emoji: string }) {
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+      <style>{`
+        @keyframes habit-float {
+          0%   { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(-110vh) translateX(var(--hdrift)) rotate(var(--hrot)); opacity: 0; }
+        }
+      `}</style>
+      {FLOAT_PARTICLES.map((p, i) => (
+        <span
+          key={i}
+          style={{
+            position:  "fixed",
+            left:      `${p.x}%`,
+            top:       `${p.y}%`,
+            fontSize:  `${p.size}px`,
+            opacity:   0,
+            "--hdrift": `${p.drift}px`,
+            "--hrot":   `${p.drift * 1.2}deg`,
+            animation: `habit-float ${p.dur}s ${p.delay}s linear infinite`,
+            filter:    "opacity(0.09)",
+          } as React.CSSProperties}
+        >
+          {emoji}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // ─── Thin separator ───────────────────────────────────────────────────────────
 function Hairline() {
   return (
@@ -282,18 +326,104 @@ function Hairline() {
 }
 
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-// ─── Badge Carousel ───────────────────────────────────────────────────────────
-function BadgeCarousel({ day }: { day: number }) {
-  // Start on the current earned badge (or 0 if nothing earned yet)
-  const earnedCount = BADGES.filter((b) => day >= b.day).length;
-  const startIdx    = Math.max(0, earnedCount - 1);
+// ─── Habit Switcher ───────────────────────────────────────────────────────────
+function HabitSwitcher({
+  addictions, activeId, isPremium, onSwitch, onAdd,
+}: {
+  addictions: Addiction[];
+  activeId: string;
+  isPremium: boolean;
+  onSwitch: (id: string) => void;
+  onAdd: () => void;
+}) {
+  const pills = (
+    <div className="flex justify-center items-center gap-2 flex-wrap">
+      {addictions.map((a) => {
+        const isActive = a.id === activeId;
+        return (
+          <button
+            key={a.id}
+            onClick={() => onSwitch(a.id)}
+            style={{
+              padding: "5px 16px", borderRadius: 20,
+              fontSize: 12, fontWeight: isActive ? 700 : 500,
+              background: isActive ? "rgba(196,135,58,0.14)" : "rgba(255,255,255,0.05)",
+              border: `1px solid ${isActive ? "rgba(196,135,58,0.38)" : "rgba(255,255,255,0.08)"}`,
+              color: isActive ? "#C4873A" : "rgba(255,255,255,0.35)",
+              transition: "all 0.2s ease",
+              cursor: "pointer",
+            }}
+          >
+            {a.emoji} {a.name}
+          </button>
+        );
+      })}
 
-  const [idx, setIdx]           = useState(startIdx);
-  const touchStartX             = useRef(0);
-  const touchStartY             = useRef(0);
-  const [dragging, setDragging] = useState(false);
+      {/* + button — PRO gate */}
+      <button
+        onClick={onAdd}
+        style={{
+          width: 28, height: 28, borderRadius: "50%",
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(255,255,255,0.04)",
+          color: "rgba(255,255,255,0.35)",
+          fontSize: 16, lineHeight: 1,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", flexShrink: 0,
+          transition: "all 0.2s ease",
+        }}
+        aria-label="Add habit"
+      >
+        +
+      </button>
+    </div>
+  );
+
+  if (addictions.length <= 1) {
+    const a = addictions[0];
+    if (!a) return null;
+    // Single habit: show name label + add button
+    return (
+      <div className="flex justify-center items-center gap-2">
+        <span className="text-[11px] font-bold tracking-[0.3em] uppercase"
+              style={{ color: "rgba(255,255,255,0.28)" }}>
+          {a.emoji} {a.name}
+        </span>
+        <button
+          onClick={onAdd}
+          style={{
+            width: 22, height: 22, borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.04)",
+            color: "rgba(255,255,255,0.30)",
+            fontSize: 14, lineHeight: 1,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", flexShrink: 0,
+          }}
+          aria-label="Add habit"
+        >
+          +
+        </button>
+      </div>
+    );
+  }
+
+  return pills;
+}
+
+// ─── Badge Carousel ───────────────────────────────────────────────────────────
+function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addictionName: string; addictionId: string }) {
+  const earnedCount = BADGES.filter((b) => day >= b.day).length;
+  const [idx, setIdx]             = useState(() => Math.max(0, earnedCount - 1));
+  const touchStartX               = useRef(0);
+  const touchStartY               = useRef(0);
+  const [dragging, setDragging]   = useState(false);
   const [dragDelta, setDragDelta] = useState(0);
+
+  // Snap to latest earned badge whenever the active habit changes
+  useEffect(() => {
+    setIdx(Math.max(0, BADGES.filter((b) => day >= b.day).length - 1));
+  }, [addictionId]);
 
   const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
 
@@ -306,7 +436,7 @@ function BadgeCarousel({ day }: { day: number }) {
   const onTouchMove = (e: React.TouchEvent) => {
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
-    if (Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
+    if (Math.abs(dy) > Math.abs(dx)) return;
     setDragDelta(dx);
   };
   const onTouchEnd = () => {
@@ -316,151 +446,105 @@ function BadgeCarousel({ day }: { day: number }) {
     setDragDelta(0);
   };
 
-  const badge   = BADGES[idx];
-  const earned  = day >= badge.day;
-  const daysAway = badge.day - day;
+  const b       = BADGES[idx];
+  const isEarned = day >= b.day;
 
   return (
-    <div
-      className="select-none"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      {/* Card viewport */}
-      <div className="overflow-hidden">
+    <div className="select-none text-center">
+
+      {/* ── Swipeable badge area ── */}
+      <div
+        className="overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <motion.div
           style={{ display: "flex" }}
           animate={{ x: `calc(-${idx * 100}% + ${dragging ? dragDelta : 0}px)` }}
-          transition={dragging
-            ? { duration: 0 }
-            : { type: "spring", damping: 30, stiffness: 300, mass: 0.85 }
-          }
+          transition={dragging ? { duration: 0 } : { type: "spring", damping: 30, stiffness: 300, mass: 0.85 }}
         >
           {BADGES.map((b, i) => {
-            const isEarned   = day >= b.day;
-            const isCurrent  = i === idx;
-            const dAway      = b.day - day;
-
+            const earned = day >= b.day;
             return (
-              <div
-                key={b.name}
-                style={{ minWidth: "100%", width: "100%" }}
-                className="relative px-6 pt-8 pb-3 text-center"
-              >
-                {/* Ambient glow — only for earned */}
-                {isEarned && (
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute"
-                    style={{
-                      top: "0%", left: "50%", transform: "translateX(-50%)",
-                      width: 300, height: 300,
-                      borderRadius: "50%",
-                      background: `radial-gradient(circle, ${b.glow.replace("0.40","0.13")} 0%, transparent 68%)`,
-                      filter: "blur(40px)",
-                    }}
-                  />
+              <div key={b.name} style={{ minWidth: "100%", width: "100%" }} className="relative pt-8 pb-2 flex flex-col items-center">
+                {/* Ambient glow */}
+                {earned && (
+                  <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
+                    style={{ width: 280, height: 280, borderRadius: "50%",
+                      background: `radial-gradient(circle, ${b.glow.replace("0.40","0.12")} 0%, transparent 68%)`,
+                      filter: "blur(40px)" }} />
                 )}
 
                 {/* Eyebrow */}
-                <p
-                  className="text-[9px] font-bold tracking-[0.5em] uppercase mb-2"
-                  style={{ color: isEarned ? `${b.color}80` : "rgba(255,255,255,0.18)" }}
-                >
-                  {isEarned
+                <p className="text-[9px] font-bold tracking-[0.45em] uppercase mb-3"
+                   style={{ color: earned ? `${b.color}70` : "rgba(255,255,255,0.15)" }}>
+                  {earned
                     ? i === earnedCount - 1 ? "Your rank" : "Earned"
-                    : i === earnedCount ? "Next badge" : "Coming up"}
+                    : i === earnedCount     ? "Next badge" : "Coming up"}
                 </p>
 
-                {/* Badge symbol — the hero */}
-                <div
-                  className="font-bold leading-none tabular-nums select-none mx-auto"
-                  style={{
-                    fontSize: "clamp(5.5rem, 24vw, 8.5rem)",
-                    color: isEarned ? b.color : "rgba(255,255,255,0.08)",
-                    filter: isEarned ? "none" : "blur(6px)",
-                    textShadow: isEarned
-                      ? `0 0 60px ${b.glow}, 0 0 120px ${b.glow.replace("0.40","0.25")}`
-                      : "none",
-                    transition: "color 0.4s, filter 0.4s",
-                  }}
-                >
-                  {b.symbol}
+                {/* Badge symbol with lock overlay */}
+                <div className="relative inline-flex items-center justify-center">
+                  <span className="font-bold leading-none select-none"
+                    style={{
+                      fontSize: "clamp(5rem, 22vw, 7.5rem)",
+                      color: earned ? b.color : "rgba(255,255,255,0.06)",
+                      filter: earned ? "none" : "blur(9px)",
+                      textShadow: earned ? `0 0 55px ${b.glow}, 0 0 110px ${b.glow.replace("0.40","0.2")}` : "none",
+                      transition: "color 0.35s, filter 0.35s",
+                      userSelect: "none",
+                    }}>
+                    {b.symbol}
+                  </span>
+                  {!earned && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                      <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
+                            style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
+                      <span className="text-[20px] font-bold tabular-nums"
+                            style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Badge name */}
-                <p
-                  className="mt-3 text-[22px] font-bold leading-tight tracking-tight"
-                  style={{ color: isEarned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.2)" }}
-                >
+                <p className="mt-3 font-bold leading-tight"
+                   style={{ fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
+                            color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.18)" }}>
                   {b.name}
                 </p>
-
-                {/* Day info */}
-                <div className="mt-2 flex items-center justify-center gap-3">
-                  <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
-                  <span
-                    className="text-[11px] font-bold tracking-[0.25em] uppercase tabular-nums"
-                    style={{ color: isEarned ? `${b.color}90` : "rgba(255,255,255,0.22)" }}
-                  >
-                    {isEarned && i === earnedCount - 1
-                      ? `Day ${day}`        // current badge → show actual days
-                      : isEarned
-                        ? `Day ${b.day} ✓`  // past badge → show unlock day
-                        : `Day ${b.day}`    // future badge → show requirement
-                    }
-                  </span>
-                  <div className="h-px w-8" style={{ background: isEarned ? `${b.color}40` : "rgba(255,255,255,0.06)" }} />
-                </div>
-
-                {/* Days away pill — upcoming only */}
-                {!isEarned && (
-                  <div className="mt-3 flex justify-center">
-                    <span
-                      className="text-[10px] font-bold px-3 py-1 rounded-full"
-                      style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        color: "rgba(255,255,255,0.25)",
-                      }}
-                    >
-                      {dAway} day{dAway !== 1 ? "s" : ""} away
-                    </span>
-                  </div>
+                {earned && i < earnedCount - 1 && (
+                  <p className="mt-1 text-[10px] font-semibold tracking-wider" style={{ color: `${b.color}55` }}>
+                    ✓ Day {b.day}
+                  </p>
                 )}
-
-                {/* Spacer so card height is consistent */}
-                {isEarned && <div className="mt-3 h-7" />}
               </div>
             );
           })}
         </motion.div>
       </div>
 
-      {/* Dots — tap to jump */}
-      <div className="flex justify-center gap-1.5 pb-3 pt-1">
+      {/* ── Fixed day display — outside the swipe area ── */}
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+        <span className="text-[13px] font-bold tracking-[0.3em] uppercase tabular-nums"
+              style={{ color: "rgba(255,255,255,0.5)" }}>
+          Day {day}
+        </span>
+        <div className="h-px w-8" style={{ background: "rgba(196,135,58,0.25)" }} />
+      </div>
+
+      {/* ── Dots ── */}
+      <div className="flex justify-center gap-1.5 pt-4 pb-2">
         {BADGES.map((_, i) => {
-          const isEarned = day >= BADGES[i].day;
+          const earned = day >= BADGES[i].day;
           return (
-            <button
-              key={i}
-              onClick={() => go(i)}
+            <button key={i} onClick={() => go(i)}
               style={{
-                width: i === idx ? 16 : 4,
-                height: 4,
-                borderRadius: 2,
-                background: i === idx
-                  ? BADGES[i].color
-                  : isEarned
-                    ? `${BADGES[i].color}50`
-                    : "rgba(255,255,255,0.12)",
-                transition: "all 0.25s ease",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-              }}
-            />
+                width: i === idx ? 16 : 4, height: 4, borderRadius: 2,
+                background: i === idx ? BADGES[i].color : earned ? `${BADGES[i].color}45` : "rgba(255,255,255,0.12)",
+                transition: "all 0.25s ease", border: "none", padding: 0, cursor: "pointer",
+              }} />
           );
         })}
       </div>
@@ -482,11 +566,13 @@ function Dashboard() {
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
   const next        = nextMilestone(day);
 
-  // Init RevenueCat and sync premium status on mount
+  // Init RevenueCat and sync premium status on mount (native only)
+  // On web, checkPremium() always returns false — don't let it override localStorage
   useEffect(() => {
     async function syncPremium() {
       const { data: { session } } = await supabase.auth.getSession();
       await initPurchases(session?.user?.id);
+      if (typeof window !== "undefined" && !(window as any).Capacitor?.isNativePlatform?.()) return;
       const isPremium = await checkPremium();
       if (isPremium !== state.isPremium) {
         update({ isPremium });
@@ -499,10 +585,18 @@ function Dashboard() {
     if (!state.onboarding) return;
     const inactive = inactivityDays(state.lastLoginAt);
     if (inactive >= 30) setReEntryDays(inactive);
-    update((s) => ({
-      lastLoginAt:  Date.now(),
-      loginHistory: [...(s.loginHistory ?? []).slice(-89), Date.now()],
-    }));
+    const today = new Date().toISOString().slice(0, 10);
+    update((s) => {
+      const waterToday = s.lastTreeWaterDate !== today && s.addictions.length > 0;
+      return {
+        lastLoginAt:       Date.now(),
+        loginHistory:      [...(s.loginHistory ?? []).slice(-89), Date.now()],
+        ...(waterToday ? {
+          treeXP:            s.treeXP + s.addictions.length * 10,
+          lastTreeWaterDate: today,
+        } : {}),
+      };
+    });
   }, [state.onboarding]);
 
   useEffect(() => {
@@ -521,6 +615,7 @@ function Dashboard() {
 
   return (
     <PageShell>
+      <FloatingHabitBg emoji={active?.emoji ?? "🧠"} />
 
       {/* ── NAV ──────────────────────────────────────────────── */}
       <motion.header
@@ -537,16 +632,6 @@ function Dashboard() {
         </span>
 
         <div className="flex items-center gap-3">
-          <motion.button
-            onClick={() => setShowAddHabit(true)}
-            whileHover={{ opacity: 0.7 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ duration: 0.15 }}
-            className="h-7 w-7 rounded-full grid place-items-center"
-            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
-          >
-            <Plus className="h-3 w-3" />
-          </motion.button>
 
           <motion.div whileHover={{ opacity: 0.7 }} whileTap={{ scale: 0.96 }} transition={{ duration: 0.15 }}>
             <Link
@@ -565,13 +650,22 @@ function Dashboard() {
         </div>
       </motion.header>
 
-      {/* ── HERO — Badge carousel ─────────────────────────────── */}
+      {/* ── HABIT SWITCHER + BADGE CAROUSEL ──────────────────── */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: EASE }}
       >
-        <BadgeCarousel day={day} />
+        <div className="px-6 pb-3 pt-1">
+          <HabitSwitcher
+            addictions={state.addictions}
+            activeId={state.activeAddictionId}
+            isPremium={state.isPremium}
+            onSwitch={(id) => update({ activeAddictionId: id })}
+            onAdd={() => setShowAddHabit(true)}
+          />
+        </div>
+        <BadgeCarousel day={day} addictionName={active?.name ?? "Recovery"} addictionId={active?.id ?? ""} />
       </motion.div>
 
       {/* ── STATS ─────────────────────────────────────────────── */}
@@ -602,13 +696,13 @@ function Dashboard() {
             transition={{ duration: 0.2 }}
           >
             <span
-              className="text-[24px] font-bold tabular-nums leading-none"
+              className="text-[28px] font-bold tabular-nums leading-none"
               style={{ color: gold ? "#C4873A" : "rgba(255,255,255,0.88)" }}
             >
               {value}
             </span>
             <span
-              className="text-[9px] font-semibold tracking-[0.2em] uppercase mt-1.5"
+              className="text-[10px] font-semibold tracking-[0.2em] uppercase mt-2"
               style={{ color: "rgba(255,255,255,0.25)" }}
             >
               {sub}
@@ -644,7 +738,7 @@ function Dashboard() {
         initial="hidden" whileInView="show" viewport={vp} variants={up}
       >
         <SectionTitle>Daily Check-in</SectionTitle>
-        <p className="text-[20px] font-semibold leading-tight mb-5"
+        <p className="text-[24px] font-semibold leading-tight mb-6"
            style={{ letterSpacing: "-0.02em" }}>
           How are you<br />holding up today?
         </p>
@@ -659,7 +753,7 @@ function Dashboard() {
         initial="hidden" whileInView="show" viewport={{ once: true, margin: "-16px" }} variants={fade}
       >
         <p
-          className="text-[15px] leading-relaxed"
+          className="text-[17px] leading-relaxed"
           style={{ color: "rgba(255,255,255,0.36)", fontStyle: "italic" }}
         >
           You started this for{" "}
@@ -691,7 +785,7 @@ function Dashboard() {
                  style={{ color: "rgba(255,255,255,0.25)" }}>
                 Next milestone
               </p>
-              <p className="text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+              <p className="text-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
                 Day {next.day} — {next.benefit}
               </p>
             </div>
@@ -766,7 +860,17 @@ function Dashboard() {
       </motion.section>
 
       {/* ── MODALS ────────────────────────────────────────────── */}
-      {showAddHabit && <AddAddictionModal onClose={() => setShowAddHabit(false)} />}
+      {showAddHabit && (
+        <AddAddictionModal
+          trackedIds={new Set(state.addictions.map((a) => a.id))}
+          onClose={() => setShowAddHabit(false)}
+          onAdd={(addiction) => {
+            if (!state.isPremium) { triggerPaywall(); return; }
+            update((s) => ({ addictions: [...s.addictions, addiction] }));
+            setShowAddHabit(false);
+          }}
+        />
+      )}
       {showRelapse  && (
         <RelapseModal onClose={() => setShowRelapse(false)} totalCleanDays={state.totalCleanDays} />
       )}

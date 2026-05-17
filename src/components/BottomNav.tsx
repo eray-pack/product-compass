@@ -44,7 +44,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 function TreeIcon({ strokeWidth }: { strokeWidth: number }) {
   return (
     <svg
-      className="h-5 w-5"
+      width="26" height="26"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -52,13 +52,9 @@ function TreeIcon({ strokeWidth }: { strokeWidth: number }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {/* trunk */}
       <line x1="12" y1="22" x2="12" y2="13" />
-      {/* bottom layer */}
       <path d="M5 17l7-4 7 4" />
-      {/* middle layer */}
       <path d="M7 13l5-4 5 4" />
-      {/* top layer */}
       <path d="M9 9l3-5 3 5" />
     </svg>
   );
@@ -67,7 +63,7 @@ function TreeIcon({ strokeWidth }: { strokeWidth: number }) {
 function WolfIcon({ strokeWidth }: { strokeWidth: number }) {
   return (
     <svg
-      className="h-5 w-5"
+      width="26" height="26"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -75,48 +71,34 @@ function WolfIcon({ strokeWidth }: { strokeWidth: number }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {/* ears */}
       <path d="M4 8 L6 2 L9 7" />
       <path d="M15 7 L18 2 L20 8" />
-      {/* head */}
       <path d="M4 8 Q4 14 12 14 Q20 14 20 8 Q20 4 15 3 Q12 2 9 3 Q4 4 4 8Z" />
-      {/* snout */}
       <path d="M9 12 Q12 15 15 12" />
-      {/* body */}
       <path d="M7 14 Q4 18 5 22" />
       <path d="M17 14 Q20 18 19 22" />
       <path d="M5 22 Q12 20 19 22" />
-      {/* tail */}
       <path d="M5 16 Q1 12 3 8" />
     </svg>
   );
 }
 
-const COMPANION_ICONS = {
-  tree: TreeIcon,
-  wolf: WolfIcon,
-} as const;
+const COMPANION_ICONS = { tree: TreeIcon, wolf: WolfIcon } as const;
 
-// ── Static nav items (companion tab handled separately) ───────────────────────
 const BASE_NAV = [
-  { to: "/",          label: "Home",      Icon: Home      },
-  { to: "/tools",     label: "Tools",     Icon: Wrench    },
-  { to: "/community", label: "Community", Icon: Users     },
-  { to: "/progress",  label: "Progress",  Icon: BarChart2 },
+  { to: "/",          label: "Home",     Icon: Home      },
+  { to: "/tools",     label: "Tools",    Icon: Wrench    },
+  { to: "/community", label: "Community",Icon: Users     },
+  { to: "/progress",  label: "Progress", Icon: BarChart2 },
 ] as const;
 
 export function BottomNav() {
-  const path = useRouterState({ select: (r) => r.location.pathname });
-  const hidden = useScrollHide();
-
-  // Read companion from localStorage — same source as the rest of the app.
-  // loadState() is synchronous and cheap (just a JSON.parse).
-  const companion = loadState().companion ?? "tree";
-  const CompanionIcon = COMPANION_ICONS[companion];
-
+  const path         = useRouterState({ select: (r) => r.location.pathname });
+  const hidden       = useScrollHide();
+  const companion    = loadState().companion ?? "tree";
+  const CompanionIcon  = COMPANION_ICONS[companion];
   const companionLabel = companion === "wolf" ? "Companion" : "Tree";
 
-  // Build ordered nav: Home | Companion | Tools | Community | Progress
   const navItems = [
     BASE_NAV[0],
     { to: "/tree" as const, label: companionLabel, Icon: null as unknown as typeof Home },
@@ -125,53 +107,84 @@ export function BottomNav() {
 
   return (
     <nav
-      className={`fixed bottom-0 inset-x-0 z-40 backdrop-blur-2xl transition-transform duration-300 ${hidden ? "translate-y-full" : "translate-y-0"}`}
-      style={{
-        background: "oklch(0.11 0.018 265 / 0.92)",
-        borderTop: "1px solid oklch(0.20 0.025 265 / 0.6)",
-      }}
+      className={`fixed bottom-0 inset-x-0 z-40 flex justify-center transition-transform duration-300 ${hidden ? "translate-y-full" : "translate-y-0"}`}
+      style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
     >
-      <div className="mx-auto max-w-md flex items-stretch">
+      <div
+        className="flex items-center gap-1 px-2 py-2 rounded-[28px]"
+        style={{
+          background: "oklch(0.13 0.020 265 / 0.94)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid oklch(0.26 0.028 265 / 0.55)",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3)",
+        }}
+      >
         {navItems.map(({ to, label, Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
-          const sw = active ? 2.2 : 1.6;
+          const sw = active ? 2.3 : 1.7;
+
           return (
             <Link
               key={to}
               to={to}
-              className={`flex-1 flex flex-col items-center gap-1 pt-3 pb-2 text-[9.5px] font-semibold tracking-wide transition-all relative ${
-                active ? "" : "opacity-50 hover:opacity-80"
-              }`}
-              style={{ color: active ? "#C4873A" : "rgba(255,255,255,0.85)" }}
+              className="relative flex flex-col items-center transition-all"
+              style={{
+                color: active ? "#C4873A" : "rgba(255,255,255,0.45)",
+                minWidth: active ? 72 : 52,
+                paddingTop: 10,
+                paddingBottom: 10,
+                paddingLeft: active ? 14 : 10,
+                paddingRight: active ? 14 : 10,
+                borderRadius: 22,
+                background: active ? "rgba(196,135,58,0.10)" : "transparent",
+                gap: 5,
+              }}
             >
+              {/* Active glow dot above icon */}
               {active && (
                 <span
-                  className="absolute top-0 inset-x-5 h-[1.5px] rounded-full"
-                  style={{ background: "var(--gradient-primary)" }}
+                  className="absolute top-1.5 left-1/2 -translate-x-1/2 rounded-full"
+                  style={{
+                    width: 18,
+                    height: 2.5,
+                    background: "linear-gradient(90deg, #C4873A, #E8A84A)",
+                    boxShadow: "0 0 8px rgba(196,135,58,0.7)",
+                  }}
                 />
               )}
+
               {to === "/tree" ? (
                 <CompanionIcon strokeWidth={sw} />
               ) : (
-                <Icon className="h-5 w-5" strokeWidth={sw} />
+                <Icon width={26} height={26} strokeWidth={sw} />
               )}
-              {label}
+
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: active ? 700 : 600,
+                  letterSpacing: "0.04em",
+                  lineHeight: 1,
+                  opacity: active ? 1 : 0.7,
+                }}
+              >
+                {label}
+              </span>
             </Link>
           );
         })}
       </div>
-      <div className="h-[env(safe-area-inset-bottom)]" />
     </nav>
   );
 }
 
 export function PageShell({ children }: { children: React.ReactNode }) {
-  const path = useRouterState({ select: (r) => r.location.pathname });
+  const path       = useRouterState({ select: (r) => r.location.pathname });
   const onSettings = path === "/settings";
 
   return (
-    <div className="min-h-screen pb-24 mx-auto max-w-md">
-      {/* Settings gear — hidden on the settings page itself */}
+    <div className="min-h-screen pb-32 mx-auto max-w-md">
       {!onSettings && (
         <Link
           to="/settings"

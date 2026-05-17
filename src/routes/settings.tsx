@@ -21,11 +21,14 @@ import {
   ShieldCheck,
   Plus,
   Calendar,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { SectionTitle } from "@/components/BottomNav";
 import { BADGES, currentBadge, badgeSplit } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
+import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/theme";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 
@@ -297,7 +300,32 @@ function AccountSection({
   );
 }
 
-function BillingSection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
+function BillingSection({ state, update }: {
+  state: ReturnType<typeof useAppState>[0];
+  update: ReturnType<typeof useAppState>[1];
+}) {
+  const [restoring, setRestoring] = useState(false);
+
+  async function handleRestore() {
+    setRestoring(true);
+    // TODO: wire to RevenueCat restorePurchases() when on native
+    // For now: grant PRO in both localStorage AND Supabase so the sync doesn't revert it
+    update({ isPremium: true });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from("user_state").upsert({
+          user_id: session.user.id,
+          is_premium: true,
+          updated_at: new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      console.warn("[Restore] Supabase sync failed", e);
+    }
+    setRestoring(false);
+  }
+
   return (
     <section>
       <SectionLabel>Billing & Plan</SectionLabel>
@@ -323,9 +351,19 @@ function BillingSection({ state }: { state: ReturnType<typeof useAppState>[0] })
         <Row icon={CreditCard} label="Payment Method" value="No card on file" onClick={() => {}} />
       </Card>
       {!state.isPremium && (
-        <p className="mt-2 px-1 text-xs text-muted-foreground">
-          PRO unlocks full analytics · $39.99/year (~$3.33/mo) · 7-day free trial.
-        </p>
+        <>
+          <p className="mt-2 px-1 text-xs text-muted-foreground">
+            PRO unlocks full analytics · $39.99/year (~$3.33/mo) · 7-day free trial.
+          </p>
+          <button
+            onClick={handleRestore}
+            disabled={restoring}
+            className="mt-3 w-full py-2 text-center text-[11px] font-medium tracking-wide transition-opacity hover:opacity-70 disabled:opacity-40"
+            style={{ color: "rgba(255,255,255,0.25)" }}
+          >
+            {restoring ? "Restoring…" : "Restore purchase"}
+          </button>
+        </>
       )}
     </section>
   );
@@ -531,6 +569,113 @@ function AboutSection() {
   );
 }
 
+// ── Delete habit confirmation modal ──────────────────────────────────────────
+function DeleteHabitModal({
+  habit,
+  costs,
+  identity,
+  dayCount: days,
+  onConfirm,
+  onCancel,
+}: {
+  habit: { name: string; emoji: string };
+  costs: string[];
+  identity: string;
+  dayCount: number;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div
+        className="w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-border/60 overflow-hidden"
+        style={{ background: "var(--card)" }}
+      >
+        {/* Warning header */}
+        <div className="px-6 pt-7 pb-5 text-center"
+             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="inline-flex items-center justify-center h-14 w-14 rounded-full mb-4"
+               style={{ background: "oklch(0.22 0.10 25 / 0.5)", border: "1px solid oklch(0.45 0.18 25 / 0.4)" }}>
+            <AlertTriangle className="h-6 w-6" style={{ color: "oklch(0.72 0.18 25)" }} />
+          </div>
+          <p className="text-[10px] font-bold tracking-[0.3em] uppercase mb-2"
+             style={{ color: "oklch(0.72 0.18 25)" }}>
+            Wait — are you sure?
+          </p>
+          <h2 className="text-xl font-bold leading-snug">
+            You're about to stop<br />tracking{" "}
+            <span style={{ color: "rgba(255,255,255,0.55)" }}>
+              {habit.emoji} {habit.name}
+            </span>
+          </h2>
+        </div>
+
+        {/* Why you started */}
+        <div className="px-6 py-5 space-y-4">
+          <div className="rounded-2xl p-4 space-y-3"
+               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase"
+               style={{ color: "rgba(255,255,255,0.3)" }}>
+              You started this because
+            </p>
+
+            {costs.length > 0 && (
+              <div className="space-y-1.5">
+                {costs.map((c) => (
+                  <div key={c} className="flex items-start gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0"
+                         style={{ background: "oklch(0.72 0.18 25)" }} />
+                    <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.65)" }}>
+                      {c}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {identity && (
+              <p className="text-[13px] italic pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                "I am becoming someone who{" "}
+                <span className="not-italic font-semibold" style={{ color: "#C4873A" }}>
+                  {identity}
+                </span>."
+              </p>
+            )}
+
+            <p className="text-[12px] pt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+              You've been clean for{" "}
+              <span className="font-bold" style={{ color: "rgba(255,255,255,0.7)" }}>
+                {days} {days === 1 ? "day" : "days"}
+              </span>
+              . That's real progress — don't lose the record.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <button
+            onClick={onCancel}
+            className="w-full h-12 rounded-2xl font-bold text-sm"
+            style={{ background: "var(--gradient-primary)", color: "white" }}
+          >
+            Keep fighting — stay in
+          </button>
+          <button
+            onClick={onConfirm}
+            className="w-full h-10 rounded-2xl text-sm font-medium"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "rgba(255,255,255,0.35)",
+            }}
+          >
+            Remove habit anyway
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TrackedHabitsSection({
   state,
   update,
@@ -539,6 +684,20 @@ function TrackedHabitsSection({
   update: ReturnType<typeof useAppState>[1];
 }) {
   const [showAdd, setShowAdd] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<typeof state.addictions[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    update((s) => {
+      const remaining = s.addictions.filter((a) => a.id !== deleteTarget.id);
+      const newActiveId =
+        s.activeAddictionId === deleteTarget.id
+          ? (remaining[0]?.id ?? "")
+          : s.activeAddictionId;
+      return { addictions: remaining, activeAddictionId: newActiveId };
+    });
+    setDeleteTarget(null);
+  };
 
   return (
     <section>
@@ -566,34 +725,66 @@ function TrackedHabitsSection({
               a.id === state.activeAddictionId ||
               (!state.activeAddictionId && a === state.addictions[0]);
             return (
-              <button
+              <div
                 key={a.id}
-                onClick={() => update({ activeAddictionId: a.id })}
-                className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-foreground/[0.03]"
+                className="flex items-center gap-3 px-4 py-3.5 hover:bg-foreground/[0.03] transition-colors"
               >
-                <span className="text-2xl leading-none shrink-0">{a.emoji}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{a.name}</p>
-                  <p className="text-xs text-muted-foreground">Day {day}</p>
-                </div>
-                {isActive && (
-                  <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-                    style={{
-                      background: "var(--primary)",
-                      color: "var(--primary-foreground)",
-                      opacity: 0.9,
-                    }}
-                  >
-                    Active
-                  </span>
-                )}
-              </button>
+                <button
+                  onClick={() => update({ activeAddictionId: a.id })}
+                  className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                >
+                  <span className="text-2xl leading-none shrink-0">{a.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{a.name}</p>
+                    <p className="text-xs text-muted-foreground">Day {day}</p>
+                  </div>
+                  {isActive && (
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                      style={{
+                        background: "var(--primary)",
+                        color: "var(--primary-foreground)",
+                        opacity: 0.9,
+                      }}
+                    >
+                      Active
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(a)}
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                  style={{ color: "rgba(255,255,255,0.2)" }}
+                  aria-label={`Remove ${a.name}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
             );
           })
         )}
       </Card>
-      {showAdd && <AddAddictionModal onClose={() => setShowAdd(false)} />}
+
+      {deleteTarget && (
+        <DeleteHabitModal
+          habit={deleteTarget}
+          costs={state.onboarding?.costs ?? []}
+          identity={state.onboarding?.identity ?? ""}
+          dayCount={dayCount(deleteTarget.startDate)}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+      {showAdd && (
+        <AddAddictionModal
+          trackedIds={new Set(state.addictions.map((a) => a.id))}
+          onClose={() => setShowAdd(false)}
+          onAdd={(addiction) => {
+            update((s) => ({ addictions: [...s.addictions, addiction] }));
+            setShowAdd(false);
+          }}
+        />
+      )}
     </section>
   );
 }
@@ -841,7 +1032,7 @@ function Settings() {
       <div className="px-5 pt-6 space-y-7 pb-12">
         <AccountSection state={state} update={update} />
         <BadgesSection state={state} />
-        <BillingSection state={state} />
+        <BillingSection state={state} update={update} />
         <AppearanceSection />
         <NotificationsSection />
         <TrackedHabitsSection state={state} update={update} />

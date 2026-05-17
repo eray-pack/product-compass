@@ -22,6 +22,12 @@ export default defineConfig({
         localEnv.ANTHROPIC_API_KEY ?? "",
       ),
     },
+    optimizeDeps: {
+      exclude: [
+        "@revenuecat/purchases-capacitor",
+        "@capacitor/push-notifications",
+      ],
+    },
     build: {
       rollupOptions: {
         // Native Capacitor plugins only run on device — exclude from web bundle

@@ -69,6 +69,8 @@ export type AppState = {
   lastLoginAt: number;
   loginHistory: number[];
   totalReturns: number;
+  // Tree watering — date string "YYYY-MM-DD", prevents double-award per day
+  lastTreeWaterDate: string;
   // Legacy mirrors
   startDate: number;
   totalCleanDays: number;
@@ -96,6 +98,7 @@ const defaultState = (): AppState => ({
   lastLoginAt: 0,
   loginHistory: [],
   totalReturns: 0,
+  lastTreeWaterDate: "",
   startDate: Date.now(),
   totalCleanDays: 0,
   badges: [],
@@ -164,7 +167,7 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
 }
 
 export function useAppState() {
-  const [state, setState] = useState<AppState>(defaultState);
+  const [state, setState] = useState<AppState>(loadState);
   useEffect(() => {
     setState(loadState());
     loadFromSupabase(setState);
@@ -188,6 +191,14 @@ export function dayCount(startDate: number) {
 
 export function activeAddiction(s: AppState): Addiction | undefined {
   return s.addictions.find((a) => a.id === s.activeAddictionId) ?? s.addictions[0];
+}
+
+/** The addiction with the most clean days — used for community badge, profile rank, etc. */
+export function flagshipAddiction(s: AppState): Addiction | undefined {
+  if (!s.addictions.length) return undefined;
+  return s.addictions.reduce((best, a) =>
+    dayCount(a.startDate) > dayCount(best.startDate) ? a : best
+  );
 }
 
 export function longestCleanPeriod(s: AppState): number {
