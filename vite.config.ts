@@ -25,10 +25,7 @@ export default defineConfig({
     build: {
       rollupOptions: {
         // Native Capacitor plugins only run on device — exclude from web bundle
-        external: [
-          "@revenuecat/purchases-capacitor",
-          "@capacitor/push-notifications",
-        ],
+        external: ["@capacitor/push-notifications"],
       },
     },
   },
