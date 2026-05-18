@@ -718,14 +718,22 @@ function LifeTreePage({
     try { localStorage.setItem("stopamine.tree-style", style); } catch {}
   }
 
+  const [shopFeedback, setShopFeedback] = useState<string | null>(null);
+
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
-    if (state.points < cost) return;
+    if (state.points < cost) {
+      setShopFeedback(`Need ${cost - state.points} more credits`);
+      setTimeout(() => setShopFeedback(null), 2200);
+      return;
+    }
     update((s) => ({
       points: s.points - cost,
       treeXP: s.treeXP + Math.floor(cost / 2),
       treeUnlocks: s.treeUnlocks.includes(id) ? s.treeUnlocks : [...s.treeUnlocks, id],
     }));
+    setShopFeedback("Unlocked!");
+    setTimeout(() => setShopFeedback(null), 2000);
   };
 
   return (
@@ -737,6 +745,13 @@ function LifeTreePage({
           This tree is sacred. Every clean day is permanently etched into it.
         </p>
       </header>
+
+      {/* Info line — logins feed the tree */}
+      <div className="px-6 mt-3 mb-1 flex items-center gap-2">
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em" }}>
+          Every day you open the app waters your tree · <span style={{ color: health.color }}>{daysThisWeek}/7 this week</span>
+        </span>
+      </div>
 
       {/* Tree scene — full-bleed, no card frame */}
       <section className="mt-4 relative" style={{ height: 360 }}>
@@ -794,18 +809,48 @@ function LifeTreePage({
         </div>
 
         {/* Tree visual */}
-        <div className="absolute inset-0 flex items-center justify-center z-10"
-          style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
-          {treeStyle === "3d" ? (
+        {treeStyle === "3d" ? (
+          <div className="absolute inset-0 flex items-center justify-center z-10"
+            style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
             <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
               <Tree3D day={day} />
             </div>
-          ) : (
-            <div className="anim-tree-float" style={{ width: "100%", height: "100%" }}>
-              <CartoonTree day={day} xp={state.treeXP} />
+          </div>
+        ) : (
+          /* Cartoon: oval scene centered, fading into black at edges */
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div style={{ position: "relative", width: 300, height: 300 }}>
+              {/* Oval sky background */}
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: SKY_CONFIGS[timeOfDay].gradient,
+                filter: health.companionFilter,
+                transition: "filter 1.2s ease",
+                boxShadow: `0 0 80px 40px #080604, 0 0 40px 20px #080604`,
+                overflow: "hidden",
+              }}>
+                {/* Mini sky elements inside oval */}
+                <div style={{ position: "absolute", inset: 0, opacity: 0.6 }}>
+                  <TreeSkyBackground timeOfDay={timeOfDay} />
+                </div>
+                <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
+              </div>
+              {/* Radial fade mask — blends oval edges into black */}
+              <div style={{
+                position: "absolute", inset: -2, borderRadius: "50%",
+                background: "radial-gradient(ellipse at center, transparent 52%, #080604 78%)",
+                pointerEvents: "none", zIndex: 2,
+              }} />
+              {/* Tree centered in oval */}
+              <div className="anim-tree-float" style={{
+                position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                filter: health.companionFilter, transition: "filter 1.2s ease", zIndex: 3,
+              }}>
+                <CartoonTree day={day} xp={state.treeXP} />
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Bottom row — rank left, health center, day right */}
         <div className="absolute bottom-5 inset-x-5 z-20 flex items-center justify-between">
@@ -906,13 +951,67 @@ function LifeTreePage({
         </div>
       </section>
 
+      {/* Daily credit claim */}
+      {(() => {
+        const today = new Date().toISOString().slice(0, 10);
+        const claimed = state.lastDailyClaimDate === today;
+        return (
+          <section className="px-6 mt-4">
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              disabled={claimed}
+              onClick={() => {
+                if (claimed) return;
+                update((s) => ({ points: s.points + 25, lastDailyClaimDate: today }));
+              }}
+              style={{
+                width: "100%", padding: "14px 20px", borderRadius: 16,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                background: claimed ? "rgba(255,255,255,0.03)" : "radial-gradient(ellipse at 10% 50%, rgba(201,168,76,0.14) 0%, transparent 70%), rgba(255,255,255,0.04)",
+                border: claimed ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(201,168,76,0.30)",
+                cursor: claimed ? "default" : "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 22 }}>{claimed ? "✅" : "🎁"}</span>
+                <div style={{ textAlign: "left" }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: claimed ? "rgba(255,255,255,0.35)" : "#f5ede0", marginBottom: 1 }}>
+                    {claimed ? "Daily bonus claimed" : "Claim daily bonus"}
+                  </p>
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.30)" }}>
+                    {claimed ? "Come back tomorrow" : "Log in every day to keep your tree alive"}
+                  </p>
+                </div>
+              </div>
+              {!claimed && (
+                <span style={{
+                  fontSize: 12, fontWeight: 800, color: "#C9A84C",
+                  background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.35)",
+                  borderRadius: 999, padding: "4px 12px",
+                }}>
+                  +25
+                </span>
+              )}
+            </motion.button>
+          </section>
+        );
+      })()}
+
       {/* Upgrades — etched glass shop */}
       <section className="px-6 mt-6">
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82, marginBottom: 4 }}>
-          Grow your tree
-        </p>
+        <div className="flex items-center justify-between mb-1">
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82 }}>
+            Grow your tree
+          </p>
+          {shopFeedback && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: shopFeedback === "Unlocked!" ? "#3fb86a" : "#C9A84C", transition: "opacity 0.3s" }}>
+              {shopFeedback}
+            </span>
+          )}
+        </div>
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
-          Spend points you've earned — or speed it up.
+          Spend credits you've earned — or speed it up.
         </p>
         {UPGRADES.map((u) => {
           const owned = state.treeUnlocks.includes(u.id);

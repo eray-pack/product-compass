@@ -181,6 +181,38 @@ export function BottomNav() {
   );
 }
 
+function CreditsChip() {
+  const [points, setPoints] = useState(() => loadState().points);
+  useEffect(() => {
+    const sync = () => setPoints(loadState().points);
+    window.addEventListener("focus", sync);
+    const id = setInterval(sync, 2000);
+    return () => { window.removeEventListener("focus", sync); clearInterval(id); };
+  }, []);
+
+  return (
+    <div
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "5px 12px", borderRadius: 999,
+        background: "rgba(201,168,76,0.10)",
+        border: "1px solid rgba(201,168,76,0.30)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
+    >
+      <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="9" stroke="#C9A84C" strokeWidth="1.5"/>
+        <circle cx="10" cy="10" r="5" fill="#C9A84C" opacity="0.5"/>
+        <circle cx="10" cy="10" r="2.5" fill="#C9A84C"/>
+      </svg>
+      <span style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", letterSpacing: "0.02em" }}>
+        {points}
+      </span>
+    </div>
+  );
+}
+
 export function PageShell({ children }: { children: React.ReactNode }) {
   const path       = useRouterState({ select: (r) => r.location.pathname });
   const onSettings = path === "/settings";
@@ -188,14 +220,17 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
       {!onSettings && (
-        <Link
-          to="/settings"
-          className="fixed top-3 right-4 z-30 h-9 w-9 rounded-xl grid place-items-center border border-border/60 transition-colors hover:bg-foreground/[0.06]"
-          style={{ background: "var(--card)", backdropFilter: "blur(12px)" }}
-          aria-label="Settings"
-        >
-          <Settings className="h-4 w-4 text-muted-foreground" />
-        </Link>
+        <div className="fixed top-3 right-4 z-30 flex items-center gap-2">
+          <CreditsChip />
+          <Link
+            to="/settings"
+            className="h-9 w-9 rounded-xl grid place-items-center border border-border/60 transition-colors hover:bg-foreground/[0.06]"
+            style={{ background: "var(--card)", backdropFilter: "blur(12px)" }}
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4 text-muted-foreground" />
+          </Link>
+        </div>
       )}
       {children}
       <BottomNav />

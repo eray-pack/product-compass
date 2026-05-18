@@ -71,6 +71,8 @@ export type AppState = {
   totalReturns: number;
   // Tree watering — date string "YYYY-MM-DD", prevents double-award per day
   lastTreeWaterDate: string;
+  // Daily credit claim — date string "YYYY-MM-DD"
+  lastDailyClaimDate: string;
   // Legacy mirrors
   startDate: number;
   totalCleanDays: number;
@@ -99,6 +101,7 @@ const defaultState = (): AppState => ({
   loginHistory: [],
   totalReturns: 0,
   lastTreeWaterDate: "",
+  lastDailyClaimDate: "",
   startDate: Date.now(),
   totalCleanDays: 0,
   badges: [],
