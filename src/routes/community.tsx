@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
+import { PremiumBackground } from "@/components/PremiumBackground";
 import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
 import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";
@@ -505,7 +506,8 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   };
 
   return (
-    <div className="min-h-screen max-w-md mx-auto flex flex-col" style={{ background: "#0D0A08" }}>
+    <div className="min-h-screen max-w-md mx-auto flex flex-col">
+      <PremiumBackground />
       <header className="sticky top-0 z-30 backdrop-blur-xl px-4 py-3 flex items-center gap-3"
         style={{ background: "oklch(0.13 0.020 265 / 0.92)", borderBottom: "1px solid oklch(0.20 0.025 265 / 0.7)" }}>
         <button onClick={onBack}
@@ -668,7 +670,7 @@ function CreateRoomScreen({ onBack, onCreate }: { onBack: () => void; onCreate: 
 
   if (done) {
     return (
-      <div className="min-h-screen max-w-md mx-auto flex flex-col items-center justify-center px-6 gap-4 text-center" style={{ background: "#0D0A08" }}>
+      <div className="min-h-screen max-w-md mx-auto flex flex-col items-center justify-center px-6 gap-4 text-center">
         <div className="h-16 w-16 rounded-2xl grid place-items-center" style={{ background: "oklch(0.52 0.14 150 / 0.15)", color: "oklch(0.60 0.18 150)" }}>
           <Check className="h-8 w-8" />
         </div>
@@ -681,7 +683,8 @@ function CreateRoomScreen({ onBack, onCreate }: { onBack: () => void; onCreate: 
   }
 
   return (
-    <div className="min-h-screen max-w-md mx-auto flex flex-col" style={{ background: "#0D0A08" }}>
+    <div className="min-h-screen max-w-md mx-auto flex flex-col">
+      <PremiumBackground />
       <header className="px-4 pt-12 pb-6 flex items-center gap-3">
         <button onClick={onBack} className="h-9 w-9 rounded-xl grid place-items-center transition-colors"
           style={{ border: "1px solid oklch(0.22 0.03 265)", color: "var(--muted-foreground)" }}>

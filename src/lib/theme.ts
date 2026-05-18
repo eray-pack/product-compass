@@ -5,7 +5,7 @@ export type Theme = "dark";
 
 export function applyTheme(_theme: Theme) {
   document.documentElement.className = "dark";
-  document.documentElement.style.background = "#0D0A08";
+  document.documentElement.style.background = "#000000";
   document.documentElement.style.colorScheme = "dark";
   localStorage.removeItem("stopamine.theme");
 }

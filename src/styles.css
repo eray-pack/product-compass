@@ -564,12 +564,12 @@ html.light {
 @layer base {
   * { border-color: var(--color-border); }
   html {
-    /* Hardcoded dark — never resolved via CSS variable, cannot be overridden by OS */
-    background: radial-gradient(ellipse at 50% 42%, #161412 0%, #0a0806 42%, #000000 100%) no-repeat fixed;
+    /* Hardcoded dark — inline style in __root.tsx overrides this, but kept as fallback */
     background-color: #000000;
     color-scheme: dark;
   }
   body {
+    /* Transparent so the PremiumBackground fixed layer (z-index:-1) shows through */
     background-color: transparent;
     color: #f5ede0;
     color-scheme: dark;
@@ -582,6 +582,6 @@ html.light {
 /* ── Force dark even when OS is in light mode ────────────── */
 @media (prefers-color-scheme: light) {
   :root { color-scheme: dark; }
-  html { background: radial-gradient(ellipse at 50% 42%, #161412 0%, #0a0806 42%, #000000 100%) no-repeat fixed; background-color: #000000; }
+  html { background-color: #000000; }
   body { background-color: transparent; color: #f5ede0; }
 }

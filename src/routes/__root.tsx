@@ -77,13 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" style={{ colorScheme: "dark", background: "#0D0A08" }}>
+    <html lang="en" className="dark" style={{ colorScheme: "dark", background: "#000000" }}>
       <head>
         {/* Always force dark — runs synchronously before paint, before any CSS loads */}
-        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.className='dark';document.documentElement.style.background='#0D0A08';document.documentElement.style.colorScheme='dark';` }} />
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.className='dark';document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';` }} />
         <HeadContent />
       </head>
-      <body style={{ background: "#0D0A08", color: "#f5ede0", colorScheme: "dark" }}>{children}<Scripts /></body>
+      <body style={{ background: "transparent", color: "#f5ede0", colorScheme: "dark" }}>{children}<Scripts /></body>
     </html>
   );
 }
