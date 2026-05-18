@@ -14,35 +14,40 @@ export const Route = createFileRoute("/tools/")({
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const CARD: React.CSSProperties = {
   background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.06)",
-  borderRadius: 16,
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(255,255,255,0.09)",
+  borderTop: "1px solid rgba(201,168,76,0.14)",
+  borderRadius: 24,
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
 };
 
+// Capsule CTA buttons — etched glass pill style
 const GOLD_OUTLINE: React.CSSProperties = {
-  color: "#C9A84C",
-  border: "1px solid rgba(201,168,76,0.35)",
-  background: "rgba(201,168,76,0.06)",
-  borderRadius: 10,
+  color: "#debc7a",
+  border: "1px solid rgba(201,168,76,0.38)",
+  background: "rgba(201,168,76,0.08)",
+  borderRadius: 999,
   fontSize: 12,
-  fontWeight: 600,
-  padding: "6px 14px",
+  fontWeight: 700,
+  padding: "6px 16px",
   flexShrink: 0,
-  transition: "background 0.2s",
+  letterSpacing: "0.03em",
+  textShadow: "0 0 8px rgba(201,168,76,0.30)",
+  cursor: "pointer",
 };
 
 const ICON_WRAP = (color: string): React.CSSProperties => ({
-  height: 38,
-  width: 38,
-  borderRadius: 12,
+  height: 40,
+  width: 40,
+  borderRadius: 14,
   display: "grid",
   placeItems: "center",
-  background: `${color}18`,
-  border: `1px solid ${color}40`,
-  boxShadow: `0 0 12px 2px ${color}28`,
+  background: `${color}14`,
+  border: `1px solid ${color}42`,
+  boxShadow: `0 0 16px 3px ${color}26`,
   color,
   flexShrink: 0,
+  position: "relative",
 });
 
 const REFRAME_COUNT = 5;
@@ -424,10 +429,15 @@ function Tools() {
       </section>
 
       {/* ── Tool cards grid ─────────────────────────────────────────────── */}
-      <section className="px-4 mt-10 pb-8 space-y-3">
+      <section className="px-4 mt-10 pb-8" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-        {/* Cut the Signal Games — full-width card */}
-        <div style={CARD} className="p-4">
+        {/* ── Cut the Signal Games ────────────────────────────────────── */}
+        <motion.div
+          style={CARD}
+          whileHover={{ borderColor: "rgba(255,255,255,0.18)", scale: 1.01 }}
+          transition={{ duration: 0.2 }}
+          className="p-5"
+        >
           <button
             onClick={() => setGamesOpen((v) => !v)}
             className="flex items-center gap-3 w-full text-left"
@@ -444,17 +454,16 @@ function Tools() {
               </svg>
             </div>
             <div className="flex-1">
-              <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0" }}>{t("tools.gamesTitle")}</p>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
+              <p style={{ fontWeight: 700, fontSize: 14, color: "#ffffff" }}>{t("tools.gamesTitle")}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
             </div>
             <ChevronDown
-              style={{ height: 16, width: 16, color: "rgba(255,255,255,0.35)", transition: "transform 0.2s", transform: gamesOpen ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
+              style={{ height: 16, width: 16, color: "rgba(255,255,255,0.30)", transition: "transform 0.22s ease", transform: gamesOpen ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
             />
           </button>
 
           {gamesOpen && (
             <div className="mt-5">
-              {/* ── Free games row — staggered entry ── */}
               <motion.div
                 className="flex justify-around"
                 variants={gameContainer}
@@ -467,7 +476,6 @@ function Tools() {
               </motion.div>
 
               {state.isPremium === true ? (
-                /* ── PRO games grid — staggered entry ── */
                 <motion.div
                   className="mt-7 grid grid-cols-3 gap-y-6 place-items-center"
                   variants={gameContainer}
@@ -498,92 +506,131 @@ function Tools() {
               )}
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Recovery Coach — full-width card */}
-        <Link to="/tools/coach" style={{ ...CARD, border: "1px solid rgba(201,168,76,0.45)", display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px", gap: 4, textDecoration: "none" }} className="active:scale-[0.98] transition-transform">
-          <CoachRobot />
-          <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0", marginTop: 8 }}>{t("tools.coach.name")}</p>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)" }}>{t("tools.coach.tagline")}</p>
-        </Link>
+        {/* ── Recovery Coach ──────────────────────────────────────────── */}
+        <motion.div
+          whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.20)" }}
+          transition={{ duration: 0.2 }}
+          style={{ ...CARD, borderColor: "rgba(201,168,76,0.30)", borderTopColor: "rgba(201,168,76,0.40)" }}
+        >
+          <Link
+            to="/tools/coach"
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px 22px", gap: 6, textDecoration: "none" }}
+          >
+            {/* Ambient glow behind robot */}
+            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{
+                position: "absolute", inset: -18, borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(201,168,76,0.20) 0%, transparent 70%)",
+                filter: "blur(12px)",
+                pointerEvents: "none",
+              }} />
+              <CoachRobot />
+            </div>
+            <p style={{ fontWeight: 700, fontSize: 15, color: "#ffffff", marginTop: 10 }}>{t("tools.coach.name")}</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)" }}>{t("tools.coach.tagline")}</p>
+            <span style={{ ...GOLD_OUTLINE, marginTop: 6 }}>{t("tools.coach.cta") || "Start →"}</span>
+          </Link>
+        </motion.div>
 
-        {/* Reframe + Cold Exposure — two-column grid */}
+        {/* ── Reframe + Cold Exposure — two-column ────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
 
           {/* Reframe */}
-          <div style={CARD} className="p-4 flex flex-col gap-3">
+          <motion.div
+            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18 }}
+            whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.18)" }}
+            transition={{ duration: 0.2 }}
+          >
             <div className="flex items-center gap-2">
               <div style={ICON_WRAP("#C9A84C")}>
                 <Brain style={{ height: 16, width: 16 }} />
               </div>
-              <p style={{ fontWeight: 600, fontSize: 13, color: "#f5ede0" }}>{t("tools.reframeTitle")}</p>
+              <p style={{ fontWeight: 700, fontSize: 13, color: "#ffffff" }}>{t("tools.reframeTitle")}</p>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", lineHeight: 1.45 }}>{t("tools.reframeDesc")}</p>
-            <button
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{t("tools.reframeDesc")}</p>
+            <motion.button
               onClick={() => setReframeIdx(Math.floor(Math.random() * REFRAME_COUNT))}
               style={GOLD_OUTLINE}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94, transition: { duration: 0.1 } }}
             >
               {t("tools.reframeCta")}
-            </button>
+            </motion.button>
             {reframeIdx !== null && (
-              <p style={{ fontSize: 12, lineHeight: 1.55, fontStyle: "italic", color: "rgba(245,237,224,0.80)", marginTop: 2 }}>
+              <p style={{ fontSize: 11.5, lineHeight: 1.6, fontStyle: "italic", color: "rgba(245,237,224,0.78)", marginTop: -4 }}>
                 "{t(`tools.reframes.${reframeIdx}`)}"
               </p>
             )}
-          </div>
+          </motion.div>
 
           {/* Cold Exposure */}
-          <Link to="/tools/cold" style={{ ...CARD, display: "flex", flexDirection: "column", gap: 12, padding: 16, textDecoration: "none" }} className="active:scale-[0.98] transition-transform">
-            <div className="flex items-center gap-2">
-              <div style={ICON_WRAP("oklch(0.65 0.18 220)")}>
-                <Snowflake style={{ height: 16, width: 16 }} />
+          <motion.div
+            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18 }}
+            whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.18)" }}
+            transition={{ duration: 0.2 }}
+          >
+            <Link to="/tools/cold" style={{ display: "flex", flexDirection: "column", gap: 14, textDecoration: "none" }}>
+              <div className="flex items-center gap-2">
+                <div style={ICON_WRAP("#5BB8D4")}>
+                  <Snowflake style={{ height: 16, width: 16 }} />
+                </div>
+                <p style={{ fontWeight: 700, fontSize: 13, color: "#ffffff" }}>{t("tools.coldTitle")}</p>
               </div>
-              <p style={{ fontWeight: 600, fontSize: 13, color: "#f5ede0" }}>{t("tools.coldTitle")}</p>
-            </div>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", lineHeight: 1.45 }}>{t("tools.coldDesc")}</p>
-            <span style={{ ...GOLD_OUTLINE, display: "inline-block", textAlign: "center" }}>
-              {t("tools.coldCta")}
-            </span>
-          </Link>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{t("tools.coldDesc")}</p>
+              <span style={{ ...GOLD_OUTLINE, display: "inline-block", textAlign: "center" }}>
+                {t("tools.coldCta")}
+              </span>
+            </Link>
+          </motion.div>
         </div>
 
-        {/* Implementation Plan — full-width card */}
-        <div style={CARD} className="p-4">
+        {/* ── Implementation Plan ─────────────────────────────────────── */}
+        <motion.div
+          style={{ ...CARD, padding: 20 }}
+          whileHover={{ scale: 1.01, borderColor: "rgba(255,255,255,0.16)" }}
+          transition={{ duration: 0.2 }}
+        >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div style={ICON_WRAP("#C9A84C")}>
                 <GitBranch style={{ height: 16, width: 16 }} />
               </div>
               <div>
-                <p style={{ fontWeight: 600, fontSize: 14, color: "#f5ede0" }}>{t("tools.planTitle")}</p>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", marginTop: 2 }}>{t("tools.planDesc")}</p>
+                <p style={{ fontWeight: 700, fontSize: 14, color: "#ffffff" }}>{t("tools.planTitle")}</p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginTop: 2 }}>{t("tools.planDesc")}</p>
               </div>
             </div>
-            <button onClick={() => setPlanOpen((v) => !v)} style={GOLD_OUTLINE}>
+            <motion.button
+              onClick={() => setPlanOpen((v) => !v)}
+              style={GOLD_OUTLINE}
+              whileTap={{ scale: 0.93, transition: { duration: 0.1 } }}
+            >
               {planOpen ? t("tools.planClose") : t("tools.planAdd")}
-            </button>
+            </motion.button>
           </div>
 
-          {/* Existing plans */}
+          {/* Existing plans — nested etched layer */}
           {plans.length > 0 && (
-            <ul style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+            <ul style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
               {plans.map((p, i) => (
                 <li
                   key={i}
                   style={{
                     fontSize: 13,
-                    lineHeight: 1.55,
-                    padding: "10px 14px",
-                    borderRadius: 10,
-                    background: "rgba(201,168,76,0.05)",
-                    border: "1px solid rgba(201,168,76,0.12)",
-                    color: "rgba(245,237,224,0.75)",
+                    lineHeight: 1.6,
+                    padding: "12px 16px",
+                    borderRadius: 16,
+                    background: "rgba(0,0,0,0.22)",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    color: "rgba(245,237,224,0.72)",
                   }}
                 >
                   <span>{t("tools.planIfI")} </span>
-                  <span style={{ fontWeight: 600, color: "#f5ede0" }}>{p.trigger}</span>
+                  <span style={{ fontWeight: 700, color: "#f5ede0" }}>{p.trigger}</span>
                   <span>, {t("tools.planIWill")} </span>
-                  <span style={{ fontWeight: 600, color: "#C9A84C" }}>{p.action}</span>
+                  <span style={{ fontWeight: 700, color: "#debc7a" }}>{p.action}</span>
                   <span>.</span>
                 </li>
               ))}
@@ -598,8 +645,8 @@ function Tools() {
                 onChange={(e) => setTrigger(e.target.value)}
                 placeholder={t("tools.planTriggerPlaceholder")}
                 style={{
-                  width: "100%", borderRadius: 10, fontSize: 13, padding: "10px 14px", outline: "none",
-                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.25)",
+                  width: "100%", borderRadius: 12, fontSize: 13, padding: "10px 16px", outline: "none",
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
                   color: "#f5ede0",
                 }}
               />
@@ -608,30 +655,32 @@ function Tools() {
                 onChange={(e) => setAction(e.target.value)}
                 placeholder={t("tools.planActionPlaceholder")}
                 style={{
-                  width: "100%", borderRadius: 10, fontSize: 13, padding: "10px 14px", outline: "none",
-                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.25)",
+                  width: "100%", borderRadius: 12, fontSize: 13, padding: "10px 16px", outline: "none",
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
                   color: "#f5ede0",
                 }}
               />
-              <button
+              <motion.button
                 onClick={() => {
                   if (trigger.trim() && action.trim()) {
                     setPlans([...plans, { trigger, action }]);
                     setTrigger(""); setAction(""); setPlanOpen(false);
                   }
                 }}
+                whileTap={{ scale: 0.97 }}
                 style={{
-                  width: "100%", borderRadius: 10, padding: "10px 14px", fontSize: 13,
+                  width: "100%", borderRadius: 12, padding: "11px 16px", fontSize: 13,
                   fontWeight: 700, color: "#090705",
                   background: "linear-gradient(135deg, #C9A84C, #E8C96A)",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  cursor: "pointer",
                 }}
               >
-                <Plus style={{ height: 16, width: 16 }} /> {t("tools.planSave")}
-              </button>
+                <Plus style={{ height: 15, width: 15 }} /> {t("tools.planSave")}
+              </motion.button>
             </div>
           )}
-        </div>
+        </motion.div>
 
       </section>
     </PageShell>
