@@ -332,51 +332,94 @@ function Tools() {
 
   return (
     <PageShell>
-      <style>{`
-        @keyframes sos-breathe {
-          0%, 100% {
-            box-shadow:
-              0 0 0 0 rgba(220, 80, 60, 0),
-              0 0 40px 10px rgba(200, 60, 40, 0.30),
-              inset 0 0 30px 4px rgba(220, 80, 60, 0.08);
-          }
-          50% {
-            box-shadow:
-              0 0 0 18px rgba(200, 60, 40, 0.07),
-              0 0 65px 22px rgba(200, 60, 40, 0.50),
-              inset 0 0 40px 8px rgba(220, 80, 60, 0.14);
-          }
-        }
-        .sos-breathe {
-          animation: sos-breathe 3s ease-in-out infinite;
-        }
-      `}</style>
-
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2">
         <SectionTitle>{t("nav.tools")}</SectionTitle>
         <h1 className="mt-2 text-3xl font-bold">{t("tools.indexSubtitle")}</h1>
       </header>
 
-      {/* ── SOS hero — breathing pulse circle ───────────────────────────── */}
+      {/* ── SOS hero — tactical distress button ─────────────────────────── */}
       <section className="flex justify-center mt-10 mb-2">
-        <Link
-          to="/tools/sos"
-          className="sos-breathe flex flex-col items-center justify-center text-center active:scale-95 transition-transform"
-          style={{
-            width: 220,
-            height: 220,
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 40% 35%, oklch(0.22 0.08 25), oklch(0.14 0.06 25))",
-            border: "1.5px solid rgba(200,80,60,0.30)",
-          }}
-        >
-          <p style={{ fontSize: 15, fontWeight: 700, color: "#f5ede0", lineHeight: 1.4, padding: "0 32px" }}>
-            {t("tools.sos.heroLine1")}<br />{t("tools.sos.heroLine2")}
-          </p>
-          <p style={{ marginTop: 8, fontSize: 11, color: "oklch(0.65 0.07 25)", lineHeight: 1.5, padding: "0 24px" }}>
-            {t("tools.sos.heroSub")}
-          </p>
+        <Link to="/tools/sos" style={{ display: "block", position: "relative" }}>
+          {/* Ambient distress ripples */}
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 1.4], opacity: [0.35, 0] }}
+            transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 0 }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(200,60,40,0.70)",
+              pointerEvents: "none",
+            }}
+          />
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 1.4], opacity: [0.22, 0] }}
+            transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 0, delay: 0.7 }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(200,60,40,0.50)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Hover glow layer */}
+          <motion.span
+            aria-hidden
+            initial={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            style={{
+              position: "absolute", inset: -18, borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(200,60,40,0.28) 0%, transparent 70%)",
+              filter: "blur(12px)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Main button */}
+          <motion.div
+            className="flex flex-col items-center justify-center text-center"
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 18 } }}
+            style={{
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              background: "radial-gradient(circle at 40% 35%, #2a1010, #160808)",
+              border: "1.5px solid rgba(200,80,60,0.45)",
+              boxShadow: "0 0 40px 10px rgba(200,60,40,0.30), inset 0 0 30px 4px rgba(220,80,60,0.08)",
+              cursor: "pointer",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <p style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: "#ffffff",
+              lineHeight: 1.35,
+              padding: "0 32px",
+              textShadow: "0 0 18px rgba(255,120,100,0.70), 0 1px 3px rgba(0,0,0,0.60)",
+              letterSpacing: "0.01em",
+            }}>
+              {t("tools.sos.heroLine1")}<br />{t("tools.sos.heroLine2")}
+            </p>
+            <p style={{
+              marginTop: 10,
+              fontSize: 11.5,
+              fontWeight: 700,
+              color: "rgba(255,180,160,0.90)",
+              lineHeight: 1.5,
+              padding: "0 24px",
+              letterSpacing: "0.03em",
+              textShadow: "0 0 10px rgba(255,100,80,0.50)",
+            }}>
+              {t("tools.sos.heroSub")}
+            </p>
+          </motion.div>
         </Link>
       </section>
 
