@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
+import { useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
@@ -285,6 +286,7 @@ function CoinCard({
 function ProgressScreen() {
   const { t } = useTranslation();
   const [state] = useAppState();
+  const [progressView, setProgressView] = useState<"grid" | "bars" | "streak">("grid");
   const active = activeAddiction(state);
   if (!active) return null;
 
@@ -294,12 +296,24 @@ function ProgressScreen() {
   const totalLogins = state.loginHistory?.length ?? 0;
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
 
+  // Real login heatmap — 84 days (12 weeks), 1 cell per day
+  const loginDaySet = new Set(
+    (state.loginHistory ?? []).map((ts) => new Date(ts).toISOString().slice(0, 10))
+  );
   const cells = Array.from({ length: 84 }, (_, i) => {
-    const seed = (i * 9301 + 49297) % 233280;
-    const r = seed / 233280;
-    const recent = i > 84 - day;
-    if (recent) return r > 0.92 ? 0 : 3;
-    return r > 0.7 ? 2 : r > 0.4 ? 1 : 0;
+    const d = new Date(Date.now() - (83 - i) * 86400000);
+    return loginDaySet.has(d.toISOString().slice(0, 10)) ? 3 : 0;
+  });
+
+  // Weekly bar chart — last 8 weeks, count unique login days per week
+  const weekBars = Array.from({ length: 8 }, (_, w) => {
+    let count = 0;
+    for (let d = 0; d < 7; d++) {
+      const dayOffset = (7 - w) * 7 - d - 1;
+      const dateStr = new Date(Date.now() - dayOffset * 86400000).toISOString().slice(0, 10);
+      if (loginDaySet.has(dateStr)) count++;
+    }
+    return count; // 0–7
   });
 
   const urgesSurvived = state.urgesSurvived ?? 0;
@@ -368,10 +382,10 @@ function ProgressScreen() {
         </div>
       </div>
 
-      {/* ── Streak calendar ─────────────────────────────────── */}
+      {/* ── Consistency ─────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <div className="flex items-center justify-between mb-4">
-          <SectionTitle>{t("progress.consistency.title")}</SectionTitle>
+        <div className="flex items-center justify-between mb-3">
+          <SectionTitle>Consistency</SectionTitle>
           {!state.isPremium && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -381,27 +395,147 @@ function ProgressScreen() {
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground/60 mb-4">{t("progress.consistency.subtitle")}</p>
+
+        {/* View toggle */}
+        <div className="flex gap-2 mb-4">
+          {([
+            { key: "grid", label: "Heatmap", desc: "Days you opened the app" },
+            { key: "bars", label: "Weekly", desc: "Check-ins per week" },
+            { key: "streak", label: "Streak", desc: "Your clean day run" },
+          ] as const).map(({ key, label, desc }) => (
+            <button
+              key={key}
+              onClick={() => setProgressView(key)}
+              style={{
+                flex: 1,
+                padding: "7px 0",
+                borderRadius: 10,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.03em",
+                border: progressView === key ? "1px solid rgba(201,168,76,0.45)" : "1px solid rgba(255,255,255,0.07)",
+                background: progressView === key ? "rgba(201,168,76,0.10)" : "rgba(255,255,255,0.03)",
+                color: progressView === key ? "#C9A84C" : "rgba(255,255,255,0.35)",
+                cursor: "pointer",
+                transition: "all 0.18s ease",
+              }}
+              title={desc}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* View content */}
         <div className="relative">
-          <div
-            className={`grid grid-flow-col grid-rows-7 gap-1 ${
-              state.isPremium ? "" : "blur-[5px] select-none pointer-events-none"
-            }`}
-          >
-            {cells.map((v, i) => (
-              <div
-                key={i}
-                className="h-3 w-3 rounded-[3px]"
-                style={{
-                  backgroundColor:
-                    v === 0 ? "rgba(255,255,255,0.06)"
-                    : v === 1 ? "#1a4d2e"
-                    : v === 2 ? "#2d8a4e"
-                    : "#3fb86a",
-                }}
-              />
-            ))}
+          <div className={state.isPremium ? "" : "blur-[5px] select-none pointer-events-none"}>
+
+            {/* ── GRID view ── */}
+            {progressView === "grid" && (
+              <div>
+                <p className="text-[11px] mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  Each square = one day you opened Stopamine · last 12 weeks
+                </p>
+                <div className="grid grid-flow-col grid-rows-7 gap-1">
+                  {cells.map((v, i) => (
+                    <div
+                      key={i}
+                      className="h-3 w-3 rounded-[3px]"
+                      style={{ backgroundColor: v === 0 ? "rgba(255,255,255,0.06)" : "#3fb86a" }}
+                    />
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-[10px]" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  Less
+                  {["rgba(255,255,255,0.06)", "#3fb86a"].map((bg) => (
+                    <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
+                  ))}
+                  More
+                </div>
+              </div>
+            )}
+
+            {/* ── BARS view ── */}
+            {progressView === "bars" && (
+              <div>
+                <p className="text-[11px] mb-4" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  Days you checked in each week · last 8 weeks
+                </p>
+                <div className="flex items-end gap-2" style={{ height: 80 }}>
+                  {weekBars.map((count, i) => {
+                    const isLast = i === weekBars.length - 1;
+                    const pct = count / 7;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          style={{
+                            width: "100%",
+                            height: Math.max(4, pct * 68),
+                            borderRadius: 6,
+                            background: isLast
+                              ? "linear-gradient(180deg, #C9A84C, #a07830)"
+                              : pct > 0.5 ? "#3fb86a" : pct > 0 ? "#2d8a4e" : "rgba(255,255,255,0.06)",
+                            boxShadow: isLast ? "0 0 12px rgba(201,168,76,0.35)" : "none",
+                            transition: "height 0.4s ease",
+                          }}
+                        />
+                        <span style={{ fontSize: 9, color: isLast ? "#C9A84C" : "rgba(255,255,255,0.25)" }}>
+                          {count}d
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-right text-[10px]" style={{ color: "rgba(255,255,255,0.20)" }}>← older · newer →</p>
+              </div>
+            )}
+
+            {/* ── STREAK view ── */}
+            {progressView === "streak" && (
+              <div className="flex flex-col items-center py-2 gap-4">
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  Your current clean run
+                </p>
+                <div className="flex flex-col items-center gap-1">
+                  <span style={{ fontSize: 56, lineHeight: 1 }}>🔥</span>
+                  <span style={{ fontSize: 48, fontWeight: 900, color: "#C9A84C", lineHeight: 1 }}>{day}</span>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.40)", letterSpacing: "0.08em" }}>DAYS CLEAN</span>
+                </div>
+                {/* Milestone markers */}
+                <div className="flex gap-3 mt-1">
+                  {[
+                    { label: "7d", threshold: 7, icon: "🛡️" },
+                    { label: "30d", threshold: 30, icon: "🎖️" },
+                    { label: "90d", threshold: 90, icon: "👑" },
+                  ].map(({ label, threshold, icon }) => {
+                    const earned = day >= threshold;
+                    return (
+                      <div
+                        key={label}
+                        className="flex flex-col items-center gap-1"
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: 12,
+                          background: earned ? "rgba(201,168,76,0.10)" : "rgba(255,255,255,0.03)",
+                          border: earned ? "1px solid rgba(201,168,76,0.35)" : "1px solid rgba(255,255,255,0.06)",
+                          opacity: earned ? 1 : 0.4,
+                        }}
+                      >
+                        <span style={{ fontSize: 20 }}>{icon}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: earned ? "#C9A84C" : "rgba(255,255,255,0.4)" }}>{label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {day < 7 && (
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", textAlign: "center" }}>
+                    {7 - day} more day{7 - day !== 1 ? "s" : ""} until your first shield 🛡️
+                  </p>
+                )}
+              </div>
+            )}
           </div>
+
           {!state.isPremium && (
             <button onClick={() => triggerPaywall()} className="absolute inset-0 flex items-center justify-center">
               <span
@@ -412,17 +546,10 @@ function ProgressScreen() {
                   borderColor: "oklch(0.62 0.22 255 / 0.30)",
                 }}
               >
-                {t("progress.paywall")}
+                Unlock with PRO
               </span>
             </button>
           )}
-        </div>
-        <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
-          {t("progress.consistency.less")}
-          {["rgba(255,255,255,0.06)", "#1a4d2e", "#2d8a4e", "#3fb86a"].map((bg) => (
-            <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
-          ))}
-          {t("progress.consistency.more")}
         </div>
       </section>
 
