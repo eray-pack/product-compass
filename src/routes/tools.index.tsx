@@ -309,12 +309,33 @@ function IdentityStackIcon() {
   );
 }
 
-type GameEntry = { to: string; glow: string; labelKey: string; icon: React.ReactNode; ambient: AmbientType };
+type GameEntry = {
+  to: string; glow: string; labelKey: string; icon: React.ReactNode; ambient: AmbientType;
+  idleFilter?: string; hoverFilter?: string; hoverRotate?: number;
+};
 
 const FREE_GAMES: GameEntry[] = [
-  { to: "/tools/breath", glow: "#6BAED6", labelKey: "tools.mindPulse",    icon: <MindPulseIcon />,    ambient: "pulse"  },
-  { to: "/tools/tap",    glow: "#C9A84C", labelKey: "tools.impulseShift", icon: <ImpulseShiftIcon />, ambient: "rotate" },
-  { to: "/tools/memory", glow: "#6BAA75", labelKey: "tools.neuralLink",   icon: <NeuralLinkIcon />,   ambient: "none"   },
+  {
+    to: "/tools/breath", glow: "#6BAED6", labelKey: "tools.mindPulse",
+    icon: <MindPulseIcon />, ambient: "pulse",
+    idleFilter:  "drop-shadow(0 0 6px rgba(56,189,248,0.52))",
+    hoverFilter: "drop-shadow(0 0 14px rgba(56,189,248,0.95)) drop-shadow(0 0 30px rgba(56,189,248,0.42))",
+    hoverRotate: 8,
+  },
+  {
+    to: "/tools/tap", glow: "#C9A84C", labelKey: "tools.impulseShift",
+    icon: <ImpulseShiftIcon />, ambient: "rotate",
+    idleFilter:  "drop-shadow(0 0 6px rgba(222,188,122,0.52))",
+    hoverFilter: "drop-shadow(0 0 14px rgba(222,188,122,0.95)) drop-shadow(0 0 30px rgba(222,188,122,0.42))",
+    hoverRotate: 0,
+  },
+  {
+    to: "/tools/memory", glow: "#6BAA75", labelKey: "tools.neuralLink",
+    icon: <NeuralLinkIcon />, ambient: "none",
+    idleFilter:  "drop-shadow(0 0 6px rgba(74,222,128,0.48))",
+    hoverFilter: "drop-shadow(0 0 14px rgba(74,222,128,0.95)) drop-shadow(0 0 30px rgba(74,222,128,0.42))",
+    hoverRotate: 5,
+  },
 ];
 
 const PRO_GAMES: GameEntry[] = [
@@ -443,11 +464,11 @@ function Tools() {
             .arcade-scroll { -ms-overflow-style: none; scrollbar-width: none; }
           `}</style>
 
-          {/* Section header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+          {/* Section header — perfectly centered vertically */}
+          <div className="flex items-center gap-4" style={{ marginBottom: 20 }}>
             {/* Animated controller badge */}
             <div style={{
-              position: "relative", width: 46, height: 46, display: "grid", placeItems: "center",
+              width: 46, height: 46, display: "grid", placeItems: "center",
               borderRadius: 16, flexShrink: 0,
               background: "rgba(139,92,246,0.12)",
               border: "1px solid rgba(139,92,246,0.35)",
@@ -456,6 +477,7 @@ function Tools() {
               <motion.div
                 animate={{ rotate: [-5, 5, -5] }}
                 transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <svg width="22" height="22" viewBox="0 0 16 16" fill="none" style={{ color: "#a78bfa" }}>
                   <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
@@ -468,73 +490,82 @@ function Tools() {
                 </svg>
               </motion.div>
             </div>
-            <div>
+            <div className="flex flex-col justify-center">
               <p style={{ fontWeight: 700, fontSize: 15, color: "#ffffff", lineHeight: 1.2 }}>{t("tools.gamesTitle")}</p>
               <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 3 }}>{t("tools.gamesDesc")}</p>
             </div>
           </div>
 
-          {/* Free game cartridges — horizontal scroll */}
+          {/* Game cartridges — horizontal scroll */}
           <div
             className="arcade-scroll"
             style={{ display: "flex", overflowX: "auto", gap: 10, paddingBottom: 2 }}
           >
-            {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+            {/* Free games — enhanced neon badges with variant propagation */}
+            {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient, idleFilter, hoverFilter, hoverRotate }) => (
               <Link key={to} to={to} style={{ textDecoration: "none", flexShrink: 0 }}>
                 <motion.div
-                  whileHover={{
-                    scale: 1.04,
-                    borderColor: `${glow}70`,
-                    boxShadow: `0 0 28px 8px ${glow}35, 0 0 60px 18px ${glow}14`,
+                  variants={{
+                    rest: {
+                      scale: 1,
+                      boxShadow: "none",
+                    },
+                    hover: {
+                      scale: 1.04,
+                      boxShadow: `0 0 28px 8px ${glow}35, 0 0 60px 18px ${glow}14`,
+                      transition: { duration: 0.18, ease: "easeOut" },
+                    },
                   }}
+                  initial="rest"
+                  whileHover="hover"
                   whileTap={{ scale: 0.96 }}
-                  transition={{ duration: 0.18, ease: "easeOut" }}
                   style={{
-                    width: 112,
-                    borderRadius: 24,
-                    padding: "20px 12px 16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 12,
+                    width: 112, borderRadius: 24, padding: "20px 12px 16px",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
                     background: "rgba(255,255,255,0.04)",
-                    backdropFilter: "blur(20px)",
-                    WebkitBackdropFilter: "blur(20px)",
+                    backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                     border: `1px solid ${glow}28`,
                     borderTop: `1px solid ${glow}45`,
                   }}
                 >
-                  {/* Glowing icon */}
+                  {/* Icon stack: outer = filter+tilt (propagated), inner = breathe loop */}
                   <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {/* Ambient halo behind icon */}
                     <div style={{
                       position: "absolute", inset: -10, borderRadius: "50%",
-                      background: `radial-gradient(circle, ${glow}38 0%, transparent 72%)`,
+                      background: `radial-gradient(circle, ${glow}40 0%, transparent 72%)`,
                       filter: "blur(8px)", pointerEvents: "none",
                     }} />
+                    {/* Outer motion: filter glow + tilt — driven by card's "hover" variant */}
                     <motion.div
-                      animate={
-                        ambient === "pulse"  ? { scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] } :
-                        ambient === "rotate" ? { rotate: 360 } :
-                        ambient === "float"  ? { y: [0, -3, 0] } :
-                        {}
-                      }
-                      transition={
-                        ambient === "rotate"
-                          ? { repeat: Infinity, duration: 8, ease: "linear" }
-                          : { repeat: Infinity, duration: 3, ease: "easeInOut" }
-                      }
-                      style={{ position: "relative" }}
+                      variants={{
+                        rest:  { filter: idleFilter ?? "none", rotate: 0 },
+                        hover: {
+                          filter: hoverFilter ?? idleFilter ?? "none",
+                          rotate: hoverRotate ?? 0,
+                          transition: { duration: 0.22, ease: "easeOut" },
+                        },
+                      }}
+                      style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}
                     >
-                      {icon}
+                      {/* Inner motion: continuous breathe (all 3 games) */}
+                      <motion.div
+                        animate={
+                          ambient === "rotate"
+                            ? { rotate: 360 }
+                            : { scale: [1, 1.08, 1], opacity: [0.88, 1, 0.88] }
+                        }
+                        transition={
+                          ambient === "rotate"
+                            ? { repeat: Infinity, duration: 8, ease: "linear" }
+                            : { repeat: Infinity, duration: 3, ease: "easeInOut" }
+                        }
+                      >
+                        {icon}
+                      </motion.div>
                     </motion.div>
                   </div>
-                  <p style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: "rgba(255,255,255,0.82)",
-                    textAlign: "center",
-                    lineHeight: 1.3,
-                  }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.82)", textAlign: "center", lineHeight: 1.3 }}>
                     {t(labelKey)}
                   </p>
                 </motion.div>
@@ -554,40 +585,28 @@ function Tools() {
                     whileTap={{ scale: 0.96 }}
                     transition={{ duration: 0.18, ease: "easeOut" }}
                     style={{
-                      width: 112,
-                      borderRadius: 24,
-                      padding: "20px 12px 16px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 12,
+                      width: 112, borderRadius: 24, padding: "20px 12px 16px",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
                       background: "rgba(255,255,255,0.04)",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      border: `1px solid ${glow}28`,
-                      borderTop: `1px solid ${glow}45`,
+                      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+                      border: `1px solid ${glow}28`, borderTop: `1px solid ${glow}45`,
                     }}
                   >
                     <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{
-                        position: "absolute", inset: -10, borderRadius: "50%",
-                        background: `radial-gradient(circle, ${glow}38 0%, transparent 72%)`,
-                        filter: "blur(8px)", pointerEvents: "none",
-                      }} />
+                      <div style={{ position: "absolute", inset: -10, borderRadius: "50%", background: `radial-gradient(circle, ${glow}38 0%, transparent 72%)`, filter: "blur(8px)", pointerEvents: "none" }} />
                       <motion.div
                         animate={
-                          ambient === "pulse"   ? { scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] } :
+                          ambient === "pulse"   ? { scale: [1, 1.08, 1], opacity: [0.88, 1, 0.88] } :
                           ambient === "rotate"  ? { rotate: 360 } :
                           ambient === "breathe" ? { scale: [1, 1.06, 1] } :
                           ambient === "float"   ? { y: [0, -3, 0] } :
-                          {}
+                          { scale: [1, 1.05, 1] }
                         }
                         transition={
                           ambient === "rotate"
                             ? { repeat: Infinity, duration: 8, ease: "linear" }
                             : { repeat: Infinity, duration: 3, ease: "easeInOut" }
                         }
-                        style={{ position: "relative" }}
                       >
                         {icon}
                       </motion.div>
