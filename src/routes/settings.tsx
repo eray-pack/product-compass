@@ -22,9 +22,8 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
-import { SectionTitle } from "@/components/BottomNav";
 import { BADGES, currentBadge, badgeSplit, type Badge } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
@@ -40,12 +39,35 @@ export const Route = createFileRoute("/settings")({
 // ── Primitive layout pieces ───────────────────────────────────────────────────
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <div className="px-1 mb-3"><SectionTitle>{children}</SectionTitle></div>;
+  return (
+    <div className="px-1 mb-3">
+      <p style={{
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: "0.18em",
+        textTransform: "uppercase" as const,
+        color: "#C9A84C",
+        opacity: 0.82,
+      }}>
+        {children}
+      </p>
+    </div>
+  );
 }
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-card divide-y divide-border/50 overflow-hidden shadow-sm">
+    <div
+      className="divide-y divide-white/[0.06] overflow-hidden"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderTop: "1px solid rgba(201,168,76,0.15)",
+        borderRadius: 24,
+      }}
+    >
       {children}
     </div>
   );
@@ -99,14 +121,23 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   return (
     <button
       onClick={() => onChange(!value)}
-      className="h-6 w-11 rounded-full p-0.5 transition-colors shrink-0"
-      style={{ background: value ? "var(--primary)" : "var(--border)" }}
+      className="h-6 w-11 rounded-full p-0.5 shrink-0"
+      style={{
+        background: value ? "#debc7a" : "rgba(255,255,255,0.12)",
+        boxShadow: value
+          ? "0 0 12px rgba(222,188,122,0.55), 0 0 26px rgba(222,188,122,0.22)"
+          : "none",
+        transition: "background 0.25s ease, box-shadow 0.25s ease",
+      }}
       aria-checked={value}
       role="switch"
     >
       <span
-        className="block h-5 w-5 rounded-full bg-white transition-transform shadow-sm"
-        style={{ transform: value ? "translateX(20px)" : "translateX(0)" }}
+        className="block h-5 w-5 rounded-full bg-white shadow-sm"
+        style={{
+          transform: value ? "translateX(20px)" : "translateX(0)",
+          transition: "transform 0.22s ease",
+        }}
       />
     </button>
   );
@@ -208,7 +239,7 @@ function AccountSection({
       />
 
       {/* Profile card */}
-      <div className="rounded-2xl border border-border/70 bg-card p-4 mb-3 shadow-sm">
+      <div className="p-4 mb-3" style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.08)", borderTop: "1px solid rgba(201,168,76,0.15)", borderRadius: 24 }}>
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
             {state.profilePhoto ? (
@@ -242,7 +273,12 @@ function AccountSection({
             {state.isPremium && (
               <span
                 className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
+                style={{
+                  background: "rgba(201,168,76,0.14)",
+                  border: "1px solid rgba(201,168,76,0.45)",
+                  color: "#C9A84C",
+                  boxShadow: "0 0 10px rgba(201,168,76,0.32)",
+                }}
               >
                 <Crown className="h-2.5 w-2.5" /> PRO
               </span>
@@ -334,10 +370,16 @@ function BillingSection({ state, update }: {
         <Row icon={Crown} label="Current Plan" value={state.isPremium ? "PRO" : "Free"} chevron={false}>
           {state.isPremium ? (
             <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-              style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
+              className="text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0"
+              style={{
+                background: "rgba(201,168,76,0.12)",
+                border: "1px solid rgba(201,168,76,0.45)",
+                color: "#C9A84C",
+                boxShadow: "0 0 10px rgba(201,168,76,0.35), 0 0 24px rgba(201,168,76,0.12)",
+                letterSpacing: "0.08em",
+              }}
             >
-              ACTIVE
+              PRO ACTIVE
             </span>
           ) : (
             <button
@@ -663,69 +705,156 @@ function TrackedHabitsSection({
 
   return (
     <section>
-      <div className="flex items-baseline justify-between mb-2">
+      <div className="flex items-baseline justify-between mb-3">
         <SectionLabel>Tracked Habits</SectionLabel>
-        <button
+        <motion.button
           onClick={() => setShowAdd(true)}
-          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors mb-2"
+          whileTap={{ scale: 0.91 }}
+          className="inline-flex items-center gap-1 mb-2"
           style={{
-            color: "var(--primary)",
-            borderColor: "var(--primary)",
-            background: "transparent",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            color: "#C9A84C",
+            border: "1px solid rgba(201,168,76,0.40)",
+            background: "rgba(201,168,76,0.07)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            borderRadius: 999,
+            padding: "5px 14px",
+            textShadow: "0 0 10px rgba(201,168,76,0.45)",
+            cursor: "pointer",
           }}
         >
-          <Plus className="h-3 w-3" /> Add
-        </button>
+          <Plus style={{ height: 12, width: 12 }} /> Add
+        </motion.button>
       </div>
-      <Card>
+
+      {/* Habits — etched glass container */}
+      <div
+        style={{
+          background: "rgba(255,255,255,0.03)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderTop: "1px solid rgba(201,168,76,0.13)",
+          borderRadius: 24,
+          overflow: "hidden",
+          padding: state.addictions.length === 0 ? "18px 20px" : "10px",
+        }}
+      >
         {state.addictions.length === 0 ? (
-          <p className="px-4 py-4 text-sm text-muted-foreground">No habits tracked yet.</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.28)" }}>No habits tracked yet.</p>
         ) : (
-          state.addictions.map((a) => {
-            const day = dayCount(a.startDate);
-            const isActive =
-              a.id === state.activeAddictionId ||
-              (!state.activeAddictionId && a === state.addictions[0]);
-            return (
-              <div
-                key={a.id}
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-foreground/[0.03] transition-colors"
-              >
-                <button
-                  onClick={() => update({ activeAddictionId: a.id })}
-                  className="flex items-center gap-3 flex-1 min-w-0 text-left"
+          <AnimatePresence mode="popLayout">
+            {state.addictions.map((a) => {
+              const day = dayCount(a.startDate);
+              const isActive =
+                a.id === state.activeAddictionId ||
+                (!state.activeAddictionId && a === state.addictions[0]);
+              return (
+                <motion.div
+                  key={a.id}
+                  layout
+                  initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.95, transition: { duration: 0.20 } }}
+                  transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "10px 12px",
+                    borderRadius: 16,
+                    marginBottom: 6,
+                    background: isActive
+                      ? "radial-gradient(ellipse at 8% 50%, rgba(201,168,76,0.13) 0%, transparent 68%), rgba(255,255,255,0.04)"
+                      : "rgba(255,255,255,0.025)",
+                    border: `1px solid ${isActive ? "rgba(201,168,76,0.26)" : "rgba(255,255,255,0.06)"}`,
+                    boxShadow: isActive ? "inset 0 0 24px rgba(201,168,76,0.04)" : "none",
+                  }}
                 >
-                  <span className="text-2xl leading-none shrink-0">{a.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{a.name}</p>
-                    <p className="text-xs text-muted-foreground">Day {day}</p>
-                  </div>
-                  {isActive && (
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-                      style={{
-                        background: "var(--primary)",
-                        color: "var(--primary-foreground)",
-                        opacity: 0.9,
-                      }}
-                    >
-                      Active
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(a)}
-                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
-                  style={{ color: "rgba(255,255,255,0.2)" }}
-                  aria-label={`Remove ${a.name}`}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            );
-          })
+                  {/* Tap to activate */}
+                  <button
+                    onClick={() => update({ activeAddictionId: a.id })}
+                    style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, textAlign: "left", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  >
+                    {/* Emoji with ambient glow */}
+                    <div style={{ position: "relative", flexShrink: 0, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {isActive && (
+                        <div style={{
+                          position: "absolute", inset: -8, borderRadius: "50%",
+                          background: "radial-gradient(circle, rgba(201,168,76,0.38) 0%, transparent 72%)",
+                          filter: "blur(7px)",
+                          pointerEvents: "none",
+                        }} />
+                      )}
+                      <span style={{
+                        fontSize: 26,
+                        lineHeight: 1,
+                        position: "relative",
+                        filter: isActive ? "drop-shadow(0 0 8px rgba(201,168,76,0.65))" : "none",
+                        transition: "filter 0.3s ease",
+                      }}>
+                        {a.emoji}
+                      </span>
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: isActive ? "#f5ede0" : "rgba(255,255,255,0.65)",
+                        marginBottom: 1,
+                        transition: "color 0.3s ease",
+                      }}>
+                        {a.name}
+                      </p>
+                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em" }}>
+                        Day {day}
+                      </p>
+                    </div>
+
+                    {isActive && (
+                      <span style={{
+                        fontSize: 9,
+                        fontWeight: 800,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase" as const,
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                        flexShrink: 0,
+                        background: "rgba(201,168,76,0.12)",
+                        border: "1px solid rgba(201,168,76,0.40)",
+                        color: "#C9A84C",
+                        boxShadow: "0 0 10px rgba(201,168,76,0.32), 0 0 22px rgba(201,168,76,0.10)",
+                      }}>
+                        Active
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Remove button */}
+                  <motion.button
+                    whileTap={{ scale: 0.82 }}
+                    onClick={() => setDeleteTarget(a)}
+                    style={{
+                      height: 28, width: 28, borderRadius: "50%",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.22)", cursor: "pointer",
+                    }}
+                    aria-label={`Remove ${a.name}`}
+                  >
+                    <X style={{ height: 12, width: 12 }} />
+                  </motion.button>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         )}
-      </Card>
+      </div>
 
       {deleteTarget && (
         <DeleteHabitModal
