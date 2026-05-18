@@ -173,7 +173,7 @@
   "tools": {
     "header": "Recovery Tools",
     "subtitle": "Choose your weapon against the urge.",
-    "indexSubtitle": "Use what works.",
+    "indexSubtitle": "Usa ciò che funziona.",
     "reframes": {
       "0": "Every time you resist, you literally grow new neural pathways.",
       "1": "The urge isn't you — it's old wiring asking for one more hit.",
@@ -193,12 +193,15 @@
       "heroLine2": "We've got you.",
       "heroSub": "Tap to start urge surfing · 3 min"
     },
-    "gamesTitle": "Cut the Signal Games",
-    "gamesDesc": "Train your brain. Beat the urge.",
-    "mindPulse": "Mind Pulse",
-    "impulseShift": "Impulse Shift",
-    "neuralLink": "Neural Link",
-    "moreGames": "More games available",
+    "gamesTitle": "Giochi: Interrompi il Segnale",
+    "gamesDesc": "Allena il tuo cervello. Supera l'impulso.",
+    "mindPulse": "Pulsazione Mentale",
+    "impulseShift": "Spostamento dell'Impulso",
+    "neuralLink": "Connessione Neurale",
+    "gamesProTitle": "Giochi Pro",
+    "gamesProLocked": "Giochi Pro (Bloccati)",
+    "gamesProLockedSub": "Abbonati per sbloccare tutti i giochi premium.",
+    "moreGames": "Altri giochi disponibili",
     "reframeTitle": "Reframe",
     "reframeDesc": "Rewire your reaction in one thought.",
     "reframeCta": "Show me one",
@@ -231,36 +234,36 @@
       "desc": "Anchor your strongest reason"
     },
     "darkroom": {
-      "name": "Dark Room",
-      "desc": "Sensory deprivation mode"
+      "name": "Camera Oscura",
+      "desc": "Modalità di privazione sensoriale"
     },
     "voidstare": {
-      "name": "Void Stare",
-      "desc": "Stare into the abyss"
+      "name": "Sguardo nel Vuoto",
+      "desc": "Fissa l'abisso"
     },
     "noisefilter": {
-      "name": "Noise Filter",
-      "desc": "Brown noise focus field"
+      "name": "Filtro del Rumore",
+      "desc": "Campo di concentrazione con rumore marrone"
     },
     "echochamber": {
-      "name": "Echo Chamber",
-      "desc": "Hear your own conviction"
+      "name": "Camera dell'Eco",
+      "desc": "Ascolta la tua stessa convinzione"
     },
     "identitystack": {
-      "name": "Identity Stack",
-      "desc": "Who you're becoming"
+      "name": "Ancoraggio dell'Identità",
+      "desc": "Chi stai diventando"
     },
     "clarityclimb": {
-      "name": "Clarity Climb",
-      "desc": "Mindfulness staircase"
+      "name": "Ascesa alla Chiarezza",
+      "desc": "Scala della consapevolezza"
     },
     "coldswitch": {
-      "name": "Cold Switch",
-      "desc": "Emergency temp drop"
+      "name": "Interruzione Fredda",
+      "desc": "Calo di temperatura d'emergenza"
     },
     "steadyhand": {
-      "name": "Steady Hand",
-      "desc": "Precision focus drill"
+      "name": "Mano Ferma",
+      "desc": "Esercizio di focus di precisione"
     }
   },
   "settings": {
