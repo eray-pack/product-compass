@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown } from "lucide-react";
+import { Brain, Snowflake, GitBranch, Plus, Lock } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
@@ -311,6 +311,12 @@ function IdentityStackIcon() {
 
 type GameEntry = { to: string; glow: string; labelKey: string; icon: React.ReactNode; ambient: AmbientType };
 
+const FREE_GAMES: GameEntry[] = [
+  { to: "/tools/breath", glow: "#6BAED6", labelKey: "tools.mindPulse",    icon: <MindPulseIcon />,    ambient: "pulse"  },
+  { to: "/tools/tap",    glow: "#C9A84C", labelKey: "tools.impulseShift", icon: <ImpulseShiftIcon />, ambient: "rotate" },
+  { to: "/tools/memory", glow: "#6BAA75", labelKey: "tools.neuralLink",   icon: <NeuralLinkIcon />,   ambient: "none"   },
+];
+
 const PRO_GAMES: GameEntry[] = [
   { to: "/tools/coldswitch",    glow: "#00BCD4", labelKey: "tools.coldswitch.name",    icon: <ColdSwitchIcon />,    ambient: "none"    },
   { to: "/tools/voidstare",     glow: "#7B2FBE", labelKey: "tools.voidstare.name",     icon: <VoidStareIcon />,     ambient: "breathe" },
@@ -328,7 +334,6 @@ function Tools() {
   const [state] = useAppState();
   const [reframeIdx, setReframeIdx] = useState<number | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
-  const [gamesOpen, setGamesOpen] = useState(false);
   const [trigger, setTrigger] = useState("");
   const [action, setAction] = useState("");
   const [plans, setPlans] = useState([
@@ -431,82 +436,203 @@ function Tools() {
       {/* ── Tool cards grid ─────────────────────────────────────────────── */}
       <section className="px-4 mt-10 pb-8" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-        {/* ── Cut the Signal Games ────────────────────────────────────── */}
-        <motion.div
-          style={CARD}
-          whileHover={{ borderColor: "rgba(255,255,255,0.18)", scale: 1.01 }}
-          transition={{ duration: 0.2 }}
-          className="p-5"
-        >
-          <button
-            onClick={() => setGamesOpen((v) => !v)}
-            className="flex items-center gap-3 w-full text-left"
-          >
-            <div style={ICON_WRAP("oklch(0.68 0.18 280)")}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: "oklch(0.68 0.18 280)" }}>
-                <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
-                <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-                <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-                <circle cx="10.5" cy="7.5" r="0.7" fill="currentColor" opacity="0.9"/>
-                <circle cx="11.8" cy="8.5" r="0.7" fill="currentColor" opacity="0.9"/>
-                <circle cx="10.5" cy="9.5" r="0.7" fill="currentColor" opacity="0.9"/>
-                <circle cx="9.2"  cy="8.5" r="0.7" fill="currentColor" opacity="0.9"/>
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p style={{ fontWeight: 700, fontSize: 14, color: "#ffffff" }}>{t("tools.gamesTitle")}</p>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
-            </div>
-            <ChevronDown
-              style={{ height: 16, width: 16, color: "rgba(255,255,255,0.30)", transition: "transform 0.22s ease", transform: gamesOpen ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
-            />
-          </button>
+        {/* ── Cyber-Arcade Console ────────────────────────────────────── */}
+        <div style={{ ...CARD, padding: "22px 18px 20px", overflow: "hidden" }}>
+          <style>{`
+            .arcade-scroll::-webkit-scrollbar { display: none; }
+            .arcade-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+          `}</style>
 
-          {gamesOpen && (
-            <div className="mt-5">
+          {/* Section header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+            {/* Animated controller badge */}
+            <div style={{
+              position: "relative", width: 46, height: 46, display: "grid", placeItems: "center",
+              borderRadius: 16, flexShrink: 0,
+              background: "rgba(139,92,246,0.12)",
+              border: "1px solid rgba(139,92,246,0.35)",
+              boxShadow: "0 0 20px 4px rgba(139,92,246,0.22)",
+            }}>
               <motion.div
-                className="flex justify-around"
-                variants={gameContainer}
-                initial="hidden"
-                animate="visible"
+                animate={{ rotate: [-5, 5, -5] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
               >
-                <SignalGame to="/tools/breath" glow="#6BAED6" label={t("tools.mindPulse")}    icon={<MindPulseIcon />}    ambient="pulse"  />
-                <SignalGame to="/tools/tap"    glow="#C9A84C" label={t("tools.impulseShift")} icon={<ImpulseShiftIcon />} ambient="rotate" />
-                <SignalGame to="/tools/memory" glow="#6BAA75" label={t("tools.neuralLink")}   icon={<NeuralLinkIcon />}   ambient="none"   />
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none" style={{ color: "#a78bfa" }}>
+                  <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
+                  <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                  <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                  <circle cx="10.5" cy="7.5" r="0.75" fill="currentColor" opacity="0.95"/>
+                  <circle cx="11.8" cy="8.5" r="0.75" fill="currentColor" opacity="0.95"/>
+                  <circle cx="10.5" cy="9.5" r="0.75" fill="currentColor" opacity="0.95"/>
+                  <circle cx="9.2"  cy="8.5" r="0.75" fill="currentColor" opacity="0.95"/>
+                </svg>
               </motion.div>
-
-              {state.isPremium === true ? (
-                <motion.div
-                  className="mt-7 grid grid-cols-3 gap-y-6 place-items-center"
-                  variants={gameContainer}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
-                    <SignalGame key={to} to={to} glow={glow} label={t(labelKey)} icon={icon} ambient={ambient} />
-                  ))}
-                </motion.div>
-              ) : (
-                <button
-                  onClick={() => triggerPaywall()}
-                  className="mt-4 flex items-center justify-center gap-1.5 w-full active:opacity-70 transition-opacity flex-wrap"
-                >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999, color: "#C9A84C", border: "1px solid rgba(201,168,76,0.35)", background: "rgba(201,168,76,0.08)" }}>
-                    <Lock style={{ height: 10, width: 10 }} /> PRO
-                  </span>
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{t("tools.moreGames")}</span>
-                  <span className="flex items-center gap-1">
-                    {PRO_GAMES.map(({ labelKey, glow }) => (
-                      <span key={labelKey} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 8, fontWeight: 700, width: 16, height: 16, background: `${glow}22`, border: `1px solid ${glow}66`, color: glow }}>
-                        {t(labelKey)[0]}
-                      </span>
-                    ))}
-                  </span>
-                </button>
-              )}
             </div>
-          )}
-        </motion.div>
+            <div>
+              <p style={{ fontWeight: 700, fontSize: 15, color: "#ffffff", lineHeight: 1.2 }}>{t("tools.gamesTitle")}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 3 }}>{t("tools.gamesDesc")}</p>
+            </div>
+          </div>
+
+          {/* Free game cartridges — horizontal scroll */}
+          <div
+            className="arcade-scroll"
+            style={{ display: "flex", overflowX: "auto", gap: 10, paddingBottom: 2 }}
+          >
+            {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+              <Link key={to} to={to} style={{ textDecoration: "none", flexShrink: 0 }}>
+                <motion.div
+                  whileHover={{
+                    scale: 1.04,
+                    borderColor: `${glow}70`,
+                    boxShadow: `0 0 28px 8px ${glow}35, 0 0 60px 18px ${glow}14`,
+                  }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  style={{
+                    width: 112,
+                    borderRadius: 24,
+                    padding: "20px 12px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 12,
+                    background: "rgba(255,255,255,0.04)",
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
+                    border: `1px solid ${glow}28`,
+                    borderTop: `1px solid ${glow}45`,
+                  }}
+                >
+                  {/* Glowing icon */}
+                  <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{
+                      position: "absolute", inset: -10, borderRadius: "50%",
+                      background: `radial-gradient(circle, ${glow}38 0%, transparent 72%)`,
+                      filter: "blur(8px)", pointerEvents: "none",
+                    }} />
+                    <motion.div
+                      animate={
+                        ambient === "pulse"  ? { scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] } :
+                        ambient === "rotate" ? { rotate: 360 } :
+                        ambient === "float"  ? { y: [0, -3, 0] } :
+                        {}
+                      }
+                      transition={
+                        ambient === "rotate"
+                          ? { repeat: Infinity, duration: 8, ease: "linear" }
+                          : { repeat: Infinity, duration: 3, ease: "easeInOut" }
+                      }
+                      style={{ position: "relative" }}
+                    >
+                      {icon}
+                    </motion.div>
+                  </div>
+                  <p style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "rgba(255,255,255,0.82)",
+                    textAlign: "center",
+                    lineHeight: 1.3,
+                  }}>
+                    {t(labelKey)}
+                  </p>
+                </motion.div>
+              </Link>
+            ))}
+
+            {/* PRO cartridges or paywall nudge */}
+            {state.isPremium === true ? (
+              PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                <Link key={to} to={to} style={{ textDecoration: "none", flexShrink: 0 }}>
+                  <motion.div
+                    whileHover={{
+                      scale: 1.04,
+                      borderColor: `${glow}70`,
+                      boxShadow: `0 0 28px 8px ${glow}35, 0 0 60px 18px ${glow}14`,
+                    }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    style={{
+                      width: 112,
+                      borderRadius: 24,
+                      padding: "20px 12px 16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 12,
+                      background: "rgba(255,255,255,0.04)",
+                      backdropFilter: "blur(20px)",
+                      WebkitBackdropFilter: "blur(20px)",
+                      border: `1px solid ${glow}28`,
+                      borderTop: `1px solid ${glow}45`,
+                    }}
+                  >
+                    <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{
+                        position: "absolute", inset: -10, borderRadius: "50%",
+                        background: `radial-gradient(circle, ${glow}38 0%, transparent 72%)`,
+                        filter: "blur(8px)", pointerEvents: "none",
+                      }} />
+                      <motion.div
+                        animate={
+                          ambient === "pulse"   ? { scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] } :
+                          ambient === "rotate"  ? { rotate: 360 } :
+                          ambient === "breathe" ? { scale: [1, 1.06, 1] } :
+                          ambient === "float"   ? { y: [0, -3, 0] } :
+                          {}
+                        }
+                        transition={
+                          ambient === "rotate"
+                            ? { repeat: Infinity, duration: 8, ease: "linear" }
+                            : { repeat: Infinity, duration: 3, ease: "easeInOut" }
+                        }
+                        style={{ position: "relative" }}
+                      >
+                        {icon}
+                      </motion.div>
+                    </div>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.82)", textAlign: "center", lineHeight: 1.3 }}>
+                      {t(labelKey)}
+                    </p>
+                  </motion.div>
+                </Link>
+              ))
+            ) : (
+              /* Paywall teaser card */
+              <motion.button
+                onClick={() => triggerPaywall()}
+                whileHover={{ scale: 1.04, borderColor: "rgba(201,168,76,0.55)" }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: 0.18 }}
+                style={{
+                  flexShrink: 0, width: 112, borderRadius: 24,
+                  padding: "20px 12px 16px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                  background: "rgba(201,168,76,0.05)",
+                  backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+                  border: "1px solid rgba(201,168,76,0.22)",
+                  borderTop: "1px solid rgba(201,168,76,0.38)",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center", maxWidth: 84 }}>
+                  {PRO_GAMES.slice(0, 6).map(({ labelKey, glow }) => (
+                    <span key={labelKey} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 7, fontWeight: 700, width: 18, height: 18, background: `${glow}20`, border: `1px solid ${glow}55`, color: glow }}>
+                      {t(labelKey)[0]}
+                    </span>
+                  ))}
+                </div>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.38)", background: "rgba(201,168,76,0.08)", borderRadius: 999, padding: "2px 8px" }}>
+                  <Lock style={{ height: 9, width: 9 }} /> +{PRO_GAMES.length} PRO
+                </span>
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.32)", lineHeight: 1.4, textAlign: "center" }}>
+                  {t("tools.moreGames")}
+                </p>
+              </motion.button>
+            )}
+          </div>
+        </div>
 
         {/* ── Recovery Coach ──────────────────────────────────────────── */}
         <motion.div
