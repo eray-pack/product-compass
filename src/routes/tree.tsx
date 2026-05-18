@@ -4,6 +4,7 @@ import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Tree3D } from "@/components/Tree3D";
 import { Wolf3D } from "@/components/Wolf3D";
 import { CartoonTree } from "@/components/CartoonTree";
@@ -302,6 +303,144 @@ function WolfBackground() {
   );
 }
 
+// ── Etched Glass Shop Card ────────────────────────────────────────────────────
+function ShopCard({
+  item,
+  owned,
+  canAfford,
+  onBuyPoints,
+  onBuyMoney,
+}: {
+  item: { id: string; name: string; desc: string; costPoints: number; costMoney: number; pro?: boolean };
+  owned: boolean;
+  canAfford: boolean;
+  onBuyPoints: () => void;
+  onBuyMoney: () => void;
+}) {
+  return (
+    <div
+      style={{
+        background: canAfford && !owned
+          ? "radial-gradient(ellipse at 12% 50%, rgba(201,168,76,0.09) 0%, transparent 62%), rgba(255,255,255,0.04)"
+          : "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.09)",
+        borderTop: "1px solid rgba(201,168,76,0.15)",
+        borderRadius: 28,
+        padding: 20,
+        overflow: "hidden",
+        marginBottom: 12,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {/* Energy badge icon */}
+        <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
+          {canAfford && !owned && (
+            <motion.div
+              animate={{ scale: [1, 1.35, 1], opacity: [0.45, 0.10, 0.45] }}
+              transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+              style={{
+                position: "absolute", inset: -7, borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(201,168,76,0.45) 0%, transparent 72%)",
+                filter: "blur(6px)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          <motion.div
+            animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+            style={{
+              width: 48, height: 48, borderRadius: "50%",
+              display: "grid", placeItems: "center",
+              background: owned
+                ? "rgba(255,255,255,0.05)"
+                : canAfford
+                ? "rgba(201,168,76,0.12)"
+                : "rgba(255,255,255,0.04)",
+              border: `1px solid ${owned ? "rgba(255,255,255,0.09)" : canAfford ? "rgba(201,168,76,0.42)" : "rgba(255,255,255,0.07)"}`,
+              boxShadow: canAfford && !owned ? "0 0 18px 3px rgba(201,168,76,0.20)" : "none",
+            }}
+          >
+            <Sparkles style={{ height: 20, width: 20, color: owned ? "rgba(255,255,255,0.28)" : canAfford ? "#C9A84C" : "rgba(255,255,255,0.25)" }} />
+          </motion.div>
+        </div>
+
+        {/* Text */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>{item.name}</p>
+            {item.pro && <Lock style={{ height: 11, width: 11, color: "#C9A84C", flexShrink: 0 }} />}
+          </div>
+          <p style={{ fontSize: 11, color: "#debc7a", opacity: 0.78, lineHeight: 1.4 }}>{item.desc}</p>
+        </div>
+
+        {/* Owned badge */}
+        {owned && (
+          <span style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: "0.14em",
+            textTransform: "uppercase" as const,
+            padding: "3px 10px", borderRadius: 999, flexShrink: 0,
+            background: "rgba(34,197,94,0.09)", border: "1px solid rgba(34,197,94,0.30)",
+            color: "rgba(34,197,94,0.88)",
+          }}>
+            Owned
+          </span>
+        )}
+      </div>
+
+      {/* Buy buttons */}
+      {!owned && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
+          {/* Points glass pill */}
+          <motion.button
+            onClick={onBuyPoints}
+            disabled={!canAfford}
+            whileHover={canAfford ? { scale: 1.05 } : {}}
+            whileTap={canAfford ? { scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 18 } } : {}}
+            style={{
+              height: 40, borderRadius: 999,
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
+              fontSize: 12, fontWeight: 700,
+              background: canAfford ? "rgba(201,168,76,0.10)" : "rgba(255,255,255,0.03)",
+              border: `1px solid ${canAfford ? "rgba(201,168,76,0.38)" : "rgba(255,255,255,0.07)"}`,
+              color: canAfford ? "#debc7a" : "rgba(255,255,255,0.22)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              cursor: canAfford ? "pointer" : "default",
+              textShadow: canAfford ? "0 0 8px rgba(201,168,76,0.35)" : "none",
+            }}
+          >
+            <Coins style={{ height: 13, width: 13 }} /> {item.costPoints} pts
+          </motion.button>
+
+          {/* Money glass pill */}
+          <motion.button
+            onClick={onBuyMoney}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 18 } }}
+            style={{
+              height: 40, borderRadius: 999,
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
+              fontSize: 12, fontWeight: 700,
+              background: "radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.06) 100%)",
+              border: "1px solid rgba(201,168,76,0.42)",
+              color: "#debc7a",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              cursor: "pointer",
+              textShadow: "0 0 8px rgba(201,168,76,0.40)",
+            }}
+          >
+            <CreditCard style={{ height: 13, width: 13 }} /> ${item.costMoney}
+          </motion.button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Wolf companion page ───────────────────────────────────────────────────────
 function WolfPage({
   state,
@@ -518,68 +657,34 @@ function WolfPage({
         </div>
       </section>
 
-      {/* Feed your wolf — shop */}
+      {/* Feed your wolf — etched glass shop */}
       <section className="px-6 mt-6">
-        <h2 className="text-sm font-semibold mb-1">Feed your wolf</h2>
-        <p className="text-xs text-muted-foreground mb-3">Spend points you've earned — or speed it up.</p>
-        <div className="space-y-3">
-          {WOLF_UPGRADES.map((u) => {
-            const owned = state.treeUnlocks.includes(u.id);
-            const canAfford = state.points >= u.costPoints;
-            return (
-              <div key={u.id} className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-10 w-10 rounded-full grid place-items-center shrink-0"
-                    style={{ background: "oklch(0.62 0.22 255 / 0.10)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A20" }}
-                  >
-                    <Sparkles className="h-5 w-5" style={{ color: "var(--primary)" }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium truncate">{u.name}</p>
-                      {u.pro && <Lock className="h-3 w-3 text-primary" />}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground truncate">{u.desc}</p>
-                  </div>
-                  {owned && (
-                    <span className="text-[10px] uppercase text-success bg-success/10 border border-success/30 px-2 py-0.5 rounded-full">
-                      Owned
-                    </span>
-                  )}
-                </div>
-                {!owned && (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => buyWithPoints(u.id, u.costPoints, u.pro)}
-                      disabled={!canAfford && !(u.pro && !state.isPremium)}
-                      className={`h-10 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1 ${
-                        canAfford
-                          ? "bg-primary/15 text-primary border border-primary/40"
-                          : "bg-secondary text-muted-foreground border border-border"
-                      }`}
-                    >
-                      <Coins className="h-3.5 w-3.5" /> {u.costPoints} pts
-                    </button>
-                    <button
-                      onClick={() => triggerPaywall()}
-                      className="h-10 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1 text-primary-foreground"
-                      style={{ background: "var(--gradient-primary)" }}
-                    >
-                      <CreditCard className="h-3.5 w-3.5" /> ${u.costMoney}
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82, marginBottom: 4 }}>
+          Feed your wolf
+        </p>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
+          Spend points you've earned — or speed it up.
+        </p>
+        {WOLF_UPGRADES.map((u) => {
+          const owned = state.treeUnlocks.includes(u.id);
+          const canAfford = state.points >= u.costPoints;
+          return (
+            <ShopCard
+              key={u.id}
+              item={u}
+              owned={owned}
+              canAfford={canAfford}
+              onBuyPoints={() => buyWithPoints(u.id, u.costPoints, u.pro)}
+              onBuyMoney={() => triggerPaywall()}
+            />
+          );
+        })}
       </section>
 
-      <section className="px-6 mt-6">
-        <div className="rounded-2xl border border-border bg-card p-5 text-center mb-4">
-          <p className="text-sm text-muted-foreground">
-            <span className="text-foreground font-medium">You came back today.</span>{" "}
+      <section className="px-6 mt-4 mb-2">
+        <div style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.10)", borderRadius: 24, padding: 20, textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", lineHeight: 1.6 }}>
+            <span style={{ color: "#f5ede0", fontWeight: 700 }}>You came back today.</span>{" "}
             That alone is the work. Keep going.
           </p>
         </div>
@@ -787,65 +892,34 @@ function LifeTreePage({
         </div>
       </section>
 
-      {/* Upgrades */}
+      {/* Upgrades — etched glass shop */}
       <section className="px-6 mt-6">
-        <h2 className="text-sm font-semibold mb-1">Grow your tree</h2>
-        <p className="text-xs text-muted-foreground mb-3">Spend points you've earned — or speed it up.</p>
-        <div className="space-y-3">
-          {UPGRADES.map((u) => {
-            const owned = state.treeUnlocks.includes(u.id);
-            const canAfford = state.points >= u.costPoints;
-            return (
-              <div key={u.id} className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full grid place-items-center bg-success/10 text-success shrink-0">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium truncate">{u.name}</p>
-                      {u.pro && <Lock className="h-3 w-3 text-primary" />}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground truncate">{u.desc}</p>
-                  </div>
-                  {owned && (
-                    <span className="text-[10px] uppercase text-success bg-success/10 border border-success/30 px-2 py-0.5 rounded-full">
-                      Owned
-                    </span>
-                  )}
-                </div>
-                {!owned && (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => buyWithPoints(u.id, u.costPoints, u.pro)}
-                      disabled={!canAfford && !(u.pro && !state.isPremium)}
-                      className={`h-10 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1 ${
-                        canAfford
-                          ? "bg-primary/15 text-primary border border-primary/40"
-                          : "bg-secondary text-muted-foreground border border-border"
-                      }`}
-                    >
-                      <Coins className="h-3.5 w-3.5" /> {u.costPoints} pts
-                    </button>
-                    <button
-                      onClick={() => triggerPaywall()}
-                      className="h-10 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1 text-primary-foreground"
-                      style={{ background: "var(--gradient-primary)" }}
-                    >
-                      <CreditCard className="h-3.5 w-3.5" /> ${u.costMoney}
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82, marginBottom: 4 }}>
+          Grow your tree
+        </p>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
+          Spend points you've earned — or speed it up.
+        </p>
+        {UPGRADES.map((u) => {
+          const owned = state.treeUnlocks.includes(u.id);
+          const canAfford = state.points >= u.costPoints;
+          return (
+            <ShopCard
+              key={u.id}
+              item={u}
+              owned={owned}
+              canAfford={canAfford}
+              onBuyPoints={() => buyWithPoints(u.id, u.costPoints, u.pro)}
+              onBuyMoney={() => triggerPaywall()}
+            />
+          );
+        })}
       </section>
 
-      <section className="px-6 mt-6">
-        <div className="rounded-2xl border border-border bg-card p-5 text-center">
-          <p className="text-sm text-muted-foreground">
-            <span className="text-foreground font-medium">You came back today.</span>{" "}
+      <section className="px-6 mt-4 mb-2">
+        <div style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.10)", borderRadius: 24, padding: 20, textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", lineHeight: 1.6 }}>
+            <span style={{ color: "#f5ede0", fontWeight: 700 }}>You came back today.</span>{" "}
             That alone is the work. Keep going.
           </p>
         </div>
