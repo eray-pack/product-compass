@@ -222,7 +222,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
-      <PremiumBackground />
+      <PremiumBackground hideWaves={path === "/"} />
       {!onSettings && (
         <div className="fixed top-3 right-4 z-30 flex items-center gap-2">
           <CreditsChip />
