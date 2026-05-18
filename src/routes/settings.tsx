@@ -28,6 +28,7 @@ import { BADGES, currentBadge, badgeSplit, type Badge } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
+import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
 import { setLanguage } from "@/lib/i18n";
 import i18n from "@/lib/i18n";
@@ -1421,11 +1422,12 @@ function Settings() {
   const [state, update] = useAppState();
 
   return (
-    <div className="min-h-screen pb-16 mx-auto max-w-md" style={{ background: "#0D0A08" }}>
+    <div className="min-h-screen pb-16 mx-auto max-w-md">
+      <PremiumBackground />
       {/* Sticky header */}
       <header
         className="sticky top-0 z-20 flex items-center gap-3 px-4 h-14 border-b border-border/50 backdrop-blur-xl"
-        style={{ background: "#0D0A08" }}
+        style={{ background: "rgba(10,8,6,0.82)" }}
       >
         <button
           onClick={() => navigate({ to: "/" })}

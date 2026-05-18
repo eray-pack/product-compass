@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
 import { loadState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
 
 function useScrollHide() {
@@ -221,6 +222,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
+      <PremiumBackground />
       {!onSettings && (
         <div className="fixed top-3 right-4 z-30 flex items-center gap-2">
           <CreditsChip />

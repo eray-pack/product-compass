@@ -565,11 +565,12 @@ html.light {
   * { border-color: var(--color-border); }
   html {
     /* Hardcoded dark — never resolved via CSS variable, cannot be overridden by OS */
-    background-color: #0D0A08;
+    background: radial-gradient(ellipse at 50% 42%, #161412 0%, #0a0806 42%, #000000 100%) no-repeat fixed;
+    background-color: #000000;
     color-scheme: dark;
   }
   body {
-    background-color: #0D0A08;
+    background-color: transparent;
     color: #f5ede0;
     color-scheme: dark;
     font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -581,5 +582,6 @@ html.light {
 /* ── Force dark even when OS is in light mode ────────────── */
 @media (prefers-color-scheme: light) {
   :root { color-scheme: dark; }
-  html, body { background-color: #0D0A08; color: #f5ede0; }
+  html { background: radial-gradient(ellipse at 50% 42%, #161412 0%, #0a0806 42%, #000000 100%) no-repeat fixed; background-color: #000000; }
+  body { background-color: transparent; color: #f5ede0; }
 }
