@@ -173,7 +173,7 @@
   "tools": {
     "header": "Recovery Tools",
     "subtitle": "Choose your weapon against the urge.",
-    "indexSubtitle": "Use what works.",
+    "indexSubtitle": "Use o que funciona.",
     "reframes": {
       "0": "Every time you resist, you literally grow new neural pathways.",
       "1": "The urge isn't you — it's old wiring asking for one more hit.",
@@ -193,12 +193,15 @@
       "heroLine2": "We've got you.",
       "heroSub": "Tap to start urge surfing · 3 min"
     },
-    "gamesTitle": "Cut the Signal Games",
-    "gamesDesc": "Train your brain. Beat the urge.",
-    "mindPulse": "Mind Pulse",
-    "impulseShift": "Impulse Shift",
-    "neuralLink": "Neural Link",
-    "moreGames": "More games available",
+    "gamesTitle": "Jogos: Cortar o Sinal",
+    "gamesDesc": "Treine seu cérebro. Vença o impulso.",
+    "mindPulse": "Pulso Mental",
+    "impulseShift": "Mudança de Impulso",
+    "neuralLink": "Conexão Neural",
+    "gamesProTitle": "Jogos Pro",
+    "gamesProLocked": "Jogos Pro (Bloqueados)",
+    "gamesProLockedSub": "Assine para desbloquear todos os jogos premium.",
+    "moreGames": "Mais jogos disponíveis",
     "reframeTitle": "Reframe",
     "reframeDesc": "Rewire your reaction in one thought.",
     "reframeCta": "Show me one",
@@ -231,36 +234,36 @@
       "desc": "Anchor your strongest reason"
     },
     "darkroom": {
-      "name": "Dark Room",
-      "desc": "Sensory deprivation mode"
+      "name": "Quarto Escuro",
+      "desc": "Modo de privação sensorial"
     },
     "voidstare": {
-      "name": "Void Stare",
-      "desc": "Stare into the abyss"
+      "name": "Olhar no Vazio",
+      "desc": "Encare o abismo"
     },
     "noisefilter": {
-      "name": "Noise Filter",
-      "desc": "Brown noise focus field"
+      "name": "Filtro de Ruído",
+      "desc": "Campo de foco com ruído marrom"
     },
     "echochamber": {
-      "name": "Echo Chamber",
-      "desc": "Hear your own conviction"
+      "name": "Câmara de Eco",
+      "desc": "Ouça sua própria convicção"
     },
     "identitystack": {
-      "name": "Identity Stack",
-      "desc": "Who you're becoming"
+      "name": "Ancoragem de Identidade",
+      "desc": "Em quem você está se tornando"
     },
     "clarityclimb": {
-      "name": "Clarity Climb",
-      "desc": "Mindfulness staircase"
+      "name": "Escalada da Clareza",
+      "desc": "Escada da atenção plena"
     },
     "coldswitch": {
-      "name": "Cold Switch",
-      "desc": "Emergency temp drop"
+      "name": "Corte Frio",
+      "desc": "Queda de temperatura de emergência"
     },
     "steadyhand": {
-      "name": "Steady Hand",
-      "desc": "Precision focus drill"
+      "name": "Mão Firme",
+      "desc": "Exercício de foco de precisão"
     }
   },
   "settings": {
