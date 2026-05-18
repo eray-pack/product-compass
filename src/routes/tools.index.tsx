@@ -853,8 +853,12 @@ function Tools() {
                   */}
                   <motion.div
                     aria-hidden
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 180, ease: "linear", repeat: Infinity }}
+                    animate={{
+                      scale:   [1, 1.03, 1],
+                      opacity: [0.8, 0.95, 0.8],
+                      y:       [0, 5, 0],
+                    }}
+                    transition={{ duration: 10, ease: "easeInOut", repeat: Infinity }}
                     style={{
                       position: "absolute",
                       top: "-25%", left: "-25%",
