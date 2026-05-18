@@ -484,6 +484,183 @@ function GoldenLeafBadge({ canAfford, owned }: { canAfford: boolean; owned: bool
   );
 }
 
+// ── Mind Branch icon SVG ─────────────────────────────────────────────────────
+function MindBranchSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <linearGradient id="mb-trunk" x1="14" y1="26" x2="14" y2="4" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#4338ca" />
+          <stop offset="55%"  stopColor="#6366f1" />
+          <stop offset="100%" stopColor="#38bdf8" />
+        </linearGradient>
+        <linearGradient id="mb-node-l" x1="3" y1="8" x2="10" y2="4" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#818cf8" />
+          <stop offset="100%" stopColor="#38bdf8" />
+        </linearGradient>
+        <linearGradient id="mb-node-r" x1="18" y1="4" x2="25" y2="8" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#38bdf8" />
+          <stop offset="100%" stopColor="#818cf8" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Main trunk ── */}
+      <path d="M14 26 L14 17" stroke="url(#mb-trunk)" strokeWidth="2.0" strokeLinecap="round"/>
+
+      {/* ── Primary left branch ── */}
+      <path d="M14 17 Q10 14 7 11" stroke="url(#mb-trunk)" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      {/* ── Primary right branch ── */}
+      <path d="M14 17 Q18 14 21 11" stroke="url(#mb-trunk)" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      {/* ── Central upward branch ── */}
+      <path d="M14 17 L14 11" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/>
+
+      {/* ── Secondary left branches ── */}
+      <path d="M7 11 Q4.5 8.5 3.5 6"   stroke="#818cf8" strokeWidth="1.05" strokeLinecap="round" fill="none" opacity="0.90"/>
+      <path d="M7 11 Q8 8 9.5 6"       stroke="#818cf8" strokeWidth="1.05" strokeLinecap="round" fill="none" opacity="0.90"/>
+      {/* ── Secondary right branches ── */}
+      <path d="M21 11 Q23.5 8.5 24.5 6" stroke="#38bdf8" strokeWidth="1.05" strokeLinecap="round" fill="none" opacity="0.90"/>
+      <path d="M21 11 Q20 8 18.5 6"     stroke="#38bdf8" strokeWidth="1.05" strokeLinecap="round" fill="none" opacity="0.90"/>
+      {/* ── Central secondary ── */}
+      <path d="M14 11 Q12.5 8 12 5.5"  stroke="#6366f1" strokeWidth="0.95" strokeLinecap="round" fill="none" opacity="0.85"/>
+      <path d="M14 11 Q15.5 8 16 5.5"  stroke="#6366f1" strokeWidth="0.95" strokeLinecap="round" fill="none" opacity="0.85"/>
+
+      {/* ── Neural nodes at tips ── */}
+      <circle cx="3.5"  cy="6"   r="2.2" fill="url(#mb-node-l)" />
+      <circle cx="9.5"  cy="6"   r="2.2" fill="url(#mb-node-l)" />
+      <circle cx="14"   cy="5.5" r="2.2" fill="#818cf8" />
+      <circle cx="18.5" cy="5.5" r="2.2" fill="url(#mb-node-r)" />
+      <circle cx="24.5" cy="6"   r="2.2" fill="url(#mb-node-r)" />
+      {/* Junction nodes */}
+      <circle cx="7"    cy="11"  r="1.6" fill="#6366f1" opacity="0.85"/>
+      <circle cx="21"   cy="11"  r="1.6" fill="#6366f1" opacity="0.85"/>
+      <circle cx="14"   cy="11"  r="1.6" fill="#818cf8" opacity="0.85"/>
+
+      {/* ── Specular highlight on tip nodes ── */}
+      <circle cx="3"    cy="5.4" r="0.85" fill="white" opacity="0.45"/>
+      <circle cx="9"    cy="5.4" r="0.85" fill="white" opacity="0.45"/>
+      <circle cx="13.5" cy="4.9" r="0.85" fill="white" opacity="0.45"/>
+      <circle cx="18"   cy="4.9" r="0.85" fill="white" opacity="0.45"/>
+      <circle cx="24"   cy="5.4" r="0.85" fill="white" opacity="0.45"/>
+    </svg>
+  );
+}
+
+// ── Mind Branch premium badge (branch-mind item only) ────────────────────────
+function MindBranchBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  const primary = "#6366f1";   // indigo
+  const accent  = "#38bdf8";   // sky-blue
+
+  // 10 particles on r=30 ring, in the 72px swirl div (center=36,36)
+  const particles = Array.from({ length: 10 }, (_, i) => {
+    const a = (i * 36 * Math.PI) / 180;
+    return {
+      x:      36 + 30 * Math.cos(a) - 1.5,
+      y:      36 + 30 * Math.sin(a) - 1.5,
+      big:    i % 3 === 0,
+      bright: i % 2 === 0,
+    };
+  });
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer indigo-to-cyan halo burst ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.45, 1], opacity: [0.50, 0.10, 0.50] }}
+        transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(99,102,241,0.65) 0%, rgba(56,189,248,0.28) 42%, transparent 68%)`,
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Rotating particle dust swirl ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 16, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.22, 1, 0.22], scale: [0.5, 1.3, 0.5] }}
+            transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: i * 0.24 }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2,
+              height: p.big ? 3.5 : 2,
+              borderRadius: "50%",
+              background: p.bright ? accent : primary,
+              boxShadow: `0 0 5px 1.5px rgba(99,102,241,0.80)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — burnished dark-chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 3.8, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #12112a 0%, #07060f 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.16)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.08)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px ${primary}88`,
+            `0 0 0 3.5px ${primary}18`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 30px 8px rgba(99,102,241,${canAfford && !owned ? "0.42" : "0.20"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner nebula — indigo-cyan glow behind icon */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.25, 0.55, 0.25], scale: [0.72, 1.06, 0.72] }}
+          transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 55%, rgba(99,102,241,0.70) 0%, rgba(56,189,248,0.30) 42%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 3.4, ease: "linear", repeatDelay: 3.0 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,255,255,0.20) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Branch icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.07, 1] }}
+          transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity }}
+        >
+          <MindBranchSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Etched Glass Shop Card ────────────────────────────────────────────────────
 function ShopCard({
   item,
@@ -518,6 +695,8 @@ function ShopCard({
         {/* Energy badge icon */}
         {item.id === "leaves-gold" ? (
           <GoldenLeafBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "branch-mind" ? (
+          <MindBranchBadge canAfford={canAfford} owned={owned} />
         ) : (
           <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
             {canAfford && !owned && (
