@@ -1117,7 +1117,7 @@ function CoinCard({
       onClick={handleFlip}
     >
       {/* Perspective wrapper gives rotateY real depth */}
-      <div style={{ perspective: 700, width: 82, height: 82 }}>
+      <div style={{ perspective: 700, width: 82, height: 82, position: "relative" }}>
         {/* Spinning element — rotateY is applied here */}
         <motion.div
           animate={controls}
@@ -1195,33 +1195,34 @@ function CoinCard({
               </span>
             </div>
 
-            {/* Earned check pip — bottom-right corner */}
-            {earned && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 18,
-                  height: 18,
-                  borderRadius: "50%",
-                  background: badge.color,
-                  border: "1.5px solid #080604",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 8,
-                  fontWeight: 900,
-                  color: "#080604",
-                  zIndex: 3,
-                  boxShadow: `0 0 8px ${badge.glow}`,
-                }}
-              >
-                ✓
-              </div>
-            )}
           </div>
         </motion.div>
+
+        {/* Earned check pip — outside overflow:hidden, corner of perspective wrapper */}
+        {earned && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: -3,
+              right: -3,
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              background: badge.color,
+              border: "2px solid #080604",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 9,
+              fontWeight: 900,
+              color: "#080604",
+              zIndex: 10,
+              boxShadow: `0 0 8px ${badge.glow}`,
+            }}
+          >
+            ✓
+          </div>
+        )}
       </div>
 
       {/* Badge name */}
@@ -1307,7 +1308,14 @@ function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) 
           padding: "0 4px",
         }}
       >
-        <SectionLabel>Badges</SectionLabel>
+        <p style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "#C9A84C",
+          opacity: 0.82,
+        }}>Badges</p>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span
             style={{
