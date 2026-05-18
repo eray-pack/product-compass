@@ -817,34 +817,24 @@ function LifeTreePage({
             </div>
           </div>
         ) : (
-          /* Cartoon: oval scene centered, fading into black at edges */
+          /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div style={{ position: "relative", width: 300, height: 300 }}>
-              {/* Oval sky background */}
-              <div style={{
-                position: "absolute", inset: 0, borderRadius: "50%",
-                background: SKY_CONFIGS[timeOfDay].gradient,
-                filter: health.companionFilter,
-                transition: "filter 1.2s ease",
-                boxShadow: `0 0 80px 40px #080604, 0 0 40px 20px #080604`,
-                overflow: "hidden",
-              }}>
-                {/* Mini sky elements inside oval */}
-                <div style={{ position: "absolute", inset: 0, opacity: 0.6 }}>
-                  <TreeSkyBackground timeOfDay={timeOfDay} />
-                </div>
+            <div style={{
+              position: "relative", width: 300, height: 300,
+              maskImage: "radial-gradient(ellipse at center, black 52%, transparent 80%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 52%, transparent 80%)",
+              filter: health.companionFilter,
+              transition: "filter 1.2s ease",
+            }}>
+              {/* Sky fills the oval */}
+              <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%" }}>
+                <TreeSkyBackground timeOfDay={timeOfDay} />
                 <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
               </div>
-              {/* Radial fade mask — blends oval edges into black */}
-              <div style={{
-                position: "absolute", inset: -2, borderRadius: "50%",
-                background: "radial-gradient(ellipse at center, transparent 52%, #080604 78%)",
-                pointerEvents: "none", zIndex: 2,
-              }} />
-              {/* Tree centered in oval */}
+              {/* Tree centered */}
               <div className="anim-tree-float" style={{
-                position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-                filter: health.companionFilter, transition: "filter 1.2s ease", zIndex: 3,
+                position: "absolute", inset: 0,
+                display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
               }}>
                 <CartoonTree day={day} xp={state.treeXP} />
               </div>
