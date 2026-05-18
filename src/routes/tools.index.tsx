@@ -468,6 +468,73 @@ function Tools() {
 
   return (
     <PageShell>
+      {/* ── Aurora Borealis background ───────────────────────────────────── */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        {/* Blob 1 — cyber-violet, top-left */}
+        <motion.div
+          animate={{
+            x: ["0%", "6%", "-4%", "0%"],
+            y: ["0%", "8%", "-5%", "0%"],
+            scale: [1, 1.08, 0.95, 1],
+            opacity: [0.22, 0.28, 0.20, 0.22],
+          }}
+          transition={{ duration: 28, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
+          style={{
+            position: "absolute",
+            top: "-10%",
+            left: "-15%",
+            width: "70vw",
+            height: "70vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        {/* Blob 2 — emerald seafoam, top-right */}
+        <motion.div
+          animate={{
+            x: ["0%", "-7%", "5%", "0%"],
+            y: ["0%", "10%", "-6%", "0%"],
+            scale: [1, 0.93, 1.10, 1],
+            opacity: [0.20, 0.26, 0.18, 0.20],
+          }}
+          transition={{ duration: 34, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 4 }}
+          style={{
+            position: "absolute",
+            top: "-8%",
+            right: "-20%",
+            width: "65vw",
+            height: "65vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #10b981 0%, transparent 70%)",
+            filter: "blur(90px)",
+          }}
+        />
+        {/* Blob 3 — deep cosmic indigo, center */}
+        <motion.div
+          animate={{
+            x: ["0%", "5%", "-6%", "0%"],
+            y: ["0%", "-7%", "9%", "0%"],
+            scale: [1, 1.06, 0.97, 1],
+            opacity: [0.16, 0.22, 0.14, 0.16],
+          }}
+          transition={{ duration: 40, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 10 }}
+          style={{
+            position: "absolute",
+            top: "15%",
+            left: "10%",
+            width: "80vw",
+            height: "60vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #6366f1 0%, transparent 70%)",
+            filter: "blur(100px)",
+          }}
+        />
+      </div>
+
+      {/* ── Content (above aurora) ────────────────────────────────────────── */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2">
         <SectionTitle>{t("nav.tools")}</SectionTitle>
@@ -888,6 +955,7 @@ function Tools() {
         </motion.div>
 
       </section>
+      </div>{/* end content z-1 */}
     </PageShell>
   );
 }
