@@ -191,7 +191,8 @@ function CreditsChip() {
   }, []);
 
   return (
-    <div
+    <Link
+      to="/tree"
       style={{
         display: "inline-flex", alignItems: "center", gap: 5,
         padding: "5px 12px", borderRadius: 999,
@@ -199,6 +200,7 @@ function CreditsChip() {
         border: "1px solid rgba(201,168,76,0.30)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
+        textDecoration: "none",
       }}
     >
       <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
@@ -209,7 +211,7 @@ function CreditsChip() {
       <span style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", letterSpacing: "0.02em" }}>
         {points}
       </span>
-    </div>
+    </Link>
   );
 }
 

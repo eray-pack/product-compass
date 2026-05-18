@@ -755,14 +755,16 @@ function LifeTreePage({
 
       {/* Tree scene — full-bleed, no card frame */}
       <section className="mt-4 relative" style={{ height: 360 }}>
-        {/* Sky fills the section edge-to-edge */}
-        <div className="absolute inset-0 overflow-hidden">
-          <TreeSkyBackground timeOfDay={timeOfDay} />
-        </div>
-
-        {/* Health overlay */}
-        <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
-          style={{ background: health.sceneOverlay }} />
+        {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
+        {treeStyle === "3d" && (
+          <>
+            <div className="absolute inset-0 overflow-hidden">
+              <TreeSkyBackground timeOfDay={timeOfDay} />
+            </div>
+            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
+              style={{ background: health.sceneOverlay }} />
+          </>
+        )}
 
         {/* Bottom fade — sky bleeds into page background */}
         <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"

@@ -933,23 +933,6 @@ function Dashboard() {
           Stopamine
         </span>
 
-        <div className="flex items-center gap-3">
-
-          <motion.div whileHover={{ opacity: 0.7 }} whileTap={{ scale: 0.96 }} transition={{ duration: 0.15 }}>
-            <Link
-              to="/challenges"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
-              style={{
-                color: "#C4873A",
-                background: "rgba(196,135,58,0.07)",
-                border: "1px solid rgba(196,135,58,0.2)",
-              }}
-            >
-              <Coins className="h-3 w-3" />
-              {state.points}
-            </Link>
-          </motion.div>
-        </div>
       </motion.header>
 
       {/* ── HABIT SWITCHER + BADGE CAROUSEL ──────────────────── */}
