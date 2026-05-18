@@ -1,0 +1,468 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "tools": "Outils",
+    "community": "Communauté",
+    "progress": "Progrès",
+    "tree": "Arbre",
+    "companion": "Compagnon"
+  },
+  "common": {
+    "day": "Jour",
+    "days": "jours",
+    "day_singular": "jour",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "continue": "Continuer",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "upgrade": "Améliorer",
+    "yes": "Oui",
+    "no": "Non",
+    "loading": "Chargement",
+    "active": "Actif",
+    "locked": "Verrouillé",
+    "pro": "PRO",
+    "free": "Gratuit",
+    "or": "ou",
+    "toGo": "restants",
+    "unchanged": "inchangé",
+    "daysAway": "dans {{count}} jours",
+    "dayAway": "dans {{count}} jour"
+  },
+  "home": {
+    "milestone": {
+      "awaken": "Éveil",
+      "clarity": "Clarté",
+      "control": "Contrôle",
+      "strength": "Force",
+      "reset": "Réinitialisation",
+      "benefit_7": "Énergie accrue",
+      "benefit_14": "Concentration retrouvée",
+      "benefit_30": "Confiance reconstruite",
+      "benefit_60": "Régulation émotionnelle",
+      "benefit_90": "Réinitialisation complète de la dopamine"
+    },
+    "focus": {
+      "0": "L'envie passera. Ton identité, non. Choisis qui tu deviens.",
+      "1": "La réinitialisation de la dopamine n'est pas une question de volonté — c'est reconstruire ton circuit de récompense jour après jour.",
+      "2": "Chaque heure que tu tiens signifie que ton cerveau se recâble. L'inconfort, c'est le progrès.",
+      "3": "Tu n'es pas venu aussi loin pour t'arrêter maintenant. La série en est la preuve.",
+      "4": "Les envies atteignent leur pic à 20 minutes. Tiens bon — tu l'as toujours fait.",
+      "5": "La version de toi qui a abandonné te regarde encore. Ne la déçois pas aujourd'hui.",
+      "6": "L'ennui n'est pas une urgence. Assieds-toi avec lui. C'est là que le recâblage se produit.",
+      "7": "La guérison n'est pas une ligne droite, mais chaque jour propre fait avancer le niveau de base.",
+      "8": "Ce à quoi tu résistes persiste. Reconnais l'envie, puis laisse-la passer comme la météo.",
+      "9": "Ton futur moi est en train de se construire maintenant, dans ce moment exact de résistance.",
+      "10": "La discipline, c'est se souvenir de ce que tu veux le plus plutôt que ce que tu veux maintenant.",
+      "11": "Le cerveau qui t'a amené ici peut guérir. Donne-lui le silence dont il a besoin aujourd'hui.",
+      "12": "À une décision d'une rechute, à une décision de ta meilleure journée. Choisis.",
+      "13": "Se présenter les jours difficiles, c'est ce qui distingue une série d'un mode de vie."
+    },
+    "mood": {
+      "low": {
+        "message": "Journée difficile. C'est normal. Tu as quand même tenu.",
+        "btn1": "Couper le signal",
+        "btn2": "Je ressens une envie"
+      },
+      "mid": {
+        "message": "La régularité, c'est la force. La plupart abandonnent des jours comme celui-là.",
+        "btn1": "Vérifier ta progression"
+      },
+      "high": {
+        "message": "Tu te recâbles. Garde cette énergie — elle se cumule.",
+        "btn1": "Voir ta série"
+      }
+    },
+    "moodLabel": {
+      "low": "Journée difficile, mais je tiens la ligne",
+      "mid": "Légèrement mis à l'épreuve, mais concentré",
+      "high": "Je me sens fort et invincible"
+    },
+    "reward": {
+      "bonus": "Bonus inattendu. La constance paie.",
+      "rare": "Tu viens de débloquer quelque chose de rare."
+    },
+    "checkin": {
+      "title": "Bilan quotidien",
+      "subtitle": "Comment tu te sens aujourd'hui ?",
+      "confirm": "Confirmer"
+    },
+    "sections": {
+      "todaysFocus": "Focus du jour",
+      "emergency": "SOS d'urgence",
+      "nextMilestone": "Prochain jalon",
+      "motivation": "Motivation"
+    },
+    "emergency": {
+      "title": "SOS d'urgence",
+      "subtitle": "Je ressens une envie en ce moment",
+      "cta": "Ouvrir les outils SOS"
+    },
+    "relapse": "J'ai rechuté — le noter honnêtement"
+  },
+  "progress": {
+    "header": "Suis ta guérison, jour après jour.",
+    "stats": {
+      "streak": "Série",
+      "best": "Meilleur",
+      "total": "Total propre"
+    },
+    "ring": {
+      "daysRemaining": "{{count}} jours restants pour la réinitialisation complète",
+      "achieved": "Réinitialisation complète de la dopamine atteinte. Tu l'as fait.",
+      "day": "jour",
+      "toReset": "à réinitialiser"
+    },
+    "milestones": {
+      "firstWeek": "Première semaine",
+      "thirtyDays": "30 jours",
+      "tenUrges": "10 envies surmontées",
+      "ninetyDays": "Guerrier des 90 jours",
+      "firstWeek_remaining": "{{count}} jour restant",
+      "firstWeek_remaining_plural": "{{count}} jours restants",
+      "thirtyDays_remaining": "{{count}} jours restants",
+      "ninetyDays_remaining": "{{count}} jours restants",
+      "tenUrges_remaining": "Complète {{count}} envie de plus",
+      "tenUrges_remaining_plural": "Complète {{count}} envies de plus",
+      "done": "Accompli !"
+    },
+    "consistency": {
+      "title": "Constance",
+      "subtitle": "12 dernières semaines",
+      "less": "Moins",
+      "more": "Plus"
+    },
+    "paywall": "Appuie pour voir ta série complète",
+    "story": {
+      "title": "Ton histoire",
+      "subtitle": "Ce n'est pas une série. C'est ton histoire.",
+      "daysSince": "Jours depuis le début",
+      "totalClean": "Total des jours propres",
+      "longest": "Plus longue période propre",
+      "longestValue": "{{count}} jours",
+      "timesBack": "Fois que tu es revenu",
+      "relapses": "Rechutes enregistrées honnêtement",
+      "sessions": "Sessions dans l'app",
+      "quote": "Chaque chapitre compte. Chaque fois que tu es revenu, c'était un choix. La plupart arrêtent de choisir."
+    },
+    "insights": {
+      "title": "Analyse des rechutes",
+      "subtitle": "Quand et pourquoi ça arrive",
+      "total": "Total des rechutes suivies",
+      "peakDay": "Jour le plus vulnérable",
+      "peakTime": "Moment le plus vulnérable",
+      "avgBetween": "Moyenne de jours entre rechutes",
+      "none": "Aucune",
+      "na": "—",
+      "avgValue": "{{count}} jours",
+      "paywallCta": "Voir ce qui déclenche tes rechutes",
+      "morning": "Matin",
+      "afternoon": "Après-midi",
+      "evening": "Soir",
+      "night": "Nuit",
+      "dow": { "0": "Dim", "1": "Lun", "2": "Mar", "3": "Mer", "4": "Jeu", "5": "Ven", "6": "Sam" }
+    },
+    "milestonesTitle": "Jalons",
+    "milestonesUnlocked": "{{count}} sur {{total}} débloqués",
+    "achieved": "✓ Atteint"
+  },
+  "tools": {
+    "header": "Outils de guérison",
+    "subtitle": "Choisis ton arme contre l'envie.",
+    "indexSubtitle": "Utilise ce qui fonctionne.",
+    "reframes": {
+      "0": "Chaque fois que tu résistes, tu crées littéralement de nouvelles voies neuronales.",
+      "1": "L'envie, ce n'est pas toi — c'est un ancien câblage qui demande une dernière dose.",
+      "2": "L'inconfort maintenant, c'est ton cortex préfrontal qui revient en ligne.",
+      "3": "Chaque jour propre élève ton niveau de dopamine de base d'une quantité mesurable.",
+      "4": "Tu ne renonces à rien. Tu te retrouves toi-même."
+    },
+    "coach": {
+      "name": "Coach de guérison",
+      "desc": "Soutien personnalisé par IA",
+      "tagline": "Parle-en. Sans jugement."
+    },
+    "sos": {
+      "name": "SOS d'urgence",
+      "desc": "Intervention immédiate contre l'envie",
+      "heroLine1": "Une envie te frappe ?",
+      "heroLine2": "On est là pour toi.",
+      "heroSub": "Appuie pour surfer sur l'envie · 3 min"
+    },
+    "gamesTitle": "Jeux Couper le signal",
+    "gamesDesc": "Entraîne ton cerveau. Bats l'envie.",
+    "mindPulse": "Pulse mental",
+    "impulseShift": "Décalage d'impulsion",
+    "neuralLink": "Lien neuronal",
+    "moreGames": "Plus de jeux disponibles",
+    "reframeTitle": "Recadrage",
+    "reframeDesc": "Recâble ta réaction en une seule pensée.",
+    "reframeCta": "Montre-m'en un",
+    "coldTitle": "Exposition au froid",
+    "coldDesc": "Respiration guidée sous douche froide 2 min.",
+    "coldCta": "Commencer →",
+    "planTitle": "Plan d'action",
+    "planDesc": "Stratégies si/alors pour tes déclencheurs.",
+    "planAdd": "Ajouter un plan",
+    "planClose": "Fermer",
+    "planTriggerPlaceholder": "Si je ressens… (déclencheur)",
+    "planActionPlaceholder": "…je vais (action)",
+    "planSave": "Enregistrer le plan",
+    "planIfI": "Si je",
+    "planIWill": "je vais",
+    "breath": {
+      "name": "Respirer",
+      "desc": "Respiration en boîte pour se réinitialiser"
+    },
+    "cold": {
+      "name": "Douche froide",
+      "desc": "Protocole de boost de dopamine"
+    },
+    "tap": {
+      "name": "Tapoteur d'envie",
+      "desc": "Tapote jusqu'à ce que ça passe"
+    },
+    "memory": {
+      "name": "Palais de la mémoire",
+      "desc": "Ancre ta raison la plus forte"
+    },
+    "darkroom": {
+      "name": "Chambre noire",
+      "desc": "Mode de privation sensorielle"
+    },
+    "voidstare": {
+      "name": "Regard dans le vide",
+      "desc": "Fixe l'abîme"
+    },
+    "noisefilter": {
+      "name": "Filtre de bruit",
+      "desc": "Champ de concentration bruit brun"
+    },
+    "echochamber": {
+      "name": "Chambre d'écho",
+      "desc": "Entends ta propre conviction"
+    },
+    "identitystack": {
+      "name": "Pile d'identité",
+      "desc": "Qui tu deviens"
+    },
+    "clarityclimb": {
+      "name": "Montée de clarté",
+      "desc": "Escalier de pleine conscience"
+    },
+    "coldswitch": {
+      "name": "Interrupteur froid",
+      "desc": "Baisse de température d'urgence"
+    },
+    "steadyhand": {
+      "name": "Main ferme",
+      "desc": "Exercice de concentration précise"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "sections": {
+      "account": "Compte",
+      "billing": "Facturation & abonnement",
+      "language": "Langue",
+      "notifications": "Notifications",
+      "privacy": "Confidentialité & données",
+      "habits": "Habitudes suivies",
+      "startDate": "Date de début de guérison",
+      "badges": "Badges",
+      "about": "À propos"
+    },
+    "account": {
+      "profilePhoto": "Photo de profil",
+      "takePhoto": "Prendre une photo",
+      "chooseLibrary": "Choisir depuis la bibliothèque",
+      "name": "Nom",
+      "email": "E-mail",
+      "changePassword": "Changer le mot de passe",
+      "notSet": "Non défini",
+      "notConnected": "Non connecté"
+    },
+    "billing": {
+      "currentPlan": "Abonnement actuel",
+      "paymentMethod": "Moyen de paiement",
+      "noCard": "Aucune carte enregistrée",
+      "promo": "PRO débloque toutes les analyses · 39,99 $/an (~3,33 $/mois) · 7 jours d'essai gratuit.",
+      "restore": "Restaurer l'achat"
+    },
+    "notifications": {
+      "push": "Notifications push",
+      "pushSub": "Alertes d'envie, jalons & séries",
+      "email": "Notifications par e-mail",
+      "emailSub": "Conseils de guérison et mises à jour",
+      "weekly": "Rapport hebdomadaire",
+      "weeklySub": "Envoyé chaque dimanche matin"
+    },
+    "privacy": {
+      "export": "Exporter mes données",
+      "exportHelp": "L'exportation télécharge un fichier JSON avec toutes vos données d'application.",
+      "delete": "Supprimer le compte",
+      "deleteConfirm": "Appuyer à nouveau pour confirmer la suppression"
+    },
+    "habits": {
+      "add": "Ajouter",
+      "empty": "Aucune habitude suivie pour l'instant.",
+      "dayLabel": "Jour {{day}}"
+    },
+    "startDate": {
+      "label": "Date de début",
+      "modalTitle": "Quand as-tu dernièrement réinitialisé ?",
+      "modalDesc": "Choisis la date à laquelle tu as commencé cette série. Ne peut être défini qu'une seule fois.",
+      "confirmBtn": "Confirmer la date de début",
+      "helpText": "Définis une date passée si tu étais déjà propre avant d'installer l'application."
+    },
+    "badges": {
+      "dayThreshold": "Jour {{day}}",
+      "legend": "{{earned}}/{{total}} débloqués",
+      "next": "Suivant : {{name}} dans {{days}}j"
+    },
+    "about": {
+      "version": "Version de l'application",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité"
+    }
+  },
+  "onboarding": {
+    "habits": {
+      "porn": "Pornographie",
+      "socialMedia": "Doomscrolling sur les réseaux sociaux",
+      "sugar": "Sucre / malbouffe",
+      "alcohol": "Alcool",
+      "nicotine": "Nicotine / vapotage",
+      "cannabis": "Cannabis",
+      "gambling": "Jeux d'argent en ligne / paris",
+      "gaming": "Binges de jeux vidéo",
+      "procrastination": "Procrastination"
+    },
+    "durations": {
+      "short": "Moins de 6 mois",
+      "medium": "1 à 2 ans",
+      "long": "3 à 5 ans",
+      "veryLong": "Plus de 5 ans"
+    },
+    "costs": {
+      "relationships": "Relations",
+      "focus": "Concentration & travail",
+      "confidence": "Estime de soi",
+      "sleep": "Sommeil",
+      "social": "Vie sociale",
+      "mental": "Santé mentale"
+    },
+    "triggers": {
+      "lateNight": "Tard le soir",
+      "bored": "Quand je m'ennuie",
+      "stressed": "Quand je suis stressé",
+      "alone": "Quand je suis seul",
+      "rejection": "Après un rejet"
+    },
+    "identity": {
+      "control": "a le plein contrôle de son esprit",
+      "validation": "n'a plus besoin de validation externe",
+      "discomfort": "choisit l'inconfort plutôt que la gratification immédiate",
+      "proud": "est quelqu'un dont son futur moi est fier",
+      "discipline": "agit avec discipline, pas selon son humeur"
+    },
+    "notifications": {
+      "styles": {
+        "friend": "Un court message, comme un texto d'un ami",
+        "insight": "Un fait ou une information qui me surprend",
+        "question": "Une question qui me fait réfléchir",
+        "quiet": "Un doux rappel — rien d'intense"
+      },
+      "apps": {
+        "imessage": "iMessage / WhatsApp",
+        "instagram": "Instagram",
+        "email": "E-mail",
+        "rarely": "J'ouvre rarement les notifications"
+      }
+    },
+    "step": "Étape {{step}} sur {{total}}"
+  },
+  "tree": {
+    "yourCompanion": "Ton compagnon",
+    "ranks": {
+      "beginning": "Début",
+      "awakening": "Éveil",
+      "building": "Construction",
+      "established": "Établi",
+      "rising": "Ascension",
+      "legendary": "Légendaire"
+    },
+    "wolfRanks": {
+      "beginning": "Début",
+      "awakening": "Éveil",
+      "building": "Construction",
+      "established": "Établi",
+      "rising": "Ascension",
+      "fierce": "Féroce",
+      "dominant": "Dominant",
+      "legendary": "Légendaire"
+    },
+    "stageNames": {
+      "day1": "Jour 1",
+      "week1": "Semaine 1",
+      "twoWeeks": "2 semaines",
+      "month1": "Mois 1",
+      "twoMonths": "2 mois",
+      "ninetyDays": "90 jours"
+    },
+    "wolfStages": {
+      "newborn": "Nouveau-né",
+      "pup": "Chiot",
+      "young": "Jeune",
+      "adolescent": "Adolescent",
+      "adult": "Adulte",
+      "strong": "Fort",
+      "alpha": "Alpha",
+      "legendary": "Légendaire"
+    },
+    "upgrades": {
+      "sacredGround": "Terre sacrée"
+    },
+    "hallOfLegends": "Hall des légendes",
+    "sky": {
+      "morning": "Matin",
+      "afternoon": "Après-midi",
+      "evening": "Soir",
+      "night": "Nuit"
+    }
+  },
+  "relapse": {
+    "confirm": {
+      "title": "As-tu rechuté ?",
+      "body": "Sois honnête avec toi-même. L'enregistrer est un acte de courage — ton compteur reste exactement là où il est.",
+      "yes": "Oui, l'enregistrer honnêtement",
+      "no": "Non, je suis toujours propre"
+    },
+    "trigger": {
+      "step": "Étape 1 sur 2",
+      "title": "Que s'est-il passé juste avant ?",
+      "subtitle": "Sois précis. Cela façonne ton recadrage.",
+      "stressed": "J'étais stressé",
+      "bored": "Je m'ennuyais",
+      "alone": "J'étais seul",
+      "late": "C'était tard le soir",
+      "online": "Quelque chose m'a déclenché en ligne",
+      "unknown": "Je ne sais pas"
+    },
+    "reframe": {
+      "readThis": "Lis ceci.",
+      "analysing": "Analyse de ton schéma…",
+      "totalClean": "Total des jours propres",
+      "cta": "Le jour 1 commence maintenant. Continue."
+    },
+    "done": {
+      "title": "Tu es encore dans la partie.",
+      "body": "L'enregistrer a demandé du courage. Ferme ceci, ouvre les outils SOS et identifie ce qui l'a déclenché. C'est ça le travail.",
+      "cta": "Retour au tableau de bord"
+    }
+  }
+}

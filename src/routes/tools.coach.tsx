@@ -110,7 +110,7 @@ function Coach() {
   return (
     <div
       className="flex flex-col h-[100dvh]"
-      style={{ background: "var(--background)" }}
+      style={{ background: "#0D0A08" }}
     >
       {/* ── Header ─────────────────────────────────────────── */}
       <header

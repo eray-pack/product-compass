@@ -1,0 +1,468 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "tools": "Herramientas",
+    "community": "Comunidad",
+    "progress": "Progreso",
+    "tree": "Árbol",
+    "companion": "Compañero"
+  },
+  "common": {
+    "day": "Día",
+    "days": "días",
+    "day_singular": "día",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Listo",
+    "continue": "Continuar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "upgrade": "Mejorar",
+    "yes": "Sí",
+    "no": "No",
+    "loading": "Cargando",
+    "active": "Activo",
+    "locked": "Bloqueado",
+    "pro": "PRO",
+    "free": "Gratis",
+    "or": "o",
+    "toGo": "restantes",
+    "unchanged": "sin cambios",
+    "daysAway": "en {{count}} días",
+    "dayAway": "en {{count}} día"
+  },
+  "home": {
+    "milestone": {
+      "awaken": "Despertar",
+      "clarity": "Claridad",
+      "control": "Control",
+      "strength": "Fuerza",
+      "reset": "Reinicio",
+      "benefit_7": "Más energía",
+      "benefit_14": "Concentración recuperada",
+      "benefit_30": "Confianza reconstruida",
+      "benefit_60": "Regulación emocional",
+      "benefit_90": "Reinicio completo de la dopamina"
+    },
+    "focus": {
+      "0": "El impulso pasará. Tu identidad no. Elige en quién te estás convirtiendo.",
+      "1": "El reinicio de la dopamina no es cuestión de fuerza de voluntad — es reconstruir tu circuito de recompensa día a día.",
+      "2": "Cada hora que aguantas significa que tu cerebro se está recableando. El malestar es el progreso.",
+      "3": "No llegaste tan lejos para quedarte a medias. La racha es la prueba.",
+      "4": "Los antojos alcanzan su pico a los 20 minutos. Aguanta — siempre lo has hecho.",
+      "5": "La versión de ti que se rindió todavía te observa. No la decepciones hoy.",
+      "6": "El aburrimiento no es una emergencia. Quédate con él. Ahí es donde ocurre el recableado.",
+      "7": "La recuperación no es una línea recta, pero cada día limpio mueve la base hacia arriba.",
+      "8": "Lo que resistes persiste. Reconoce el impulso y deja que pase como el clima.",
+      "9": "Tu yo futuro se está construyendo ahora mismo, en este preciso momento de resistencia.",
+      "10": "La disciplina es recordar lo que más quieres sobre lo que quieres ahora mismo.",
+      "11": "El cerebro que te trajo aquí puede sanar. Dale el silencio que necesita hoy.",
+      "12": "A una decisión de una recaída, a una decisión de tu mejor día. Elige.",
+      "13": "Aparecer en los días difíciles es lo que diferencia una racha de un estilo de vida."
+    },
+    "mood": {
+      "low": {
+        "message": "Día duro. Está bien. De todas formas apareciste.",
+        "btn1": "Cortar la señal",
+        "btn2": "Siento un impulso"
+      },
+      "mid": {
+        "message": "La estabilidad es fortaleza. La mayoría abandona en días como este.",
+        "btn1": "Ver tu progreso"
+      },
+      "high": {
+        "message": "Te estás recableando. Mantén esta energía — se acumula.",
+        "btn1": "Ver tu racha"
+      }
+    },
+    "moodLabel": {
+      "low": "Día difícil, manteniendo la línea",
+      "mid": "Ligeramente desafiado, manteniéndome enfocado",
+      "high": "Me siento fuerte e imparable"
+    },
+    "reward": {
+      "bonus": "Bono inesperado. La constancia paga.",
+      "rare": "Acabas de desbloquear algo raro."
+    },
+    "checkin": {
+      "title": "Check-in diario",
+      "subtitle": "¿Cómo te sientes hoy?",
+      "confirm": "Confirmar"
+    },
+    "sections": {
+      "todaysFocus": "Enfoque del día",
+      "emergency": "SOS de emergencia",
+      "nextMilestone": "Próximo hito",
+      "motivation": "Motivación"
+    },
+    "emergency": {
+      "title": "SOS de emergencia",
+      "subtitle": "Siento un impulso ahora mismo",
+      "cta": "Abrir herramientas SOS"
+    },
+    "relapse": "Recaí — registrarlo honestamente"
+  },
+  "progress": {
+    "header": "Sigue tu recuperación, día a día.",
+    "stats": {
+      "streak": "Racha",
+      "best": "Mejor",
+      "total": "Total limpio"
+    },
+    "ring": {
+      "daysRemaining": "{{count}} días restantes para el reinicio completo",
+      "achieved": "Reinicio completo de la dopamina logrado. Lo conseguiste.",
+      "day": "día",
+      "toReset": "para reiniciar"
+    },
+    "milestones": {
+      "firstWeek": "Primera semana",
+      "thirtyDays": "30 días",
+      "tenUrges": "10 impulsos superados",
+      "ninetyDays": "Guerrero de los 90 días",
+      "firstWeek_remaining": "{{count}} día restante",
+      "firstWeek_remaining_plural": "{{count}} días restantes",
+      "thirtyDays_remaining": "{{count}} días restantes",
+      "ninetyDays_remaining": "{{count}} días restantes",
+      "tenUrges_remaining": "Completa {{count}} impulso más",
+      "tenUrges_remaining_plural": "Completa {{count}} impulsos más",
+      "done": "¡Completado!"
+    },
+    "consistency": {
+      "title": "Constancia",
+      "subtitle": "Últimas 12 semanas",
+      "less": "Menos",
+      "more": "Más"
+    },
+    "paywall": "Toca para ver tu racha completa",
+    "story": {
+      "title": "Tu historia",
+      "subtitle": "Esto no es una racha. Es tu historia.",
+      "daysSince": "Días desde que empezaste",
+      "totalClean": "Total de días limpios",
+      "longest": "Período limpio más largo",
+      "longestValue": "{{count}} días",
+      "timesBack": "Veces que volviste",
+      "relapses": "Recaídas registradas honestamente",
+      "sessions": "Sesiones en la app",
+      "quote": "Cada capítulo cuenta. Cada vez que volviste fue una elección. La mayoría deja de elegir."
+    },
+    "insights": {
+      "title": "Análisis de recaídas",
+      "subtitle": "Cuándo y por qué ocurre",
+      "total": "Total de recaídas registradas",
+      "peakDay": "Día más vulnerable",
+      "peakTime": "Momento más vulnerable",
+      "avgBetween": "Promedio de días entre recaídas",
+      "none": "Ninguna",
+      "na": "—",
+      "avgValue": "{{count}} días",
+      "paywallCta": "Ver qué desencadena tus recaídas",
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "evening": "Noche",
+      "night": "Madrugada",
+      "dow": { "0": "Dom", "1": "Lun", "2": "Mar", "3": "Mié", "4": "Jue", "5": "Vie", "6": "Sáb" }
+    },
+    "milestonesTitle": "Hitos",
+    "milestonesUnlocked": "{{count}} de {{total}} desbloqueados",
+    "achieved": "✓ Logrado"
+  },
+  "tools": {
+    "header": "Herramientas de recuperación",
+    "subtitle": "Elige tu arma contra el impulso.",
+    "indexSubtitle": "Usa lo que funciona.",
+    "reframes": {
+      "0": "Cada vez que resistes, literalmente creas nuevas vías neuronales.",
+      "1": "El impulso no eres tú — es un cableado antiguo pidiendo una dosis más.",
+      "2": "El malestar ahora es tu corteza prefrontal volviendo a funcionar.",
+      "3": "Cada día limpio eleva tu nivel base de dopamina en una cantidad medible.",
+      "4": "No estás renunciando a algo. Te estás recuperando a ti mismo."
+    },
+    "coach": {
+      "name": "Coach de recuperación",
+      "desc": "Apoyo personalizado con IA",
+      "tagline": "Habla sobre ello. Sin juicios."
+    },
+    "sos": {
+      "name": "SOS de emergencia",
+      "desc": "Intervención inmediata contra el impulso",
+      "heroLine1": "¿Te golpea un impulso?",
+      "heroLine2": "Estamos contigo.",
+      "heroSub": "Toca para surfear el impulso · 3 min"
+    },
+    "gamesTitle": "Juegos Cortar la señal",
+    "gamesDesc": "Entrena tu cerebro. Vence el impulso.",
+    "mindPulse": "Pulso mental",
+    "impulseShift": "Cambio de impulso",
+    "neuralLink": "Enlace neuronal",
+    "moreGames": "Más juegos disponibles",
+    "reframeTitle": "Reencuadre",
+    "reframeDesc": "Recablea tu reacción en un solo pensamiento.",
+    "reframeCta": "Muéstrame uno",
+    "coldTitle": "Exposición al frío",
+    "coldDesc": "Respiración guiada bajo ducha fría de 2 min.",
+    "coldCta": "Comenzar →",
+    "planTitle": "Plan de acción",
+    "planDesc": "Estrategias si/entonces para tus desencadenantes.",
+    "planAdd": "Agregar plan",
+    "planClose": "Cerrar",
+    "planTriggerPlaceholder": "Si siento… (desencadenante)",
+    "planActionPlaceholder": "…voy a (acción)",
+    "planSave": "Guardar plan",
+    "planIfI": "Si yo",
+    "planIWill": "voy a",
+    "breath": {
+      "name": "Respirar",
+      "desc": "Respiración cuadrada para reiniciarse"
+    },
+    "cold": {
+      "name": "Ducha fría",
+      "desc": "Protocolo de impulso de dopamina"
+    },
+    "tap": {
+      "name": "Tapeador de impulsos",
+      "desc": "Toca hasta que se desvanezca"
+    },
+    "memory": {
+      "name": "Palacio de la memoria",
+      "desc": "Ancla tu razón más fuerte"
+    },
+    "darkroom": {
+      "name": "Cuarto oscuro",
+      "desc": "Modo de privación sensorial"
+    },
+    "voidstare": {
+      "name": "Mirada al vacío",
+      "desc": "Mira al abismo"
+    },
+    "noisefilter": {
+      "name": "Filtro de ruido",
+      "desc": "Campo de concentración con ruido marrón"
+    },
+    "echochamber": {
+      "name": "Cámara de eco",
+      "desc": "Escucha tu propia convicción"
+    },
+    "identitystack": {
+      "name": "Pila de identidad",
+      "desc": "En quién te estás convirtiendo"
+    },
+    "clarityclimb": {
+      "name": "Escalada de claridad",
+      "desc": "Escalera de atención plena"
+    },
+    "coldswitch": {
+      "name": "Interruptor frío",
+      "desc": "Bajada de temperatura de emergencia"
+    },
+    "steadyhand": {
+      "name": "Mano firme",
+      "desc": "Ejercicio de enfoque de precisión"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "sections": {
+      "account": "Cuenta",
+      "billing": "Facturación y plan",
+      "language": "Idioma",
+      "notifications": "Notificaciones",
+      "privacy": "Privacidad y datos",
+      "habits": "Hábitos seguidos",
+      "startDate": "Fecha de inicio de recuperación",
+      "badges": "Insignias",
+      "about": "Acerca de"
+    },
+    "account": {
+      "profilePhoto": "Foto de perfil",
+      "takePhoto": "Tomar foto",
+      "chooseLibrary": "Elegir de la biblioteca",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "changePassword": "Cambiar contraseña",
+      "notSet": "No definido",
+      "notConnected": "No conectado"
+    },
+    "billing": {
+      "currentPlan": "Plan actual",
+      "paymentMethod": "Método de pago",
+      "noCard": "No hay tarjeta registrada",
+      "promo": "PRO desbloquea análisis completos · $39,99/año (~$3,33/mes) · 7 días de prueba gratis.",
+      "restore": "Restaurar compra"
+    },
+    "notifications": {
+      "push": "Notificaciones push",
+      "pushSub": "Alertas de impulso, hitos y rachas",
+      "email": "Notificaciones por correo",
+      "emailSub": "Consejos de recuperación y actualizaciones",
+      "weekly": "Informe semanal de progreso",
+      "weeklySub": "Enviado cada domingo por la mañana"
+    },
+    "privacy": {
+      "export": "Exportar mis datos",
+      "exportHelp": "Exportar descarga un archivo JSON con todos tus datos de la app.",
+      "delete": "Eliminar cuenta",
+      "deleteConfirm": "Toca de nuevo para confirmar la eliminación"
+    },
+    "habits": {
+      "add": "Agregar",
+      "empty": "Aún no se siguen hábitos.",
+      "dayLabel": "Día {{day}}"
+    },
+    "startDate": {
+      "label": "Fecha de inicio",
+      "modalTitle": "¿Cuándo fue tu último reinicio?",
+      "modalDesc": "Elige la fecha en que comenzaste esta racha. Solo se puede establecer una vez.",
+      "confirmBtn": "Confirmar fecha de inicio",
+      "helpText": "Establece una fecha pasada si ya estabas limpio antes de instalar la app."
+    },
+    "badges": {
+      "dayThreshold": "Día {{day}}",
+      "legend": "{{earned}}/{{total}} desbloqueados",
+      "next": "Siguiente: {{name}} en {{days}}d"
+    },
+    "about": {
+      "version": "Versión de la app",
+      "terms": "Términos de servicio",
+      "privacy": "Política de privacidad"
+    }
+  },
+  "onboarding": {
+    "habits": {
+      "porn": "Pornografía",
+      "socialMedia": "Doomscrolling en redes sociales",
+      "sugar": "Azúcar / comida basura",
+      "alcohol": "Alcohol",
+      "nicotine": "Nicotina / vapeo",
+      "cannabis": "Cannabis",
+      "gambling": "Juegos de azar en línea / apuestas",
+      "gaming": "Atracones de videojuegos",
+      "procrastination": "Procrastinación"
+    },
+    "durations": {
+      "short": "Menos de 6 meses",
+      "medium": "1-2 años",
+      "long": "3-5 años",
+      "veryLong": "Más de 5 años"
+    },
+    "costs": {
+      "relationships": "Relaciones",
+      "focus": "Concentración y trabajo",
+      "confidence": "Autoconfianza",
+      "sleep": "Sueño",
+      "social": "Vida social",
+      "mental": "Salud mental"
+    },
+    "triggers": {
+      "lateNight": "Tarde en la noche",
+      "bored": "Cuando me aburro",
+      "stressed": "Cuando estoy estresado",
+      "alone": "Cuando estoy solo",
+      "rejection": "Después de un rechazo"
+    },
+    "identity": {
+      "control": "tiene pleno control de su mente",
+      "validation": "ya no necesita validación externa",
+      "discomfort": "elige el malestar sobre la gratificación inmediata",
+      "proud": "es alguien de quien su yo futuro se siente orgulloso",
+      "discipline": "actúa con disciplina, no según su estado de ánimo"
+    },
+    "notifications": {
+      "styles": {
+        "friend": "Un mensaje corto, como un texto de un amigo",
+        "insight": "Un dato o perspectiva que me sorprende",
+        "question": "Una pregunta que me hace pensar",
+        "quiet": "Un suave recordatorio — nada intenso"
+      },
+      "apps": {
+        "imessage": "iMessage / WhatsApp",
+        "instagram": "Instagram",
+        "email": "Correo electrónico",
+        "rarely": "Rara vez abro notificaciones"
+      }
+    },
+    "step": "Paso {{step}} de {{total}}"
+  },
+  "tree": {
+    "yourCompanion": "Tu compañero",
+    "ranks": {
+      "beginning": "Inicio",
+      "awakening": "Despertar",
+      "building": "Construcción",
+      "established": "Establecido",
+      "rising": "Ascenso",
+      "legendary": "Legendario"
+    },
+    "wolfRanks": {
+      "beginning": "Inicio",
+      "awakening": "Despertar",
+      "building": "Construcción",
+      "established": "Establecido",
+      "rising": "Ascenso",
+      "fierce": "Feroz",
+      "dominant": "Dominante",
+      "legendary": "Legendario"
+    },
+    "stageNames": {
+      "day1": "Día 1",
+      "week1": "Semana 1",
+      "twoWeeks": "2 semanas",
+      "month1": "Mes 1",
+      "twoMonths": "2 meses",
+      "ninetyDays": "90 días"
+    },
+    "wolfStages": {
+      "newborn": "Recién nacido",
+      "pup": "Cachorro",
+      "young": "Joven",
+      "adolescent": "Adolescente",
+      "adult": "Adulto",
+      "strong": "Fuerte",
+      "alpha": "Alfa",
+      "legendary": "Legendario"
+    },
+    "upgrades": {
+      "sacredGround": "Tierra sagrada"
+    },
+    "hallOfLegends": "Salón de leyendas",
+    "sky": {
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "evening": "Noche",
+      "night": "Madrugada"
+    }
+  },
+  "relapse": {
+    "confirm": {
+      "title": "¿Recaíste?",
+      "body": "Sé honesto contigo mismo. Registrarlo es un acto de valentía — tu contador se queda exactamente donde está.",
+      "yes": "Sí, registrarlo honestamente",
+      "no": "No, sigo limpio"
+    },
+    "trigger": {
+      "step": "Paso 1 de 2",
+      "title": "¿Qué pasó justo antes?",
+      "subtitle": "Sé específico. Esto da forma a tu reencuadre.",
+      "stressed": "Estaba estresado",
+      "bored": "Estaba aburrido",
+      "alone": "Estaba solo",
+      "late": "Era tarde en la noche",
+      "online": "Algo me desencadenó en línea",
+      "unknown": "No lo sé"
+    },
+    "reframe": {
+      "readThis": "Lee esto.",
+      "analysing": "Analizando tu patrón…",
+      "totalClean": "Total de días limpios",
+      "cta": "El día 1 comienza ahora. Sigue adelante."
+    },
+    "done": {
+      "title": "Sigues en el juego.",
+      "body": "Registrarlo requirió valentía. Cierra esto, abre las herramientas SOS e identifica qué lo desencadenó. Ese es el trabajo.",
+      "cta": "Volver al panel"
+    }
+  }
+}

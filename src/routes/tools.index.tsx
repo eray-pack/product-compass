@@ -1,146 +1,232 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/tools/")({
   component: Tools,
 });
 
-const reframes = [
-  "Every time you resist, you literally grow new neural pathways.",
-  "The urge isn't you — it's old wiring asking for one more hit.",
-  "Discomfort now is your prefrontal cortex coming back online.",
-  "Each clean day raises your dopamine baseline by a measurable amount.",
-  "You're not giving something up. You're getting yourself back.",
-];
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const CARD: React.CSSProperties = {
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.09)",
+  borderTop: "1px solid rgba(201,168,76,0.14)",
+  borderRadius: 24,
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+};
 
+// Capsule CTA buttons — etched glass pill style
+const GOLD_OUTLINE: React.CSSProperties = {
+  color: "#debc7a",
+  border: "1px solid rgba(201,168,76,0.38)",
+  background: "rgba(201,168,76,0.08)",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 700,
+  padding: "6px 16px",
+  flexShrink: 0,
+  letterSpacing: "0.03em",
+  textShadow: "0 0 8px rgba(201,168,76,0.30)",
+  cursor: "pointer",
+};
+
+const ICON_WRAP = (color: string): React.CSSProperties => ({
+  height: 40,
+  width: 40,
+  borderRadius: 14,
+  display: "grid",
+  placeItems: "center",
+  background: `${color}14`,
+  border: `1px solid ${color}42`,
+  boxShadow: `0 0 16px 3px ${color}26`,
+  color,
+  flexShrink: 0,
+  position: "relative",
+});
+
+const REFRAME_COUNT = 5;
+
+// ── Game badge animation ──────────────────────────────────────────────────────
+type AmbientType = "pulse" | "rotate" | "breathe" | "float" | "none";
+
+const gameContainer: Variants = {
+  hidden:   {},
+  visible:  { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const gameItem: Variants = {
+  hidden:   { opacity: 0, scale: 0.82 },
+  visible:  { opacity: 1, scale: 1, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } },
+};
+
+// ── CoachRobot SVG ────────────────────────────────────────────────────────────
 function CoachRobot() {
   return (
-    <svg
-      width="52"
-      height="66"
-      viewBox="0 0 52 66"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      overflow="visible"
-      className="robot-body"
-    >
-      {/* Antenna */}
-      <line x1="26" y1="9" x2="26" y2="2" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="26" cy="2" r="2.5" fill="#C4873A" />
-
-      {/* Head */}
-      <rect x="8" y="9" width="36" height="22" rx="6" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
-
-      {/* Eyes */}
-      <circle cx="19" cy="20" r="3.5" fill="#C4873A" opacity="0.85" />
-      <circle cx="33" cy="20" r="3.5" fill="#C4873A" opacity="0.85" />
-      {/* Eye shine */}
+    <svg width="52" height="66" viewBox="0 0 52 66" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible" className="robot-body">
+      <line x1="26" y1="9" x2="26" y2="2" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="26" cy="2" r="2.5" fill="#C9A84C" />
+      <rect x="8" y="9" width="36" height="22" rx="6" fill="#1C170F" stroke="#C9A84C" strokeWidth="1.2" />
+      <circle cx="19" cy="20" r="3.5" fill="#C9A84C" opacity="0.85" />
+      <circle cx="33" cy="20" r="3.5" fill="#C9A84C" opacity="0.85" />
       <circle cx="20.2" cy="18.5" r="1.2" fill="#f5ede0" opacity="0.55" />
       <circle cx="34.2" cy="18.5" r="1.2" fill="#f5ede0" opacity="0.55" />
-
-      {/* Smile */}
-      <path d="M 20 26 Q 26 30.5 32 26" stroke="#C4873A" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.85" />
-
-      {/* Neck */}
+      <path d="M 20 26 Q 26 30.5 32 26" stroke="#C9A84C" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.85" />
       <rect x="21" y="31" width="10" height="5" rx="2.5" fill="#261F15" />
-
-      {/* Body */}
-      <rect x="5" y="36" width="42" height="26" rx="6" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
-
-      {/* Chest panel */}
-      <rect x="14" y="42" width="24" height="12" rx="3" fill="#261F15" stroke="#C4873A" strokeWidth="0.6" opacity="0.75" />
-      {/* Indicator dots — left dim, right lit */}
-      <circle cx="23" cy="48" r="2.5" fill="#C4873A" opacity="0.35" />
-      <circle cx="30" cy="48" r="2.5" fill="#C4873A" opacity="0.9" />
-
-      {/* Left arm — static */}
-      <rect x="0" y="38" width="9" height="18" rx="4.5" fill="#1C170F" stroke="#C4873A" strokeWidth="1.2" />
-
-      {/* Right arm — waving (pivot: top-center of rect = shoulder joint) */}
-      <rect
-        x="43"
-        y="38"
-        width="9"
-        height="18"
-        rx="4.5"
-        fill="#1C170F"
-        stroke="#C4873A"
-        strokeWidth="1.2"
-        className="robot-wave-arm"
-      />
+      <rect x="5" y="36" width="42" height="26" rx="6" fill="#1C170F" stroke="#C9A84C" strokeWidth="1.2" />
+      <rect x="14" y="42" width="24" height="12" rx="3" fill="#261F15" stroke="#C9A84C" strokeWidth="0.6" opacity="0.75" />
+      <circle cx="23" cy="48" r="2.5" fill="#C9A84C" opacity="0.35" />
+      <circle cx="30" cy="48" r="2.5" fill="#C9A84C" opacity="0.9" />
+      <rect x="0" y="38" width="9" height="18" rx="4.5" fill="#1C170F" stroke="#C9A84C" strokeWidth="1.2" />
+      <rect x="43" y="38" width="9" height="18" rx="4.5" fill="#1C170F" stroke="#C9A84C" strokeWidth="1.2" className="robot-wave-arm" />
     </svg>
   );
 }
 
-// ── Cut the Signal game circles ───────────────────────────────────────────────
-function SignalGame({ to, glow, label, icon }: { to: string; glow: string; label: string; icon: React.ReactNode }) {
+// ── Cut-the-Signal game circles ───────────────────────────────────────────────
+function SignalGame({
+  to, glow, label, icon, ambient = "none",
+}: {
+  to: string; glow: string; label: string; icon: React.ReactNode; ambient?: AmbientType;
+}) {
   return (
-    <Link to={to} className="flex flex-col items-center gap-3 active:opacity-70 transition-opacity">
-      <div
-        className="h-[68px] w-[68px] rounded-full grid place-items-center"
-        style={{
-          background: "var(--card)",
-          border: `1.5px solid ${glow}44`,
-          boxShadow: `0 0 20px 4px ${glow}35, 0 0 6px 1px ${glow}22`,
-        }}
-      >
-        {icon}
-      </div>
-      <span className="text-[11px] font-semibold text-foreground/70 text-center leading-tight max-w-[72px]">
-        {label}
-      </span>
-    </Link>
+    // Outer stagger item — entry animation driven by parent container
+    <motion.div variants={gameItem} className="flex flex-col items-center">
+      <Link to={to} className="flex flex-col items-center gap-3" style={{ textDecoration: "none" }}>
+
+        {/* ── Badge circle — hover + tap ── */}
+        <motion.div
+          whileHover={{
+            scale: 1.06,
+            filter: "brightness(1.25)",
+            boxShadow: `0 0 30px 10px ${glow}55, 0 0 12px 3px ${glow}44`,
+            transition: { duration: 0.18, ease: "easeOut" },
+          }}
+          whileTap={{ scale: 0.94, transition: { duration: 0.1 } }}
+          style={{
+            position: "relative",
+            height: 68, width: 68,
+            borderRadius: "50%",
+            display: "grid",
+            placeItems: "center",
+            background: "rgba(255,255,255,0.04)",
+            border: `1.5px solid ${glow}44`,
+            boxShadow: `0 0 20px 4px ${glow}35, 0 0 6px 1px ${glow}22`,
+          }}
+        >
+          {/* ── Pulsing neon ring — Mind Pulse & Echo Chamber ── */}
+          {ambient === "pulse" && (
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: -6,
+                borderRadius: "50%",
+                border: `1.5px solid ${glow}`,
+                pointerEvents: "none",
+              }}
+              animate={{ scale: [1, 1.12, 1], opacity: [0.7, 0.2, 0.7] }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+            />
+          )}
+
+          {/* ── Rotating dashed ring — Impulse Shift & Steady Hand ── */}
+          {ambient === "rotate" && (
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: -6,
+                borderRadius: "50%",
+                border: `1.5px dashed ${glow}80`,
+                pointerEvents: "none",
+              }}
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+            />
+          )}
+
+          {/* ── Icon — static, breathing, or floating ── */}
+          {ambient === "breathe" ? (
+            <motion.div
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+              animate={{ scale: [1, 1.06, 1] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            >
+              {icon}
+            </motion.div>
+          ) : ambient === "float" ? (
+            <motion.div
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+              animate={{ y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            >
+              {icon}
+            </motion.div>
+          ) : (
+            icon
+          )}
+        </motion.div>
+
+        <span style={{
+          fontSize: 11, fontWeight: 600,
+          color: "rgba(255,255,255,0.65)",
+          textAlign: "center", lineHeight: 1.3, maxWidth: 72,
+        }}>
+          {label}
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
+// ── Mini icons for signal games ───────────────────────────────────────────────
 function MindPulseIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="15" r="12" stroke="#6BAED6" strokeWidth="1.2" strokeOpacity="0.5"/>
-      <circle cx="15" cy="15" r="6" fill="#6BAED6" fillOpacity="0.15" stroke="#6BAED6" strokeWidth="1.3"/>
-      <path d="M5 15 L9 15 L11 10 L13 20 L15 13 L17 17 L19 15 L25 15" stroke="#6BAED6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="15" cy="15" r="12" stroke="#38bdf8" strokeWidth="1.2" strokeOpacity="0.55"/>
+      <circle cx="15" cy="15" r="6" fill="#38bdf8" fillOpacity="0.18" stroke="#38bdf8" strokeWidth="1.3"/>
+      <path d="M5 15 L9 15 L11 10 L13 20 L15 13 L17 17 L19 15 L25 15" stroke="#38bdf8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
-
 function ImpulseShiftIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="15" r="12" stroke="#C4873A" strokeWidth="1.2" strokeOpacity="0.5"/>
-      <circle cx="15" cy="15" r="7" stroke="#C4873A" strokeWidth="1.2" strokeOpacity="0.65"/>
-      <circle cx="15" cy="15" r="2.2" fill="#C4873A"/>
-      <line x1="15" y1="2" x2="15" y2="6"  stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="15" y1="24" x2="15" y2="28" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="2"  y1="15" x2="6"  y2="15" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="24" y1="15" x2="28" y2="15" stroke="#C4873A" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="15" cy="15" r="12" stroke="#debc7a" strokeWidth="1.2" strokeOpacity="0.55"/>
+      <circle cx="15" cy="15" r="7"  stroke="#debc7a" strokeWidth="1.2" strokeOpacity="0.70"/>
+      <circle cx="15" cy="15" r="2.2" fill="#debc7a"/>
+      <line x1="15" y1="2"  x2="15" y2="6"  stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="15" y1="24" x2="15" y2="28" stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="2"  y1="15" x2="6"  y2="15" stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="24" y1="15" x2="28" y2="15" stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }
-
 function NeuralLinkIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <line x1="8"  y1="8"  x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="22" y1="8"  x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="8"  y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="22" y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="8"  y1="8"  x2="22" y2="8"  stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="8"  y1="22" x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="8"  y1="8"  x2="8"  y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="22" y1="8"  x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <circle cx="8"  cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="22" cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="8"  cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="22" cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="15" cy="15" r="3.5" fill="#6BAA75" fillOpacity="0.3" stroke="#6BAA75" strokeWidth="1.4"/>
+      <line x1="8" y1="8" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="22" y1="8" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="8" y1="22" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="22" y1="22" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="8" y1="8" x2="22" y2="8"  stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <line x1="8" y1="22" x2="22" y2="22" stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <line x1="8" y1="8" x2="8" y2="22"  stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <line x1="22" y1="8" x2="22" y2="22" stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <circle cx="8"  cy="8"  r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="22" cy="8"  r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="8"  cy="22" r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="22" cy="22" r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="15" cy="15" r="3.5" fill="#4ade80" fillOpacity="0.32" stroke="#4ade80" strokeWidth="1.5"/>
     </svg>
   );
 }
-
 function ColdSwitchIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -150,11 +236,9 @@ function ColdSwitchIcon() {
     </svg>
   );
 }
-
 function VoidStareIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <ellipse cx="15" cy="15" rx="30" ry="30" stroke="#7B2FBE" strokeOpacity="0" fill="none"/>
       <path d="M2 15 Q15 4 28 15 Q15 26 2 15Z" stroke="#7B2FBE" strokeWidth="1.5" fill="#7B2FBE" fillOpacity="0.10"/>
       <circle cx="15" cy="15" r="5" fill="#7B2FBE" fillOpacity="0.28" stroke="#7B2FBE" strokeWidth="1.3"/>
       <circle cx="15" cy="15" r="2.5" fill="#7B2FBE"/>
@@ -162,7 +246,6 @@ function VoidStareIcon() {
     </svg>
   );
 }
-
 function ClarityClimbIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -173,7 +256,6 @@ function ClarityClimbIcon() {
     </svg>
   );
 }
-
 function EchoChamberIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -185,7 +267,6 @@ function EchoChamberIcon() {
     </svg>
   );
 }
-
 function DarkRoomIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -196,7 +277,6 @@ function DarkRoomIcon() {
     </svg>
   );
 }
-
 function NoiseFilterIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -206,7 +286,6 @@ function NoiseFilterIcon() {
     </svg>
   );
 }
-
 function SteadyHandIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -218,33 +297,167 @@ function SteadyHandIcon() {
     </svg>
   );
 }
-
 function IdentityStackIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
       <rect x="8" y="14" width="16" height="11" rx="2" fill="#E11D48" fillOpacity="0.08" stroke="#E11D48" strokeWidth="1" opacity="0.45" transform="rotate(5 16 19)"/>
       <rect x="7" y="12" width="16" height="11" rx="2" fill="#E11D48" fillOpacity="0.12" stroke="#E11D48" strokeWidth="1.1" opacity="0.65"/>
       <rect x="6" y="10" width="16" height="11" rx="2" fill="#E11D48" fillOpacity="0.18" stroke="#E11D48" strokeWidth="1.5"/>
-      <line x1="9"  y1="14.5" x2="19" y2="14.5" stroke="#E11D48" strokeWidth="1.3" strokeLinecap="round" opacity="0.85"/>
-      <line x1="9"  y1="17.5" x2="15" y2="17.5" stroke="#E11D48" strokeWidth="1.3" strokeLinecap="round" opacity="0.5"/>
+      <line x1="9" y1="14.5" x2="19" y2="14.5" stroke="#E11D48" strokeWidth="1.3" strokeLinecap="round" opacity="0.85"/>
+      <line x1="9" y1="17.5" x2="15" y2="17.5" stroke="#E11D48" strokeWidth="1.3" strokeLinecap="round" opacity="0.5"/>
     </svg>
   );
 }
 
-const PRO_GAMES = [
-  { to: "/tools/coldswitch",   glow: "#00BCD4", label: "Cold Switch",    icon: <ColdSwitchIcon /> },
-  { to: "/tools/voidstare",    glow: "#7B2FBE", label: "Void Stare",     icon: <VoidStareIcon /> },
-  { to: "/tools/clarityclimb", glow: "#10B981", label: "Clarity Climb",  icon: <ClarityClimbIcon /> },
-  { to: "/tools/echochamber",  glow: "#F97316", label: "Echo Chamber",   icon: <EchoChamberIcon /> },
-  { to: "/tools/darkroom",     glow: "#4F46E5", label: "Dark Room",      icon: <DarkRoomIcon /> },
-  { to: "/tools/noisefilter",  glow: "#2563EB", label: "Noise Filter",   icon: <NoiseFilterIcon /> },
-  { to: "/tools/steadyhand",   glow: "#D97706", label: "Steady Hand",    icon: <SteadyHandIcon /> },
-  { to: "/tools/identitystack",glow: "#E11D48", label: "Identity Stack", icon: <IdentityStackIcon /> },
-] as const;
+type GameEntry = {
+  to: string; glow: string; labelKey: string; icon: React.ReactNode; ambient: AmbientType;
+  idleFilter?: string; hoverFilter?: string; hoverRotate?: number;
+};
 
+const FREE_GAMES: GameEntry[] = [
+  {
+    to: "/tools/breath", glow: "#38bdf8", labelKey: "tools.mindPulse",
+    icon: <MindPulseIcon />, ambient: "pulse",
+    idleFilter:  "drop-shadow(0 0 7px rgba(56,189,248,0.60))",
+    hoverFilter: "drop-shadow(0 0 16px rgba(56,189,248,1.0)) drop-shadow(0 0 32px rgba(56,189,248,0.45))",
+    hoverRotate: 8,
+  },
+  {
+    to: "/tools/tap", glow: "#debc7a", labelKey: "tools.impulseShift",
+    icon: <ImpulseShiftIcon />, ambient: "rotate",
+    idleFilter:  "drop-shadow(0 0 7px rgba(222,188,122,0.60))",
+    hoverFilter: "drop-shadow(0 0 16px rgba(222,188,122,1.0)) drop-shadow(0 0 32px rgba(222,188,122,0.45))",
+    hoverRotate: 0,
+  },
+  {
+    to: "/tools/memory", glow: "#4ade80", labelKey: "tools.neuralLink",
+    icon: <NeuralLinkIcon />, ambient: "breathe",
+    idleFilter:  "drop-shadow(0 0 7px rgba(74,222,128,0.58))",
+    hoverFilter: "drop-shadow(0 0 16px rgba(74,222,128,1.0)) drop-shadow(0 0 32px rgba(74,222,128,0.45))",
+    hoverRotate: 5,
+  },
+];
+
+const PRO_GAMES: GameEntry[] = [
+  { to: "/tools/coldswitch",    glow: "#00BCD4", labelKey: "tools.coldswitch.name",    icon: <ColdSwitchIcon />,    ambient: "none"    },
+  { to: "/tools/voidstare",     glow: "#7B2FBE", labelKey: "tools.voidstare.name",     icon: <VoidStareIcon />,     ambient: "breathe" },
+  { to: "/tools/clarityclimb",  glow: "#10B981", labelKey: "tools.clarityclimb.name",  icon: <ClarityClimbIcon />,  ambient: "float"   },
+  { to: "/tools/echochamber",   glow: "#F97316", labelKey: "tools.echochamber.name",   icon: <EchoChamberIcon />,   ambient: "pulse"   },
+  { to: "/tools/darkroom",      glow: "#4F46E5", labelKey: "tools.darkroom.name",      icon: <DarkRoomIcon />,      ambient: "none"    },
+  { to: "/tools/noisefilter",   glow: "#2563EB", labelKey: "tools.noisefilter.name",   icon: <NoiseFilterIcon />,   ambient: "none"    },
+  { to: "/tools/steadyhand",    glow: "#D97706", labelKey: "tools.steadyhand.name",    icon: <SteadyHandIcon />,    ambient: "rotate"  },
+  { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon />, ambient: "none"    },
+];
+
+// ── Arcade badge helpers ──────────────────────────────────────────────────────
+
+function getGlowFilter(glow: string): string {
+  const blues   = ["#38bdf8", "#6BAED6", "#2563EB", "#7B2FBE", "#4F46E5", "#00BCD4"];
+  const greens  = ["#4ade80", "#6BAA75", "#10B981"];
+  if (blues.includes(glow))  return "drop-shadow(0 0 9px rgba(56,189,248,0.70))";
+  if (greens.includes(glow)) return "drop-shadow(0 0 9px rgba(74,222,128,0.70))";
+  return "drop-shadow(0 0 9px rgba(222,188,122,0.70))";
+}
+
+function ArcadeBadge({
+  to, glow, label, icon, ambient, locked, onLockedTap,
+}: {
+  to: string; glow: string; label: string; icon: React.ReactNode;
+  ambient: AmbientType; locked?: boolean; onLockedTap?: () => void;
+}) {
+  const glowFilter = getGlowFilter(glow);
+
+  const circle = (
+    <div style={{ position: "relative" }}>
+      {/* Ambient halo */}
+      <div style={{
+        position: "absolute", inset: -8, borderRadius: "50%",
+        background: `radial-gradient(circle, ${glow}32 0%, transparent 72%)`,
+        filter: "blur(7px)", pointerEvents: "none",
+      }} />
+      {/* Breathing badge circle */}
+      <motion.div
+        animate={{ scale: [1, 1.06, 1] }}
+        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        style={{
+          position: "relative", width: 62, height: 62, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          background: locked ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.05)",
+          border: `1.5px solid ${locked ? "rgba(255,255,255,0.10)" : glow + "48"}`,
+          boxShadow: locked ? "none" : `0 0 16px 4px ${glow}22`,
+          filter: locked ? "none" : glowFilter,
+          opacity: locked ? 0.45 : 1,
+        }}
+      >
+        {/* Inner ambient loop — only when unlocked */}
+        {!locked ? (
+          <motion.div
+            animate={
+              ambient === "rotate"  ? { rotate: 360 } :
+              ambient === "breathe" ? { scale: [1, 1.08, 1] } :
+              ambient === "float"   ? { y: [0, -2, 0] } :
+              ambient === "pulse"   ? { opacity: [0.80, 1, 0.80] } :
+              {}
+            }
+            transition={
+              ambient === "rotate"
+                ? { repeat: Infinity, duration: 8, ease: "linear" }
+                : { repeat: Infinity, duration: 3, ease: "easeInOut" }
+            }
+          >
+            {icon}
+          </motion.div>
+        ) : icon}
+
+        {/* Lock overlay */}
+        {locked && (
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: "rgba(0,0,0,0.50)",
+            display: "grid", placeItems: "center",
+          }}>
+            <Lock style={{ height: 14, width: 14, color: "#C9A84C" }} />
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+
+  if (locked) {
+    return (
+      <button
+        onClick={onLockedTap}
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer" }}
+      >
+        {circle}
+        <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.28)", textAlign: "center", lineHeight: 1.3, maxWidth: 72 }}>
+          {label}
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} style={{ textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <motion.div
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        transition={{ duration: 0.16 }}
+      >
+        {circle}
+      </motion.div>
+      <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.75)", textAlign: "center", lineHeight: 1.3, maxWidth: 72 }}>
+        {label}
+      </span>
+    </Link>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 function Tools() {
+  const { t } = useTranslation();
   const [state] = useAppState();
-  const [reframe, setReframe] = useState<string | null>(null);
+  const [reframeIdx, setReframeIdx] = useState<number | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [trigger, setTrigger] = useState("");
@@ -255,244 +468,517 @@ function Tools() {
 
   return (
     <PageShell>
-      {/* ── Header ──────────────────────────────────────────── */}
-      <header className="px-6 pt-12 pb-2 fade-up">
-        <SectionTitle>Tools</SectionTitle>
-        <h1 className="mt-2 text-3xl font-bold">Use what works.</h1>
+      {/* ── Aurora Borealis background ───────────────────────────────────── */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        {/* Blob 1 — deep cyber-violet, left */}
+        <motion.div
+          animate={{
+            x: ["0%", "8%", "-5%", "2%", "0%"],
+            y: ["0%", "6%", "-8%", "4%", "0%"],
+            scale: [1, 1.07, 0.96, 1.03, 1],
+            opacity: [0.25, 0.30, 0.22, 0.27, 0.25],
+          }}
+          transition={{ duration: 25, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
+          style={{
+            position: "absolute",
+            top: "-12%",
+            left: "-18%",
+            width: "75vw",
+            height: "75vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #a855f7 0%, transparent 68%)",
+            filter: "blur(130px)",
+          }}
+        />
+        {/* Blob 2 — radiant emerald seafoam, right */}
+        <motion.div
+          animate={{
+            x: ["0%", "-9%", "6%", "-3%", "0%"],
+            y: ["0%", "9%", "-5%", "7%", "0%"],
+            scale: [1, 0.94, 1.08, 0.98, 1],
+            opacity: [0.25, 0.29, 0.20, 0.26, 0.25],
+          }}
+          transition={{ duration: 28, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 5 }}
+          style={{
+            position: "absolute",
+            top: "-10%",
+            right: "-22%",
+            width: "70vw",
+            height: "70vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #10b981 0%, transparent 68%)",
+            filter: "blur(130px)",
+          }}
+        />
+        {/* Blob 3 — cosmic indigo, center-low */}
+        <motion.div
+          animate={{
+            x: ["0%", "6%", "-7%", "3%", "0%"],
+            y: ["0%", "-6%", "10%", "-4%", "0%"],
+            scale: [1, 1.05, 0.97, 1.04, 1],
+            opacity: [0.20, 0.25, 0.17, 0.23, 0.20],
+          }}
+          transition={{ duration: 32, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 11 }}
+          style={{
+            position: "absolute",
+            top: "20%",
+            left: "5%",
+            width: "85vw",
+            height: "65vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #6366f1 0%, transparent 68%)",
+            filter: "blur(130px)",
+          }}
+        />
+      </div>
+
+      {/* ── Content (above aurora) ────────────────────────────────────────── */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <header className="px-6 pt-12 pb-2">
+        <SectionTitle>{t("nav.tools")}</SectionTitle>
+        <h1 className="mt-2 text-3xl font-bold">{t("tools.indexSubtitle")}</h1>
       </header>
 
-      {/* ── SOS hero — glowing circle ────────────────────────── */}
-      <section className="flex justify-center mt-10 mb-2 fade-up-1">
-        <Link
-          to="/tools/sos"
-          className="sos-heartbeat flex flex-col items-center justify-center text-center active:scale-95 transition-transform"
-          style={{
-            width: 220,
-            height: 220,
-            borderRadius: "50%",
-            background: "oklch(0.18 0.06 25)",
-          }}
-        >
-          <div
-            className="flex flex-col items-center justify-center"
+      {/* ── SOS hero — tactical distress button ─────────────────────────── */}
+      <section className="flex justify-center mt-10 mb-2">
+        <Link to="/tools/sos" style={{ display: "block", position: "relative" }}>
+          {/* Ambient distress ripples */}
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 1.4], opacity: [0.35, 0] }}
+            transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 0 }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(200,60,40,0.70)",
+              pointerEvents: "none",
+            }}
+          />
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 1.4], opacity: [0.22, 0] }}
+            transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 0, delay: 0.7 }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(200,60,40,0.50)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Hover glow layer */}
+          <motion.span
+            aria-hidden
+            initial={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            style={{
+              position: "absolute", inset: -18, borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(200,60,40,0.28) 0%, transparent 70%)",
+              filter: "blur(12px)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Main button */}
+          <motion.div
+            className="flex flex-col items-center justify-center text-center"
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94, transition: { type: "spring", stiffness: 500, damping: 18 } }}
             style={{
               width: 220,
               height: 220,
               borderRadius: "50%",
+              background: "radial-gradient(circle at 40% 35%, #2a1010, #160808)",
+              border: "1.5px solid rgba(200,80,60,0.45)",
+              boxShadow: "0 0 40px 10px rgba(200,60,40,0.30), inset 0 0 30px 4px rgba(220,80,60,0.08)",
+              cursor: "pointer",
+              position: "relative",
+              zIndex: 1,
             }}
           >
-            <p className="text-[15px] font-bold text-white leading-snug px-8">
-              Urge hitting?<br />We've got you.
+            <p style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: "#ffffff",
+              lineHeight: 1.35,
+              padding: "0 32px",
+              textShadow: "0 0 18px rgba(255,120,100,0.70), 0 1px 3px rgba(0,0,0,0.60)",
+              letterSpacing: "0.01em",
+            }}>
+              {t("tools.sos.heroLine1")}<br />{t("tools.sos.heroLine2")}
             </p>
-            <p className="mt-2 text-[11px] px-6 leading-relaxed" style={{ color: "oklch(0.70 0.06 25)" }}>
-              Tap to start urge surfing · 3 min
+            <p style={{
+              marginTop: 10,
+              fontSize: 11.5,
+              fontWeight: 700,
+              color: "rgba(255,180,160,0.90)",
+              lineHeight: 1.5,
+              padding: "0 24px",
+              letterSpacing: "0.03em",
+              textShadow: "0 0 10px rgba(255,100,80,0.50)",
+            }}>
+              {t("tools.sos.heroSub")}
             </p>
-          </div>
+          </motion.div>
         </Link>
       </section>
 
-      {/* ── Cut the Signal Games ─────────────────────────────── */}
-      <section className="px-6 mt-10 pt-8 fade-up-2" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <button
-          onClick={() => setGamesOpen((v) => !v)}
-          className="flex items-center gap-3 w-full text-left"
-        >
-          <div
-            className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-            style={{ background: "oklch(0.62 0.18 280 / 0.12)", color: "oklch(0.68 0.18 280)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              {/* Controller body */}
-              <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
-              {/* D-pad left */}
-              <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-              <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-              {/* Buttons right */}
-              <circle cx="10.5" cy="7.5" r="0.7" fill="currentColor" opacity="0.9"/>
-              <circle cx="11.8" cy="8.5" r="0.7" fill="currentColor" opacity="0.9"/>
-              <circle cx="10.5" cy="9.5" r="0.7" fill="currentColor" opacity="0.9"/>
-              <circle cx="9.2" cy="8.5" r="0.7" fill="currentColor" opacity="0.9"/>
-            </svg>
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-sm">Cut the Signal Games</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Train your brain. Beat the urge.</p>
-          </div>
-          <ChevronDown
-            className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200"
-            style={{ transform: gamesOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-          />
-        </button>
+      {/* ── Tool cards grid ─────────────────────────────────────────────── */}
+      <section className="px-4 mt-10 pb-8" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-        {gamesOpen && (
-          <div className="mt-5 text-center">
-            <div className="flex justify-around">
-              <SignalGame to="/tools/breath" glow="#6BAED6" label="Mind Pulse"    icon={<MindPulseIcon />} />
-              <SignalGame to="/tools/tap"    glow="#C4873A" label="Impulse Shift" icon={<ImpulseShiftIcon />} />
-              <SignalGame to="/tools/memory" glow="#6BAA75" label="Neural Link"   icon={<NeuralLinkIcon />} />
-            </div>
-            {state.isPremium === true ? (
-              <div className="mt-7 grid grid-cols-3 gap-y-6 place-items-center">
-                {PRO_GAMES.map(({ to, glow, label, icon }) => (
-                  <SignalGame key={to} to={to} glow={glow} label={label} icon={icon} />
-                ))}
-              </div>
-            ) : (
-              <button
-                onClick={() => triggerPaywall()}
-                className="mt-4 flex items-center justify-center gap-1.5 w-full active:opacity-70 transition-opacity flex-wrap"
+        {/* ── Cyber-Arcade Accordion ───────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+
+          {/* ── Premium gold header pill ── */}
+          <motion.button
+            onClick={() => setGamesOpen((v) => !v)}
+            whileHover={{ borderColor: "rgba(222,188,122,0.30)" }}
+            transition={{ duration: 0.2 }}
+            className="w-full flex items-center justify-center gap-4 cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              borderTop: "1px solid rgba(201,168,76,0.22)",
+              borderRadius: 20,
+              padding: "18px 20px",
+              position: "relative",
+            }}
+          >
+            {/* Gold controller badge */}
+            <div style={{
+              width: 44, height: 44, display: "grid", placeItems: "center",
+              borderRadius: 14, flexShrink: 0,
+              background: "rgba(222,188,122,0.10)",
+              border: "1px solid rgba(222,188,122,0.32)",
+              boxShadow: "0 0 18px 3px rgba(222,188,122,0.18)",
+              filter: "drop-shadow(0 0 12px rgba(222,188,122,0.70))",
+            }}>
+              <motion.div
+                animate={{ rotate: [-4, 4, -4] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
               >
-                <span
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
-                  style={{ color: "var(--primary)", borderColor: "oklch(0.62 0.22 255 / 0.3)", background: "oklch(0.62 0.22 255 / 0.06)" }}
-                >
-                  <Lock className="h-3 w-3" /> PRO
-                </span>
-                <span className="text-[11px] text-muted-foreground/60">More games available</span>
-                <span className="flex items-center gap-1">
-                  {PRO_GAMES.map(({ label, glow }) => (
-                    <span
-                      key={label}
-                      className="inline-flex items-center justify-center rounded-full text-[8px] font-bold"
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none" style={{ color: "#debc7a" }}>
+                  <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
+                  <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                  <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                  <circle cx="10.5" cy="7.5" r="0.8" fill="currentColor"/>
+                  <circle cx="11.8" cy="8.5" r="0.8" fill="currentColor"/>
+                  <circle cx="10.5" cy="9.5" r="0.8" fill="currentColor"/>
+                  <circle cx="9.2"  cy="8.5" r="0.8" fill="currentColor"/>
+                </svg>
+              </motion.div>
+            </div>
+
+            {/* Centred text block */}
+            <div className="flex-1 text-center">
+              <p style={{ fontWeight: 700, fontSize: 14, color: "#ffffff", lineHeight: 1.2 }}>{t("tools.gamesTitle")}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
+            </div>
+
+            {/* Rotating gold chevron */}
+            <motion.div
+              animate={{ rotate: gamesOpen ? 180 : 0 }}
+              transition={{ duration: 0.28, ease: "easeInOut" }}
+              style={{ flexShrink: 0, display: "flex" }}
+            >
+              <ChevronDown style={{ height: 16, width: 16, color: "rgba(222,188,122,0.60)" }} />
+            </motion.div>
+          </motion.button>
+
+          {/* ── Slide-in glass dropdown ── */}
+          <AnimatePresence initial={false}>
+            {gamesOpen && (
+              <motion.div
+                key="arcade-content"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                style={{ overflow: "hidden" }}
+              >
+                <div style={{
+                  background: "rgba(255,255,255,0.04)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderTop: "1px solid rgba(201,168,76,0.14)",
+                  borderRadius: 20,
+                  padding: "22px 20px 24px",
+                }}>
+
+                  {/* Free games — 3-column circle grid */}
+                  <motion.div
+                    variants={gameContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-3"
+                    style={{ gap: "24px 8px" }}
+                  >
+                    {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                      <ArcadeBadge
+                        key={to}
+                        to={to}
+                        glow={glow}
+                        label={t(labelKey)}
+                        icon={icon}
+                        ambient={ambient}
+                      />
+                    ))}
+                  </motion.div>
+
+                  {/* PRO section */}
+                  {state.isPremium === true ? (
+                    <>
+                      <div style={{ margin: "22px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.32) 20%, rgba(201,168,76,0.32) 80%, transparent)" }} />
+                      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.72, textAlign: "center", marginBottom: 18 }}>
+                        Pro Games
+                      </p>
+                      <div className="grid grid-cols-3" style={{ gap: "24px 8px" }}>
+                        {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                          <ArcadeBadge
+                            key={to}
+                            to={to}
+                            glow={glow}
+                            label={t(labelKey)}
+                            icon={icon}
+                            ambient={ambient}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    /* ── Locked PRO row ── */
+                    <motion.button
+                      onClick={() => triggerPaywall()}
+                      whileHover={{ borderColor: "rgba(201,168,76,0.44)", scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.18 }}
                       style={{
-                        width: 16, height: 16,
-                        background: `${glow}22`,
-                        border: `1px solid ${glow}66`,
-                        color: glow,
+                        width: "100%",
+                        marginTop: 18,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "14px 18px",
+                        borderRadius: 18,
+                        background: "rgba(201,168,76,0.05)",
+                        border: "1px solid rgba(201,168,76,0.20)",
+                        borderTop: "1px solid rgba(201,168,76,0.32)",
+                        cursor: "pointer",
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
                       }}
                     >
-                      {label[0]}
-                    </span>
-                  ))}
-                </span>
-              </button>
+                      {/* Sleek golden padlock badge */}
+                      <div style={{
+                        width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
+                        display: "grid", placeItems: "center",
+                        background: "rgba(201,168,76,0.09)",
+                        border: "1.5px solid rgba(201,168,76,0.32)",
+                        boxShadow: "0 0 16px 3px rgba(201,168,76,0.16)",
+                        filter: "drop-shadow(0 0 8px rgba(222,188,122,0.50))",
+                      }}>
+                        <Lock style={{ height: 17, width: 17, color: "#debc7a" }} />
+                      </div>
+                      <div style={{ textAlign: "left", flex: 1 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 3 }}>
+                          Pro Games (Locked)
+                        </p>
+                        <p style={{ fontSize: 11, color: "#debc7a", opacity: 0.70, lineHeight: 1.45 }}>
+                          Subscribe to unlock all premium games.
+                        </p>
+                      </div>
+                      <ChevronDown style={{ height: 14, width: 14, color: "rgba(201,168,76,0.55)", transform: "rotate(-90deg)", flexShrink: 0 }} />
+                    </motion.button>
+                  )}
+                </div>
+              </motion.div>
             )}
-          </div>
-        )}
-      </section>
-
-      {/* ── Recovery Coach ───────────────────────────────────── */}
-      <section className="px-6 mt-6 pt-6 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <Link to="/tools/coach" className="flex flex-col items-center text-center gap-1 py-1 active:scale-95 transition-transform">
-          <CoachRobot />
-          <p className="font-semibold text-sm mt-2">Recovery Coach</p>
-          <p className="text-[11px] text-muted-foreground">Talk it through. No judgment.</p>
-        </Link>
-      </section>
-
-      {/* ── Reframe ─────────────────────────────────────────── */}
-      <section className="px-6 mt-6 pt-6 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-              style={{ background: "oklch(0.62 0.22 255 / 0.10)", color: "var(--primary)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
-            >
-              <Brain className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm">Reframe</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Rewire your reaction in one thought.</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setReframe(reframes[Math.floor(Math.random() * reframes.length)])}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 transition-colors"
-            style={{ color: "var(--primary)", border: "1px solid oklch(0.62 0.22 255 / 0.28)", background: "oklch(0.62 0.22 255 / 0.06)" }}
-          >
-            Show me one
-          </button>
-        </div>
-        {reframe && (
-          <p
-            className="mt-5 text-sm leading-relaxed italic"
-            style={{ color: "oklch(0.78 0.025 265 / 0.85)" }}
-          >
-            "{reframe}"
-          </p>
-        )}
-      </section>
-
-      {/* ── Cold Exposure ────────────────────────────────────── */}
-      <section className="px-6 mt-6 pt-6 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <Link to="/tools/cold" className="flex items-center gap-3">
-          <div
-            className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-            style={{ background: "oklch(0.55 0.18 220 / 0.10)", color: "oklch(0.65 0.18 220)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
-          >
-            <Snowflake className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-sm">Cold Exposure</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">2-minute guided cold shower breathing.</p>
-          </div>
-        </Link>
-      </section>
-
-      {/* ── Implementation Plan ──────────────────────────────── */}
-      <section className="px-6 mt-6 pt-6 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-              style={{ background: "oklch(0.62 0.22 255 / 0.10)", color: "var(--primary)", border: "1px solid #C4873A44", boxShadow: "0 0 14px 3px #C4873A30, 0 0 4px 1px #C4873A20" }}
-            >
-              <GitBranch className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm">Implementation Plan</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">If/then strategies for your triggers.</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setPlanOpen((v) => !v)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 transition-colors"
-            style={{ color: "var(--primary)", border: "1px solid oklch(0.62 0.22 255 / 0.28)", background: "oklch(0.62 0.22 255 / 0.06)" }}
-          >
-            {planOpen ? "Close" : "Add plan"}
-          </button>
+          </AnimatePresence>
         </div>
 
-        <ul className="mt-5 space-y-2">
-          {plans.map((p, i) => (
-            <li key={i} className="text-sm py-3" style={{ borderBottom: "1px solid oklch(0.20 0.025 265 / 0.6)" }}>
-              <span className="text-muted-foreground">If I </span>
-              <span className="font-medium">{p.trigger}</span>
-              <span className="text-muted-foreground">, I will </span>
-              <span className="font-medium" style={{ color: "var(--primary)" }}>{p.action}</span>.
-            </li>
-          ))}
-        </ul>
+        {/* ── Recovery Coach ──────────────────────────────────────────── */}
+        <motion.div
+          whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.20)" }}
+          transition={{ duration: 0.2 }}
+          style={{ ...CARD, borderColor: "rgba(201,168,76,0.30)", borderTopColor: "rgba(201,168,76,0.40)" }}
+        >
+          <Link
+            to="/tools/coach"
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px 22px", gap: 6, textDecoration: "none" }}
+          >
+            {/* Ambient glow behind robot */}
+            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{
+                position: "absolute", inset: -18, borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(201,168,76,0.20) 0%, transparent 70%)",
+                filter: "blur(12px)",
+                pointerEvents: "none",
+              }} />
+              <CoachRobot />
+            </div>
+            <p style={{ fontWeight: 700, fontSize: 15, color: "#ffffff", marginTop: 10 }}>{t("tools.coach.name")}</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)" }}>{t("tools.coach.tagline")}</p>
+            <span style={{ ...GOLD_OUTLINE, marginTop: 6 }}>{t("tools.coach.cta") || "Start →"}</span>
+          </Link>
+        </motion.div>
 
-        {planOpen && (
-          <div className="mt-4 space-y-2">
-            <input
-              value={trigger}
-              onChange={(e) => setTrigger(e.target.value)}
-              placeholder="If I feel… (trigger)"
-              className="w-full rounded-xl border border-border/50 bg-card px-3 py-2.5 text-sm outline-none focus:border-primary/60 transition-colors"
-            />
-            <input
-              value={action}
-              onChange={(e) => setAction(e.target.value)}
-              placeholder="…I will (action)"
-              className="w-full rounded-xl border border-border/50 bg-card px-3 py-2.5 text-sm outline-none focus:border-primary/60 transition-colors"
-            />
-            <button
-              onClick={() => {
-                if (trigger.trim() && action.trim()) {
-                  setPlans([...plans, { trigger, action }]);
-                  setTrigger(""); setAction(""); setPlanOpen(false);
-                }
-              }}
-              className="w-full rounded-xl px-3 py-2.5 text-sm font-semibold text-primary-foreground inline-flex items-center justify-center gap-1"
-              style={{ background: "var(--gradient-primary)" }}
+        {/* ── Reframe + Cold Exposure — two-column ────────────────────── */}
+        <div className="grid grid-cols-2 gap-3">
+
+          {/* Reframe */}
+          <motion.div
+            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18 }}
+            whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.18)" }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex items-center gap-2">
+              <div style={ICON_WRAP("#C9A84C")}>
+                <Brain style={{ height: 16, width: 16 }} />
+              </div>
+              <p style={{ fontWeight: 700, fontSize: 13, color: "#ffffff" }}>{t("tools.reframeTitle")}</p>
+            </div>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{t("tools.reframeDesc")}</p>
+            <motion.button
+              onClick={() => setReframeIdx(Math.floor(Math.random() * REFRAME_COUNT))}
+              style={GOLD_OUTLINE}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94, transition: { duration: 0.1 } }}
             >
-              <Plus className="h-4 w-4" /> Save plan
-            </button>
+              {t("tools.reframeCta")}
+            </motion.button>
+            {reframeIdx !== null && (
+              <p style={{ fontSize: 11.5, lineHeight: 1.6, fontStyle: "italic", color: "rgba(245,237,224,0.78)", marginTop: -4 }}>
+                "{t(`tools.reframes.${reframeIdx}`)}"
+              </p>
+            )}
+          </motion.div>
+
+          {/* Cold Exposure */}
+          <motion.div
+            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18 }}
+            whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.18)" }}
+            transition={{ duration: 0.2 }}
+          >
+            <Link to="/tools/cold" style={{ display: "flex", flexDirection: "column", gap: 14, textDecoration: "none" }}>
+              <div className="flex items-center gap-2">
+                <div style={ICON_WRAP("#5BB8D4")}>
+                  <Snowflake style={{ height: 16, width: 16 }} />
+                </div>
+                <p style={{ fontWeight: 700, fontSize: 13, color: "#ffffff" }}>{t("tools.coldTitle")}</p>
+              </div>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{t("tools.coldDesc")}</p>
+              <span style={{ ...GOLD_OUTLINE, display: "inline-block", textAlign: "center" }}>
+                {t("tools.coldCta")}
+              </span>
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* ── Implementation Plan ─────────────────────────────────────── */}
+        <motion.div
+          style={{ ...CARD, padding: 20 }}
+          whileHover={{ scale: 1.01, borderColor: "rgba(255,255,255,0.16)" }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div style={ICON_WRAP("#C9A84C")}>
+                <GitBranch style={{ height: 16, width: 16 }} />
+              </div>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 14, color: "#ffffff" }}>{t("tools.planTitle")}</p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginTop: 2 }}>{t("tools.planDesc")}</p>
+              </div>
+            </div>
+            <motion.button
+              onClick={() => setPlanOpen((v) => !v)}
+              style={GOLD_OUTLINE}
+              whileTap={{ scale: 0.93, transition: { duration: 0.1 } }}
+            >
+              {planOpen ? t("tools.planClose") : t("tools.planAdd")}
+            </motion.button>
           </div>
-        )}
+
+          {/* Existing plans — nested etched layer */}
+          {plans.length > 0 && (
+            <ul style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+              {plans.map((p, i) => (
+                <li
+                  key={i}
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    padding: "12px 16px",
+                    borderRadius: 16,
+                    background: "rgba(0,0,0,0.22)",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    color: "rgba(245,237,224,0.72)",
+                  }}
+                >
+                  <span>{t("tools.planIfI")} </span>
+                  <span style={{ fontWeight: 700, color: "#f5ede0" }}>{p.trigger}</span>
+                  <span>, {t("tools.planIWill")} </span>
+                  <span style={{ fontWeight: 700, color: "#debc7a" }}>{p.action}</span>
+                  <span>.</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Add-plan form */}
+          {planOpen && (
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+              <input
+                value={trigger}
+                onChange={(e) => setTrigger(e.target.value)}
+                placeholder={t("tools.planTriggerPlaceholder")}
+                style={{
+                  width: "100%", borderRadius: 12, fontSize: 13, padding: "10px 16px", outline: "none",
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+                  color: "#f5ede0",
+                }}
+              />
+              <input
+                value={action}
+                onChange={(e) => setAction(e.target.value)}
+                placeholder={t("tools.planActionPlaceholder")}
+                style={{
+                  width: "100%", borderRadius: 12, fontSize: 13, padding: "10px 16px", outline: "none",
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+                  color: "#f5ede0",
+                }}
+              />
+              <motion.button
+                onClick={() => {
+                  if (trigger.trim() && action.trim()) {
+                    setPlans([...plans, { trigger, action }]);
+                    setTrigger(""); setAction(""); setPlanOpen(false);
+                  }
+                }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  width: "100%", borderRadius: 12, padding: "11px 16px", fontSize: 13,
+                  fontWeight: 700, color: "#090705",
+                  background: "linear-gradient(135deg, #C9A84C, #E8C96A)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  cursor: "pointer",
+                }}
+              >
+                <Plus style={{ height: 15, width: 15 }} /> {t("tools.planSave")}
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+
       </section>
+      </div>{/* end content z-1 */}
     </PageShell>
   );
 }

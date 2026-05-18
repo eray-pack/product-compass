@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 const GOLD = "#C9A84C";
 
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/progress")({
 });
 
 // ── Recovery ring SVG ─────────────────────────────────────────────────────────
-function RecoveryRing({ pct, day }: { pct: number; day: number }) {
+function RecoveryRing({ pct, day, t }: { pct: number; day: number; t: TFunction }) {
   const R = 76;
   const C = 2 * Math.PI * R;
   const offset = C * (1 - pct / 100);
@@ -89,7 +91,7 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
           className="ring-text-secondary"
           fontFamily="'Space Grotesk', sans-serif"
         >
-          day {day}
+          {t("progress.ring.day")} {day}
         </text>
         <text
           x="98" y="124"
@@ -97,15 +99,191 @@ function RecoveryRing({ pct, day }: { pct: number; day: number }) {
           className="ring-text-tertiary"
           fontFamily="'Space Grotesk', sans-serif"
         >
-          to reset
+          {t("progress.ring.toReset")}
         </text>
       </svg>
     </div>
   );
 }
 
+// ── Premium Coin Card ─────────────────────────────────────────────────────────
+function CoinCard({
+  name, icon, earned, hint, index, t,
+}: {
+  name: string; icon: string; earned: boolean; hint: string; index: number; t: TFunction;
+}) {
+  const spinControls = useAnimation();
+
+  const handleClick = async () => {
+    if (!earned) return;
+    await spinControls.start({
+      rotateY: 360,
+      transition: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
+    });
+    spinControls.set({ rotateY: 0 });
+  };
+
+  return (
+    // Outer wrapper handles stagger entry
+    <motion.div
+      variants={earned ? undefined : msItem}
+      initial={earned ? { scale: 0.82, opacity: 0 } : "hidden"}
+      animate={earned ? { scale: [0.82, 1.08, 1], opacity: 1 } : "visible"}
+      transition={
+        earned
+          ? { duration: 0.55, times: [0, 0.6, 1], delay: index * 0.1 }
+          : { type: "spring", stiffness: 320, damping: 26 }
+      }
+    >
+      {/* Inner wrapper handles interactivity + spin */}
+      <motion.div
+        animate={spinControls}
+        whileHover={earned ? { scale: 1.05, y: -4, transition: { duration: 0.2, ease: "easeOut" } } : undefined}
+        whileTap={earned ? { scale: 0.96 } : undefined}
+        onClick={handleClick}
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: 16,
+          padding: 16,
+          cursor: earned ? "pointer" : "default",
+          background: earned
+            ? "linear-gradient(145deg, rgba(201,168,76,0.10) 0%, rgba(15,12,6,0.95) 100%)"
+            : "#0f0c06",
+          border: earned ? "1.5px solid rgba(201,168,76,0.45)" : "1px solid #1e1a10",
+          boxShadow: earned
+            ? "0 0 0 1px rgba(201,168,76,0.06), 0 4px 20px rgba(201,168,76,0.20), 0 0 56px rgba(201,168,76,0.08)"
+            : "none",
+          opacity: earned ? 1 : 0.4,
+          transformStyle: "preserve-3d",
+          willChange: "transform",
+        }}
+      >
+        {/* ── Diagonal shimmer sweep — unlocked only ── */}
+        {earned && (
+          <motion.div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              borderRadius: 16,
+              background:
+                "linear-gradient(108deg, transparent 30%, rgba(255,220,120,0.06) 46%, rgba(201,168,76,0.20) 50%, rgba(255,220,120,0.06) 54%, transparent 70%)",
+            }}
+            animate={{ x: ["-110%", "210%"] }}
+            transition={{
+              duration: 2.0,
+              repeat: Infinity,
+              repeatDelay: 4,
+              ease: "easeInOut",
+            }}
+          />
+        )}
+
+        {/* ── Icon circle ── */}
+        <div
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            background: earned
+              ? "radial-gradient(circle at 35% 30%, rgba(255,230,140,0.28), rgba(201,168,76,0.10))"
+              : "rgba(255,255,255,0.03)",
+            border: earned
+              ? "1.5px solid rgba(201,168,76,0.45)"
+              : "1px solid #2a2010",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 22,
+            flexShrink: 0,
+            filter: earned
+              ? "drop-shadow(0 2px 10px rgba(201,168,76,0.5))"
+              : "grayscale(1) brightness(0.4)",
+            boxShadow: earned ? "0 0 18px rgba(201,168,76,0.30)" : "none",
+          }}
+        >
+          {icon}
+        </div>
+
+        {/* ── Name ── */}
+        <p
+          style={{
+            marginTop: 12,
+            marginBottom: 0,
+            fontSize: 14,
+            fontWeight: earned ? 700 : 500,
+            color: earned ? "#ffffff" : "#3d3520",
+            lineHeight: 1.3,
+            fontFamily: "DM Sans, sans-serif",
+          }}
+        >
+          {name}
+        </p>
+
+        {/* ── Status pill or progress hint ── */}
+        {earned ? (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              marginTop: 8,
+              background: "rgba(201,168,76,0.14)",
+              border: "1px solid rgba(201,168,76,0.38)",
+              borderRadius: 20,
+              padding: "3px 10px",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              color: GOLD,
+            }}
+          >
+            {t("progress.achieved")}
+          </div>
+        ) : (
+          <p
+            style={{
+              marginTop: 6,
+              marginBottom: 0,
+              fontSize: 11,
+              color: "#3a3020",
+              lineHeight: 1.45,
+              fontFamily: "DM Sans, sans-serif",
+            }}
+          >
+            {hint}
+          </p>
+        )}
+
+        {/* ── Lock badge — locked cards ── */}
+        {!earned && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 12,
+              right: 12,
+              width: 24,
+              height: 24,
+              borderRadius: "50%",
+              background: "#0f0c06",
+              border: "1px solid #2a2010",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Lock size={12} color="#3a3020" strokeWidth={2.5} />
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 function ProgressScreen() {
+  const { t } = useTranslation();
   const [state] = useAppState();
   const active = activeAddiction(state);
   if (!active) return null;
@@ -125,30 +303,31 @@ function ProgressScreen() {
   });
 
   const urgesSurvived = state.urgesSurvived ?? 0;
+  const rem7 = Math.max(0, 7 - day);
   const milestones = [
     {
-      name: "First Week",
+      name: t("progress.milestones.firstWeek"),
       icon: "🛡️",
       earned: day >= 7,
-      hint: `${Math.max(0, 7 - day)} day${Math.max(0, 7 - day) !== 1 ? "s" : ""} to go`,
+      hint: rem7 === 0 ? t("progress.milestones.done") : rem7 === 1 ? t("progress.milestones.firstWeek_remaining", { count: rem7 }) : t("progress.milestones.firstWeek_remaining_plural", { count: rem7 }),
     },
     {
-      name: "30 Days",
+      name: t("progress.milestones.thirtyDays"),
       icon: "🎖️",
       earned: day >= 30,
-      hint: `${Math.max(0, 30 - day)} days to go`,
+      hint: day >= 30 ? t("progress.milestones.done") : t("progress.milestones.thirtyDays_remaining", { count: Math.max(0, 30 - day) }),
     },
     {
-      name: "Survived 10 Urges",
+      name: t("progress.milestones.tenUrges"),
       icon: "🔥",
       earned: urgesSurvived >= 10,
-      hint: `Complete ${Math.max(0, 10 - urgesSurvived)} more urges`,
+      hint: urgesSurvived >= 10 ? t("progress.milestones.done") : Math.max(0, 10 - urgesSurvived) === 1 ? t("progress.milestones.tenUrges_remaining", { count: 1 }) : t("progress.milestones.tenUrges_remaining_plural", { count: Math.max(0, 10 - urgesSurvived) }),
     },
     {
-      name: "90 Day Warrior",
+      name: t("progress.milestones.ninetyDays"),
       icon: "👑",
       earned: day >= 90,
-      hint: `${Math.max(0, 90 - day)} days to go`,
+      hint: day >= 90 ? t("progress.milestones.done") : t("progress.milestones.ninetyDays_remaining", { count: Math.max(0, 90 - day) }),
     },
   ];
   const unlockedCount = milestones.filter((m) => m.earned).length;
@@ -157,19 +336,19 @@ function ProgressScreen() {
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <SectionTitle>Progress</SectionTitle>
+        <SectionTitle>{t("nav.progress")}</SectionTitle>
         <p style={{ fontSize: 13, color: "#ffffff", opacity: 0.45, marginTop: 4, fontFamily: "DM Sans, sans-serif", fontWeight: 400 }}>
-          Track your recovery, day by day.
+          {t("progress.header")}
         </p>
       </header>
 
       {/* ── Recovery ring hero ──────────────────────────────── */}
       <section className="flex flex-col items-center pt-6 pb-4 px-6 fade-up-1">
-        <RecoveryRing pct={recoveryPct} day={day} />
+        <RecoveryRing pct={recoveryPct} day={day} t={t} />
         <p className="mt-5 text-sm text-muted-foreground text-center max-w-[220px]">
           {recoveryPct < 100
-            ? `${90 - day} days remaining to full brain reset`
-            : "Full dopamine reset achieved. You did it."}
+            ? t("progress.ring.daysRemaining", { count: 90 - day })
+            : t("progress.ring.achieved")}
         </p>
       </section>
 
@@ -177,22 +356,22 @@ function ProgressScreen() {
       <div className="px-6 mt-2 flex divide-x fade-up-2" style={{ borderColor: "var(--border)" }}>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>{day}d</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Streak</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.streak")}</p>
         </div>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums">{longest}d</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Best</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.best")}</p>
         </div>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums">{state.totalCleanDays}</p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Total clean</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.total")}</p>
         </div>
       </div>
 
       {/* ── Streak calendar ─────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-center justify-between mb-4">
-          <SectionTitle>Consistency</SectionTitle>
+          <SectionTitle>{t("progress.consistency.title")}</SectionTitle>
           {!state.isPremium && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -202,7 +381,7 @@ function ProgressScreen() {
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground/60 mb-4">Last 12 weeks</p>
+        <p className="text-xs text-muted-foreground/60 mb-4">{t("progress.consistency.subtitle")}</p>
         <div className="relative">
           <div
             className={`grid grid-flow-col grid-rows-7 gap-1 ${
@@ -215,10 +394,10 @@ function ProgressScreen() {
                 className="h-3 w-3 rounded-[3px]"
                 style={{
                   backgroundColor:
-                    v === 0 ? "rgba(201,168,76,0.12)"
-                    : v === 1 ? "rgba(201,168,76,0.35)"
-                    : v === 2 ? "rgba(201,168,76,0.60)"
-                    : "#C9A84C",
+                    v === 0 ? "rgba(255,255,255,0.06)"
+                    : v === 1 ? "#1a4d2e"
+                    : v === 2 ? "#2d8a4e"
+                    : "#3fb86a",
                 }}
               />
             ))}
@@ -233,32 +412,32 @@ function ProgressScreen() {
                   borderColor: "oklch(0.62 0.22 255 / 0.30)",
                 }}
               >
-                Tap to see your full streak
+                {t("progress.paywall")}
               </span>
             </button>
           )}
         </div>
         <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
-          Less
-          {["rgba(201,168,76,0.12)", "rgba(201,168,76,0.35)", "rgba(201,168,76,0.60)", "#C9A84C"].map((bg) => (
+          {t("progress.consistency.less")}
+          {["rgba(255,255,255,0.06)", "#1a4d2e", "#2d8a4e", "#3fb86a"].map((bg) => (
             <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
           ))}
-          More
+          {t("progress.consistency.more")}
         </div>
       </section>
 
       {/* ── Your story ──────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <SectionTitle>Your Story</SectionTitle>
-        <p className="text-xs text-muted-foreground/60 mb-5">This is not a streak. This is your history.</p>
+        <SectionTitle>{t("progress.story.title")}</SectionTitle>
+        <p className="text-xs text-muted-foreground/60 mb-5">{t("progress.story.subtitle")}</p>
         <div className="space-y-0">
           {[
-            { label: "Days since you started",   value: `${daysSinceStart}` },
-            { label: "Total clean days, ever",   value: `${state.totalCleanDays}` },
-            { label: "Longest clean period",     value: `${longest} days` },
-            { label: "Times you came back",      value: `${state.totalReturns}` },
-            { label: "Relapses logged honestly", value: `${state.relapses?.length ?? 0}` },
-            { label: "App sessions",             value: `${totalLogins}` },
+            { label: t("progress.story.daysSince"),  value: `${daysSinceStart}` },
+            { label: t("progress.story.totalClean"), value: `${state.totalCleanDays}` },
+            { label: t("progress.story.longest"),    value: t("progress.story.longestValue", { count: longest }) },
+            { label: t("progress.story.timesBack"),  value: `${state.totalReturns}` },
+            { label: t("progress.story.relapses"),   value: `${state.relapses?.length ?? 0}` },
+            { label: t("progress.story.sessions"),   value: `${totalLogins}` },
           ].map(({ label, value }, i, arr) => (
             <div
               key={label}
@@ -271,7 +450,7 @@ function ProgressScreen() {
           ))}
         </div>
         <p className="mt-5 text-[12px] italic leading-relaxed" style={{ color: "oklch(0.52 0.015 265 / 0.65)" }}>
-          "Every chapter counts. Every time you came back was a choice. Most people stop choosing."
+          "{t("progress.story.quote")}"
         </p>
       </section>
 
@@ -279,8 +458,8 @@ function ProgressScreen() {
       <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">Relapse Insights</p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">When and why it happens</p>
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">{t("progress.insights.title")}</p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">{t("progress.insights.subtitle")}</p>
           </div>
           {!state.isPremium && (
             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -293,7 +472,7 @@ function ProgressScreen() {
           <div className={state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}>
             {(() => {
               const relapses = state.relapses ?? [];
-              const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+              const dowKeys = [0,1,2,3,4,5,6].map(i => t(`progress.insights.dow.${i}`));
               const dayCounts = Array(7).fill(0);
               const hourCounts = Array(4).fill(0); // morning/afternoon/evening/night
               relapses.forEach(r => {
@@ -305,18 +484,23 @@ function ProgressScreen() {
                 else if (h < 18) hourCounts[1]++;
                 else hourCounts[2]++;
               });
-              const peakDay = days[dayCounts.indexOf(Math.max(...dayCounts))];
-              const peakTime = ["Morning", "Afternoon", "Evening", "Night"][hourCounts.indexOf(Math.max(...hourCounts))];
+              const peakDay = dowKeys[dayCounts.indexOf(Math.max(...dayCounts))];
+              const peakTime = [
+                t("progress.insights.morning"),
+                t("progress.insights.afternoon"),
+                t("progress.insights.evening"),
+                t("progress.insights.night"),
+              ][hourCounts.indexOf(Math.max(...hourCounts))];
               const total = relapses.length;
               return (
                 <div className="space-y-3">
                   {[
-                    { label: "Total relapses tracked", value: total > 0 ? `${total}` : "None yet" },
-                    { label: "Most vulnerable day", value: total > 0 ? peakDay : "—" },
-                    { label: "Most vulnerable time", value: total > 0 ? peakTime : "—" },
-                    { label: "Avg. days between relapses", value: total > 1
-                      ? `${Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / (1000 * 60 * 60 * 24 * (total - 1)))} days`
-                      : "—" },
+                    { label: t("progress.insights.total"),     value: total > 0 ? `${total}` : t("progress.insights.none") },
+                    { label: t("progress.insights.peakDay"),   value: total > 0 ? peakDay : t("progress.insights.na") },
+                    { label: t("progress.insights.peakTime"),  value: total > 0 ? peakTime : t("progress.insights.na") },
+                    { label: t("progress.insights.avgBetween"), value: total > 1
+                      ? t("progress.insights.avgValue", { count: Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / (1000 * 60 * 60 * 24 * (total - 1))) })
+                      : t("progress.insights.na") },
                   ].map(({ label, value }, i, arr) => (
                     <div key={label} className="flex justify-between items-center py-3"
                       style={{ borderBottom: i < arr.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.7)" : "none" }}>
@@ -332,7 +516,7 @@ function ProgressScreen() {
             <button onClick={() => triggerPaywall()} className="absolute inset-0 flex items-center justify-center">
               <span className="text-xs font-semibold border px-3 py-1.5 rounded-full"
                 style={{ color: "var(--primary)", background: "oklch(0.13 0.022 265 / 0.90)", borderColor: "oklch(0.62 0.22 255 / 0.30)" }}>
-                See what triggers your relapses
+                {t("progress.insights.paywallCta")}
               </span>
             </button>
           )}
@@ -343,13 +527,13 @@ function ProgressScreen() {
       <section className="px-6 mt-8 pt-7 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         {/* Section header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <SectionTitle>Milestones</SectionTitle>
-          <p style={{ fontSize: 11, color: "#3a3020", margin: 0 }}>
-            {unlockedCount} of {milestones.length} unlocked
+          <SectionTitle>{t("progress.milestonesTitle")}</SectionTitle>
+          <p style={{ fontSize: 11, color: "#5a4a30", margin: 0, fontFamily: "DM Sans, sans-serif" }}>
+            {t("progress.milestonesUnlocked", { count: unlockedCount, total: milestones.length })}
           </p>
         </div>
 
-        {/* Cards grid */}
+        {/* Coin cards grid */}
         <motion.div
           className="grid grid-cols-2 gap-3"
           variants={msContainer}
@@ -357,118 +541,15 @@ function ProgressScreen() {
           animate="visible"
         >
           {milestones.map(({ name, icon, earned, hint }, i) => (
-            <motion.div
+            <CoinCard
               key={name}
-              // Unlocked: keyframe pop animation with staggered delay
-              // Locked: stagger variant
-              variants={earned ? undefined : msItem}
-              initial={earned ? { scale: 0.9, opacity: 0 } : "hidden"}
-              animate={earned ? { scale: [0.9, 1.05, 1], opacity: 1 } : "visible"}
-              transition={
-                earned
-                  ? { duration: 0.5, times: [0, 0.6, 1], delay: i * 0.1 }
-                  : { type: "spring", stiffness: 320, damping: 26 }
-              }
-              whileTap={{ scale: 0.97 }}
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: 16,
-                padding: 16,
-                background: earned ? "rgba(201,168,76,0.08)" : "#0f0c06",
-                border: earned
-                  ? "1.5px solid rgba(201,168,76,0.4)"
-                  : "1px solid #1e1a10",
-                boxShadow: earned ? "0 0 20px rgba(201,168,76,0.08)" : "none",
-                opacity: earned ? 1 : 0.5,
-              }}
-            >
-              {/* Gold shimmer — unlocked only */}
-              {earned && (
-                <motion.div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    pointerEvents: "none",
-                    background:
-                      "linear-gradient(105deg, transparent 40%, rgba(201,168,76,0.08) 50%, transparent 60%)",
-                    borderRadius: 16,
-                  }}
-                  animate={{ x: ["-100%", "200%"] }}
-                  transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-                />
-              )}
-
-              {/* Icon circle */}
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  background: earned ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
-                  border: earned ? "1px solid rgba(201,168,76,0.3)" : "1px solid #2a2010",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 20,
-                  filter: earned ? "none" : "grayscale(1)",
-                }}
-              >
-                {icon}
-              </div>
-
-              {/* Name */}
-              <p
-                style={{
-                  marginTop: 10,
-                  marginBottom: 0,
-                  fontSize: 14,
-                  fontWeight: earned ? 700 : 600,
-                  color: earned ? "#fff" : "#555",
-                  lineHeight: 1.3,
-                }}
-              >
-                {name}
-              </p>
-
-              {/* Status */}
-              {earned ? (
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    marginTop: 6,
-                    background: "rgba(201,168,76,0.15)",
-                    border: "1px solid rgba(201,168,76,0.3)",
-                    borderRadius: 20,
-                    padding: "2px 10px",
-                    fontSize: 10,
-                    color: GOLD,
-                  }}
-                >
-                  ✓ Achieved
-                </div>
-              ) : (
-                <p style={{ marginTop: 6, marginBottom: 0, fontSize: 11, color: "#3a3020" }}>
-                  {hint}
-                </p>
-              )}
-
-              {/* Lock icon — locked only */}
-              {!earned && (
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: 12,
-                    right: 12,
-                    fontSize: 12,
-                    color: "#2a2010",
-                  }}
-                >
-                  🔒
-                </span>
-              )}
-            </motion.div>
+              name={name}
+              icon={icon}
+              earned={earned}
+              hint={hint}
+              index={i}
+              t={t}
+            />
           ))}
         </motion.div>
       </section>

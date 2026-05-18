@@ -37,7 +37,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 neural-mesh-fine" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen flex items-center justify-center px-6 neural-mesh-fine" style={{ background: "#0D0A08" }}>
       <div className="w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="text-center space-y-2">

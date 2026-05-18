@@ -20,7 +20,7 @@ function TermsOfService() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen mx-auto max-w-md" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen mx-auto max-w-md" style={{ background: "#0D0A08" }}>
       {/* Header */}
       <header
         className="sticky top-0 z-20 flex items-center gap-3 px-4 h-14 backdrop-blur-xl"
