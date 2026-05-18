@@ -189,41 +189,41 @@ function SignalGame({
 function MindPulseIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="15" r="12" stroke="#6BAED6" strokeWidth="1.2" strokeOpacity="0.5"/>
-      <circle cx="15" cy="15" r="6" fill="#6BAED6" fillOpacity="0.15" stroke="#6BAED6" strokeWidth="1.3"/>
-      <path d="M5 15 L9 15 L11 10 L13 20 L15 13 L17 17 L19 15 L25 15" stroke="#6BAED6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="15" cy="15" r="12" stroke="#38bdf8" strokeWidth="1.2" strokeOpacity="0.55"/>
+      <circle cx="15" cy="15" r="6" fill="#38bdf8" fillOpacity="0.18" stroke="#38bdf8" strokeWidth="1.3"/>
+      <path d="M5 15 L9 15 L11 10 L13 20 L15 13 L17 17 L19 15 L25 15" stroke="#38bdf8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 function ImpulseShiftIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <circle cx="15" cy="15" r="12" stroke="#C9A84C" strokeWidth="1.2" strokeOpacity="0.5"/>
-      <circle cx="15" cy="15" r="7"  stroke="#C9A84C" strokeWidth="1.2" strokeOpacity="0.65"/>
-      <circle cx="15" cy="15" r="2.2" fill="#C9A84C"/>
-      <line x1="15" y1="2"  x2="15" y2="6"  stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="15" y1="24" x2="15" y2="28" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="2"  y1="15" x2="6"  y2="15" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="24" y1="15" x2="28" y2="15" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="15" cy="15" r="12" stroke="#debc7a" strokeWidth="1.2" strokeOpacity="0.55"/>
+      <circle cx="15" cy="15" r="7"  stroke="#debc7a" strokeWidth="1.2" strokeOpacity="0.70"/>
+      <circle cx="15" cy="15" r="2.2" fill="#debc7a"/>
+      <line x1="15" y1="2"  x2="15" y2="6"  stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="15" y1="24" x2="15" y2="28" stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="2"  y1="15" x2="6"  y2="15" stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="24" y1="15" x2="28" y2="15" stroke="#debc7a" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }
 function NeuralLinkIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      <line x1="8" y1="8" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="22" y1="8" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="8" y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="22" y1="22" x2="15" y2="15" stroke="#6BAA75" strokeWidth="1.1" strokeOpacity="0.7"/>
-      <line x1="8" y1="8" x2="22" y2="8"  stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="8" y1="22" x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="8" y1="8" x2="8" y2="22"  stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <line x1="22" y1="8" x2="22" y2="22" stroke="#6BAA75" strokeWidth="1.0" strokeOpacity="0.4"/>
-      <circle cx="8"  cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="22" cy="8"  r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="8"  cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="22" cy="22" r="2.8" fill="#6BAA75" fillOpacity="0.2" stroke="#6BAA75" strokeWidth="1.2"/>
-      <circle cx="15" cy="15" r="3.5" fill="#6BAA75" fillOpacity="0.3" stroke="#6BAA75" strokeWidth="1.4"/>
+      <line x1="8" y1="8" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="22" y1="8" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="8" y1="22" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="22" y1="22" x2="15" y2="15" stroke="#4ade80" strokeWidth="1.2" strokeOpacity="0.75"/>
+      <line x1="8" y1="8" x2="22" y2="8"  stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <line x1="8" y1="22" x2="22" y2="22" stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <line x1="8" y1="8" x2="8" y2="22"  stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <line x1="22" y1="8" x2="22" y2="22" stroke="#4ade80" strokeWidth="1.0" strokeOpacity="0.42"/>
+      <circle cx="8"  cy="8"  r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="22" cy="8"  r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="8"  cy="22" r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="22" cy="22" r="2.8" fill="#4ade80" fillOpacity="0.22" stroke="#4ade80" strokeWidth="1.3"/>
+      <circle cx="15" cy="15" r="3.5" fill="#4ade80" fillOpacity="0.32" stroke="#4ade80" strokeWidth="1.5"/>
     </svg>
   );
 }
@@ -316,24 +316,24 @@ type GameEntry = {
 
 const FREE_GAMES: GameEntry[] = [
   {
-    to: "/tools/breath", glow: "#6BAED6", labelKey: "tools.mindPulse",
+    to: "/tools/breath", glow: "#38bdf8", labelKey: "tools.mindPulse",
     icon: <MindPulseIcon />, ambient: "pulse",
-    idleFilter:  "drop-shadow(0 0 6px rgba(56,189,248,0.52))",
-    hoverFilter: "drop-shadow(0 0 14px rgba(56,189,248,0.95)) drop-shadow(0 0 30px rgba(56,189,248,0.42))",
+    idleFilter:  "drop-shadow(0 0 7px rgba(56,189,248,0.60))",
+    hoverFilter: "drop-shadow(0 0 16px rgba(56,189,248,1.0)) drop-shadow(0 0 32px rgba(56,189,248,0.45))",
     hoverRotate: 8,
   },
   {
-    to: "/tools/tap", glow: "#C9A84C", labelKey: "tools.impulseShift",
+    to: "/tools/tap", glow: "#debc7a", labelKey: "tools.impulseShift",
     icon: <ImpulseShiftIcon />, ambient: "rotate",
-    idleFilter:  "drop-shadow(0 0 6px rgba(222,188,122,0.52))",
-    hoverFilter: "drop-shadow(0 0 14px rgba(222,188,122,0.95)) drop-shadow(0 0 30px rgba(222,188,122,0.42))",
+    idleFilter:  "drop-shadow(0 0 7px rgba(222,188,122,0.60))",
+    hoverFilter: "drop-shadow(0 0 16px rgba(222,188,122,1.0)) drop-shadow(0 0 32px rgba(222,188,122,0.45))",
     hoverRotate: 0,
   },
   {
-    to: "/tools/memory", glow: "#6BAA75", labelKey: "tools.neuralLink",
-    icon: <NeuralLinkIcon />, ambient: "none",
-    idleFilter:  "drop-shadow(0 0 6px rgba(74,222,128,0.48))",
-    hoverFilter: "drop-shadow(0 0 14px rgba(74,222,128,0.95)) drop-shadow(0 0 30px rgba(74,222,128,0.42))",
+    to: "/tools/memory", glow: "#4ade80", labelKey: "tools.neuralLink",
+    icon: <NeuralLinkIcon />, ambient: "breathe",
+    idleFilter:  "drop-shadow(0 0 7px rgba(74,222,128,0.58))",
+    hoverFilter: "drop-shadow(0 0 16px rgba(74,222,128,1.0)) drop-shadow(0 0 32px rgba(74,222,128,0.45))",
     hoverRotate: 5,
   },
 ];
@@ -352,11 +352,11 @@ const PRO_GAMES: GameEntry[] = [
 // ── Arcade badge helpers ──────────────────────────────────────────────────────
 
 function getGlowFilter(glow: string): string {
-  const blues   = ["#6BAED6", "#2563EB", "#7B2FBE", "#4F46E5", "#00BCD4"];
-  const greens  = ["#6BAA75", "#10B981"];
-  if (blues.includes(glow))  return "drop-shadow(0 0 8px rgba(56,189,248,0.60))";
-  if (greens.includes(glow)) return "drop-shadow(0 0 8px rgba(74,222,128,0.60))";
-  return "drop-shadow(0 0 8px rgba(222,188,122,0.60))";
+  const blues   = ["#38bdf8", "#6BAED6", "#2563EB", "#7B2FBE", "#4F46E5", "#00BCD4"];
+  const greens  = ["#4ade80", "#6BAA75", "#10B981"];
+  if (blues.includes(glow))  return "drop-shadow(0 0 9px rgba(56,189,248,0.70))";
+  if (greens.includes(glow)) return "drop-shadow(0 0 9px rgba(74,222,128,0.70))";
+  return "drop-shadow(0 0 9px rgba(222,188,122,0.70))";
 }
 
 function ArcadeBadge({
@@ -470,64 +470,64 @@ function Tools() {
     <PageShell>
       {/* ── Aurora Borealis background ───────────────────────────────────── */}
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
-        {/* Blob 1 — cyber-violet, top-left */}
+        {/* Blob 1 — deep cyber-violet, left */}
         <motion.div
           animate={{
-            x: ["0%", "6%", "-4%", "0%"],
-            y: ["0%", "8%", "-5%", "0%"],
-            scale: [1, 1.08, 0.95, 1],
-            opacity: [0.22, 0.28, 0.20, 0.22],
+            x: ["0%", "8%", "-5%", "2%", "0%"],
+            y: ["0%", "6%", "-8%", "4%", "0%"],
+            scale: [1, 1.07, 0.96, 1.03, 1],
+            opacity: [0.25, 0.30, 0.22, 0.27, 0.25],
           }}
-          transition={{ duration: 28, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
+          transition={{ duration: 25, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
+          style={{
+            position: "absolute",
+            top: "-12%",
+            left: "-18%",
+            width: "75vw",
+            height: "75vw",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, #a855f7 0%, transparent 68%)",
+            filter: "blur(130px)",
+          }}
+        />
+        {/* Blob 2 — radiant emerald seafoam, right */}
+        <motion.div
+          animate={{
+            x: ["0%", "-9%", "6%", "-3%", "0%"],
+            y: ["0%", "9%", "-5%", "7%", "0%"],
+            scale: [1, 0.94, 1.08, 0.98, 1],
+            opacity: [0.25, 0.29, 0.20, 0.26, 0.25],
+          }}
+          transition={{ duration: 28, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 5 }}
           style={{
             position: "absolute",
             top: "-10%",
-            left: "-15%",
+            right: "-22%",
             width: "70vw",
             height: "70vw",
             borderRadius: "50%",
-            background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)",
-            filter: "blur(80px)",
+            background: "radial-gradient(circle, #10b981 0%, transparent 68%)",
+            filter: "blur(130px)",
           }}
         />
-        {/* Blob 2 — emerald seafoam, top-right */}
+        {/* Blob 3 — cosmic indigo, center-low */}
         <motion.div
           animate={{
-            x: ["0%", "-7%", "5%", "0%"],
-            y: ["0%", "10%", "-6%", "0%"],
-            scale: [1, 0.93, 1.10, 1],
-            opacity: [0.20, 0.26, 0.18, 0.20],
+            x: ["0%", "6%", "-7%", "3%", "0%"],
+            y: ["0%", "-6%", "10%", "-4%", "0%"],
+            scale: [1, 1.05, 0.97, 1.04, 1],
+            opacity: [0.20, 0.25, 0.17, 0.23, 0.20],
           }}
-          transition={{ duration: 34, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 4 }}
+          transition={{ duration: 32, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 11 }}
           style={{
             position: "absolute",
-            top: "-8%",
-            right: "-20%",
-            width: "65vw",
+            top: "20%",
+            left: "5%",
+            width: "85vw",
             height: "65vw",
             borderRadius: "50%",
-            background: "radial-gradient(circle, #10b981 0%, transparent 70%)",
-            filter: "blur(90px)",
-          }}
-        />
-        {/* Blob 3 — deep cosmic indigo, center */}
-        <motion.div
-          animate={{
-            x: ["0%", "5%", "-6%", "0%"],
-            y: ["0%", "-7%", "9%", "0%"],
-            scale: [1, 1.06, 0.97, 1],
-            opacity: [0.16, 0.22, 0.14, 0.16],
-          }}
-          transition={{ duration: 40, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 10 }}
-          style={{
-            position: "absolute",
-            top: "15%",
-            left: "10%",
-            width: "80vw",
-            height: "60vw",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #6366f1 0%, transparent 70%)",
-            filter: "blur(100px)",
+            background: "radial-gradient(circle, #6366f1 0%, transparent 68%)",
+            filter: "blur(130px)",
           }}
         />
       </div>
@@ -630,35 +630,47 @@ function Tools() {
       <section className="px-4 mt-10 pb-8" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
         {/* ── Cyber-Arcade Accordion ───────────────────────────────────── */}
-        <div style={{ ...CARD, overflow: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
 
-          {/* ── Accordion header bar — centered symmetrical row ── */}
-          <button
+          {/* ── Premium gold header pill ── */}
+          <motion.button
             onClick={() => setGamesOpen((v) => !v)}
-            className="flex items-center gap-3 w-full cursor-pointer"
-            style={{ padding: "18px 20px" }}
+            whileHover={{ borderColor: "rgba(222,188,122,0.30)" }}
+            transition={{ duration: 0.2 }}
+            className="w-full flex items-center justify-center gap-4 cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              borderTop: "1px solid rgba(201,168,76,0.22)",
+              borderRadius: 20,
+              padding: "18px 20px",
+              position: "relative",
+            }}
           >
-            {/* Animated controller badge */}
+            {/* Gold controller badge */}
             <div style={{
               width: 44, height: 44, display: "grid", placeItems: "center",
               borderRadius: 14, flexShrink: 0,
-              background: "rgba(139,92,246,0.12)",
-              border: "1px solid rgba(139,92,246,0.35)",
-              boxShadow: "0 0 18px 3px rgba(139,92,246,0.22)",
+              background: "rgba(222,188,122,0.10)",
+              border: "1px solid rgba(222,188,122,0.32)",
+              boxShadow: "0 0 18px 3px rgba(222,188,122,0.18)",
+              filter: "drop-shadow(0 0 12px rgba(222,188,122,0.70))",
             }}>
               <motion.div
                 animate={{ rotate: [-4, 4, -4] }}
                 transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
               >
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style={{ color: "#a78bfa" }}>
-                  <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
-                  <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                  <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                  <circle cx="10.5" cy="7.5" r="0.75" fill="currentColor" opacity="0.95"/>
-                  <circle cx="11.8" cy="8.5" r="0.75" fill="currentColor" opacity="0.95"/>
-                  <circle cx="10.5" cy="9.5" r="0.75" fill="currentColor" opacity="0.95"/>
-                  <circle cx="9.2"  cy="8.5" r="0.75" fill="currentColor" opacity="0.95"/>
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none" style={{ color: "#debc7a" }}>
+                  <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
+                  <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                  <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                  <circle cx="10.5" cy="7.5" r="0.8" fill="currentColor"/>
+                  <circle cx="11.8" cy="8.5" r="0.8" fill="currentColor"/>
+                  <circle cx="10.5" cy="9.5" r="0.8" fill="currentColor"/>
+                  <circle cx="9.2"  cy="8.5" r="0.8" fill="currentColor"/>
                 </svg>
               </motion.div>
             </div>
@@ -669,17 +681,17 @@ function Tools() {
               <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
             </div>
 
-            {/* Rotating chevron */}
+            {/* Rotating gold chevron */}
             <motion.div
               animate={{ rotate: gamesOpen ? 180 : 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+              transition={{ duration: 0.28, ease: "easeInOut" }}
               style={{ flexShrink: 0, display: "flex" }}
             >
-              <ChevronDown style={{ height: 16, width: 16, color: "rgba(255,255,255,0.35)" }} />
+              <ChevronDown style={{ height: 16, width: 16, color: "rgba(222,188,122,0.60)" }} />
             </motion.div>
-          </button>
+          </motion.button>
 
-          {/* ── Expandable content ── */}
+          {/* ── Slide-in glass dropdown ── */}
           <AnimatePresence initial={false}>
             {gamesOpen && (
               <motion.div
@@ -687,16 +699,27 @@ function Tools() {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
                 style={{ overflow: "hidden" }}
               >
                 <div style={{
-                  padding: "4px 20px 22px",
-                  borderTop: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(255,255,255,0.04)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderTop: "1px solid rgba(201,168,76,0.14)",
+                  borderRadius: 20,
+                  padding: "22px 20px 24px",
                 }}>
 
-                  {/* Free game badges — 3-column grid */}
-                  <div className="grid grid-cols-3" style={{ gap: "22px 8px", paddingTop: 20 }}>
+                  {/* Free games — 3-column circle grid */}
+                  <motion.div
+                    variants={gameContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-3"
+                    style={{ gap: "24px 8px" }}
+                  >
                     {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
                       <ArcadeBadge
                         key={to}
@@ -707,17 +730,16 @@ function Tools() {
                         ambient={ambient}
                       />
                     ))}
-                  </div>
+                  </motion.div>
 
                   {/* PRO section */}
                   {state.isPremium === true ? (
                     <>
-                      {/* Gold separator */}
-                      <div style={{ margin: "20px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.28) 20%, rgba(201,168,76,0.28) 80%, transparent)" }} />
-                      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.70, textAlign: "center", marginBottom: 16 }}>
+                      <div style={{ margin: "22px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.32) 20%, rgba(201,168,76,0.32) 80%, transparent)" }} />
+                      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.72, textAlign: "center", marginBottom: 18 }}>
                         Pro Games
                       </p>
-                      <div className="grid grid-cols-3" style={{ gap: "22px 8px" }}>
+                      <div className="grid grid-cols-3" style={{ gap: "24px 8px" }}>
                         {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
                           <ArcadeBadge
                             key={to}
@@ -731,43 +753,44 @@ function Tools() {
                       </div>
                     </>
                   ) : (
-                    /* Locked PRO row */
+                    /* ── Locked PRO row ── */
                     <motion.button
                       onClick={() => triggerPaywall()}
-                      whileHover={{ borderColor: "rgba(201,168,76,0.40)", scale: 1.01 }}
+                      whileHover={{ borderColor: "rgba(201,168,76,0.44)", scale: 1.01 }}
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.18 }}
                       style={{
                         width: "100%",
-                        marginTop: 16,
+                        marginTop: 18,
                         display: "flex",
                         alignItems: "center",
                         gap: 14,
                         padding: "14px 18px",
                         borderRadius: 18,
                         background: "rgba(201,168,76,0.05)",
-                        border: "1px solid rgba(201,168,76,0.18)",
-                        borderTop: "1px solid rgba(201,168,76,0.28)",
+                        border: "1px solid rgba(201,168,76,0.20)",
+                        borderTop: "1px solid rgba(201,168,76,0.32)",
                         cursor: "pointer",
                         backdropFilter: "blur(12px)",
                         WebkitBackdropFilter: "blur(12px)",
                       }}
                     >
-                      {/* Lock badge */}
+                      {/* Sleek golden padlock badge */}
                       <div style={{
-                        width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
+                        width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
                         display: "grid", placeItems: "center",
-                        background: "rgba(201,168,76,0.08)",
-                        border: "1px solid rgba(201,168,76,0.28)",
-                        boxShadow: "0 0 14px 2px rgba(201,168,76,0.14)",
+                        background: "rgba(201,168,76,0.09)",
+                        border: "1.5px solid rgba(201,168,76,0.32)",
+                        boxShadow: "0 0 16px 3px rgba(201,168,76,0.16)",
+                        filter: "drop-shadow(0 0 8px rgba(222,188,122,0.50))",
                       }}>
-                        <Lock style={{ height: 16, width: 16, color: "#C9A84C", filter: "drop-shadow(0 0 5px rgba(201,168,76,0.55))" }} />
+                        <Lock style={{ height: 17, width: 17, color: "#debc7a" }} />
                       </div>
                       <div style={{ textAlign: "left", flex: 1 }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 2 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 3 }}>
                           Pro Games (Locked)
                         </p>
-                        <p style={{ fontSize: 11, color: "#debc7a", opacity: 0.72, lineHeight: 1.4 }}>
+                        <p style={{ fontSize: 11, color: "#debc7a", opacity: 0.70, lineHeight: 1.45 }}>
                           Subscribe to unlock all premium games.
                         </p>
                       </div>
