@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { motion, type Variants } from "framer-motion";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
@@ -46,6 +47,19 @@ const ICON_WRAP = (color: string): React.CSSProperties => ({
 
 const REFRAME_COUNT = 5;
 
+// ── Game badge animation ──────────────────────────────────────────────────────
+type AmbientType = "pulse" | "rotate" | "breathe" | "float" | "none";
+
+const gameContainer: Variants = {
+  hidden:   {},
+  visible:  { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const gameItem: Variants = {
+  hidden:   { opacity: 0, scale: 0.82 },
+  visible:  { opacity: 1, scale: 1, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } },
+};
+
 // ── CoachRobot SVG ────────────────────────────────────────────────────────────
 function CoachRobot() {
   return (
@@ -70,14 +84,99 @@ function CoachRobot() {
 }
 
 // ── Cut-the-Signal game circles ───────────────────────────────────────────────
-function SignalGame({ to, glow, label, icon }: { to: string; glow: string; label: string; icon: React.ReactNode }) {
+function SignalGame({
+  to, glow, label, icon, ambient = "none",
+}: {
+  to: string; glow: string; label: string; icon: React.ReactNode; ambient?: AmbientType;
+}) {
   return (
-    <Link to={to} className="flex flex-col items-center gap-3 active:opacity-70 transition-opacity">
-      <div style={{ height: 68, width: 68, borderRadius: "50%", display: "grid", placeItems: "center", background: "rgba(255,255,255,0.04)", border: `1.5px solid ${glow}44`, boxShadow: `0 0 20px 4px ${glow}35, 0 0 6px 1px ${glow}22` }}>
-        {icon}
-      </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.65)", textAlign: "center", lineHeight: 1.3, maxWidth: 72 }}>{label}</span>
-    </Link>
+    // Outer stagger item — entry animation driven by parent container
+    <motion.div variants={gameItem} className="flex flex-col items-center">
+      <Link to={to} className="flex flex-col items-center gap-3" style={{ textDecoration: "none" }}>
+
+        {/* ── Badge circle — hover + tap ── */}
+        <motion.div
+          whileHover={{
+            scale: 1.06,
+            filter: "brightness(1.25)",
+            boxShadow: `0 0 30px 10px ${glow}55, 0 0 12px 3px ${glow}44`,
+            transition: { duration: 0.18, ease: "easeOut" },
+          }}
+          whileTap={{ scale: 0.94, transition: { duration: 0.1 } }}
+          style={{
+            position: "relative",
+            height: 68, width: 68,
+            borderRadius: "50%",
+            display: "grid",
+            placeItems: "center",
+            background: "rgba(255,255,255,0.04)",
+            border: `1.5px solid ${glow}44`,
+            boxShadow: `0 0 20px 4px ${glow}35, 0 0 6px 1px ${glow}22`,
+          }}
+        >
+          {/* ── Pulsing neon ring — Mind Pulse & Echo Chamber ── */}
+          {ambient === "pulse" && (
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: -6,
+                borderRadius: "50%",
+                border: `1.5px solid ${glow}`,
+                pointerEvents: "none",
+              }}
+              animate={{ scale: [1, 1.12, 1], opacity: [0.7, 0.2, 0.7] }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+            />
+          )}
+
+          {/* ── Rotating dashed ring — Impulse Shift & Steady Hand ── */}
+          {ambient === "rotate" && (
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: -6,
+                borderRadius: "50%",
+                border: `1.5px dashed ${glow}80`,
+                pointerEvents: "none",
+              }}
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+            />
+          )}
+
+          {/* ── Icon — static, breathing, or floating ── */}
+          {ambient === "breathe" ? (
+            <motion.div
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+              animate={{ scale: [1, 1.06, 1] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            >
+              {icon}
+            </motion.div>
+          ) : ambient === "float" ? (
+            <motion.div
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+              animate={{ y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            >
+              {icon}
+            </motion.div>
+          ) : (
+            icon
+          )}
+        </motion.div>
+
+        <span style={{
+          fontSize: 11, fontWeight: 600,
+          color: "rgba(255,255,255,0.65)",
+          textAlign: "center", lineHeight: 1.3, maxWidth: 72,
+        }}>
+          {label}
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -205,16 +304,18 @@ function IdentityStackIcon() {
   );
 }
 
-const PRO_GAMES = [
-  { to: "/tools/coldswitch",    glow: "#00BCD4", labelKey: "tools.coldswitch.name",    icon: <ColdSwitchIcon /> },
-  { to: "/tools/voidstare",     glow: "#7B2FBE", labelKey: "tools.voidstare.name",     icon: <VoidStareIcon /> },
-  { to: "/tools/clarityclimb",  glow: "#10B981", labelKey: "tools.clarityclimb.name",  icon: <ClarityClimbIcon /> },
-  { to: "/tools/echochamber",   glow: "#F97316", labelKey: "tools.echochamber.name",   icon: <EchoChamberIcon /> },
-  { to: "/tools/darkroom",      glow: "#4F46E5", labelKey: "tools.darkroom.name",      icon: <DarkRoomIcon /> },
-  { to: "/tools/noisefilter",   glow: "#2563EB", labelKey: "tools.noisefilter.name",   icon: <NoiseFilterIcon /> },
-  { to: "/tools/steadyhand",    glow: "#D97706", labelKey: "tools.steadyhand.name",    icon: <SteadyHandIcon /> },
-  { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon /> },
-] as const;
+type GameEntry = { to: string; glow: string; labelKey: string; icon: React.ReactNode; ambient: AmbientType };
+
+const PRO_GAMES: GameEntry[] = [
+  { to: "/tools/coldswitch",    glow: "#00BCD4", labelKey: "tools.coldswitch.name",    icon: <ColdSwitchIcon />,    ambient: "none"    },
+  { to: "/tools/voidstare",     glow: "#7B2FBE", labelKey: "tools.voidstare.name",     icon: <VoidStareIcon />,     ambient: "breathe" },
+  { to: "/tools/clarityclimb",  glow: "#10B981", labelKey: "tools.clarityclimb.name",  icon: <ClarityClimbIcon />,  ambient: "float"   },
+  { to: "/tools/echochamber",   glow: "#F97316", labelKey: "tools.echochamber.name",   icon: <EchoChamberIcon />,   ambient: "pulse"   },
+  { to: "/tools/darkroom",      glow: "#4F46E5", labelKey: "tools.darkroom.name",      icon: <DarkRoomIcon />,      ambient: "none"    },
+  { to: "/tools/noisefilter",   glow: "#2563EB", labelKey: "tools.noisefilter.name",   icon: <NoiseFilterIcon />,   ambient: "none"    },
+  { to: "/tools/steadyhand",    glow: "#D97706", labelKey: "tools.steadyhand.name",    icon: <SteadyHandIcon />,    ambient: "rotate"  },
+  { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon />, ambient: "none"    },
+];
 
 // ── Main component ────────────────────────────────────────────────────────────
 function Tools() {
@@ -310,17 +411,30 @@ function Tools() {
 
           {gamesOpen && (
             <div className="mt-5">
-              <div className="flex justify-around">
-                <SignalGame to="/tools/breath" glow="#6BAED6" label={t("tools.mindPulse")}    icon={<MindPulseIcon />} />
-                <SignalGame to="/tools/tap"    glow="#C9A84C" label={t("tools.impulseShift")} icon={<ImpulseShiftIcon />} />
-                <SignalGame to="/tools/memory" glow="#6BAA75" label={t("tools.neuralLink")}   icon={<NeuralLinkIcon />} />
-              </div>
+              {/* ── Free games row — staggered entry ── */}
+              <motion.div
+                className="flex justify-around"
+                variants={gameContainer}
+                initial="hidden"
+                animate="visible"
+              >
+                <SignalGame to="/tools/breath" glow="#6BAED6" label={t("tools.mindPulse")}    icon={<MindPulseIcon />}    ambient="pulse"  />
+                <SignalGame to="/tools/tap"    glow="#C9A84C" label={t("tools.impulseShift")} icon={<ImpulseShiftIcon />} ambient="rotate" />
+                <SignalGame to="/tools/memory" glow="#6BAA75" label={t("tools.neuralLink")}   icon={<NeuralLinkIcon />}   ambient="none"   />
+              </motion.div>
+
               {state.isPremium === true ? (
-                <div className="mt-7 grid grid-cols-3 gap-y-6 place-items-center">
-                  {PRO_GAMES.map(({ to, glow, labelKey, icon }) => (
-                    <SignalGame key={to} to={to} glow={glow} label={t(labelKey)} icon={icon} />
+                /* ── PRO games grid — staggered entry ── */
+                <motion.div
+                  className="mt-7 grid grid-cols-3 gap-y-6 place-items-center"
+                  variants={gameContainer}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                    <SignalGame key={to} to={to} glow={glow} label={t(labelKey)} icon={icon} ambient={ambient} />
                   ))}
-                </div>
+                </motion.div>
               ) : (
                 <button
                   onClick={() => triggerPaywall()}
