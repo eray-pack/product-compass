@@ -1186,6 +1186,341 @@ function DeepRootsBadge({ canAfford, owned }: { canAfford: boolean; owned: boole
   );
 }
 
+// ── Raw Meat icon SVG ─────────────────────────────────────────────────────────
+function RawMeatSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <radialGradient id="rm-meat" cx="45%" cy="52%" r="52%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stopColor="#ff4444" />
+          <stop offset="38%"  stopColor="#cc1a1a" />
+          <stop offset="72%"  stopColor="#8b0000" />
+          <stop offset="100%" stopColor="#4a0000" />
+        </radialGradient>
+        <linearGradient id="rm-bone" x1="16" y1="3" x2="26" y2="10" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#f5f0e8" />
+          <stop offset="100%" stopColor="#c8bfaa" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Steak silhouette ── */}
+      <path d="M3 18 Q2 12 5 8 Q8 4 13 4 Q19 4 22 8 Q26 10 25 16 Q24 22 20 24 Q16 27 11 25 Q5 23 3 18Z"
+        fill="url(#rm-meat)" />
+
+      {/* ── Bone cap (top-right) ── */}
+      <circle cx="19.5" cy="5.5" r="2.4" fill="url(#rm-bone)" />
+      <circle cx="23.0" cy="5.5" r="2.4" fill="#e8e2d5" />
+      <circle cx="19.5" cy="9.0" r="2.2" fill="url(#rm-bone)" />
+      <circle cx="23.0" cy="9.0" r="2.2" fill="#ddd6c8" />
+      <rect x="20.2" y="5.5" width="2.6" height="3.5" rx="0.8" fill="#ede8dc" />
+      {/* Bone specular */}
+      <circle cx="19.0" cy="5.0" r="0.8" fill="white" opacity="0.55"/>
+      <circle cx="22.5" cy="5.0" r="0.8" fill="white" opacity="0.45"/>
+
+      {/* ── Marbling / fat streaks ── */}
+      <path d="M8 15 Q11 13 14 14 Q17 15 19 13"
+        stroke="rgba(255,210,170,0.52)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+      <path d="M7 19 Q10 17 13 18"
+        stroke="rgba(255,210,170,0.38)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
+      <path d="M15 20 Q17 18.5 19.5 19.5"
+        stroke="rgba(255,210,170,0.42)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
+
+      {/* ── Surface specular ── */}
+      <ellipse cx="9" cy="11" rx="3.5" ry="2" fill="rgba(255,80,80,0.28)" transform="rotate(-20 9 11)"/>
+    </svg>
+  );
+}
+
+// ── Raw Meat badge (wolf-raw-meat item only) ──────────────────────────────────
+function RawMeatBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  // Smoke wisps — scattered around top of badge
+  const smokeParticles = [
+    { x: 15, baseY: 6,  driftY: -10, driftX:  2, delay: 0.0, size: 3.5 },
+    { x: 24, baseY: 4,  driftY: -12, driftX: -2, delay: 0.6, size: 2.5 },
+    { x: 32, baseY: 6,  driftY: -10, driftX:  3, delay: 1.2, size: 3.0 },
+    { x: 20, baseY: 8,  driftY: -8,  driftX: -3, delay: 1.8, size: 2.0 },
+    { x: 28, baseY: 5,  driftY: -11, driftX:  1, delay: 0.9, size: 2.5 },
+    { x: 12, baseY: 9,  driftY: -9,  driftX: -1, delay: 1.5, size: 2.0 },
+  ];
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer blood-red power burst ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.58, 1], opacity: [0.68, 0.08, 0.68] }}
+        transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -16, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(220,38,38,0.82) 0%, rgba(153,27,27,0.44) 38%, transparent 68%)`,
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Secondary crimson pulse ring ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.80, 1.70, 0.80], opacity: [0.40, 0, 0.40] }}
+        transition={{ duration: 2.6, ease: "easeOut", repeat: Infinity, delay: 0.65 }}
+        style={{
+          position: "absolute", inset: -10, borderRadius: "50%",
+          border: "1.5px solid rgba(220,38,38,0.58)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Floating smoke / ember wisps ── */}
+      <div aria-hidden style={{ position: "absolute", inset: -12, overflow: "visible", pointerEvents: "none" }}>
+        {smokeParticles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{
+              y: [0, p.driftY],
+              x: [0, p.driftX],
+              opacity: [0, i % 2 === 0 ? 0.62 : 0.45, 0],
+              scale: [0.5, 1.5, 0.6],
+            }}
+            transition={{ repeat: Infinity, duration: 2.0 + i * 0.25, ease: "easeOut", delay: p.delay }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.baseY,
+              width: p.size, height: p.size,
+              borderRadius: "50%",
+              background: i % 2 === 0 ? `rgba(220,38,38,0.80)` : `rgba(80,10,10,0.70)`,
+              filter: "blur(1.8px)",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ── Main badge circle — dark steel with crimson core ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.06, 1] } : {}}
+        transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #1c0505 0%, #080101 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.14)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.07)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px rgba(220,38,38,0.74)`,
+            `0 0 0 3.5px rgba(220,38,38,0.18)`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 34px 12px rgba(220,38,38,${canAfford && !owned ? "0.56" : "0.22"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner blood-red nebula */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.28, 0.65, 0.28], scale: [0.68, 1.12, 0.68] }}
+          transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 58%, rgba(220,38,38,0.74) 0%, rgba(153,27,27,0.38) 42%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 2.8, ease: "linear", repeatDelay: 3.0 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,100,100,0.24) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Steak icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.07, 1] }}
+          transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+        >
+          <RawMeatSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Wolf Pack Bond icon SVG ───────────────────────────────────────────────────
+function WolfPackBondSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <radialGradient id="wpb-moon-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="rgba(226,232,240,0.60)" />
+          <stop offset="100%" stopColor="rgba(148,163,184,0)" />
+        </radialGradient>
+        <linearGradient id="wpb-wolf" x1="6" y1="27" x2="16" y2="4" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#1e293b" />
+          <stop offset="55%"  stopColor="#334155" />
+          <stop offset="100%" stopColor="#64748b" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Crescent moon (top-right) ── */}
+      {/* Outer disc */}
+      <circle cx="21.5" cy="6" r="5.2" fill="#c8d4e8" />
+      {/* Inner cutout to form crescent */}
+      <circle cx="23.8" cy="4.8" r="4.4" fill="#080b14" />
+      {/* Subtle glow around crescent */}
+      <circle cx="21.5" cy="6" r="5.2" fill="none" stroke="rgba(200,212,232,0.38)" strokeWidth="0.8"/>
+
+      {/* ── Wolf silhouette — head thrown back, howling ── */}
+      {/* Body/haunches */}
+      <path d="M5 27 Q5 22 7.5 18.5 Q9 16 11.5 15 Q13 14.2 14.5 14.5 Q17 15 18 17.5 Q19 20 19 27Z"
+        fill="url(#wpb-wolf)" />
+      {/* Neck arching back */}
+      <path d="M11 15 Q11.5 11.5 12.5 9 Q13.5 6.5 14.5 5.5 Q15.5 4.5 16.5 5 Q17.5 5.5 17.5 7.5 Q17.5 9.5 18 13"
+        fill="url(#wpb-wolf)" />
+      {/* Head angled upward */}
+      <ellipse cx="15" cy="5.8" rx="3.2" ry="2.5" fill="#334155" transform="rotate(-30 15 5.8)" />
+      {/* Muzzle / open howl snout */}
+      <path d="M16.5 4.2 Q18.5 2.5 19.5 3.2 Q19.8 3.8 18.5 4.8 Q17.5 5.5 16 5Z"
+        fill="#475569" />
+      {/* Ears */}
+      <path d="M12.5 4.5 Q12.8 2.2 14.2 3 Q14.6 4 13.5 5Z" fill="#334155"/>
+      <path d="M15.5 3.5 Q17 1.5 18 2.5 Q17.8 3.5 16.5 4.5Z" fill="#334155"/>
+      {/* Eye glint */}
+      <circle cx="14" cy="5.5" r="0.75" fill="rgba(148,163,184,0.75)" />
+      {/* Front legs */}
+      <path d="M8 21 Q7.5 24 7.5 27" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+      <path d="M11.5 21 Q11.5 24 11.5 27" stroke="#1e293b" strokeWidth="2.0" strokeLinecap="round" fill="none"/>
+      {/* Tail sweeping up */}
+      <path d="M19 21 Q22 18 23 15 Q23.5 13 22 12.5"
+        stroke="#334155" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+// ── Wolf Pack Bond badge (wolf-pack-bond item only) ───────────────────────────
+function WolfPackBondBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  // Audio wave bars — simulate a sound-wave / howl visualiser
+  const waveBars = [
+    { x: 5,  h: 8,  delay: 0.00 },
+    { x: 9,  h: 14, delay: 0.14 },
+    { x: 13, h: 20, delay: 0.28 },
+    { x: 17, h: 26, delay: 0.42 },
+    { x: 21, h: 20, delay: 0.28 },
+    { x: 25, h: 14, delay: 0.14 },
+    { x: 29, h: 8,  delay: 0.00 },
+    { x: 33, h: 12, delay: 0.20 },
+    { x: 37, h: 6,  delay: 0.08 },
+  ];
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer moonlight silver-blue halo ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.50, 1], opacity: [0.54, 0.08, 0.54] }}
+        transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(96,165,250,0.65) 0%, rgba(148,163,184,0.28) 42%, transparent 68%)`,
+          filter: "blur(11px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Floating howl audio wave bars ── */}
+      <div aria-hidden style={{ position: "absolute", inset: -12, overflow: "visible", pointerEvents: "none" }}>
+        {waveBars.map((bar, i) => (
+          <motion.div
+            key={i}
+            animate={{
+              scaleY: [0.25, 1.0, 0.25],
+              opacity: [0.22, 0.70, 0.22],
+            }}
+            transition={{ repeat: Infinity, duration: 1.3, ease: "easeInOut", delay: bar.delay }}
+            style={{
+              position: "absolute",
+              left: bar.x,
+              top: "50%",
+              marginTop: -(bar.h / 2),
+              width: 2.2,
+              height: bar.h,
+              borderRadius: 2,
+              background: i % 2 === 0 ? `rgba(96,165,250,0.85)` : `rgba(226,232,240,0.72)`,
+              transformOrigin: "center",
+              boxShadow: `0 0 4px 1px rgba(96,165,250,0.50)`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ── Main badge circle — midnight chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #0b0f1e 0%, #030408 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.16)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.08)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px rgba(96,165,250,0.66)`,
+            `0 0 0 3.5px rgba(96,165,250,0.14)`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 30px 10px rgba(96,165,250,${canAfford && !owned ? "0.42" : "0.18"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner moonlight nebula */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.24, 0.56, 0.24], scale: [0.72, 1.08, 0.72] }}
+          transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 45%, rgba(96,165,250,0.68) 0%, rgba(148,163,184,0.28) 42%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 4.2, ease: "linear", repeatDelay: 4.0 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(200,220,255,0.22) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Wolf howl icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.07, 1] }}
+          transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+        >
+          <WolfPackBondSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Etched Glass Shop Card ────────────────────────────────────────────────────
 function ShopCard({
   item,
@@ -1228,6 +1563,10 @@ function ShopCard({
           <StreakOrnamentBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "root-deep" ? (
           <DeepRootsBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "wolf-raw-meat" ? (
+          <RawMeatBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "wolf-pack-bond" ? (
+          <WolfPackBondBadge canAfford={canAfford} owned={owned} />
         ) : (
           <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
             {canAfford && !owned && (
