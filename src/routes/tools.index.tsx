@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { motion, type Variants } from "framer-motion";
-import { Brain, Snowflake, GitBranch, Plus, Lock } from "lucide-react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
@@ -349,12 +349,117 @@ const PRO_GAMES: GameEntry[] = [
   { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon />, ambient: "none"    },
 ];
 
+// ── Arcade badge helpers ──────────────────────────────────────────────────────
+
+function getGlowFilter(glow: string): string {
+  const blues   = ["#6BAED6", "#2563EB", "#7B2FBE", "#4F46E5", "#00BCD4"];
+  const greens  = ["#6BAA75", "#10B981"];
+  if (blues.includes(glow))  return "drop-shadow(0 0 8px rgba(56,189,248,0.60))";
+  if (greens.includes(glow)) return "drop-shadow(0 0 8px rgba(74,222,128,0.60))";
+  return "drop-shadow(0 0 8px rgba(222,188,122,0.60))";
+}
+
+function ArcadeBadge({
+  to, glow, label, icon, ambient, locked, onLockedTap,
+}: {
+  to: string; glow: string; label: string; icon: React.ReactNode;
+  ambient: AmbientType; locked?: boolean; onLockedTap?: () => void;
+}) {
+  const glowFilter = getGlowFilter(glow);
+
+  const circle = (
+    <div style={{ position: "relative" }}>
+      {/* Ambient halo */}
+      <div style={{
+        position: "absolute", inset: -8, borderRadius: "50%",
+        background: `radial-gradient(circle, ${glow}32 0%, transparent 72%)`,
+        filter: "blur(7px)", pointerEvents: "none",
+      }} />
+      {/* Breathing badge circle */}
+      <motion.div
+        animate={{ scale: [1, 1.06, 1] }}
+        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        style={{
+          position: "relative", width: 62, height: 62, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          background: locked ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.05)",
+          border: `1.5px solid ${locked ? "rgba(255,255,255,0.10)" : glow + "48"}`,
+          boxShadow: locked ? "none" : `0 0 16px 4px ${glow}22`,
+          filter: locked ? "none" : glowFilter,
+          opacity: locked ? 0.45 : 1,
+        }}
+      >
+        {/* Inner ambient loop — only when unlocked */}
+        {!locked ? (
+          <motion.div
+            animate={
+              ambient === "rotate"  ? { rotate: 360 } :
+              ambient === "breathe" ? { scale: [1, 1.08, 1] } :
+              ambient === "float"   ? { y: [0, -2, 0] } :
+              ambient === "pulse"   ? { opacity: [0.80, 1, 0.80] } :
+              {}
+            }
+            transition={
+              ambient === "rotate"
+                ? { repeat: Infinity, duration: 8, ease: "linear" }
+                : { repeat: Infinity, duration: 3, ease: "easeInOut" }
+            }
+          >
+            {icon}
+          </motion.div>
+        ) : icon}
+
+        {/* Lock overlay */}
+        {locked && (
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: "rgba(0,0,0,0.50)",
+            display: "grid", placeItems: "center",
+          }}>
+            <Lock style={{ height: 14, width: 14, color: "#C9A84C" }} />
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+
+  if (locked) {
+    return (
+      <button
+        onClick={onLockedTap}
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer" }}
+      >
+        {circle}
+        <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.28)", textAlign: "center", lineHeight: 1.3, maxWidth: 72 }}>
+          {label}
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} style={{ textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <motion.div
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        transition={{ duration: 0.16 }}
+      >
+        {circle}
+      </motion.div>
+      <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.75)", textAlign: "center", lineHeight: 1.3, maxWidth: 72 }}>
+        {label}
+      </span>
+    </Link>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 function Tools() {
   const { t } = useTranslation();
   const [state] = useAppState();
   const [reframeIdx, setReframeIdx] = useState<number | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
   const [trigger, setTrigger] = useState("");
   const [action, setAction] = useState("");
   const [plans, setPlans] = useState([
@@ -457,29 +562,29 @@ function Tools() {
       {/* ── Tool cards grid ─────────────────────────────────────────────── */}
       <section className="px-4 mt-10 pb-8" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-        {/* ── Cyber-Arcade Console ────────────────────────────────────── */}
-        <div style={{ ...CARD, padding: "22px 18px 20px", overflow: "hidden" }}>
-          <style>{`
-            .arcade-scroll::-webkit-scrollbar { display: none; }
-            .arcade-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-          `}</style>
+        {/* ── Cyber-Arcade Accordion ───────────────────────────────────── */}
+        <div style={{ ...CARD, overflow: "hidden" }}>
 
-          {/* Section header — perfectly centered vertically */}
-          <div className="flex items-center gap-4" style={{ marginBottom: 20 }}>
+          {/* ── Accordion header bar — centered symmetrical row ── */}
+          <button
+            onClick={() => setGamesOpen((v) => !v)}
+            className="flex items-center gap-3 w-full cursor-pointer"
+            style={{ padding: "18px 20px" }}
+          >
             {/* Animated controller badge */}
             <div style={{
-              width: 46, height: 46, display: "grid", placeItems: "center",
-              borderRadius: 16, flexShrink: 0,
+              width: 44, height: 44, display: "grid", placeItems: "center",
+              borderRadius: 14, flexShrink: 0,
               background: "rgba(139,92,246,0.12)",
               border: "1px solid rgba(139,92,246,0.35)",
-              boxShadow: "0 0 20px 4px rgba(139,92,246,0.22)",
+              boxShadow: "0 0 18px 3px rgba(139,92,246,0.22)",
             }}>
               <motion.div
-                animate={{ rotate: [-5, 5, -5] }}
+                animate={{ rotate: [-4, 4, -4] }}
                 transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
               >
-                <svg width="22" height="22" viewBox="0 0 16 16" fill="none" style={{ color: "#a78bfa" }}>
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style={{ color: "#a78bfa" }}>
                   <path d="M2 7 Q2 5 4 5 L5.5 5 Q6 4 8 4 Q10 4 10.5 5 L12 5 Q14 5 14 7 L13.5 11 Q13 13 11.5 13 L10.5 13 Q9.5 12 8 12 Q6.5 12 5.5 13 L4.5 13 Q3 13 2.5 11 Z" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
                   <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
                   <line x1="5.5" y1="7" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -490,167 +595,122 @@ function Tools() {
                 </svg>
               </motion.div>
             </div>
-            <div className="flex flex-col justify-center">
-              <p style={{ fontWeight: 700, fontSize: 15, color: "#ffffff", lineHeight: 1.2 }}>{t("tools.gamesTitle")}</p>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 3 }}>{t("tools.gamesDesc")}</p>
+
+            {/* Centred text block */}
+            <div className="flex-1 text-center">
+              <p style={{ fontWeight: 700, fontSize: 14, color: "#ffffff", lineHeight: 1.2 }}>{t("tools.gamesTitle")}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 2 }}>{t("tools.gamesDesc")}</p>
             </div>
-          </div>
 
-          {/* Game cartridges — horizontal scroll */}
-          <div
-            className="arcade-scroll"
-            style={{ display: "flex", overflowX: "auto", gap: 10, paddingBottom: 2 }}
-          >
-            {/* Free games — enhanced neon badges with variant propagation */}
-            {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient, idleFilter, hoverFilter, hoverRotate }) => (
-              <Link key={to} to={to} style={{ textDecoration: "none", flexShrink: 0 }}>
-                <motion.div
-                  variants={{
-                    rest: {
-                      scale: 1,
-                      boxShadow: "none",
-                    },
-                    hover: {
-                      scale: 1.04,
-                      boxShadow: `0 0 28px 8px ${glow}35, 0 0 60px 18px ${glow}14`,
-                      transition: { duration: 0.18, ease: "easeOut" },
-                    },
-                  }}
-                  initial="rest"
-                  whileHover="hover"
-                  whileTap={{ scale: 0.96 }}
-                  style={{
-                    width: 112, borderRadius: 24, padding: "20px 12px 16px",
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-                    background: "rgba(255,255,255,0.04)",
-                    backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                    border: `1px solid ${glow}28`,
-                    borderTop: `1px solid ${glow}45`,
-                  }}
-                >
-                  {/* Icon stack: outer = filter+tilt (propagated), inner = breathe loop */}
-                  <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {/* Ambient halo behind icon */}
-                    <div style={{
-                      position: "absolute", inset: -10, borderRadius: "50%",
-                      background: `radial-gradient(circle, ${glow}40 0%, transparent 72%)`,
-                      filter: "blur(8px)", pointerEvents: "none",
-                    }} />
-                    {/* Outer motion: filter glow + tilt — driven by card's "hover" variant */}
-                    <motion.div
-                      variants={{
-                        rest:  { filter: idleFilter ?? "none", rotate: 0 },
-                        hover: {
-                          filter: hoverFilter ?? idleFilter ?? "none",
-                          rotate: hoverRotate ?? 0,
-                          transition: { duration: 0.22, ease: "easeOut" },
-                        },
-                      }}
-                      style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}
-                    >
-                      {/* Inner motion: continuous breathe (all 3 games) */}
-                      <motion.div
-                        animate={
-                          ambient === "rotate"
-                            ? { rotate: 360 }
-                            : { scale: [1, 1.08, 1], opacity: [0.88, 1, 0.88] }
-                        }
-                        transition={
-                          ambient === "rotate"
-                            ? { repeat: Infinity, duration: 8, ease: "linear" }
-                            : { repeat: Infinity, duration: 3, ease: "easeInOut" }
-                        }
-                      >
-                        {icon}
-                      </motion.div>
-                    </motion.div>
-                  </div>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.82)", textAlign: "center", lineHeight: 1.3 }}>
-                    {t(labelKey)}
-                  </p>
-                </motion.div>
-              </Link>
-            ))}
+            {/* Rotating chevron */}
+            <motion.div
+              animate={{ rotate: gamesOpen ? 180 : 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              style={{ flexShrink: 0, display: "flex" }}
+            >
+              <ChevronDown style={{ height: 16, width: 16, color: "rgba(255,255,255,0.35)" }} />
+            </motion.div>
+          </button>
 
-            {/* PRO cartridges or paywall nudge */}
-            {state.isPremium === true ? (
-              PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
-                <Link key={to} to={to} style={{ textDecoration: "none", flexShrink: 0 }}>
-                  <motion.div
-                    whileHover={{
-                      scale: 1.04,
-                      borderColor: `${glow}70`,
-                      boxShadow: `0 0 28px 8px ${glow}35, 0 0 60px 18px ${glow}14`,
-                    }}
-                    whileTap={{ scale: 0.96 }}
-                    transition={{ duration: 0.18, ease: "easeOut" }}
-                    style={{
-                      width: 112, borderRadius: 24, padding: "20px 12px 16px",
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-                      background: "rgba(255,255,255,0.04)",
-                      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                      border: `1px solid ${glow}28`, borderTop: `1px solid ${glow}45`,
-                    }}
-                  >
-                    <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ position: "absolute", inset: -10, borderRadius: "50%", background: `radial-gradient(circle, ${glow}38 0%, transparent 72%)`, filter: "blur(8px)", pointerEvents: "none" }} />
-                      <motion.div
-                        animate={
-                          ambient === "pulse"   ? { scale: [1, 1.08, 1], opacity: [0.88, 1, 0.88] } :
-                          ambient === "rotate"  ? { rotate: 360 } :
-                          ambient === "breathe" ? { scale: [1, 1.06, 1] } :
-                          ambient === "float"   ? { y: [0, -3, 0] } :
-                          { scale: [1, 1.05, 1] }
-                        }
-                        transition={
-                          ambient === "rotate"
-                            ? { repeat: Infinity, duration: 8, ease: "linear" }
-                            : { repeat: Infinity, duration: 3, ease: "easeInOut" }
-                        }
-                      >
-                        {icon}
-                      </motion.div>
-                    </div>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.82)", textAlign: "center", lineHeight: 1.3 }}>
-                      {t(labelKey)}
-                    </p>
-                  </motion.div>
-                </Link>
-              ))
-            ) : (
-              /* Paywall teaser card */
-              <motion.button
-                onClick={() => triggerPaywall()}
-                whileHover={{ scale: 1.04, borderColor: "rgba(201,168,76,0.55)" }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ duration: 0.18 }}
-                style={{
-                  flexShrink: 0, width: 112, borderRadius: 24,
-                  padding: "20px 12px 16px",
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-                  background: "rgba(201,168,76,0.05)",
-                  backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(201,168,76,0.22)",
-                  borderTop: "1px solid rgba(201,168,76,0.38)",
-                  cursor: "pointer",
-                }}
+          {/* ── Expandable content ── */}
+          <AnimatePresence initial={false}>
+            {gamesOpen && (
+              <motion.div
+                key="arcade-content"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                style={{ overflow: "hidden" }}
               >
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center", maxWidth: 84 }}>
-                  {PRO_GAMES.slice(0, 6).map(({ labelKey, glow }) => (
-                    <span key={labelKey} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 7, fontWeight: 700, width: 18, height: 18, background: `${glow}20`, border: `1px solid ${glow}55`, color: glow }}>
-                      {t(labelKey)[0]}
-                    </span>
-                  ))}
+                <div style={{
+                  padding: "4px 20px 22px",
+                  borderTop: "1px solid rgba(255,255,255,0.07)",
+                }}>
+
+                  {/* Free game badges — 3-column grid */}
+                  <div className="grid grid-cols-3" style={{ gap: "22px 8px", paddingTop: 20 }}>
+                    {FREE_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                      <ArcadeBadge
+                        key={to}
+                        to={to}
+                        glow={glow}
+                        label={t(labelKey)}
+                        icon={icon}
+                        ambient={ambient}
+                      />
+                    ))}
+                  </div>
+
+                  {/* PRO section */}
+                  {state.isPremium === true ? (
+                    <>
+                      {/* Gold separator */}
+                      <div style={{ margin: "20px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.28) 20%, rgba(201,168,76,0.28) 80%, transparent)" }} />
+                      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.70, textAlign: "center", marginBottom: 16 }}>
+                        Pro Games
+                      </p>
+                      <div className="grid grid-cols-3" style={{ gap: "22px 8px" }}>
+                        {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                          <ArcadeBadge
+                            key={to}
+                            to={to}
+                            glow={glow}
+                            label={t(labelKey)}
+                            icon={icon}
+                            ambient={ambient}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    /* Locked PRO row */
+                    <motion.button
+                      onClick={() => triggerPaywall()}
+                      whileHover={{ borderColor: "rgba(201,168,76,0.40)", scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.18 }}
+                      style={{
+                        width: "100%",
+                        marginTop: 16,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "14px 18px",
+                        borderRadius: 18,
+                        background: "rgba(201,168,76,0.05)",
+                        border: "1px solid rgba(201,168,76,0.18)",
+                        borderTop: "1px solid rgba(201,168,76,0.28)",
+                        cursor: "pointer",
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
+                      }}
+                    >
+                      {/* Lock badge */}
+                      <div style={{
+                        width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
+                        display: "grid", placeItems: "center",
+                        background: "rgba(201,168,76,0.08)",
+                        border: "1px solid rgba(201,168,76,0.28)",
+                        boxShadow: "0 0 14px 2px rgba(201,168,76,0.14)",
+                      }}>
+                        <Lock style={{ height: 16, width: 16, color: "#C9A84C", filter: "drop-shadow(0 0 5px rgba(201,168,76,0.55))" }} />
+                      </div>
+                      <div style={{ textAlign: "left", flex: 1 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 2 }}>
+                          Pro Games (Locked)
+                        </p>
+                        <p style={{ fontSize: 11, color: "#debc7a", opacity: 0.72, lineHeight: 1.4 }}>
+                          Subscribe to unlock all premium games.
+                        </p>
+                      </div>
+                      <ChevronDown style={{ height: 14, width: 14, color: "rgba(201,168,76,0.55)", transform: "rotate(-90deg)", flexShrink: 0 }} />
+                    </motion.button>
+                  )}
                 </div>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.38)", background: "rgba(201,168,76,0.08)", borderRadius: 999, padding: "2px 8px" }}>
-                  <Lock style={{ height: 9, width: 9 }} /> +{PRO_GAMES.length} PRO
-                </span>
-                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.32)", lineHeight: 1.4, textAlign: "center" }}>
-                  {t("tools.moreGames")}
-                </p>
-              </motion.button>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
 
         {/* ── Recovery Coach ──────────────────────────────────────────── */}
