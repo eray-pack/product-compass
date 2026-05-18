@@ -661,6 +661,531 @@ function MindBranchBadge({ canAfford, owned }: { canAfford: boolean; owned: bool
   );
 }
 
+// ── Body Branch icon SVG ─────────────────────────────────────────────────────
+function BodyBranchSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <linearGradient id="bb-arm" x1="5" y1="26" x2="18" y2="4" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#b91c1c" />
+          <stop offset="45%"  stopColor="#ef4444" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+        <linearGradient id="bb-branch" x1="14" y1="10" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#fde68a" />
+        </linearGradient>
+        <linearGradient id="bb-shine" x1="8" y1="18" x2="12" y2="10" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.28)" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Arm silhouette — flex/curl pose ── */}
+      {/* Lower forearm from bottom-left */}
+      <path d="M5 26 Q7 22 9 19"
+        stroke="url(#bb-arm)" strokeWidth="4.0" strokeLinecap="round" fill="none"/>
+      {/* Bicep — thicker stroke = muscle mass */}
+      <path d="M9 19 Q11 15 13 12"
+        stroke="url(#bb-arm)" strokeWidth="5.0" strokeLinecap="round" fill="none"/>
+      {/* Upper arm narrowing toward wrist */}
+      <path d="M13 12 Q15 10 17 8"
+        stroke="url(#bb-arm)" strokeWidth="3.8" strokeLinecap="round" fill="none"/>
+      {/* Specular shine on bicep */}
+      <path d="M10 17 Q11.5 14 13 12"
+        stroke="url(#bb-shine)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+
+      {/* ── Branch growing from fist ── */}
+      <path d="M17 8 L17 4" stroke="url(#bb-branch)" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M17 6.5 Q14 4.5 13 2.5" stroke="url(#bb-branch)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+      <path d="M17 5.5 Q20 3.5 21 2"   stroke="url(#bb-branch)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+
+      {/* ── Neural-style tip nodes ── */}
+      <circle cx="13" cy="2.5" r="2.0" fill="#fde68a" />
+      <circle cx="21" cy="2"   r="2.0" fill="#f59e0b" />
+      <circle cx="17" cy="4"   r="1.5" fill="#fde68a" opacity="0.90"/>
+      <circle cx="12.4" cy="2.0" r="0.75" fill="white" opacity="0.50"/>
+      <circle cx="20.5" cy="1.5" r="0.75" fill="white" opacity="0.50"/>
+    </svg>
+  );
+}
+
+// ── Body Branch premium badge (branch-body item only) ────────────────────────
+function BodyBranchBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  const primary = "#ef4444";
+  const accent  = "#f59e0b";
+
+  // 12 particles — faster, more energetic feel
+  const particles = Array.from({ length: 12 }, (_, i) => {
+    const a = (i * 30 * Math.PI) / 180;
+    return {
+      x:      36 + 30 * Math.cos(a) - 1.5,
+      y:      36 + 30 * Math.sin(a) - 1.5,
+      big:    i % 3 === 0,
+      bright: i % 2 === 0,
+    };
+  });
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer red-amber power burst halo ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.52, 1], opacity: [0.58, 0.10, 0.58] }}
+        transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(239,68,68,0.72) 0%, rgba(245,158,11,0.36) 42%, transparent 68%)`,
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Rotating particle swirl ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 10, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.22, 1, 0.22], scale: [0.5, 1.4, 0.5] }}
+            transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut", delay: i * 0.17 }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2,
+              height: p.big ? 3.5 : 2,
+              borderRadius: "50%",
+              background: p.bright ? accent : primary,
+              boxShadow: `0 0 5px 1.5px rgba(239,68,68,0.82)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — dark red chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.06, 1] } : {}}
+        transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #1a0808 0%, #0a0404 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.16)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.08)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px ${primary}88`,
+            `0 0 0 3.5px ${primary}18`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 30px 8px rgba(239,68,68,${canAfford && !owned ? "0.46" : "0.22"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner nebula — red core fading to amber */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.32, 0.68, 0.32], scale: [0.68, 1.10, 0.68] }}
+          transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 58%, rgba(239,68,68,0.78) 0%, rgba(245,158,11,0.32) 42%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "linear", repeatDelay: 2.2 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,255,255,0.24) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Arm icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.09, 1] }}
+          transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
+        >
+          <BodyBranchSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Streak Ornament icon SVG ──────────────────────────────────────────────────
+function StreakOrnamentSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <linearGradient id="so-shield" x1="14" y1="2" x2="14" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#93c5fd" />
+          <stop offset="40%"  stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id="so-gem" x1="11" y1="10" x2="17" y2="17" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#6ee7b7" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+        <linearGradient id="so-shine" x1="10" y1="3" x2="16" y2="11" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="rgba(255,255,255,0.45)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Shield body ── */}
+      <path d="M14 2 L23 5.5 L23 13.5 Q23 21 14 26 Q5 21 5 13.5 L5 5.5 Z"
+        fill="url(#so-shield)" opacity="0.88"/>
+      <path d="M14 2 L23 5.5 L23 13.5 Q23 21 14 26 Q5 21 5 13.5 L5 5.5 Z"
+        fill="none" stroke="rgba(147,197,253,0.65)" strokeWidth="1.0"/>
+      {/* Inner inset */}
+      <path d="M14 5 L20.5 7.8 L20.5 13.5 Q20.5 19.5 14 23.5 Q7.5 19.5 7.5 13.5 L7.5 7.8 Z"
+        fill="none" stroke="rgba(147,197,253,0.28)" strokeWidth="0.75"/>
+
+      {/* ── Filigree ── */}
+      <line x1="14" y1="5.5" x2="14" y2="10"      stroke="rgba(147,197,253,0.55)" strokeWidth="0.75"/>
+      <line x1="9.5" y1="12.5" x2="18.5" y2="12.5" stroke="rgba(147,197,253,0.38)" strokeWidth="0.70"/>
+      <path d="M10 8.5 Q7.5 11 9 13.5"   stroke="rgba(147,197,253,0.48)" strokeWidth="0.70" strokeLinecap="round" fill="none"/>
+      <path d="M18 8.5 Q20.5 11 19 13.5" stroke="rgba(147,197,253,0.48)" strokeWidth="0.70" strokeLinecap="round" fill="none"/>
+      <path d="M10.5 18 Q14 20.5 17.5 18" stroke="rgba(147,197,253,0.40)" strokeWidth="0.70" strokeLinecap="round" fill="none"/>
+      <circle cx="9.5"  cy="8.5" r="0.90" fill="rgba(147,197,253,0.55)"/>
+      <circle cx="18.5" cy="8.5" r="0.90" fill="rgba(147,197,253,0.55)"/>
+
+      {/* ── Central emerald gem ── */}
+      <polygon points="14,10 17,13.5 14,17 11,13.5" fill="url(#so-gem)"/>
+      <polygon points="14,10 17,13.5 14,17 11,13.5" fill="none" stroke="rgba(110,231,183,0.65)" strokeWidth="0.75"/>
+      <polygon points="14,10 17,13.5 14,13.5" fill="rgba(255,255,255,0.22)"/>
+      <line x1="14" y1="10" x2="14" y2="17"     stroke="rgba(110,231,183,0.38)" strokeWidth="0.55"/>
+      <line x1="11" y1="13.5" x2="17" y2="13.5" stroke="rgba(110,231,183,0.38)" strokeWidth="0.55"/>
+
+      {/* ── Shine facet ── */}
+      <path d="M14 2.5 L21.5 5.5 L21.5 10 Q17 6.5 14 5.5 Q11 5 7 8.5 L7 5.5 Z"
+        fill="url(#so-shine)" opacity="0.45"/>
+
+      {/* ── Crown sparkle + corner accents ── */}
+      <circle cx="14" cy="2"  r="1.5"  fill="white" opacity="0.88"/>
+      <circle cx="5"  cy="5.5" r="0.80" fill="#93c5fd" opacity="0.72"/>
+      <circle cx="23" cy="5.5" r="0.80" fill="#93c5fd" opacity="0.72"/>
+    </svg>
+  );
+}
+
+// ── Streak Ornament premium badge (ornament-streak item only) ─────────────────
+function StreakOrnamentBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  const primary = "#3b82f6";
+  const accent  = "#10b981";
+
+  // Two-tier hexagonal + diamond pattern — geometric shield feel
+  const particles = [
+    ...Array.from({ length: 6 }, (_, i) => {
+      const a = (i * 60 * Math.PI) / 180;
+      return { x: 36 + 28 * Math.cos(a) - 1.5, y: 36 + 28 * Math.sin(a) - 1.5, big: false, bright: i % 2 === 0 };
+    }),
+    ...Array.from({ length: 4 }, (_, i) => {
+      const a = ((i * 90 + 45) * Math.PI) / 180;
+      return { x: 36 + 20 * Math.cos(a) - 1.5, y: 36 + 20 * Math.sin(a) - 1.5, big: true,  bright: i % 2 !== 0 };
+    }),
+  ];
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer sapphire-emerald protective aura ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.44, 1], opacity: [0.46, 0.08, 0.46] }}
+        transition={{ duration: 4.2, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(59,130,246,0.68) 0%, rgba(16,185,129,0.30) 45%, transparent 68%)`,
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Counter-rotating geometric particles ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: -360 }}
+        transition={{ duration: 18, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.20, 0.92, 0.20], scale: [0.6, 1.2, 0.6] }}
+            transition={{ repeat: Infinity, duration: 3.0, ease: "easeInOut", delay: i * 0.30 }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2,
+              height: p.big ? 3.5 : 2,
+              borderRadius: p.big ? "2px" : "50%",
+              background: p.bright ? accent : primary,
+              boxShadow: `0 0 5px 1.5px rgba(59,130,246,0.82)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — dark blue chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 4.2, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #0a0f1e 0%, #04070f 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.16)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.08)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px ${primary}80`,
+            `0 0 0 3.5px ${primary}16`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 28px 8px rgba(59,130,246,${canAfford && !owned ? "0.44" : "0.18"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner nebula — sapphire → emerald */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.22, 0.52, 0.22], scale: [0.72, 1.06, 0.72] }}
+          transition={{ duration: 4.2, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 55%, rgba(59,130,246,0.70) 0%, rgba(16,185,129,0.28) 45%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep — slower, more majestic */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 3.8, ease: "linear", repeatDelay: 4.2 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Shield icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.06, 1] }}
+          transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+        >
+          <StreakOrnamentSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Deep Roots icon SVG ──────────────────────────────────────────────────────
+function DeepRootsSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <linearGradient id="dr-trunk" x1="14" y1="3" x2="14" y2="13" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#f0d47a" />
+          <stop offset="55%"  stopColor="#c9a84c" />
+          <stop offset="100%" stopColor="#a0522d" />
+        </linearGradient>
+        <linearGradient id="dr-root-l" x1="14" y1="13" x2="3" y2="25" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#c9a84c" />
+          <stop offset="100%" stopColor="#78350f" />
+        </linearGradient>
+        <linearGradient id="dr-root-r" x1="14" y1="13" x2="25" y2="25" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#d97706" />
+          <stop offset="100%" stopColor="#78350f" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Trunk stub — illuminated surface entry ── */}
+      <path d="M14 3 L14 13" stroke="url(#dr-trunk)" strokeWidth="2.2" strokeLinecap="round"/>
+
+      {/* ── Primary left root ── */}
+      <path d="M14 13 Q9 16 6 19" stroke="url(#dr-root-l)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      {/* ── Primary right root ── */}
+      <path d="M14 13 Q19 16 22 19" stroke="url(#dr-root-r)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      {/* ── Central downward root ── */}
+      <path d="M14 13 L14 21" stroke="url(#dr-trunk)" strokeWidth="1.5" strokeLinecap="round"/>
+
+      {/* ── Secondary left roots ── */}
+      <path d="M6 19 Q3.5 21 2.5 24"  stroke="#a0522d" strokeWidth="1.15" strokeLinecap="round" fill="none" opacity="0.90"/>
+      <path d="M6 19 Q7 21.5 8 24.5"  stroke="#a0522d" strokeWidth="1.15" strokeLinecap="round" fill="none" opacity="0.90"/>
+      {/* ── Secondary right roots ── */}
+      <path d="M22 19 Q24.5 21 25.5 24" stroke="#d97706" strokeWidth="1.15" strokeLinecap="round" fill="none" opacity="0.90"/>
+      <path d="M22 19 Q21 21.5 20 24.5" stroke="#d97706" strokeWidth="1.15" strokeLinecap="round" fill="none" opacity="0.90"/>
+      {/* ── Center secondary ── */}
+      <path d="M14 21 Q12 23 11 25.5"  stroke="#a0522d" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.85"/>
+      <path d="M14 21 Q16 23 17 25.5"  stroke="#d97706" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.85"/>
+
+      {/* ── Root tip glow nodes ── */}
+      <circle cx="2.5"  cy="24"   r="1.9" fill="#d97706" />
+      <circle cx="8"    cy="24.5" r="1.9" fill="#c9a84c" />
+      <circle cx="25.5" cy="24"   r="1.9" fill="#d97706" />
+      <circle cx="20"   cy="24.5" r="1.9" fill="#c9a84c" />
+      <circle cx="11"   cy="25.5" r="1.5" fill="#a0522d" opacity="0.90"/>
+      <circle cx="17"   cy="25.5" r="1.5" fill="#d97706" opacity="0.90"/>
+      {/* Junction nodes */}
+      <circle cx="6"    cy="19"   r="1.6" fill="#c9a84c" opacity="0.85"/>
+      <circle cx="22"   cy="19"   r="1.6" fill="#d97706" opacity="0.85"/>
+      <circle cx="14"   cy="21"   r="1.4" fill="#c9a84c" opacity="0.85"/>
+
+      {/* ── Surface stump — bright inner core ── */}
+      <circle cx="14" cy="3" r="2.6" fill="#c9a84c" opacity="0.90"/>
+      <circle cx="14" cy="3" r="1.5" fill="#f0d47a"/>
+      <circle cx="13.3" cy="2.4" r="0.65" fill="white" opacity="0.55"/>
+
+      {/* ── Inner luminous glow along trunk ── */}
+      <path d="M14 3 L14 13" stroke="rgba(240,212,122,0.60)" strokeWidth="0.85" strokeLinecap="round"/>
+
+      {/* ── Specular on root tips ── */}
+      <circle cx="2.1"  cy="23.5" r="0.70" fill="white" opacity="0.42"/>
+      <circle cx="7.5"  cy="24.0" r="0.70" fill="white" opacity="0.42"/>
+      <circle cx="25.1" cy="23.5" r="0.70" fill="white" opacity="0.42"/>
+      <circle cx="19.5" cy="24.0" r="0.70" fill="white" opacity="0.42"/>
+    </svg>
+  );
+}
+
+// ── Deep Roots premium badge (root-deep item only) ────────────────────────────
+function DeepRootsBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  const primary = "#a0522d";
+  const accent  = "#c9a84c";
+
+  // Tendril-spread pattern — inner + outer ring at offset angles
+  const particles = [
+    ...Array.from({ length: 8 }, (_, i) => {
+      const a = ((i * 45 + 10) * Math.PI) / 180;
+      return { x: 36 + 30 * Math.cos(a) - 1.5, y: 36 + 30 * Math.sin(a) - 1.5, big: i % 2 === 0, bright: i % 3 === 0 };
+    }),
+    ...Array.from({ length: 4 }, (_, i) => {
+      const a = ((i * 90 + 22) * Math.PI) / 180;
+      return { x: 36 + 20 * Math.cos(a) - 1.5, y: 36 + 20 * Math.sin(a) - 1.5, big: false, bright: true };
+    }),
+  ];
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer bronze-gold deep-earth halo ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.40, 1], opacity: [0.62, 0.12, 0.62] }}
+        transition={{ duration: 4.8, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(160,82,45,0.72) 0%, rgba(201,168,76,0.34) 42%, transparent 68%)`,
+          filter: "blur(11px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Slowly rotating earth tendril particles ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.25, 0.88, 0.25], scale: [0.5, 1.28, 0.5] }}
+            transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: i * 0.28 }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2,
+              height: p.big ? 3.5 : 2,
+              borderRadius: "50%",
+              background: p.bright ? accent : primary,
+              boxShadow: `0 0 5px 1.5px rgba(201,168,76,0.76)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — earth dark chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 4.8, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #1a1208 0%, #080604 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.14)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.07)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px rgba(160,82,45,0.70)`,
+            `0 0 0 3.5px rgba(160,82,45,0.16)`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 32px 10px rgba(160,82,45,${canAfford && !owned ? "0.44" : "0.20"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner nebula — gold core → bronze → dark */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.32, 0.72, 0.32], scale: [0.68, 1.12, 0.68] }}
+          transition={{ duration: 4.8, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 62%, rgba(201,168,76,0.72) 0%, rgba(160,82,45,0.36) 40%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 4.5, ease: "linear", repeatDelay: 4.8 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Roots icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.08, 1], opacity: [0.88, 1, 0.88] }}
+          transition={{ duration: 4.8, ease: "easeInOut", repeat: Infinity }}
+        >
+          <DeepRootsSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Etched Glass Shop Card ────────────────────────────────────────────────────
 function ShopCard({
   item,
@@ -697,6 +1222,12 @@ function ShopCard({
           <GoldenLeafBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "branch-mind" ? (
           <MindBranchBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "branch-body" ? (
+          <BodyBranchBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "ornament-streak" ? (
+          <StreakOrnamentBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "root-deep" ? (
+          <DeepRootsBadge canAfford={canAfford} owned={owned} />
         ) : (
           <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
             {canAfford && !owned && (
