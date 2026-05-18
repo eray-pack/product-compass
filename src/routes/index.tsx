@@ -560,9 +560,9 @@ function HabitSwitcher({
   return pills;
 }
 
-// ─── Spark badge — premium overhaul ──────────────────────────────────────────
-// Pre-generated particle positions (polar → cartesian, avoid Math.random in render)
-const SPARK_PARTICLES = [
+// ─── Premium badge symbol — unique per rank ────────────────────────────────────
+// Shared particle positions (reused across all badges, colored per rank)
+const BADGE_PARTICLES = [
   { x:  88,  y:   0,  size: 3, dur: 2.8, delay: 0.0, o: 0.80 },
   { x:  62,  y:  36,  size: 2, dur: 3.2, delay: 0.4, o: 0.60 },
   { x:  36,  y:  62,  size: 3, dur: 2.5, delay: 0.8, o: 0.70 },
@@ -577,98 +577,125 @@ const SPARK_PARTICLES = [
   { x:  73,  y: -42,  size: 2, dur: 3.4, delay: 0.1, o: 0.55 },
 ];
 
-function SparkBadgeSymbol() {
+// Per-rank visual config — controls how the badge looks and moves
+const RANK_FX: Record<string, {
+  glowScale: [number, number, number];
+  glowDur: number;
+  ringDur: number;
+  ringRotate: number;
+  ringDouble: boolean;
+  pulseScale: [number, number, number, number, number];
+  pulseDur: number;
+  particleCount: number;
+  particleSpread: number;
+}> = {
+  Spark:    { glowScale: [1, 1.30, 1], glowDur: 3.8, ringDur: 6.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.04, 0.98, 1.02, 1], pulseDur: 1.4, particleCount: 12, particleSpread: 1.18 },
+  Riser:    { glowScale: [1, 1.20, 1], glowDur: 2.8, ringDur: 4.5,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.06, 1.00, 1.03, 1], pulseDur: 1.1, particleCount: 8,  particleSpread: 1.10 },
+  Awaken:   { glowScale: [1, 1.40, 1], glowDur: 4.2, ringDur: 8.0,  ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.08, 0.96, 1.04, 1], pulseDur: 1.8, particleCount: 10, particleSpread: 1.22 },
+  Clarity:  { glowScale: [1, 1.25, 1], glowDur: 3.5, ringDur: 5.0,  ringRotate: 180,  ringDouble: false, pulseScale: [1, 1.03, 0.99, 1.01, 1], pulseDur: 2.2, particleCount: 8,  particleSpread: 1.08 },
+  Warrior:  { glowScale: [1, 1.35, 1], glowDur: 2.4, ringDur: 3.5,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.07, 0.95, 1.05, 1], pulseDur: 0.9, particleCount: 12, particleSpread: 1.25 },
+  Ironmind: { glowScale: [1, 1.15, 1], glowDur: 5.0, ringDur: 9.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.02, 0.99, 1.01, 1], pulseDur: 3.0, particleCount: 6,  particleSpread: 1.05 },
+  Forge:    { glowScale: [1, 1.45, 1], glowDur: 2.0, ringDur: 3.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.09, 0.94, 1.06, 1], pulseDur: 0.8, particleCount: 12, particleSpread: 1.30 },
+  Titan:    { glowScale: [1, 1.20, 1], glowDur: 6.0, ringDur: 12.0, ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.02, 0.98, 1.01, 1], pulseDur: 4.0, particleCount: 8,  particleSpread: 1.12 },
+  Gorilla:  { glowScale: [1, 1.38, 1], glowDur: 3.0, ringDur: 4.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.08, 0.94, 1.06, 1], pulseDur: 1.0, particleCount: 10, particleSpread: 1.20 },
+  Apex:     { glowScale: [1, 1.50, 1], glowDur: 3.2, ringDur: 5.5,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.06, 0.96, 1.04, 1], pulseDur: 1.5, particleCount: 12, particleSpread: 1.28 },
+  Legend:   { glowScale: [1, 1.60, 1], glowDur: 4.0, ringDur: 7.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.10, 0.92, 1.08, 1], pulseDur: 1.2, particleCount: 12, particleSpread: 1.35 },
+};
+
+function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; color: string; glow: string } }) {
+  const fx = RANK_FX[badge.name] ?? RANK_FX.Spark;
+  const rgb = badge.glow; // e.g. "rgba(224,122,69,0.40)"
+  const rgbBase = rgb.replace(/[\d.]+\)$/, ""); // "rgba(224,122,69,"
+  const particles = BADGE_PARTICLES.slice(0, fx.particleCount);
+
   return (
-    <div
-      className="relative flex items-center justify-center"
-      style={{ width: 200, height: 200 }}
-    >
-      {/* ── Outer atmospheric glow (slow expand + fade) ── */}
+    <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
+      {/* Outer atmospheric glow */}
       <motion.div
         aria-hidden
         className="absolute inset-0 rounded-full pointer-events-none"
-        style={{
-          background: [
-            "radial-gradient(circle,",
-            "rgba(224,122,69,0.42) 0%,",
-            "rgba(224,122,69,0.10) 52%,",
-            "transparent 72%)",
-          ].join(" "),
-        }}
-        animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.1, 0.4] }}
-        transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+        style={{ background: `radial-gradient(circle, ${rgbBase}0.42) 0%, ${rgbBase}0.10) 52%, transparent 72%)` }}
+        animate={{ scale: fx.glowScale, opacity: [0.4, 0.1, 0.4] }}
+        transition={{ repeat: Infinity, duration: fx.glowDur, ease: "easeInOut" }}
       />
 
-      {/* ── Inner neon ring (rotates + breathes) ── */}
+      {/* Primary ring */}
       <motion.div
         aria-hidden
         className="absolute rounded-full pointer-events-none"
         style={{
           width: "66%", height: "66%",
-          border: "2px solid rgba(224,122,69,0.88)",
+          border: `2px solid ${rgbBase}0.88)`,
           filter: "blur(2px)",
-          boxShadow: "0 0 12px rgba(224,122,69,0.6), inset 0 0 8px rgba(224,122,69,0.25)",
+          boxShadow: `0 0 12px ${rgbBase}0.6), inset 0 0 8px ${rgbBase}0.25)`,
         }}
-        animate={{ scale: [1, 1.1, 1], rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+        animate={{ scale: [1, 1.1, 1], rotate: fx.ringRotate }}
+        transition={{ repeat: Infinity, duration: fx.ringDur, ease: "linear" }}
       />
 
-      {/* ── Cosmic particle dust matrix ── */}
-      {SPARK_PARTICLES.map((p, i) => (
+      {/* Second ring — only for double-ring ranks */}
+      {fx.ringDouble && (
+        <motion.div
+          aria-hidden
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: "84%", height: "84%",
+            border: `1px solid ${rgbBase}0.30)`,
+            filter: "blur(1px)",
+          }}
+          animate={{ scale: [1, 1.06, 1], rotate: -fx.ringRotate }}
+          transition={{ repeat: Infinity, duration: fx.ringDur * 1.4, ease: "linear" }}
+        />
+      )}
+
+      {/* Particle dust */}
+      {particles.map((p, i) => (
         <motion.div
           key={i}
           aria-hidden
           className="absolute rounded-full pointer-events-none"
           style={{
             width: p.size, height: p.size,
-            background: "#C9A84C",
-            left: "50%",
-            top: "50%",
-            marginLeft: -(p.size / 2),
-            marginTop:  -(p.size / 2),
-            boxShadow: `0 0 ${p.size * 2}px rgba(201,168,76,0.7)`,
+            background: badge.color,
+            left: "50%", top: "50%",
+            marginLeft: -(p.size / 2), marginTop: -(p.size / 2),
+            boxShadow: `0 0 ${p.size * 2}px ${rgbBase}0.7)`,
           }}
           animate={{
-            x: [p.x, p.x * 1.18, p.x],
-            y: [p.y, p.y * 1.14, p.y],
+            x: [p.x, p.x * fx.particleSpread, p.x],
+            y: [p.y, p.y * fx.particleSpread, p.y],
             opacity: [p.o, p.o * 0.2, p.o],
           }}
           transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
         />
       ))}
 
-      {/* ── Core: jittering electric-gold symbol ── */}
+      {/* Core symbol */}
       <motion.span
         className="font-bold leading-none select-none"
         style={{ position: "relative", zIndex: 1 }}
-        animate={{ scale: [1, 1.04, 0.98, 1.02, 1] }}
-        transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+        animate={{ scale: fx.pulseScale }}
+        transition={{ repeat: Infinity, duration: fx.pulseDur, ease: "easeInOut" }}
       >
         <span
           style={{
             fontSize: "clamp(5rem, 22vw, 7.5rem)",
             display: "block",
-            background: [
-              "radial-gradient(circle at 40% 35%,",
-              "#ffffff 0%,",
-              "#FFE090 16%,",
-              "#E07A45 48%,",
-              "#A03018 82%)",
-            ].join(" "),
+            background: `radial-gradient(circle at 40% 35%, #ffffff 0%, ${badge.color}cc 30%, ${badge.color} 65%)`,
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
             WebkitTextFillColor: "transparent",
             color: "transparent",
             filter: [
-              "drop-shadow(0 0 12px rgba(224,122,69,0.95))",
-              "drop-shadow(0 0 28px rgba(224,122,69,0.60))",
-              "drop-shadow(0 0 55px rgba(224,122,69,0.28))",
+              `drop-shadow(0 0 12px ${rgbBase}0.95))`,
+              `drop-shadow(0 0 28px ${rgbBase}0.60))`,
+              `drop-shadow(0 0 55px ${rgbBase}0.28))`,
             ].join(" "),
             userSelect: "none",
             lineHeight: 1,
           }}
         >
-          ✦
+          {badge.symbol}
         </span>
       </motion.span>
     </div>
@@ -748,57 +775,45 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                     : i === earnedCount     ? "Next badge" : "Coming up"}
                 </p>
 
-                {/* Badge symbol — Spark gets premium overhaul, others use standard render */}
-                {b.name === "Spark" && earned ? (
-                  <SparkBadgeSymbol />
+                {/* Badge symbol — premium animated for all earned ranks */}
+                {earned ? (
+                  <PremiumBadgeSymbol badge={b} />
                 ) : (
                   <div className="relative inline-flex items-center justify-center">
                     <span className="font-bold leading-none select-none"
                       style={{
                         fontSize: "clamp(5rem, 22vw, 7.5rem)",
-                        color: earned ? b.color : "rgba(255,255,255,0.06)",
-                        filter: earned ? "none" : "blur(9px)",
-                        textShadow: earned ? `0 0 55px ${b.glow}, 0 0 110px ${b.glow.replace("0.40","0.2")}` : "none",
-                        transition: "color 0.35s, filter 0.35s",
+                        color: "rgba(255,255,255,0.06)",
+                        filter: "blur(9px)",
                         userSelect: "none",
                       }}>
                       {b.symbol}
                     </span>
-                    {!earned && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                        <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
-                              style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
-                        <span className="text-[20px] font-bold tabular-nums"
-                              style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
-                      </div>
-                    )}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                      <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
+                            style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
+                      <span className="text-[20px] font-bold tabular-nums"
+                            style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
+                    </div>
                   </div>
                 )}
 
-                {/* Badge name — Spark gets illuminated typography */}
-                {b.name === "Spark" && earned ? (
-                  <p
-                    className="mt-3 font-bold leading-tight"
-                    style={{
-                      fontSize: "clamp(1.65rem, 7vw, 2.2rem)",
-                      color: "#ffffff",
-                      letterSpacing: "0.025em",
-                      textShadow: [
-                        "0 0 18px rgba(255,255,255,0.90)",
-                        "0 0 36px rgba(224,122,69,0.60)",
-                        "0 0 65px rgba(224,122,69,0.28)",
-                      ].join(", "),
-                    }}
-                  >
-                    Spark
-                  </p>
-                ) : (
-                  <p className="mt-3 font-bold leading-tight"
-                     style={{ fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
-                              color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.18)" }}>
-                    {b.name}
-                  </p>
-                )}
+                {/* Badge name — glows in rank color when earned */}
+                <p
+                  className="mt-3 font-bold leading-tight"
+                  style={{
+                    fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
+                    color: earned ? "#ffffff" : "rgba(255,255,255,0.18)",
+                    letterSpacing: "0.025em",
+                    textShadow: earned ? [
+                      "0 0 18px rgba(255,255,255,0.85)",
+                      `0 0 36px ${b.glow.replace("0.40", "0.65")}`,
+                      `0 0 65px ${b.glow.replace("0.40", "0.30")}`,
+                    ].join(", ") : "none",
+                  }}
+                >
+                  {b.name}
+                </p>
                 {earned && i < earnedCount - 1 && (
                   <p className="mt-1 text-[10px] font-semibold tracking-wider" style={{ color: `${b.color}55` }}>
                     ✓ Day {b.day}
