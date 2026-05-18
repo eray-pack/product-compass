@@ -333,6 +333,157 @@ function WolfBackground() {
   );
 }
 
+// ── Golden Leaf icon SVG ─────────────────────────────────────────────────────
+function GoldenLeafSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 26 26" fill="none">
+      <defs>
+        <linearGradient id="lf-gold" x1="6" y1="2" x2="20" y2="24" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#F0D47A" />
+          <stop offset="50%"  stopColor="#C9A84C" />
+          <stop offset="100%" stopColor="#8C6520" />
+        </linearGradient>
+        <linearGradient id="lf-shine" x1="9" y1="3" x2="15" y2="11" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="rgba(255,255,255,0.38)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+      </defs>
+      {/* Main leaf body */}
+      <path d="M13 2 C18.5 4 22.5 9 21 15 C19.5 21 15.5 23.5 13 24.5 C10.5 23.5 6.5 21 5 15 C3.5 9 7.5 4 13 2Z"
+        fill="url(#lf-gold)" />
+      {/* Surface shine facet */}
+      <path d="M13 2 C16.5 4 20 7.5 19.5 12 C17 9 14.5 5.5 13 2Z"
+        fill="url(#lf-shine)" opacity="0.75" />
+      {/* Central vein */}
+      <line x1="13" y1="4.5" x2="13" y2="23.5"
+        stroke="rgba(255,255,255,0.42)" strokeWidth="0.85" strokeLinecap="round" />
+      {/* Left lateral veins */}
+      <line x1="13" y1="9"  x2="7"   y2="12.5" stroke="rgba(255,255,255,0.30)" strokeWidth="0.65" strokeLinecap="round" />
+      <line x1="13" y1="13" x2="6.5" y2="17"   stroke="rgba(255,255,255,0.24)" strokeWidth="0.60" strokeLinecap="round" />
+      <line x1="13" y1="17" x2="8"   y2="20"   stroke="rgba(255,255,255,0.18)" strokeWidth="0.55" strokeLinecap="round" />
+      {/* Right lateral veins */}
+      <line x1="13" y1="9"  x2="19"  y2="12.5" stroke="rgba(255,255,255,0.30)" strokeWidth="0.65" strokeLinecap="round" />
+      <line x1="13" y1="13" x2="19.5" y2="17"  stroke="rgba(255,255,255,0.24)" strokeWidth="0.60" strokeLinecap="round" />
+      <line x1="13" y1="17" x2="18"  y2="20"   stroke="rgba(255,255,255,0.18)" strokeWidth="0.55" strokeLinecap="round" />
+      {/* Stem */}
+      <path d="M13 24.5 Q12.5 26 12 26.5" stroke="#8C6520" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+// ── Golden Leaf premium badge (leaves-gold item only) ─────────────────────────
+function GoldenLeafBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  // 10 particle positions on a ring r=30 centred in the 72px particle div (center=36,36)
+  const particles = Array.from({ length: 10 }, (_, i) => {
+    const a = (i * 36 * Math.PI) / 180;
+    return {
+      x: 36 + 30 * Math.cos(a) - 1.5,
+      y: 36 + 30 * Math.sin(a) - 1.5,
+      big: i % 3 === 0,
+      bright: i % 2 === 0,
+    };
+  });
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer golden halo burst ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.45, 1], opacity: [0.55, 0.12, 0.55] }}
+        transition={{ duration: 3.2, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(232,201,106,0.70) 0%, rgba(201,168,76,0.35) 38%, transparent 68%)",
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Rotating particle dust swirl ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 14, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.25, 1, 0.25], scale: [0.5, 1.3, 0.5] }}
+            transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: i * 0.22 }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2,
+              height: p.big ? 3.5 : 2,
+              borderRadius: "50%",
+              background: p.bright ? "#F0D47A" : "#C9A84C",
+              boxShadow: `0 0 5px 1.5px rgba(222,188,122,0.75)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — burnished metallic chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #2a1f0e 0%, #0d0b07 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.18)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.09)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            "0 0 0 1.5px rgba(201,168,76,0.60)",
+            "0 0 0 3.5px rgba(201,168,76,0.14)",
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 32px 10px rgba(201,168,76,${canAfford && !owned ? "0.38" : "0.18"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner nebula glow */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.28, 0.58, 0.28], scale: [0.72, 1.06, 0.72] }}
+          transition={{ duration: 3.2, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: "radial-gradient(circle at 50% 58%, rgba(232,201,106,0.68) 0%, rgba(201,168,76,0.32) 40%, transparent 68%)",
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 3.2, ease: "linear", repeatDelay: 2.8 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Leaf icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.07, 1] }}
+          transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+        >
+          <GoldenLeafSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Etched Glass Shop Card ────────────────────────────────────────────────────
 function ShopCard({
   item,
@@ -365,37 +516,41 @@ function ShopCard({
     >
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         {/* Energy badge icon */}
-        <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
-          {canAfford && !owned && (
+        {item.id === "leaves-gold" ? (
+          <GoldenLeafBadge canAfford={canAfford} owned={owned} />
+        ) : (
+          <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
+            {canAfford && !owned && (
+              <motion.div
+                animate={{ scale: [1, 1.35, 1], opacity: [0.45, 0.10, 0.45] }}
+                transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
+                style={{
+                  position: "absolute", inset: -7, borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(201,168,76,0.45) 0%, transparent 72%)",
+                  filter: "blur(6px)",
+                  pointerEvents: "none",
+                }}
+              />
+            )}
             <motion.div
-              animate={{ scale: [1, 1.35, 1], opacity: [0.45, 0.10, 0.45] }}
+              animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
               transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
               style={{
-                position: "absolute", inset: -7, borderRadius: "50%",
-                background: "radial-gradient(circle, rgba(201,168,76,0.45) 0%, transparent 72%)",
-                filter: "blur(6px)",
-                pointerEvents: "none",
+                width: 48, height: 48, borderRadius: "50%",
+                display: "grid", placeItems: "center",
+                background: owned
+                  ? "rgba(255,255,255,0.05)"
+                  : canAfford
+                  ? "rgba(201,168,76,0.12)"
+                  : "rgba(255,255,255,0.04)",
+                border: `1px solid ${owned ? "rgba(255,255,255,0.09)" : canAfford ? "rgba(201,168,76,0.42)" : "rgba(255,255,255,0.07)"}`,
+                boxShadow: canAfford && !owned ? "0 0 18px 3px rgba(201,168,76,0.20)" : "none",
               }}
-            />
-          )}
-          <motion.div
-            animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
-            transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
-            style={{
-              width: 48, height: 48, borderRadius: "50%",
-              display: "grid", placeItems: "center",
-              background: owned
-                ? "rgba(255,255,255,0.05)"
-                : canAfford
-                ? "rgba(201,168,76,0.12)"
-                : "rgba(255,255,255,0.04)",
-              border: `1px solid ${owned ? "rgba(255,255,255,0.09)" : canAfford ? "rgba(201,168,76,0.42)" : "rgba(255,255,255,0.07)"}`,
-              boxShadow: canAfford && !owned ? "0 0 18px 3px rgba(201,168,76,0.20)" : "none",
-            }}
-          >
-            <Sparkles style={{ height: 20, width: 20, color: owned ? "rgba(255,255,255,0.28)" : canAfford ? "#C9A84C" : "rgba(255,255,255,0.25)" }} />
-          </motion.div>
-        </div>
+            >
+              <Sparkles style={{ height: 20, width: 20, color: owned ? "rgba(255,255,255,0.28)" : canAfford ? "#C9A84C" : "rgba(255,255,255,0.25)" }} />
+            </motion.div>
+          </div>
+        )}
 
         {/* Text */}
         <div style={{ flex: 1, minWidth: 0 }}>
