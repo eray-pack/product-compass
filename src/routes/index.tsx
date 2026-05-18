@@ -560,6 +560,121 @@ function HabitSwitcher({
   return pills;
 }
 
+// ─── Spark badge — premium overhaul ──────────────────────────────────────────
+// Pre-generated particle positions (polar → cartesian, avoid Math.random in render)
+const SPARK_PARTICLES = [
+  { x:  88,  y:   0,  size: 3, dur: 2.8, delay: 0.0, o: 0.80 },
+  { x:  62,  y:  36,  size: 2, dur: 3.2, delay: 0.4, o: 0.60 },
+  { x:  36,  y:  62,  size: 3, dur: 2.5, delay: 0.8, o: 0.70 },
+  { x:   0,  y:  78,  size: 2, dur: 3.5, delay: 0.2, o: 0.55 },
+  { x: -50,  y:  87,  size: 4, dur: 2.9, delay: 0.6, o: 0.85 },
+  { x: -59,  y:  34,  size: 2, dur: 3.1, delay: 1.0, o: 0.60 },
+  { x: -90,  y:   0,  size: 3, dur: 2.7, delay: 0.3, o: 0.70 },
+  { x: -65,  y: -37,  size: 2, dur: 3.3, delay: 0.7, o: 0.55 },
+  { x: -38,  y: -66,  size: 3, dur: 2.6, delay: 1.1, o: 0.75 },
+  { x:   0,  y: -92,  size: 2, dur: 3.0, delay: 0.5, o: 0.60 },
+  { x:  46,  y: -80,  size: 4, dur: 2.4, delay: 0.9, o: 0.80 },
+  { x:  73,  y: -42,  size: 2, dur: 3.4, delay: 0.1, o: 0.55 },
+];
+
+function SparkBadgeSymbol() {
+  return (
+    <div
+      className="relative flex items-center justify-center"
+      style={{ width: 200, height: 200 }}
+    >
+      {/* ── Outer atmospheric glow (slow expand + fade) ── */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          background: [
+            "radial-gradient(circle,",
+            "rgba(224,122,69,0.42) 0%,",
+            "rgba(224,122,69,0.10) 52%,",
+            "transparent 72%)",
+          ].join(" "),
+        }}
+        animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.1, 0.4] }}
+        transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+      />
+
+      {/* ── Inner neon ring (rotates + breathes) ── */}
+      <motion.div
+        aria-hidden
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: "66%", height: "66%",
+          border: "2px solid rgba(224,122,69,0.88)",
+          filter: "blur(2px)",
+          boxShadow: "0 0 12px rgba(224,122,69,0.6), inset 0 0 8px rgba(224,122,69,0.25)",
+        }}
+        animate={{ scale: [1, 1.1, 1], rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+      />
+
+      {/* ── Cosmic particle dust matrix ── */}
+      {SPARK_PARTICLES.map((p, i) => (
+        <motion.div
+          key={i}
+          aria-hidden
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: p.size, height: p.size,
+            background: "#C9A84C",
+            left: "50%",
+            top: "50%",
+            marginLeft: -(p.size / 2),
+            marginTop:  -(p.size / 2),
+            boxShadow: `0 0 ${p.size * 2}px rgba(201,168,76,0.7)`,
+          }}
+          animate={{
+            x: [p.x, p.x * 1.18, p.x],
+            y: [p.y, p.y * 1.14, p.y],
+            opacity: [p.o, p.o * 0.2, p.o],
+          }}
+          transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
+        />
+      ))}
+
+      {/* ── Core: jittering electric-gold symbol ── */}
+      <motion.span
+        className="font-bold leading-none select-none"
+        style={{ position: "relative", zIndex: 1 }}
+        animate={{ scale: [1, 1.04, 0.98, 1.02, 1] }}
+        transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+      >
+        <span
+          style={{
+            fontSize: "clamp(5rem, 22vw, 7.5rem)",
+            display: "block",
+            background: [
+              "radial-gradient(circle at 40% 35%,",
+              "#ffffff 0%,",
+              "#FFE090 16%,",
+              "#E07A45 48%,",
+              "#A03018 82%)",
+            ].join(" "),
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            color: "transparent",
+            filter: [
+              "drop-shadow(0 0 12px rgba(224,122,69,0.95))",
+              "drop-shadow(0 0 28px rgba(224,122,69,0.60))",
+              "drop-shadow(0 0 55px rgba(224,122,69,0.28))",
+            ].join(" "),
+            userSelect: "none",
+            lineHeight: 1,
+          }}
+        >
+          ✦
+        </span>
+      </motion.span>
+    </div>
+  );
+}
+
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
 function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addictionName: string; addictionId: string }) {
   const earnedCount = BADGES.filter((b) => day >= b.day).length;
@@ -633,35 +748,57 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                     : i === earnedCount     ? "Next badge" : "Coming up"}
                 </p>
 
-                {/* Badge symbol with lock overlay */}
-                <div className="relative inline-flex items-center justify-center">
-                  <span className="font-bold leading-none select-none"
-                    style={{
-                      fontSize: "clamp(5rem, 22vw, 7.5rem)",
-                      color: earned ? b.color : "rgba(255,255,255,0.06)",
-                      filter: earned ? "none" : "blur(9px)",
-                      textShadow: earned ? `0 0 55px ${b.glow}, 0 0 110px ${b.glow.replace("0.40","0.2")}` : "none",
-                      transition: "color 0.35s, filter 0.35s",
-                      userSelect: "none",
-                    }}>
-                    {b.symbol}
-                  </span>
-                  {!earned && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                      <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
-                            style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
-                      <span className="text-[20px] font-bold tabular-nums"
-                            style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
-                    </div>
-                  )}
-                </div>
+                {/* Badge symbol — Spark gets premium overhaul, others use standard render */}
+                {b.name === "Spark" && earned ? (
+                  <SparkBadgeSymbol />
+                ) : (
+                  <div className="relative inline-flex items-center justify-center">
+                    <span className="font-bold leading-none select-none"
+                      style={{
+                        fontSize: "clamp(5rem, 22vw, 7.5rem)",
+                        color: earned ? b.color : "rgba(255,255,255,0.06)",
+                        filter: earned ? "none" : "blur(9px)",
+                        textShadow: earned ? `0 0 55px ${b.glow}, 0 0 110px ${b.glow.replace("0.40","0.2")}` : "none",
+                        transition: "color 0.35s, filter 0.35s",
+                        userSelect: "none",
+                      }}>
+                      {b.symbol}
+                    </span>
+                    {!earned && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                        <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
+                              style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
+                        <span className="text-[20px] font-bold tabular-nums"
+                              style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                {/* Badge name */}
-                <p className="mt-3 font-bold leading-tight"
-                   style={{ fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
-                            color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.18)" }}>
-                  {b.name}
-                </p>
+                {/* Badge name — Spark gets illuminated typography */}
+                {b.name === "Spark" && earned ? (
+                  <p
+                    className="mt-3 font-bold leading-tight"
+                    style={{
+                      fontSize: "clamp(1.65rem, 7vw, 2.2rem)",
+                      color: "#ffffff",
+                      letterSpacing: "0.025em",
+                      textShadow: [
+                        "0 0 18px rgba(255,255,255,0.90)",
+                        "0 0 36px rgba(224,122,69,0.60)",
+                        "0 0 65px rgba(224,122,69,0.28)",
+                      ].join(", "),
+                    }}
+                  >
+                    Spark
+                  </p>
+                ) : (
+                  <p className="mt-3 font-bold leading-tight"
+                     style={{ fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
+                              color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.18)" }}>
+                    {b.name}
+                  </p>
+                )}
                 {earned && i < earnedCount - 1 && (
                   <p className="mt-1 text-[10px] font-semibold tracking-wider" style={{ color: `${b.color}55` }}>
                     ✓ Day {b.day}
