@@ -173,7 +173,7 @@
   "tools": {
     "header": "Recovery Tools",
     "subtitle": "Choose your weapon against the urge.",
-    "indexSubtitle": "Use what works.",
+    "indexSubtitle": "Nutze, was funktioniert.",
     "reframes": {
       "0": "Every time you resist, you literally grow new neural pathways.",
       "1": "The urge isn't you — it's old wiring asking for one more hit.",
@@ -193,12 +193,15 @@
       "heroLine2": "We've got you.",
       "heroSub": "Tap to start urge surfing · 3 min"
     },
-    "gamesTitle": "Cut the Signal Games",
-    "gamesDesc": "Train your brain. Beat the urge.",
-    "mindPulse": "Mind Pulse",
-    "impulseShift": "Impulse Shift",
-    "neuralLink": "Neural Link",
-    "moreGames": "More games available",
+    "gamesTitle": "Spiele: Signal Trennen",
+    "gamesDesc": "Trainiere dein Gehirn. Bezwinge den Drang.",
+    "mindPulse": "Mentaler Puls",
+    "impulseShift": "Impuls-Wechsel",
+    "neuralLink": "Neurale Verbindung",
+    "gamesProTitle": "Pro-Spiele",
+    "gamesProLocked": "Pro-Spiele (Gesperrt)",
+    "gamesProLockedSub": "Abonnieren, um alle Premium-Spiele freizuschalten.",
+    "moreGames": "Mehr Spiele verfügbar",
     "reframeTitle": "Reframe",
     "reframeDesc": "Rewire your reaction in one thought.",
     "reframeCta": "Show me one",
@@ -231,36 +234,36 @@
       "desc": "Anchor your strongest reason"
     },
     "darkroom": {
-      "name": "Dark Room",
-      "desc": "Sensory deprivation mode"
+      "name": "Dunkelkammer",
+      "desc": "Sensorischer Entzugsmodus"
     },
     "voidstare": {
-      "name": "Void Stare",
-      "desc": "Stare into the abyss"
+      "name": "Blick in die Leere",
+      "desc": "Starre in den Abgrund"
     },
     "noisefilter": {
-      "name": "Noise Filter",
-      "desc": "Brown noise focus field"
+      "name": "Rauschfilter",
+      "desc": "Brown-Noise-Fokusfeld"
     },
     "echochamber": {
-      "name": "Echo Chamber",
-      "desc": "Hear your own conviction"
+      "name": "Echokammer",
+      "desc": "Höre deine eigene Überzeugung"
     },
     "identitystack": {
-      "name": "Identity Stack",
-      "desc": "Who you're becoming"
+      "name": "Identitäts-Verankerung",
+      "desc": "Wer du wirst"
     },
     "clarityclimb": {
-      "name": "Clarity Climb",
-      "desc": "Mindfulness staircase"
+      "name": "Aufstieg zur Klarheit",
+      "desc": "Achtsamkeitstreppe"
     },
     "coldswitch": {
-      "name": "Cold Switch",
-      "desc": "Emergency temp drop"
+      "name": "Kalter Entzug",
+      "desc": "Notfall-Temperaturabfall"
     },
     "steadyhand": {
-      "name": "Steady Hand",
-      "desc": "Precision focus drill"
+      "name": "Ruhige Hand",
+      "desc": "Präzisionsfokus-Übung"
     }
   },
   "settings": {
