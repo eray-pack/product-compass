@@ -118,6 +118,7 @@ function Coach() {
       {/* ── Animated organic wave background ───────────────── */}
       <div
         aria-hidden
+        className="coach-overlay"
         style={{
           position: "absolute", inset: 0,
           overflow: "hidden", pointerEvents: "none",

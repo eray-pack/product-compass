@@ -470,13 +470,21 @@ html.light {
 /* ── Coach background wave breathe ─────────────────────── */
 @keyframes coach-wave-breathe {
   0%, 100% { opacity: 0.025; }
-  50%       { opacity: 0.052; }
+  50%       { opacity: 0.050; }
 }
-.coach-wave   { animation: coach-wave-breathe 20s ease-in-out infinite; }
-.coach-wave-2 { animation: coach-wave-breathe 20s ease-in-out 4s  infinite; }
-.coach-wave-3 { animation: coach-wave-breathe 20s ease-in-out 8s  infinite; }
-.coach-wave-4 { animation: coach-wave-breathe 20s ease-in-out 12s infinite; }
-.coach-wave-5 { animation: coach-wave-breathe 20s ease-in-out 16s infinite; }
+@keyframes coach-overlay-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* fill-mode: backwards → holds the 0% keyframe (opacity 0.025) during any
+   animation-delay, preventing the default opacity:1 flash on mount.        */
+.coach-wave   { animation: coach-wave-breathe 20s ease-in-out          infinite; animation-fill-mode: backwards; }
+.coach-wave-2 { animation: coach-wave-breathe 20s ease-in-out  4s      infinite; animation-fill-mode: backwards; }
+.coach-wave-3 { animation: coach-wave-breathe 20s ease-in-out  8s      infinite; animation-fill-mode: backwards; }
+.coach-wave-4 { animation: coach-wave-breathe 20s ease-in-out 12s      infinite; animation-fill-mode: backwards; }
+.coach-wave-5 { animation: coach-wave-breathe 20s ease-in-out 16s      infinite; animation-fill-mode: backwards; }
+/* The overlay wrapper fades in the whole layer over 2 s on mount */
+.coach-overlay { animation: coach-overlay-fadein 2s ease-out both; }
 
 /* ── Coach robot illustration ──────────────────────────── */
 @keyframes robot-bob {
