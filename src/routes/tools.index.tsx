@@ -767,7 +767,7 @@ function Tools() {
                     <>
                       <div style={{ margin: "22px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.32) 20%, rgba(201,168,76,0.32) 80%, transparent)" }} />
                       <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.72, textAlign: "center", marginBottom: 18 }}>
-                        Pro Games
+                        {t("tools.gamesProTitle")}
                       </p>
                       <div className="grid grid-cols-3" style={{ gap: "24px 8px" }}>
                         {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
@@ -818,10 +818,10 @@ function Tools() {
                       </div>
                       <div style={{ textAlign: "left", flex: 1 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 3 }}>
-                          Pro Games (Locked)
+                          {t("tools.gamesProLocked")}
                         </p>
                         <p style={{ fontSize: 11, color: "#debc7a", opacity: 0.70, lineHeight: 1.45 }}>
-                          Subscribe to unlock all premium games.
+                          {t("tools.gamesProLockedSub")}
                         </p>
                       </div>
                       <ChevronDown style={{ height: 14, width: 14, color: "rgba(201,168,76,0.55)", transform: "rotate(-90deg)", flexShrink: 0 }} />

@@ -193,11 +193,14 @@
       "heroLine2": "On est là pour toi.",
       "heroSub": "Appuie pour surfer sur l'envie · 3 min"
     },
-    "gamesTitle": "Jeux Couper le signal",
-    "gamesDesc": "Entraîne ton cerveau. Bats l'envie.",
-    "mindPulse": "Pulse mental",
-    "impulseShift": "Décalage d'impulsion",
-    "neuralLink": "Lien neuronal",
+    "gamesTitle": "Jeux : Couper le Signal",
+    "gamesDesc": "Entraînez votre cerveau. Surmontez l'impulsion.",
+    "mindPulse": "Pulsation Mentale",
+    "impulseShift": "Bascule d'Impulsion",
+    "neuralLink": "Lien Neural",
+    "gamesProTitle": "Jeux Pro",
+    "gamesProLocked": "Jeux Pro (Verrouillés)",
+    "gamesProLockedSub": "Abonnez-vous pour débloquer tous les jeux premium.",
     "moreGames": "Plus de jeux disponibles",
     "reframeTitle": "Recadrage",
     "reframeDesc": "Recâble ta réaction en une seule pensée.",
@@ -235,31 +238,35 @@
       "desc": "Mode de privation sensorielle"
     },
     "voidstare": {
-      "name": "Regard dans le vide",
+      "name": "Regard du Vide",
       "desc": "Fixe l'abîme"
     },
     "noisefilter": {
-      "name": "Filtre de bruit",
+      "name": "Filtre de Bruit",
       "desc": "Champ de concentration bruit brun"
     },
     "echochamber": {
-      "name": "Chambre d'écho",
+      "name": "Chambre d'Écho",
       "desc": "Entends ta propre conviction"
     },
     "identitystack": {
-      "name": "Pile d'identité",
+      "name": "Ancrage d'Identité",
       "desc": "Qui tu deviens"
     },
     "clarityclimb": {
-      "name": "Montée de clarté",
+      "name": "Ascension de la Clarté",
       "desc": "Escalier de pleine conscience"
     },
     "coldswitch": {
-      "name": "Interrupteur froid",
+      "name": "Rupture Froide",
       "desc": "Baisse de température d'urgence"
     },
+    "darkroom": {
+      "name": "Chambre Noire",
+      "desc": "Mode de privation sensorielle"
+    },
     "steadyhand": {
-      "name": "Main ferme",
+      "name": "Main Ferme",
       "desc": "Exercice de concentration précise"
     }
   },
