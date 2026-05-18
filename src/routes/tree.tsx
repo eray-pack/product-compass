@@ -1891,6 +1891,248 @@ function AlphaMarkBadge({ canAfford, owned }: { canAfford: boolean; owned: boole
   );
 }
 
+// ── Ancient Instinct icon SVG ─────────────────────────────────────────────────
+function AncientInstinctSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <radialGradient id="ai-pad" cx="50%" cy="55%" r="52%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stopColor="#7c3aed" />
+          <stop offset="45%"  stopColor="#4c1d95" />
+          <stop offset="100%" stopColor="#1e0a3c" />
+        </radialGradient>
+        <radialGradient id="ai-toe" cx="50%" cy="45%" r="50%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#5b21b6" />
+        </radialGradient>
+        <radialGradient id="ai-eye" cx="50%" cy="40%" r="50%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stopColor="#d1fae5" />
+          <stop offset="35%"  stopColor="#10b981" />
+          <stop offset="100%" stopColor="#064e3b" />
+        </radialGradient>
+        <filter id="ai-glow">
+          <feGaussianBlur stdDeviation="0.9" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {/* ── Main paw pad ── */}
+      <path d="M7 16 Q6 11 9 9 Q11 7.5 14 8 Q17 7.5 19 9 Q22 11 21 16 Q20 21 17 23 Q15 24.5 11 23 Q8 21 7 16Z"
+        fill="url(#ai-pad)" />
+
+      {/* ── Runic carving lines across the pad ── */}
+      <path d="M10 13 L14 11 L18 13" stroke="rgba(167,139,250,0.55)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
+      <path d="M11 17 L14 15.5 L17 17" stroke="rgba(167,139,250,0.50)" strokeWidth="0.8" strokeLinecap="round" fill="none"/>
+      <path d="M14 11 L14 20" stroke="rgba(167,139,250,0.40)" strokeWidth="0.7" strokeLinecap="round" fill="none"/>
+
+      {/* ── Glowing primal eye at center of pad ── */}
+      {/* Eye white / sclera glow */}
+      <ellipse cx="14" cy="15.5" rx="3.8" ry="2.6" fill="rgba(16,185,129,0.18)" filter="url(#ai-glow)"/>
+      {/* Iris */}
+      <ellipse cx="14" cy="15.5" rx="2.8" ry="1.9" fill="url(#ai-eye)" />
+      {/* Vertical slit pupil */}
+      <ellipse cx="14" cy="15.5" rx="0.75" ry="1.7" fill="#030c07" />
+      {/* Eye specular */}
+      <ellipse cx="13.2" cy="14.5" rx="0.9" ry="0.55" fill="rgba(209,250,229,0.80)" transform="rotate(-20 13.2 14.5)"/>
+      {/* Runic ring around eye */}
+      <ellipse cx="14" cy="15.5" rx="2.8" ry="1.9" fill="none"
+        stroke="rgba(16,185,129,0.55)" strokeWidth="0.6" strokeDasharray="2.2 1.4"/>
+
+      {/* ── Toe pads — four surrounding the main pad ── */}
+      <ellipse cx="9"  cy="8.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(-18 9 8.5)"/>
+      <ellipse cx="12" cy="6.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(-6 12 6.5)"/>
+      <ellipse cx="16" cy="6.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(6 16 6.5)"/>
+      <ellipse cx="19" cy="8.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(18 19 8.5)"/>
+
+      {/* ── Runic glyph dots on toe pads ── */}
+      <circle cx="9"  cy="8.5"  r="0.65" fill="rgba(167,139,250,0.80)"/>
+      <circle cx="12" cy="6.5"  r="0.65" fill="rgba(16,185,129,0.80)"/>
+      <circle cx="16" cy="6.5"  r="0.65" fill="rgba(167,139,250,0.80)"/>
+      <circle cx="19" cy="8.5"  r="0.65" fill="rgba(16,185,129,0.80)"/>
+
+      {/* ── Pad specular sheen ── */}
+      <ellipse cx="11" cy="13" rx="2.8" ry="1.5" fill="rgba(124,58,237,0.30)" transform="rotate(-15 11 13)"/>
+    </svg>
+  );
+}
+
+// ── Ancient Instinct badge (wolf-ancient item only) ───────────────────────────
+function AncientInstinctBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  // Mystic stardust — two rings, alternating purple / emerald
+  const stardust = [
+    ...Array.from({ length: 9 }, (_, i) => {
+      const a = ((i * 40 + 6)  * Math.PI) / 180;
+      return { x: 36 + 30 * Math.cos(a) - 1.5, y: 36 + 30 * Math.sin(a) - 1.5, big: i % 3 === 0, purple: i % 2 === 0, delay: i * 0.20 };
+    }),
+    ...Array.from({ length: 6 }, (_, i) => {
+      const a = ((i * 60 + 18) * Math.PI) / 180;
+      return { x: 36 + 19 * Math.cos(a) - 1.5, y: 36 + 19 * Math.sin(a) - 1.5, big: false,    purple: i % 2 !== 0, delay: i * 0.28 };
+    }),
+  ];
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer cosmic purple aura ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.55, 1], opacity: [0.60, 0.08, 0.60] }}
+        transition={{ duration: 5.0, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -16, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(124,58,237,0.75) 0%, rgba(4,120,87,0.30) 46%, transparent 68%)`,
+          filter: "blur(11px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Emerald counter-pulse ring ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.82, 1.68, 0.82], opacity: [0.42, 0, 0.42] }}
+        transition={{ duration: 5.0, ease: "easeOut", repeat: Infinity, delay: 1.2 }}
+        style={{
+          position: "absolute", inset: -10, borderRadius: "50%",
+          border: "1.5px solid rgba(16,185,129,0.55)",
+          boxShadow: "0 0 6px 1px rgba(16,185,129,0.30)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Purple inner shimmer ring ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.92, 1.38, 0.92], opacity: [0.30, 0, 0.30] }}
+        transition={{ duration: 3.5, ease: "easeOut", repeat: Infinity, delay: 0.6 }}
+        style={{
+          position: "absolute", inset: -4, borderRadius: "50%",
+          border: "1px solid rgba(124,58,237,0.48)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Mystic stardust — dual rings, slow counter-rotation ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 22, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {stardust.slice(0, 9).map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.15, 0.95, 0.15], scale: [0.3, 1.6, 0.3] }}
+            transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut", delay: p.delay }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2.0,
+              height: p.big ? 3.5 : 2.0,
+              borderRadius: "50%",
+              background: p.purple ? "#a78bfa" : "#34d399",
+              boxShadow: p.purple
+                ? `0 0 6px 2px rgba(167,139,250,0.80)`
+                : `0 0 6px 2px rgba(52,211,153,0.80)`,
+            }}
+          />
+        ))}
+      </motion.div>
+      <motion.div
+        aria-hidden
+        animate={{ rotate: -360 }}
+        transition={{ duration: 30, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {stardust.slice(9).map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.12, 0.88, 0.12], scale: [0.3, 1.4, 0.3] }}
+            transition={{ repeat: Infinity, duration: 4.0, ease: "easeInOut", delay: p.delay }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: 2.2,
+              height: 2.2,
+              borderRadius: "50%",
+              background: p.purple ? "#c4b5fd" : "#6ee7b7",
+              boxShadow: p.purple
+                ? `0 0 5px 1.5px rgba(196,181,253,0.75)`
+                : `0 0 5px 1.5px rgba(110,231,183,0.75)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — void-dark chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 5.0, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #100820 0%, #040108 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.14)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.07)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px rgba(124,58,237,0.65)`,
+            `0 0 0 3.5px rgba(16,185,129,0.16)`,
+            "0 6px 22px rgba(0,0,0,0.94)",
+            `0 0 34px 12px rgba(124,58,237,${canAfford && !owned ? "0.48" : "0.20"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner cosmic nebula — purple core fading to emerald edge */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.28, 0.62, 0.28], scale: [0.68, 1.12, 0.68] }}
+          transition={{ duration: 5.0, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 48% 52%, rgba(124,58,237,0.72) 0%, rgba(4,120,87,0.32) 45%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Emerald counter-shimmer at the edge */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.10, 0.38, 0.10], rotate: [0, 180, 360] }}
+          transition={{ duration: 8.0, ease: "linear", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 4, borderRadius: "50%",
+            background: `conic-gradient(from 0deg, transparent 0%, rgba(16,185,129,0.22) 30%, transparent 60%, rgba(124,58,237,0.18) 85%, transparent 100%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 5.0, ease: "linear", repeatDelay: 5.5 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(180,140,255,0.22) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Paw icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.07, 1], opacity: [0.88, 1, 0.88] }}
+          transition={{ duration: 5.0, ease: "easeInOut", repeat: Infinity }}
+        >
+          <AncientInstinctSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Etched Glass Shop Card ────────────────────────────────────────────────────
 function ShopCard({
   item,
@@ -1941,6 +2183,8 @@ function ShopCard({
           <ThickFurBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "wolf-alpha-mark" ? (
           <AlphaMarkBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "wolf-ancient" ? (
+          <AncientInstinctBadge canAfford={canAfford} owned={owned} />
         ) : (
           <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
             {canAfford && !owned && (
