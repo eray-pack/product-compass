@@ -733,9 +733,9 @@ function Tools() {
                 style={{ overflow: "hidden" }}
               >
                 <div style={{
-                  background: "rgba(255,255,255,0.04)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
+                  background: "rgba(5,5,8,0.72)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
                   border: "1px solid rgba(255,255,255,0.09)",
                   borderTop: "1px solid rgba(201,168,76,0.14)",
                   borderRadius: 20,
