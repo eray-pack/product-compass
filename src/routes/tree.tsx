@@ -69,6 +69,36 @@ const NIGHT_STARS = [
 ] as const;
 
 
+// ── Companion health — driven by login frequency (last 7 days) ────────────────
+type HealthState = "thriving" | "growing" | "fading" | "neglected";
+
+const HEALTH_CONFIG: Record<HealthState, {
+  label: string;
+  emoji: string;
+  color: string;
+  desc: string;
+  companionFilter: string;
+  sceneOverlay: string;
+}> = {
+  thriving:  { label: "Thriving",  emoji: "🌿", color: "#3fb86a", desc: "You show up every day.",              companionFilter: "none",                                         sceneOverlay: "transparent" },
+  growing:   { label: "Growing",   emoji: "🌱", color: "#8fbe5a", desc: "Keep the rhythm going.",             companionFilter: "saturate(0.80) brightness(0.95)",              sceneOverlay: "rgba(0,0,0,0.06)" },
+  fading:    { label: "Fading",    emoji: "🍂", color: "#C9A84C", desc: "It misses you. Come back more.",     companionFilter: "saturate(0.45) brightness(0.80) sepia(0.25)",  sceneOverlay: "rgba(20,10,0,0.22)" },
+  neglected: { label: "Neglected", emoji: "🪨", color: "#7a6a5a", desc: "It's barely holding on. Open up.",  companionFilter: "saturate(0.15) brightness(0.62) sepia(0.35)",  sceneOverlay: "rgba(8,8,8,0.40)" },
+};
+
+function getCompanionHealth(loginHistory: number[]): { state: HealthState; daysThisWeek: number } {
+  const daySet = new Set(
+    (loginHistory ?? []).map((ts) => new Date(ts).toISOString().slice(0, 10))
+  );
+  let count = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+    if (daySet.has(d)) count++;
+  }
+  const state: HealthState = count >= 6 ? "thriving" : count >= 4 ? "growing" : count >= 2 ? "fading" : "neglected";
+  return { state, daysThisWeek: count };
+}
+
 // ── Background: Tree — timezone-based sky ─────────────────────────────────────
 function getTimeOfDay() {
   const h = new Date().getHours();
@@ -457,6 +487,8 @@ function WolfPage({
     wolfStage.stage >= 7
       ? 100
       : Math.min(100, ((state.treeXP - prevThreshold) / (wolfStage.next - prevThreshold)) * 100);
+  const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);
+  const health = HEALTH_CONFIG[healthState];
 
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
@@ -494,6 +526,8 @@ function WolfPage({
           {/* Scene viewport */}
           <div className="relative" style={{ height: "320px" }}>
             <WolfBackground />
+            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
+              style={{ background: health.sceneOverlay }} />
 
             {/* Stage badge — top left */}
             <div className="absolute top-3 left-3 z-20">
@@ -567,8 +601,24 @@ function WolfPage({
               </span>
             </div>
 
+            {/* Health badge — bottom center */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  background: "rgba(0,0,0,0.45)",
+                  border: `1px solid ${health.color}55`,
+                  color: health.color,
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {health.emoji} {health.label} · {daysThisWeek}/7 days
+              </span>
+            </div>
+
             {/* Wolf visual — 3D or Cartoon */}
-            <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="absolute inset-0 flex items-center justify-center z-10"
+              style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
               {wolfStyle === "3d" ? (
                 <div className="w-full h-full">
                   <Wolf3D stage={wolfStage.stage} />
@@ -620,6 +670,9 @@ function WolfPage({
               <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
               Your wolf ranks in the{" "}
               <span className="text-success font-semibold">top {WOLF_TOP_PCT_BY_STAGE[wolfStage.stage]}%</span> of all users
+            </p>
+            <p className="mt-1.5 text-xs" style={{ color: health.color, opacity: 0.85 }}>
+              {health.emoji} {health.desc}
             </p>
           </div>
 
@@ -711,6 +764,8 @@ function LifeTreePage({
       : Math.min(100, ((state.treeXP - prevThreshold) / (stage.next - prevThreshold)) * 100);
   const timeOfDay = getTimeOfDay();
   const skyCfg = SKY_CONFIGS[timeOfDay];
+  const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);
+  const health = HEALTH_CONFIG[healthState];
 
   const [treeStyle, setTreeStyle] = useState<"3d" | "cartoon">(() => {
     try { return (localStorage.getItem("stopamine.tree-style") as "3d" | "cartoon") ?? "cartoon"; }
@@ -749,10 +804,29 @@ function LifeTreePage({
           <div className="relative" style={{ height: "320px" }}>
             <TreeSkyBackground timeOfDay={timeOfDay} />
 
+            {/* Health state overlay — darkens/desaturates scene when neglected */}
+            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
+              style={{ background: health.sceneOverlay }} />
+
             {/* Floating stage badge */}
             <div className="absolute top-3 left-3 z-20">
               <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full backdrop-blur-sm">
                 Stage {stage.stage} · {stage.name}
+              </span>
+            </div>
+
+            {/* Health badge — bottom center */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  background: "rgba(0,0,0,0.45)",
+                  border: `1px solid ${health.color}55`,
+                  color: health.color,
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {health.emoji} {health.label} · {daysThisWeek}/7 days
               </span>
             </div>
 
@@ -822,7 +896,8 @@ function LifeTreePage({
             </div>
 
             {/* Tree visual — 3D or Cartoon based on toggle */}
-            <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="absolute inset-0 flex items-center justify-center z-10"
+              style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
               {treeStyle === "3d" ? (
                 <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
                   <Tree3D day={day} />
@@ -851,6 +926,9 @@ function LifeTreePage({
               <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
               Your tree ranks in the{" "}
               <span className="text-success font-semibold">top {TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users
+            </p>
+            <p className="mt-1.5 text-xs" style={{ color: health.color, opacity: 0.85 }}>
+              {health.emoji} {health.desc}
             </p>
           </div>
 
