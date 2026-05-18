@@ -467,6 +467,17 @@ html.light {
 }
 .sos-breathe { animation: sos-breathe 8s ease-in-out infinite; }
 
+/* ── Coach background wave breathe ─────────────────────── */
+@keyframes coach-wave-breathe {
+  0%, 100% { opacity: 0.025; }
+  50%       { opacity: 0.052; }
+}
+.coach-wave   { animation: coach-wave-breathe 20s ease-in-out infinite; }
+.coach-wave-2 { animation: coach-wave-breathe 20s ease-in-out 4s  infinite; }
+.coach-wave-3 { animation: coach-wave-breathe 20s ease-in-out 8s  infinite; }
+.coach-wave-4 { animation: coach-wave-breathe 20s ease-in-out 12s infinite; }
+.coach-wave-5 { animation: coach-wave-breathe 20s ease-in-out 16s infinite; }
+
 /* ── Coach robot illustration ──────────────────────────── */
 @keyframes robot-bob {
   0%, 100% { transform: rotate(-5deg) translateY(0px); }
