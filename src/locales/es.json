@@ -173,7 +173,7 @@
   "tools": {
     "header": "Herramientas de recuperación",
     "subtitle": "Elige tu arma contra el impulso.",
-    "indexSubtitle": "Usa lo que funciona.",
+    "indexSubtitle": "Usa lo que funcione.",
     "reframes": {
       "0": "Cada vez que resistes, literalmente creas nuevas vías neuronales.",
       "1": "El impulso no eres tú — es un cableado antiguo pidiendo una dosis más.",
@@ -193,11 +193,14 @@
       "heroLine2": "Estamos contigo.",
       "heroSub": "Toca para surfear el impulso · 3 min"
     },
-    "gamesTitle": "Juegos Cortar la señal",
-    "gamesDesc": "Entrena tu cerebro. Vence el impulso.",
-    "mindPulse": "Pulso mental",
-    "impulseShift": "Cambio de impulso",
-    "neuralLink": "Enlace neuronal",
+    "gamesTitle": "Juegos: Cortar la Señal",
+    "gamesDesc": "Entrena tu cerebro. Supera el impulso.",
+    "mindPulse": "Pulso Mental",
+    "impulseShift": "Cambio de Impulso",
+    "neuralLink": "Enlace Neural",
+    "gamesProTitle": "Juegos Pro",
+    "gamesProLocked": "Juegos Pro (Bloqueados)",
+    "gamesProLockedSub": "Suscríbete para desbloquear todos los juegos premium.",
     "moreGames": "Más juegos disponibles",
     "reframeTitle": "Reencuadre",
     "reframeDesc": "Recablea tu reacción en un solo pensamiento.",
@@ -231,35 +234,35 @@
       "desc": "Ancla tu razón más fuerte"
     },
     "darkroom": {
-      "name": "Cuarto oscuro",
+      "name": "Habitación Oscura",
       "desc": "Modo de privación sensorial"
     },
     "voidstare": {
-      "name": "Mirada al vacío",
+      "name": "Mirada al Vacío",
       "desc": "Mira al abismo"
     },
     "noisefilter": {
-      "name": "Filtro de ruido",
+      "name": "Filtro de Ruido",
       "desc": "Campo de concentración con ruido marrón"
     },
     "echochamber": {
-      "name": "Cámara de eco",
+      "name": "Cámara de Eco",
       "desc": "Escucha tu propia convicción"
     },
     "identitystack": {
-      "name": "Pila de identidad",
+      "name": "Anclaje de Identidad",
       "desc": "En quién te estás convirtiendo"
     },
     "clarityclimb": {
-      "name": "Escalada de claridad",
+      "name": "Ascenso a la Claridad",
       "desc": "Escalera de atención plena"
     },
     "coldswitch": {
-      "name": "Interruptor frío",
+      "name": "Corte Frío",
       "desc": "Bajada de temperatura de emergencia"
     },
     "steadyhand": {
-      "name": "Mano firme",
+      "name": "Mano Firme",
       "desc": "Ejercicio de enfoque de precisión"
     }
   },
