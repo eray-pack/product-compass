@@ -376,12 +376,7 @@ function ArcadeTextureSVG() {
   return (
     <svg
       aria-hidden
-      style={{
-        position: "absolute",
-        top: 0, right: 0, bottom: 0, left: 0,
-        width: "100%", height: "100%",
-        zIndex: 0, pointerEvents: "none",
-      }}
+      style={{ display: "block", width: "100%", height: "100%" }}
       viewBox="0 0 380 360"
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
@@ -850,8 +845,26 @@ function Tools() {
                   padding: "22px 20px 24px",
                 }}>
 
-                  {/* ── Static etched-glass texture — z-0 ── */}
-                  <ArcadeTextureSVG />
+                  {/* ── Rotating etched-glass texture — z-0 ── */}
+                  {/*
+                    Oversized by 150 % and offset by −25 % so the rotating
+                    rectangle always fully covers the panel at every angle.
+                    The panel's own overflow:hidden clips the excess cleanly.
+                  */}
+                  <motion.div
+                    aria-hidden
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 180, ease: "linear", repeat: Infinity }}
+                    style={{
+                      position: "absolute",
+                      top: "-25%", left: "-25%",
+                      width: "150%", height: "150%",
+                      zIndex: 0,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <ArcadeTextureSVG />
+                  </motion.div>
 
                   {/* ── Content — above texture ── */}
                   <div style={{ position: "relative", zIndex: 1 }}>
