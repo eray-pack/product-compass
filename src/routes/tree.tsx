@@ -520,177 +520,118 @@ function WolfPage({
         </p>
       </header>
 
-      {/* Wolf scene — same card layout as Life Tree */}
-      <section className="px-6 mt-6">
-        <div className="rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--shadow-glow)" }}>
-          {/* Scene viewport */}
-          <div className="relative" style={{ height: "320px" }}>
-            <WolfBackground />
-            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
-              style={{ background: health.sceneOverlay }} />
+      {/* Wolf scene — full-bleed */}
+      <section className="mt-4 relative" style={{ height: 360 }}>
+        <div className="absolute inset-0 overflow-hidden">
+          <WolfBackground />
+        </div>
+        <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
+          style={{ background: health.sceneOverlay }} />
+        <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
+          style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
 
-            {/* Stage badge — top left */}
-            <div className="absolute top-3 left-3 z-20">
-              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full backdrop-blur-sm">
-                Stage {wolfStage.stage} · {wolfStage.name}
-              </span>
+        {/* Stage — top left */}
+        <div className="absolute top-4 left-5 z-20">
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "#C9A84C", background: "rgba(0,0,0,0.40)",
+            border: "1px solid rgba(201,168,76,0.30)",
+            borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)",
+          }}>
+            Stage {wolfStage.stage} · {wolfStage.name}
+          </span>
+        </div>
+
+        {/* Style toggle — top right */}
+        <div className="absolute top-4 right-5 z-20">
+          <div style={{
+            display: "inline-flex", borderRadius: 999, padding: 3,
+            background: "rgba(0,0,0,0.40)", border: "1px solid rgba(255,255,255,0.09)",
+            backdropFilter: "blur(10px)",
+          }}>
+            {(["cartoon", "3d"] as const).map((opt) => (
+              <button
+                key={opt}
+                onClick={() => toggleWolfStyle(opt)}
+                style={{
+                  padding: "3px 12px", borderRadius: 999,
+                  fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                  border: wolfStyle === opt ? "1px solid rgba(201,168,76,0.50)" : "1px solid transparent",
+                  background: wolfStyle === opt ? "rgba(201,168,76,0.18)" : "transparent",
+                  color: wolfStyle === opt ? "#C9A84C" : "rgba(255,255,255,0.35)",
+                  cursor: "pointer", transition: "all 0.18s",
+                }}
+              >
+                {opt === "3d" ? "3D" : "Cartoon"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Wolf visual */}
+        <div className="absolute inset-0 flex items-center justify-center z-10"
+          style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
+          {wolfStyle === "3d" ? (
+            <div className="w-full h-full">
+              <Wolf3D stage={wolfStage.stage} />
             </div>
-
-            {/* Top-right: night badge + style toggle */}
-            <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-1.5">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full"
-                style={{
-                  background: "rgba(0,0,0,0.38)",
-                  border: "1px solid rgba(255,255,255,0.14)",
-                  color: "rgba(255,255,255,0.80)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                🌙 Night
-              </span>
-              {/* 3D / Cartoon pill toggle */}
-              <div
-                className="inline-flex rounded-full p-0.5"
-                style={{
-                  background: "rgba(0,0,0,0.45)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                {(["3d", "cartoon"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => toggleWolfStyle(opt)}
-                    className="px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide transition-all"
-                    style={
-                      wolfStyle === opt
-                        ? { background: "rgba(196,135,58,0.22)", color: "#C4873A", border: "1px solid rgba(196,135,58,0.50)" }
-                        : { color: "rgba(255,255,255,0.45)", border: "1px solid transparent" }
-                    }
-                  >
-                    {opt === "3d" ? "3D" : "Cartoon"}
-                  </button>
-                ))}
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+              <div className="companion-3d anim-tree-float" style={{ width: "160px", height: "192px", marginBottom: "-12px" }}>
+                <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
               </div>
+              <div style={{ width: "170px", height: "36px", borderRadius: "50%", background: "radial-gradient(ellipse at 50% 30%, #2d6a3f, #1a4028)", boxShadow: "0 0 28px 10px rgba(20,80,40,0.28)", border: "1px solid rgba(45,110,65,0.40)" }} />
             </div>
+          )}
+        </div>
 
-            {/* Rank badge — bottom left */}
-            <div className="absolute bottom-3 left-3 z-20">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full"
-                style={{
-                  color: "oklch(0.92 0.14 90)",
-                  background: "linear-gradient(135deg, oklch(0.35 0.08 75 / 0.5), oklch(0.5 0.14 85 / 0.30))",
-                  border: "1px solid oklch(0.78 0.16 85 / 0.65)",
-                  boxShadow: "0 0 16px -2px oklch(0.78 0.16 85 / 0.5)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                <Crown className="h-3 w-3" /> {WOLF_RANK_BY_STAGE[wolfStage.stage]}
-              </span>
-            </div>
+        {/* Bottom row */}
+        <div className="absolute bottom-5 inset-x-5 z-20 flex items-center justify-between">
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A84C", background: "rgba(0,0,0,0.38)", border: "1px solid rgba(201,168,76,0.30)", borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)" }}>
+            <Crown style={{ height: 11, width: 11 }} /> {WOLF_RANK_BY_STAGE[wolfStage.stage]}
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, color: health.color, background: "rgba(0,0,0,0.38)", border: `1px solid ${health.color}40`, borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)" }}>
+            {health.emoji} {health.label} · {daysThisWeek}/7
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.55)", background: "rgba(0,0,0,0.38)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)" }}>
+            <Sparkles style={{ height: 11, width: 11 }} /> Day {day}
+          </span>
+        </div>
+      </section>
 
-            {/* Day badge — bottom right */}
-            <div className="absolute bottom-3 right-3 z-20">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] text-warning bg-warning/10 border border-warning/30 px-2 py-1 rounded-full"
-                style={{ backdropFilter: "blur(8px)" }}
-              >
-                <Sparkles className="h-3 w-3" /> Day {day} of you
-              </span>
-            </div>
-
-            {/* Health badge — bottom center */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                style={{
-                  background: "rgba(0,0,0,0.45)",
-                  border: `1px solid ${health.color}55`,
-                  color: health.color,
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                {health.emoji} {health.label} · {daysThisWeek}/7 days
-              </span>
-            </div>
-
-            {/* Wolf visual — 3D or Cartoon */}
-            <div className="absolute inset-0 flex items-center justify-center z-10"
-              style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
-              {wolfStyle === "3d" ? (
-                <div className="w-full h-full">
-                  <Wolf3D stage={wolfStage.stage} />
-                </div>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-                  <div
-                    className="companion-3d anim-tree-float"
-                    style={{ width: "160px", height: "192px", marginBottom: "-12px" }}
-                  >
-                    <CompanionAvatar
-                      type="wolf"
-                      day={day}
-                      stage={wolfStage.stage}
-                      relapseCount={state.relapses.length}
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div
-                    style={{
-                      width: "170px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      background: "radial-gradient(ellipse at 50% 30%, #2d6a3f, #1a4028)",
-                      boxShadow: "0 0 28px 10px rgba(20,80,40,0.28), inset 0 -6px 14px rgba(0,0,0,0.40)",
-                      border: "1px solid rgba(45,110,65,0.40)",
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+      {/* XP + stats */}
+      <section className="px-6 mt-2">
+        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-muted-foreground">{wolfStage.name}</span>
+            <span className="text-muted-foreground tabular-nums">{state.treeXP} / {wolfStage.next} XP</span>
           </div>
-
-          {/* XP progress bar — mirrors tree */}
-          <div className="px-5 py-4 border-t border-border/60" style={{ background: "var(--card)" }}>
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span className="text-muted-foreground">{wolfStage.name}</span>
-              <span className="text-muted-foreground tabular-nums">
-                {state.treeXP} / {wolfStage.next} XP
-              </span>
-            </div>
-            <div className="h-2 rounded-full bg-secondary overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
-              />
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #C9A84C, #E8C06A)" }} />
+          </div>
+          <div className="flex items-center justify-between mt-2.5">
+            <p className="text-xs text-muted-foreground">
               <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
-              Your wolf ranks in the{" "}
-              <span className="text-success font-semibold">top {WOLF_TOP_PCT_BY_STAGE[wolfStage.stage]}%</span> of all users
+              Top <span className="text-success font-semibold">{WOLF_TOP_PCT_BY_STAGE[wolfStage.stage]}%</span> of all users
             </p>
-            <p className="mt-1.5 text-xs" style={{ color: health.color, opacity: 0.85 }}>
-              {health.emoji} {health.desc}
-            </p>
+            <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>{health.emoji} {health.desc}</p>
           </div>
+        </div>
+      </section>
 
-          {/* Gold divider */}
-          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(196,135,58,0.35) 20%, rgba(196,135,58,0.35) 80%, transparent)" }} />
-
-          {/* Compact leaderboard */}
-          <div className="px-5 py-3" style={{ background: "var(--card)" }}>
-            <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-2.5" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
-            <div className="space-y-2">
-              {HALL_OF_LEGENDS.map((u, i) => (
-                <div key={u.name} className="flex items-center gap-2.5">
-                  <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.70 : 0.50 }} />
-                  <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{u.name}</span>
-                  <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.75)" }}>Day {u.day}</span>
-                </div>
-              ))}
-            </div>
+      {/* Hall of Legends */}
+      <section className="px-6 mt-3">
+        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "14px 18px" }}>
+          <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
+          <div className="space-y-2.5">
+            {HALL_OF_LEGENDS.map((u, i) => (
+              <div key={u.name} className="flex items-center gap-2.5">
+                <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.65 : 0.40 }} />
+                <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{u.name}</span>
+                <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.70)" }}>Day {u.day}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -797,156 +738,151 @@ function LifeTreePage({
         </p>
       </header>
 
-      {/* Tree visual — with timezone sky background + Y-axis rotation */}
-      <section className="px-6 mt-6">
-        <div className="rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--shadow-glow)" }}>
-          {/* Sky viewport */}
-          <div className="relative" style={{ height: "320px" }}>
-            <TreeSkyBackground timeOfDay={timeOfDay} />
+      {/* Tree scene — full-bleed, no card frame */}
+      <section className="mt-4 relative" style={{ height: 360 }}>
+        {/* Sky fills the section edge-to-edge */}
+        <div className="absolute inset-0 overflow-hidden">
+          <TreeSkyBackground timeOfDay={timeOfDay} />
+        </div>
 
-            {/* Health state overlay — darkens/desaturates scene when neglected */}
-            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
-              style={{ background: health.sceneOverlay }} />
+        {/* Health overlay */}
+        <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
+          style={{ background: health.sceneOverlay }} />
 
-            {/* Floating stage badge */}
-            <div className="absolute top-3 left-3 z-20">
-              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full backdrop-blur-sm">
-                Stage {stage.stage} · {stage.name}
-              </span>
-            </div>
+        {/* Bottom fade — sky bleeds into page background */}
+        <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
+          style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
 
-            {/* Health badge — bottom center */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+        {/* Stage badge — top left */}
+        <div className="absolute top-4 left-5 z-20">
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "#C9A84C", background: "rgba(0,0,0,0.40)",
+            border: "1px solid rgba(201,168,76,0.30)",
+            borderRadius: 999, padding: "4px 10px",
+            backdropFilter: "blur(10px)",
+          }}>
+            Stage {stage.stage} · {stage.name}
+          </span>
+        </div>
+
+        {/* Style toggle — top right */}
+        <div className="absolute top-4 right-5 z-20">
+          <div style={{
+            display: "inline-flex", borderRadius: 999, padding: 3,
+            background: "rgba(0,0,0,0.40)", border: "1px solid rgba(255,255,255,0.09)",
+            backdropFilter: "blur(10px)",
+          }}>
+            {(["cartoon", "3d"] as const).map((opt) => (
+              <button
+                key={opt}
+                onClick={() => toggleTreeStyle(opt)}
                 style={{
-                  background: "rgba(0,0,0,0.45)",
-                  border: `1px solid ${health.color}55`,
-                  color: health.color,
-                  backdropFilter: "blur(8px)",
+                  padding: "3px 12px", borderRadius: 999,
+                  fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                  border: treeStyle === opt ? "1px solid rgba(201,168,76,0.50)" : "1px solid transparent",
+                  background: treeStyle === opt ? "rgba(201,168,76,0.18)" : "transparent",
+                  color: treeStyle === opt ? "#C9A84C" : "rgba(255,255,255,0.35)",
+                  cursor: "pointer", transition: "all 0.18s",
                 }}
               >
-                {health.emoji} {health.label} · {daysThisWeek}/7 days
-              </span>
-            </div>
-
-            {/* Top-right: time badge + style toggle */}
-            <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-1.5">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full"
-                style={{
-                  background: "rgba(0,0,0,0.38)",
-                  border: "1px solid rgba(255,255,255,0.14)",
-                  color: "rgba(255,255,255,0.80)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                {skyCfg.emoji} {skyCfg.label}
-              </span>
-              {/* 3D / Cartoon pill toggle */}
-              <div
-                className="inline-flex rounded-full p-0.5"
-                style={{
-                  background: "rgba(0,0,0,0.45)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                {(["3d", "cartoon"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => toggleTreeStyle(opt)}
-                    className="px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide transition-all"
-                    style={
-                      treeStyle === opt
-                        ? { background: "rgba(196,135,58,0.22)", color: "#C4873A", border: "1px solid rgba(196,135,58,0.50)" }
-                        : { color: "rgba(255,255,255,0.45)", border: "1px solid transparent" }
-                    }
-                  >
-                    {opt === "3d" ? "3D" : "Cartoon"}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Rank badge */}
-            <div className="absolute bottom-3 left-3 z-20">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full"
-                style={{
-                  color: "oklch(0.92 0.14 90)",
-                  background: "linear-gradient(135deg, oklch(0.35 0.08 75 / 0.5), oklch(0.5 0.14 85 / 0.30))",
-                  border: "1px solid oklch(0.78 0.16 85 / 0.65)",
-                  boxShadow: "0 0 16px -2px oklch(0.78 0.16 85 / 0.5)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                <Crown className="h-3 w-3" /> {RANK_BY_STAGE[stage.stage]}
-              </span>
-            </div>
-
-            {/* Day badge */}
-            <div className="absolute bottom-3 right-3 z-20">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] text-warning bg-warning/10 border border-warning/30 px-2 py-1 rounded-full"
-                style={{ backdropFilter: "blur(8px)" }}
-              >
-                <Sparkles className="h-3 w-3" /> Day {day} of you
-              </span>
-            </div>
-
-            {/* Tree visual — 3D or Cartoon based on toggle */}
-            <div className="absolute inset-0 flex items-center justify-center z-10"
-              style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
-              {treeStyle === "3d" ? (
-                <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
-                  <Tree3D day={day} />
-                </div>
-              ) : (
-                <div className="anim-tree-float" style={{ width: "100%", height: "100%" }}>
-                  <CartoonTree day={day} xp={state.treeXP} />
-                </div>
-              )}
-            </div>
+                {opt === "3d" ? "3D" : "Cartoon"}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* XP progress bar */}
-          <div className="px-5 py-4 border-t border-border/60" style={{ background: "var(--card)" }}>
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span className="text-muted-foreground">{stage.name}</span>
-              <span className="text-muted-foreground tabular-nums">{state.treeXP} / {stage.next} XP</span>
+        {/* Tree visual */}
+        <div className="absolute inset-0 flex items-center justify-center z-10"
+          style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
+          {treeStyle === "3d" ? (
+            <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
+              <Tree3D day={day} />
             </div>
-            <div className="h-2 rounded-full bg-secondary overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
-              />
+          ) : (
+            <div className="anim-tree-float" style={{ width: "100%", height: "100%" }}>
+              <CartoonTree day={day} xp={state.treeXP} />
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
+          )}
+        </div>
+
+        {/* Bottom row — rank left, health center, day right */}
+        <div className="absolute bottom-5 inset-x-5 z-20 flex items-center justify-between">
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            color: "#C9A84C", background: "rgba(0,0,0,0.38)",
+            border: "1px solid rgba(201,168,76,0.30)", borderRadius: 999, padding: "4px 10px",
+            backdropFilter: "blur(10px)",
+          }}>
+            <Crown style={{ height: 11, width: 11 }} /> {RANK_BY_STAGE[stage.stage]}
+          </span>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            fontSize: 10, fontWeight: 600,
+            color: health.color, background: "rgba(0,0,0,0.38)",
+            border: `1px solid ${health.color}40`, borderRadius: 999, padding: "4px 10px",
+            backdropFilter: "blur(10px)",
+          }}>
+            {health.emoji} {health.label} · {daysThisWeek}/7
+          </span>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.55)",
+            background: "rgba(0,0,0,0.38)", border: "1px solid rgba(255,255,255,0.10)",
+            borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)",
+          }}>
+            <Sparkles style={{ height: 11, width: 11 }} /> Day {day}
+          </span>
+        </div>
+      </section>
+
+      {/* XP + stats — sits on dark page background naturally */}
+      <section className="px-6 mt-2">
+        <div style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderTop: "1px solid rgba(201,168,76,0.12)",
+          borderRadius: 20, padding: "16px 18px",
+        }}>
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-muted-foreground">{stage.name}</span>
+            <span className="text-muted-foreground tabular-nums">{state.treeXP} / {stage.next} XP</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${pct}%`, background: "linear-gradient(90deg, #C9A84C, #E8C06A)" }} />
+          </div>
+          <div className="flex items-center justify-between mt-2.5">
+            <p className="text-xs text-muted-foreground">
               <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
-              Your tree ranks in the{" "}
-              <span className="text-success font-semibold">top {TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users
+              Top <span className="text-success font-semibold">{TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users
             </p>
-            <p className="mt-1.5 text-xs" style={{ color: health.color, opacity: 0.85 }}>
+            <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>
               {health.emoji} {health.desc}
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Gold divider */}
-          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(196,135,58,0.35) 20%, rgba(196,135,58,0.35) 80%, transparent)" }} />
-
-          {/* Compact leaderboard */}
-          <div className="px-5 py-3" style={{ background: "var(--card)" }}>
-            <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-2.5" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
-            <div className="space-y-2">
-              {HALL_OF_LEGENDS.map((u, i) => (
-                <div key={u.name} className="flex items-center gap-2.5">
-                  <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.70 : 0.50 }} />
-                  <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{u.name}</span>
-                  <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.75)" }}>Day {u.day}</span>
-                </div>
-              ))}
-            </div>
+      {/* Hall of Legends */}
+      <section className="px-6 mt-3">
+        <div style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderTop: "1px solid rgba(201,168,76,0.12)",
+          borderRadius: 20, padding: "14px 18px",
+        }}>
+          <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
+          <div className="space-y-2.5">
+            {HALL_OF_LEGENDS.map((u, i) => (
+              <div key={u.name} className="flex items-center gap-2.5">
+                <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.65 : 0.40 }} />
+                <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{u.name}</span>
+                <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.70)" }}>Day {u.day}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
