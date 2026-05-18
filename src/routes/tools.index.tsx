@@ -470,29 +470,83 @@ function ArcadeBadge({
 
   const circle = (
     <div style={{ position: "relative" }}>
-      {/* Ambient halo */}
-      <div style={{
-        position: "absolute", inset: -8, borderRadius: "50%",
-        background: `radial-gradient(circle, ${glow}32 0%, transparent 72%)`,
-        filter: "blur(7px)", pointerEvents: "none",
-      }} />
-      {/* Breathing badge circle */}
+      {/* Outer ambient halo — colour bleeds softly behind the button */}
+      {!locked && (
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.55, 0.85, 0.55], scale: [0.92, 1.08, 0.92] }}
+          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+          style={{
+            position: "absolute", inset: -10, borderRadius: "50%",
+            background: `radial-gradient(circle, ${glow}40 0%, transparent 70%)`,
+            filter: "blur(9px)", pointerEvents: "none",
+          }}
+        />
+      )}
+
+      {/* Badge circle — solid black, metallic bevel, clipped */}
       <motion.div
-        animate={{ scale: [1, 1.06, 1] }}
+        animate={{ scale: [1, 1.05, 1] }}
         transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         style={{
-          position: "relative", width: 62, height: 62, borderRadius: "50%",
+          position: "relative", width: 64, height: 64, borderRadius: "50%",
           display: "grid", placeItems: "center",
-          background: locked ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.05)",
-          border: `1.5px solid ${locked ? "rgba(255,255,255,0.10)" : glow + "48"}`,
-          boxShadow: locked ? "none" : `0 0 16px 4px ${glow}22`,
+          overflow: "hidden",
+          // Solid black base
+          background: locked ? "#0c0c0e" : "#000000",
+          // Metallic chamfered rim: top-left highlight + bottom-right shadow + coloured outer ring
+          border: `1.5px solid ${locked ? "rgba(255,255,255,0.10)" : glow + "70"}`,
+          boxShadow: locked ? "none" : [
+            `inset 0 1.5px 0 rgba(255,255,255,0.16)`,
+            `inset 0 -1.5px 0 rgba(0,0,0,0.95)`,
+            `inset 1.5px 0 0 rgba(255,255,255,0.08)`,
+            `inset -1.5px 0 0 rgba(0,0,0,0.60)`,
+            `0 0 0 1px rgba(255,255,255,0.07)`,
+            `0 5px 18px rgba(0,0,0,0.90)`,
+            `0 0 22px 5px ${glow}30`,
+          ].join(", "),
           filter: locked ? "none" : glowFilter,
-          opacity: locked ? 0.45 : 1,
+          opacity: locked ? 0.40 : 1,
         }}
       >
-        {/* Inner ambient loop — only when unlocked */}
+        {/* ── Inner power nebula glow — behind the icon ── */}
+        {!locked && (
+          <motion.div
+            aria-hidden
+            animate={{ opacity: [0.22, 0.52, 0.22], scale: [0.70, 1.05, 0.70] }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              background: `radial-gradient(circle at 50% 58%, ${glow}80 0%, ${glow}38 36%, transparent 68%)`,
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          />
+        )}
+
+        {/* ── Glint — diagonal sheen sweeping across the black surface ── */}
+        {!locked && (
+          <motion.div
+            aria-hidden
+            animate={{ x: ["-72px", "72px"] }}
+            transition={{ repeat: Infinity, duration: 3.5, ease: "linear", repeatDelay: 2.8 }}
+            style={{
+              position: "absolute",
+              top: "-8px", left: "-8px",
+              width: "28px", height: "88px",
+              background: "linear-gradient(108deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%)",
+              filter: "blur(3px)",
+              transform: "rotate(22deg)",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          />
+        )}
+
+        {/* ── Icon — sits above glow and glint ── */}
         {!locked ? (
           <motion.div
+            style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
             animate={
               ambient === "rotate"  ? { rotate: 360 } :
               ambient === "breathe" ? { scale: [1, 1.08, 1] } :
@@ -508,14 +562,16 @@ function ArcadeBadge({
           >
             {icon}
           </motion.div>
-        ) : icon}
+        ) : (
+          <div style={{ position: "relative", zIndex: 1 }}>{icon}</div>
+        )}
 
-        {/* Lock overlay */}
+        {/* ── Lock overlay ── */}
         {locked && (
           <div style={{
             position: "absolute", inset: 0, borderRadius: "50%",
-            background: "rgba(0,0,0,0.50)",
-            display: "grid", placeItems: "center",
+            background: "rgba(0,0,0,0.55)",
+            display: "grid", placeItems: "center", zIndex: 3,
           }}>
             <Lock style={{ height: 14, width: 14, color: "#C9A84C" }} />
           </div>
