@@ -23,6 +23,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsVoidstareRouteImport } from './routes/tools.voidstare'
+import { Route as ToolsUrgesurfingRouteImport } from './routes/tools.urgesurfing'
 import { Route as ToolsTapRouteImport } from './routes/tools.tap'
 import { Route as ToolsSteadyhandRouteImport } from './routes/tools.steadyhand'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
@@ -105,6 +106,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
 const ToolsVoidstareRoute = ToolsVoidstareRouteImport.update({
   id: '/voidstare',
   path: '/voidstare',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsUrgesurfingRoute = ToolsUrgesurfingRouteImport.update({
+  id: '/urgesurfing',
+  path: '/urgesurfing',
   getParentRoute: () => ToolsRoute,
 } as any)
 const ToolsTapRoute = ToolsTapRouteImport.update({
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/tools/sos': typeof ToolsSosRoute
   '/tools/steadyhand': typeof ToolsSteadyhandRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/urgesurfing': typeof ToolsUrgesurfingRoute
   '/tools/voidstare': typeof ToolsVoidstareRoute
   '/tools/': typeof ToolsIndexRoute
 }
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/tools/sos': typeof ToolsSosRoute
   '/tools/steadyhand': typeof ToolsSteadyhandRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/urgesurfing': typeof ToolsUrgesurfingRoute
   '/tools/voidstare': typeof ToolsVoidstareRoute
   '/tools': typeof ToolsIndexRoute
 }
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/tools/sos': typeof ToolsSosRoute
   '/tools/steadyhand': typeof ToolsSteadyhandRoute
   '/tools/tap': typeof ToolsTapRoute
+  '/tools/urgesurfing': typeof ToolsUrgesurfingRoute
   '/tools/voidstare': typeof ToolsVoidstareRoute
   '/tools/': typeof ToolsIndexRoute
 }
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/tools/sos'
     | '/tools/steadyhand'
     | '/tools/tap'
+    | '/tools/urgesurfing'
     | '/tools/voidstare'
     | '/tools/'
   fileRoutesByTo: FileRoutesByTo
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/tools/sos'
     | '/tools/steadyhand'
     | '/tools/tap'
+    | '/tools/urgesurfing'
     | '/tools/voidstare'
     | '/tools'
   id:
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/tools/sos'
     | '/tools/steadyhand'
     | '/tools/tap'
+    | '/tools/urgesurfing'
     | '/tools/voidstare'
     | '/tools/'
   fileRoutesById: FileRoutesById
@@ -464,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsVoidstareRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/urgesurfing': {
+      id: '/tools/urgesurfing'
+      path: '/urgesurfing'
+      fullPath: '/tools/urgesurfing'
+      preLoaderRoute: typeof ToolsUrgesurfingRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/tap': {
       id: '/tools/tap'
       path: '/tap'
@@ -572,6 +591,7 @@ interface ToolsRouteChildren {
   ToolsSosRoute: typeof ToolsSosRoute
   ToolsSteadyhandRoute: typeof ToolsSteadyhandRoute
   ToolsTapRoute: typeof ToolsTapRoute
+  ToolsUrgesurfingRoute: typeof ToolsUrgesurfingRoute
   ToolsVoidstareRoute: typeof ToolsVoidstareRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
@@ -590,6 +610,7 @@ const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsSosRoute: ToolsSosRoute,
   ToolsSteadyhandRoute: ToolsSteadyhandRoute,
   ToolsTapRoute: ToolsTapRoute,
+  ToolsUrgesurfingRoute: ToolsUrgesurfingRoute,
   ToolsVoidstareRoute: ToolsVoidstareRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
