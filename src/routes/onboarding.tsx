@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
 import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
 import { WolfSittingPreview } from "@/components/avatars/WolfStages";
+import { PremiumBackground } from "@/components/PremiumBackground";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const G = "#C9A84C";
@@ -350,7 +351,8 @@ function Onboarding() {
   };
 
   return (
-    <div style={{ background: BG, minHeight: "100vh", fontFamily: "DM Sans, sans-serif" }}>
+    <div style={{ background: "transparent", minHeight: "100vh", fontFamily: "DM Sans, sans-serif" }}>
+      <PremiumBackground />
       <div style={{ maxWidth: 448, margin: "0 auto", padding: "0 20px" }}>
 
         {/* ── Progress bar ──────────────────────────────────────────────── */}
