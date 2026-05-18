@@ -384,7 +384,7 @@ function ArcadeTextureSVG() {
       <defs>
         {/* Micro-engraving grid — 16 × 16 px square lattice */}
         <pattern id="atx-grid" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
-          <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(255,255,255,0.016)" strokeWidth="0.35"/>
+          <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(255,255,255,0.032)" strokeWidth="0.4"/>
         </pattern>
         {/* Centre ambient glow — lifts the convergence point */}
         <radialGradient id="atx-glow" cx="50%" cy="42%" r="40%">
@@ -398,8 +398,8 @@ function ArcadeTextureSVG() {
         </radialGradient>
       </defs>
 
-      {/* ── Base fill — deep charcoal-metallic ── */}
-      <rect width="380" height="360" fill="#060609" />
+      {/* ── Base fill — slate-blue frosted ── */}
+      <rect width="380" height="360" fill="#1e2030" fillOpacity="0.0" />
 
       {/* ── Fine crosshatch micro-engraving ── */}
       <rect width="380" height="360" fill="url(#atx-grid)" />
@@ -407,14 +407,14 @@ function ArcadeTextureSVG() {
       {/* ── Radiating spokes ── */}
       {spokes.map((s, i) => (
         <line key={i} x1={cx} y1={cy} x2={s.x2} y2={s.y2}
-          stroke="rgba(255,255,255,0.020)" strokeWidth="0.45" />
+          stroke="rgba(255,255,255,0.038)" strokeWidth="0.5" />
       ))}
 
       {/* ── Concentric rings — inner ones slightly brighter ── */}
       {rings.map((r, i) => (
         <circle key={i} cx={cx} cy={cy} r={r}
           fill="none"
-          stroke={r <= 62 ? "rgba(255,255,255,0.060)" : r <= 140 ? "rgba(255,255,255,0.038)" : "rgba(255,255,255,0.022)"}
+          stroke={r <= 62 ? "rgba(255,255,255,0.10)" : r <= 140 ? "rgba(255,255,255,0.062)" : "rgba(255,255,255,0.038)"}
           strokeWidth={r <= 40 ? "0.9" : "0.55"}
         />
       ))}
@@ -836,9 +836,9 @@ function Tools() {
                 <div style={{
                   position: "relative",
                   overflow: "hidden",
-                  background: "rgba(4,4,7,0.90)",
-                  backdropFilter: "blur(24px)",
-                  WebkitBackdropFilter: "blur(24px)",
+                  background: "rgba(30,32,48,0.58)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
                   border: "1px solid rgba(255,255,255,0.09)",
                   borderTop: "1px solid rgba(201,168,76,0.18)",
                   borderRadius: 20,
