@@ -349,6 +349,111 @@ const PRO_GAMES: GameEntry[] = [
   { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon />, ambient: "none"    },
 ];
 
+// ── Arcade panel static texture ───────────────────────────────────────────────
+function ArcadeTextureSVG() {
+  // Centre of the concentric pattern — slightly above mid-height so rings
+  // feel like they're converging behind the free-games row.
+  const cx = 190, cy = 150;
+
+  // Pre-compute 36 spoke endpoints (every 10°) from the centre point.
+  const spokes = Array.from({ length: 36 }, (_, i) => {
+    const a = (i * 10 * Math.PI) / 180;
+    return { x2: cx + 640 * Math.cos(a), y2: cy + 640 * Math.sin(a) };
+  });
+
+  // 16 concentric ring radii — tight near the centre, wider apart at the edge.
+  const rings = [20, 40, 62, 86, 112, 140, 170, 202, 236, 272, 312, 356, 404, 456, 512, 572];
+
+  // 12 tick marks on ring #4 (r=112) — like watch-dial hour marks.
+  const ticks = Array.from({ length: 12 }, (_, i) => {
+    const a = (i * 30 * Math.PI) / 180;
+    return {
+      x1: cx + 104 * Math.cos(a), y1: cy + 104 * Math.sin(a),
+      x2: cx + 120 * Math.cos(a), y2: cy + 120 * Math.sin(a),
+    };
+  });
+
+  return (
+    <svg
+      aria-hidden
+      style={{
+        position: "absolute", inset: 0,
+        width: "100%", height: "100%",
+        zIndex: 0, pointerEvents: "none",
+      }}
+      viewBox="0 0 380 360"
+      preserveAspectRatio="xMidYMid slice"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        {/* Micro-engraving grid — 16 × 16 px square lattice */}
+        <pattern id="atx-grid" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+          <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(255,255,255,0.016)" strokeWidth="0.35"/>
+        </pattern>
+        {/* Centre ambient glow — lifts the convergence point */}
+        <radialGradient id="atx-glow" cx="50%" cy="42%" r="40%">
+          <stop offset="0%"   stopColor="rgba(255,255,255,0.052)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+        </radialGradient>
+        {/* Corner vignette — darkens edges so they frame the texture */}
+        <radialGradient id="atx-vignette" cx="50%" cy="50%" r="74%">
+          <stop offset="55%"  stopColor="rgba(0,0,0,0)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.60)" />
+        </radialGradient>
+      </defs>
+
+      {/* ── Base fill — deep charcoal-metallic ── */}
+      <rect width="380" height="360" fill="#060609" />
+
+      {/* ── Fine crosshatch micro-engraving ── */}
+      <rect width="380" height="360" fill="url(#atx-grid)" />
+
+      {/* ── Radiating spokes ── */}
+      {spokes.map((s, i) => (
+        <line key={i} x1={cx} y1={cy} x2={s.x2} y2={s.y2}
+          stroke="rgba(255,255,255,0.020)" strokeWidth="0.45" />
+      ))}
+
+      {/* ── Concentric rings — inner ones slightly brighter ── */}
+      {rings.map((r, i) => (
+        <circle key={i} cx={cx} cy={cy} r={r}
+          fill="none"
+          stroke={r <= 62 ? "rgba(255,255,255,0.060)" : r <= 140 ? "rgba(255,255,255,0.038)" : "rgba(255,255,255,0.022)"}
+          strokeWidth={r <= 40 ? "0.9" : "0.55"}
+        />
+      ))}
+
+      {/* ── Watch-dial tick marks on ring 4 ── */}
+      {ticks.map((t, i) => (
+        <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+          stroke="rgba(255,255,255,0.12)" strokeWidth="0.85" strokeLinecap="round" />
+      ))}
+
+      {/* ── Gold corner bracket arcs ── */}
+      <path d="M 20 56 A 44 44 0 0 1 56 20" stroke="rgba(201,168,76,0.11)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+      <path d="M 324 20 A 44 44 0 0 1 360 56" stroke="rgba(201,168,76,0.11)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+      <path d="M 20 304 A 44 44 0 0 0 56 340" stroke="rgba(201,168,76,0.11)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+      <path d="M 360 304 A 44 44 0 0 1 324 340" stroke="rgba(201,168,76,0.11)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+
+      {/* ── Secondary bracket tick-marks near each corner ── */}
+      <line x1="20"  y1="76"  x2="30"  y2="76"  stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="76"  y1="20"  x2="76"  y2="30"  stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="304" y1="20"  x2="304" y2="30"  stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="350" y1="76"  x2="360" y2="76"  stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="20"  y1="284" x2="30"  y2="284" stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="76"  y1="330" x2="76"  y2="340" stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="304" y1="330" x2="304" y2="340" stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="350" y1="284" x2="360" y2="284" stroke="rgba(201,168,76,0.07)" strokeWidth="0.7" strokeLinecap="round"/>
+
+      {/* ── Centre convergence glow ── */}
+      <rect width="380" height="360" fill="url(#atx-glow)" />
+
+      {/* ── Edge vignette — frames & grounds the texture ── */}
+      <rect width="380" height="360" fill="url(#atx-vignette)" />
+    </svg>
+  );
+}
+
 // ── Arcade badge helpers ──────────────────────────────────────────────────────
 
 function getGlowFilter(glow: string): string {
@@ -733,14 +838,22 @@ function Tools() {
                 style={{ overflow: "hidden" }}
               >
                 <div style={{
-                  background: "rgba(5,5,8,0.72)",
+                  position: "relative",
+                  overflow: "hidden",
+                  background: "rgba(4,4,7,0.90)",
                   backdropFilter: "blur(24px)",
                   WebkitBackdropFilter: "blur(24px)",
                   border: "1px solid rgba(255,255,255,0.09)",
-                  borderTop: "1px solid rgba(201,168,76,0.14)",
+                  borderTop: "1px solid rgba(201,168,76,0.18)",
                   borderRadius: 20,
                   padding: "22px 20px 24px",
                 }}>
+
+                  {/* ── Static etched-glass texture — z-0 ── */}
+                  <ArcadeTextureSVG />
+
+                  {/* ── Content — above texture ── */}
+                  <div style={{ position: "relative", zIndex: 1 }}>
 
                   {/* Free games — 3-column circle grid */}
                   <motion.div
@@ -827,6 +940,7 @@ function Tools() {
                       <ChevronDown style={{ height: 14, width: 14, color: "rgba(201,168,76,0.55)", transform: "rotate(-90deg)", flexShrink: 0 }} />
                     </motion.button>
                   )}
+                  </div>{/* end content z-1 */}
                 </div>
               </motion.div>
             )}
