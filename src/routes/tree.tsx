@@ -1521,6 +1521,376 @@ function WolfPackBondBadge({ canAfford, owned }: { canAfford: boolean; owned: bo
   );
 }
 
+// ── Thick Fur Coat icon SVG ───────────────────────────────────────────────────
+function ThickFurSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <linearGradient id="tf-base" x1="14" y1="28" x2="14" y2="4" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#78350f" />
+          <stop offset="45%"  stopColor="#b45309" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+        <linearGradient id="tf-tip" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stopColor="#fde68a" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+        <linearGradient id="tf-mid" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stopColor="#d97706" />
+          <stop offset="100%" stopColor="#92400e" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Dense underfur base — broad layered arc ── */}
+      <path d="M3 26 Q4 20 7 16 Q10 12 14 11 Q18 12 21 16 Q24 20 25 26Z"
+        fill="url(#tf-base)" />
+
+      {/* ── Guard hair layer 1 — mid tufts ── */}
+      <path d="M5 22 Q5.5 17 7 14"   stroke="#c27a20" strokeWidth="2.0" strokeLinecap="round" fill="none"/>
+      <path d="M8 20 Q8.5 15 10 12"  stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M11 18 Q11.5 13 12.5 10" stroke="#d97706" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      <path d="M14 17 Q14 12 14 9"   stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M17 18 Q17.5 13 18 10" stroke="#d97706" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      <path d="M20 20 Q21 15 22 12"  stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M22.5 22 Q23.5 17 25 14" stroke="#c27a20" strokeWidth="2.0" strokeLinecap="round" fill="none"/>
+
+      {/* ── Fluffy tip tufts — lighter, pointed ends ── */}
+      <ellipse cx="7"    cy="13.5" rx="1.5" ry="2.2" fill="url(#tf-tip)" transform="rotate(-18 7 13.5)"/>
+      <ellipse cx="10"   cy="11.5" rx="1.4" ry="2.0" fill="url(#tf-tip)" transform="rotate(-8 10 11.5)"/>
+      <ellipse cx="12.5" cy="9.5"  rx="1.3" ry="1.9" fill="#fde68a" transform="rotate(2 12.5 9.5)"/>
+      <ellipse cx="14"   cy="8.5"  rx="1.4" ry="2.1" fill="url(#tf-tip)"/>
+      <ellipse cx="15.5" cy="9.5"  rx="1.3" ry="1.9" fill="#fde68a" transform="rotate(-2 15.5 9.5)"/>
+      <ellipse cx="18"   cy="11"   rx="1.4" ry="2.0" fill="url(#tf-tip)" transform="rotate(8 18 11)"/>
+      <ellipse cx="21"   cy="13"   rx="1.5" ry="2.2" fill="url(#tf-tip)" transform="rotate(18 21 13)"/>
+
+      {/* ── Inner mane fringe — second layer ── */}
+      <path d="M8.5 19 Q9 15.5 10.5 13"  stroke="#fbbf24" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.70"/>
+      <path d="M13 18 Q13 14 13.5 11.5"  stroke="#fbbf24" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.65"/>
+      <path d="M17 18 Q17.5 14 18 12"    stroke="#fbbf24" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.65"/>
+      <path d="M19.5 19 Q21 15.5 22 13"  stroke="#fbbf24" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.70"/>
+
+      {/* ── Specular sheen across the coat ── */}
+      <path d="M9 18 Q14 14 20 17" stroke="rgba(255,236,153,0.32)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+// ── Thick Fur Coat badge (wolf-thick-fur item only) ───────────────────────────
+function ThickFurBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  // Drifting spark micro-particles — 12 distributed around the badge
+  const sparks = Array.from({ length: 12 }, (_, i) => {
+    const a = ((i * 30 + 8) * Math.PI) / 180;
+    const r = i % 3 === 0 ? 28 : 24;
+    return {
+      x: 36 + r * Math.cos(a) - 1.5,
+      y: 36 + r * Math.sin(a) - 1.5,
+      big: i % 4 === 0,
+      bright: i % 3 === 0,
+      delay: i * 0.18,
+    };
+  });
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer amber-golden aura ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.52, 1], opacity: [0.62, 0.10, 0.62] }}
+        transition={{ duration: 3.4, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -14, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(245,158,11,0.78) 0%, rgba(180,83,9,0.38) 40%, transparent 68%)`,
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Warm secondary halo ring ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.88, 1.62, 0.88], opacity: [0.38, 0, 0.38] }}
+        transition={{ duration: 3.4, ease: "easeOut", repeat: Infinity, delay: 0.75 }}
+        style={{
+          position: "absolute", inset: -10, borderRadius: "50%",
+          border: "1.5px solid rgba(251,191,36,0.55)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Slowly drifting spark micro-particles ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 18, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {sparks.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.18, 0.90, 0.18], scale: [0.4, 1.4, 0.4] }}
+            transition={{ repeat: Infinity, duration: 2.6, ease: "easeInOut", delay: p.delay }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.0 : 1.8,
+              height: p.big ? 3.0 : 1.8,
+              borderRadius: "50%",
+              background: p.bright ? "#fde68a" : "#f59e0b",
+              boxShadow: `0 0 5px 2px rgba(251,191,36,0.72)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — dark mahogany chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 3.4, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #1c1005 0%, #090602 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.16)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.08)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px rgba(245,158,11,0.68)`,
+            `0 0 0 3.5px rgba(245,158,11,0.16)`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 32px 10px rgba(245,158,11,${canAfford && !owned ? "0.48" : "0.20"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner amber nebula */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.28, 0.60, 0.28], scale: [0.70, 1.10, 0.70] }}
+          transition={{ duration: 3.4, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 55%, rgba(251,191,36,0.68) 0%, rgba(180,83,9,0.32) 42%, transparent 68%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Glint sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 3.2, ease: "linear", repeatDelay: 3.6 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,220,100,0.24) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Fur icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.07, 1] }}
+          transition={{ duration: 3.2, ease: "easeInOut", repeat: Infinity }}
+        >
+          <ThickFurSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Alpha Marking icon SVG ─────────────────────────────────────────────────────
+function AlphaMarkSVG() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <defs>
+        <linearGradient id="am-brand" x1="14" y1="2" x2="14" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#fff7ed" />
+          <stop offset="30%"  stopColor="#fb923c" />
+          <stop offset="65%"  stopColor="#ea580c" />
+          <stop offset="100%" stopColor="#7c2d12" />
+        </linearGradient>
+        <linearGradient id="am-glow" x1="14" y1="2" x2="14" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="rgba(251,146,60,0.55)" />
+          <stop offset="100%" stopColor="rgba(234,88,12,0)" />
+        </linearGradient>
+        <filter id="am-ember">
+          <feGaussianBlur stdDeviation="0.8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {/* ── Outer brand scar / char ring ── */}
+      <circle cx="14" cy="14" r="12.5" fill="none"
+        stroke="rgba(124,45,18,0.55)" strokeWidth="1.2" strokeDasharray="3 2"/>
+
+      {/* ── Alpha rune — stylised Α with tribal serifs ── */}
+      {/* Left leg */}
+      <path d="M6 24 L14 4 L22 24" stroke="url(#am-brand)" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      {/* Crossbar */}
+      <path d="M9.5 17 L18.5 17" stroke="url(#am-brand)" strokeWidth="2.4" strokeLinecap="round"/>
+
+      {/* ── Tribal serifs on feet ── */}
+      <path d="M4.5 24 L7.5 24" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M20.5 24 L23.5 24" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round"/>
+      {/* Apex crown ticks */}
+      <path d="M14 4 L12.5 6.5" stroke="#fff7ed" strokeWidth="1.2" strokeLinecap="round" opacity="0.70"/>
+      <path d="M14 4 L15.5 6.5" stroke="#fff7ed" strokeWidth="1.2" strokeLinecap="round" opacity="0.70"/>
+
+      {/* ── Inner ember glow behind the rune ── */}
+      <path d="M6 24 L14 4 L22 24" stroke="rgba(251,146,60,0.28)" strokeWidth="6.0" strokeLinecap="round" strokeLinejoin="round" fill="none" filter="url(#am-ember)"/>
+
+      {/* ── Hot-spot specular on apex ── */}
+      <circle cx="14" cy="5" r="1.5" fill="rgba(255,247,237,0.75)"/>
+      {/* Char marks — irregular scorch lines */}
+      <path d="M10 20 Q11 19 12 20" stroke="rgba(124,45,18,0.65)" strokeWidth="0.8" strokeLinecap="round" fill="none"/>
+      <path d="M16 20 Q17 19 18 20" stroke="rgba(124,45,18,0.65)" strokeWidth="0.8" strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+// ── Alpha Marking badge (wolf-alpha-mark item only) ───────────────────────────
+function AlphaMarkBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
+  // Lava/ember burst particles — two rings for intensity
+  const particles = [
+    ...Array.from({ length: 8 }, (_, i) => {
+      const a = ((i * 45 + 5) * Math.PI) / 180;
+      return { x: 36 + 30 * Math.cos(a) - 1.5, y: 36 + 30 * Math.sin(a) - 1.5, big: true,  bright: i % 2 === 0, delay: i * 0.16 };
+    }),
+    ...Array.from({ length: 6 }, (_, i) => {
+      const a = ((i * 60 + 22) * Math.PI) / 180;
+      return { x: 36 + 20 * Math.cos(a) - 1.5, y: 36 + 20 * Math.sin(a) - 1.5, big: false, bright: i % 2 !== 0, delay: i * 0.22 };
+    }),
+  ];
+
+  return (
+    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+
+      {/* ── Outer searing lava glow ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [1, 1.70, 1], opacity: [0.72, 0.08, 0.72] }}
+        transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "absolute", inset: -16, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(251,146,60,0.88) 0%, rgba(234,88,12,0.48) 35%, transparent 65%)`,
+          filter: "blur(10px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Second hard pulse ring — neon orange ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.75, 1.80, 0.75], opacity: [0.50, 0, 0.50] }}
+        transition={{ duration: 1.8, ease: "easeOut", repeat: Infinity, delay: 0.55 }}
+        style={{
+          position: "absolute", inset: -10, borderRadius: "50%",
+          border: "2px solid rgba(251,146,60,0.68)",
+          boxShadow: "0 0 8px 2px rgba(234,88,12,0.45)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Third slow ember ring ── */}
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.90, 1.50, 0.90], opacity: [0.28, 0, 0.28] }}
+        transition={{ duration: 2.8, ease: "easeOut", repeat: Infinity, delay: 1.1 }}
+        style={{
+          position: "absolute", inset: -6, borderRadius: "50%",
+          border: "1px solid rgba(234,88,12,0.40)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Lava / ember particles on two rings ── */}
+      <motion.div
+        aria-hidden
+        animate={{ rotate: 360 }}
+        transition={{ duration: 10, ease: "linear", repeat: Infinity }}
+        style={{ position: "absolute", inset: -12, pointerEvents: "none" }}
+      >
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.20, 1.0, 0.20], scale: [0.4, 1.5, 0.4] }}
+            transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: p.delay }}
+            style={{
+              position: "absolute",
+              left: p.x, top: p.y,
+              width: p.big ? 3.5 : 2.2,
+              height: p.big ? 3.5 : 2.2,
+              borderRadius: "50%",
+              background: p.bright ? "#fb923c" : "#ea580c",
+              boxShadow: `0 0 6px 2px rgba(251,146,60,0.80)`,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Main badge circle — scorched dark chrome ── */}
+      <motion.div
+        animate={canAfford && !owned ? { scale: [1, 1.08, 1] } : {}}
+        transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
+        style={{
+          position: "relative", width: 48, height: 48, borderRadius: "50%",
+          display: "grid", placeItems: "center",
+          overflow: "hidden",
+          background: "radial-gradient(circle at 38% 30%, #1e0a02 0%, #080300 100%)",
+          boxShadow: [
+            "inset 0 2px 0 rgba(255,255,255,0.16)",
+            "inset 0 -2px 0 rgba(0,0,0,0.95)",
+            "inset 2px 0 0 rgba(255,255,255,0.08)",
+            "inset -2px 0 0 rgba(0,0,0,0.70)",
+            `0 0 0 1.5px rgba(251,146,60,0.80)`,
+            `0 0 0 3.5px rgba(234,88,12,0.22)`,
+            "0 6px 22px rgba(0,0,0,0.92)",
+            `0 0 38px 14px rgba(234,88,12,${canAfford && !owned ? "0.65" : "0.26"})`,
+          ].join(", "),
+          opacity: owned ? 0.65 : 1,
+        }}
+      >
+        {/* Inner lava-core nebula */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.35, 0.75, 0.35], scale: [0.65, 1.15, 0.65] }}
+          transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            background: `radial-gradient(circle at 50% 55%, rgba(251,146,60,0.80) 0%, rgba(234,88,12,0.42) 38%, transparent 65%)`,
+            pointerEvents: "none", zIndex: 0,
+          }}
+        />
+        {/* Hot glint sweep — faster for intensity */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-52px", "52px"] }}
+          transition={{ repeat: Infinity, duration: 1.8, ease: "linear", repeatDelay: 2.0 }}
+          style={{
+            position: "absolute", top: "-8px", left: "-8px",
+            width: "22px", height: "64px",
+            background: "linear-gradient(108deg, transparent 0%, rgba(255,180,80,0.30) 50%, transparent 100%)",
+            filter: "blur(2.5px)", transform: "rotate(22deg)",
+            pointerEvents: "none", zIndex: 2,
+          }}
+        />
+        {/* Alpha rune icon */}
+        <motion.div
+          style={{ position: "relative", zIndex: 1 }}
+          animate={{ scale: [1, 1.09, 1], opacity: [0.90, 1, 0.90] }}
+          transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
+        >
+          <AlphaMarkSVG />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Etched Glass Shop Card ────────────────────────────────────────────────────
 function ShopCard({
   item,
@@ -1567,6 +1937,10 @@ function ShopCard({
           <RawMeatBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "wolf-pack-bond" ? (
           <WolfPackBondBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "wolf-thick-fur" ? (
+          <ThickFurBadge canAfford={canAfford} owned={owned} />
+        ) : item.id === "wolf-alpha-mark" ? (
+          <AlphaMarkBadge canAfford={canAfford} owned={owned} />
         ) : (
           <div style={{ position: "relative", flexShrink: 0, width: 48, height: 48 }}>
             {canAfford && !owned && (
