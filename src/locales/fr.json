@@ -1,468 +1,468 @@
 {
   "nav": {
-    "home": "Home",
-    "tools": "Tools",
-    "community": "Community",
-    "progress": "Progress",
-    "tree": "Tree",
-    "companion": "Companion"
+    "home": "Accueil",
+    "tools": "Outils",
+    "community": "Communauté",
+    "progress": "Progrès",
+    "tree": "Arbre",
+    "companion": "Compagnon"
   },
   "common": {
-    "day": "Day",
-    "days": "days",
-    "day_singular": "day",
-    "cancel": "Cancel",
-    "save": "Save",
-    "back": "Back",
-    "next": "Next",
-    "done": "Done",
-    "continue": "Continue",
-    "confirm": "Confirm",
-    "delete": "Delete",
-    "upgrade": "Upgrade",
-    "yes": "Yes",
-    "no": "No",
-    "loading": "Loading",
-    "active": "Active",
-    "locked": "Locked",
+    "day": "Jour",
+    "days": "jours",
+    "day_singular": "jour",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "continue": "Continuer",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "upgrade": "Améliorer",
+    "yes": "Oui",
+    "no": "Non",
+    "loading": "Chargement",
+    "active": "Actif",
+    "locked": "Verrouillé",
     "pro": "PRO",
-    "free": "Free",
-    "or": "or",
-    "toGo": "to go",
-    "unchanged": "unchanged",
-    "daysAway": "{{count}} days away",
-    "dayAway": "{{count}} day away"
+    "free": "Gratuit",
+    "or": "ou",
+    "toGo": "restants",
+    "unchanged": "inchangé",
+    "daysAway": "dans {{count}} jours",
+    "dayAway": "dans {{count}} jour"
   },
   "home": {
     "milestone": {
-      "awaken": "Awaken",
-      "clarity": "Clarity",
-      "control": "Control",
-      "strength": "Strength",
-      "reset": "Reset",
-      "benefit_7": "Increased energy",
-      "benefit_14": "Sharper focus returns",
-      "benefit_30": "Confidence rebuilding",
-      "benefit_60": "Emotional regulation",
-      "benefit_90": "Full dopamine reset"
+      "awaken": "Éveil",
+      "clarity": "Clarté",
+      "control": "Contrôle",
+      "strength": "Force",
+      "reset": "Réinitialisation",
+      "benefit_7": "Énergie accrue",
+      "benefit_14": "Concentration retrouvée",
+      "benefit_30": "Confiance reconstruite",
+      "benefit_60": "Régulation émotionnelle",
+      "benefit_90": "Réinitialisation complète de la dopamine"
     },
     "focus": {
-      "0": "The urge will pass. Your identity won't. Choose who you're becoming.",
-      "1": "Dopamine reset is not about willpower — it's about rebuilding your reward circuit one day at a time.",
-      "2": "Every hour you hold means your brain is rewiring. The discomfort is the progress.",
-      "3": "You didn't come this far to only come this far. The streak is the proof.",
-      "4": "Cravings peak at 20 minutes. Outlast them — you always have before.",
-      "5": "The version of you who quit is still watching. Don't let them down today.",
-      "6": "Boredom is not an emergency. Sit with it. That's where the rewiring happens.",
-      "7": "Recovery isn't a straight line, but every clean day moves the baseline up.",
-      "8": "What you resist persists. Acknowledge the urge, then let it pass like weather.",
-      "9": "Your future self is being built right now, in this exact moment of resistance.",
-      "10": "Discipline is remembering what you want most over what you want right now.",
-      "11": "The brain that got you here can heal. Give it the silence it needs today.",
-      "12": "One decision away from a relapse, one decision away from your best day. Choose.",
-      "13": "Showing up on the hard days is what separates a streak from a lifestyle."
+      "0": "L'envie passera. Ton identité, non. Choisis qui tu deviens.",
+      "1": "La réinitialisation de la dopamine n'est pas une question de volonté — c'est reconstruire ton circuit de récompense jour après jour.",
+      "2": "Chaque heure que tu tiens signifie que ton cerveau se recâble. L'inconfort, c'est le progrès.",
+      "3": "Tu n'es pas venu aussi loin pour t'arrêter maintenant. La série en est la preuve.",
+      "4": "Les envies atteignent leur pic à 20 minutes. Tiens bon — tu l'as toujours fait.",
+      "5": "La version de toi qui a abandonné te regarde encore. Ne la déçois pas aujourd'hui.",
+      "6": "L'ennui n'est pas une urgence. Assieds-toi avec lui. C'est là que le recâblage se produit.",
+      "7": "La guérison n'est pas une ligne droite, mais chaque jour propre fait avancer le niveau de base.",
+      "8": "Ce à quoi tu résistes persiste. Reconnais l'envie, puis laisse-la passer comme la météo.",
+      "9": "Ton futur moi est en train de se construire maintenant, dans ce moment exact de résistance.",
+      "10": "La discipline, c'est se souvenir de ce que tu veux le plus plutôt que ce que tu veux maintenant.",
+      "11": "Le cerveau qui t'a amené ici peut guérir. Donne-lui le silence dont il a besoin aujourd'hui.",
+      "12": "À une décision d'une rechute, à une décision de ta meilleure journée. Choisis.",
+      "13": "Se présenter les jours difficiles, c'est ce qui distingue une série d'un mode de vie."
     },
     "mood": {
       "low": {
-        "message": "Tough day. That's okay. You showed up anyway.",
-        "btn1": "Cut the Signal",
-        "btn2": "I'm feeling an urge"
+        "message": "Journée difficile. C'est normal. Tu as quand même tenu.",
+        "btn1": "Couper le signal",
+        "btn2": "Je ressens une envie"
       },
       "mid": {
-        "message": "Steady is strength. Most people quit on days like this.",
-        "btn1": "Check your progress"
+        "message": "La régularité, c'est la force. La plupart abandonnent des jours comme celui-là.",
+        "btn1": "Vérifier ta progression"
       },
       "high": {
-        "message": "You're rewiring. Keep this energy — it compounds.",
-        "btn1": "See your streak"
+        "message": "Tu te recâbles. Garde cette énergie — elle se cumule.",
+        "btn1": "Voir ta série"
       }
     },
     "moodLabel": {
-      "low": "Rough day, holding the line",
-      "mid": "Slightly challenged, staying focused",
-      "high": "Feeling strong and unstoppable"
+      "low": "Journée difficile, mais je tiens la ligne",
+      "mid": "Légèrement mis à l'épreuve, mais concentré",
+      "high": "Je me sens fort et invincible"
     },
     "reward": {
-      "bonus": "Unexpected bonus. Consistency pays.",
-      "rare": "You just unlocked something rare."
+      "bonus": "Bonus inattendu. La constance paie.",
+      "rare": "Tu viens de débloquer quelque chose de rare."
     },
     "checkin": {
-      "title": "Daily Check-in",
-      "subtitle": "How are you feeling today?",
-      "confirm": "Confirm"
+      "title": "Bilan quotidien",
+      "subtitle": "Comment tu te sens aujourd'hui ?",
+      "confirm": "Confirmer"
     },
     "sections": {
-      "todaysFocus": "Today's Focus",
-      "emergency": "Emergency SOS",
-      "nextMilestone": "Next Milestone",
+      "todaysFocus": "Focus du jour",
+      "emergency": "SOS d'urgence",
+      "nextMilestone": "Prochain jalon",
       "motivation": "Motivation"
     },
     "emergency": {
-      "title": "Emergency SOS",
-      "subtitle": "I'm feeling an urge right now",
-      "cta": "Open SOS Tools"
+      "title": "SOS d'urgence",
+      "subtitle": "Je ressens une envie en ce moment",
+      "cta": "Ouvrir les outils SOS"
     },
-    "relapse": "I relapsed — log it honestly"
+    "relapse": "J'ai rechuté — le noter honnêtement"
   },
   "progress": {
-    "header": "Track your recovery, day by day.",
+    "header": "Suis ta guérison, jour après jour.",
     "stats": {
-      "streak": "Streak",
-      "best": "Best",
-      "total": "Total clean"
+      "streak": "Série",
+      "best": "Meilleur",
+      "total": "Total propre"
     },
     "ring": {
-      "daysRemaining": "{{count}} days remaining to full brain reset",
-      "achieved": "Full dopamine reset achieved. You did it.",
-      "day": "day",
-      "toReset": "to reset"
+      "daysRemaining": "{{count}} jours restants pour la réinitialisation complète",
+      "achieved": "Réinitialisation complète de la dopamine atteinte. Tu l'as fait.",
+      "day": "jour",
+      "toReset": "à réinitialiser"
     },
     "milestones": {
-      "firstWeek": "First Week",
-      "thirtyDays": "30 Days",
-      "tenUrges": "Survived 10 Urges",
-      "ninetyDays": "90 Day Warrior",
-      "firstWeek_remaining": "{{count}} day to go",
-      "firstWeek_remaining_plural": "{{count}} days to go",
-      "thirtyDays_remaining": "{{count}} days to go",
-      "ninetyDays_remaining": "{{count}} days to go",
-      "tenUrges_remaining": "Complete {{count}} more urge",
-      "tenUrges_remaining_plural": "Complete {{count}} more urges",
-      "done": "Completed!"
+      "firstWeek": "Première semaine",
+      "thirtyDays": "30 jours",
+      "tenUrges": "10 envies surmontées",
+      "ninetyDays": "Guerrier des 90 jours",
+      "firstWeek_remaining": "{{count}} jour restant",
+      "firstWeek_remaining_plural": "{{count}} jours restants",
+      "thirtyDays_remaining": "{{count}} jours restants",
+      "ninetyDays_remaining": "{{count}} jours restants",
+      "tenUrges_remaining": "Complète {{count}} envie de plus",
+      "tenUrges_remaining_plural": "Complète {{count}} envies de plus",
+      "done": "Accompli !"
     },
     "consistency": {
-      "title": "Consistency",
-      "subtitle": "Last 12 weeks",
-      "less": "Less",
-      "more": "More"
+      "title": "Constance",
+      "subtitle": "12 dernières semaines",
+      "less": "Moins",
+      "more": "Plus"
     },
-    "paywall": "Tap to see your full streak",
+    "paywall": "Appuie pour voir ta série complète",
     "story": {
-      "title": "Your Story",
-      "subtitle": "This is not a streak. This is your history.",
-      "daysSince": "Days since you started",
-      "totalClean": "Total clean days, ever",
-      "longest": "Longest clean period",
-      "longestValue": "{{count}} days",
-      "timesBack": "Times you came back",
-      "relapses": "Relapses logged honestly",
-      "sessions": "App sessions",
-      "quote": "Every chapter counts. Every time you came back was a choice. Most people stop choosing."
+      "title": "Ton histoire",
+      "subtitle": "Ce n'est pas une série. C'est ton histoire.",
+      "daysSince": "Jours depuis le début",
+      "totalClean": "Total des jours propres",
+      "longest": "Plus longue période propre",
+      "longestValue": "{{count}} jours",
+      "timesBack": "Fois que tu es revenu",
+      "relapses": "Rechutes enregistrées honnêtement",
+      "sessions": "Sessions dans l'app",
+      "quote": "Chaque chapitre compte. Chaque fois que tu es revenu, c'était un choix. La plupart arrêtent de choisir."
     },
     "insights": {
-      "title": "Relapse Insights",
-      "subtitle": "When and why it happens",
-      "total": "Total relapses tracked",
-      "peakDay": "Most vulnerable day",
-      "peakTime": "Most vulnerable time",
-      "avgBetween": "Avg. days between relapses",
-      "none": "None yet",
+      "title": "Analyse des rechutes",
+      "subtitle": "Quand et pourquoi ça arrive",
+      "total": "Total des rechutes suivies",
+      "peakDay": "Jour le plus vulnérable",
+      "peakTime": "Moment le plus vulnérable",
+      "avgBetween": "Moyenne de jours entre rechutes",
+      "none": "Aucune",
       "na": "—",
-      "avgValue": "{{count}} days",
-      "paywallCta": "See what triggers your relapses",
-      "morning": "Morning",
-      "afternoon": "Afternoon",
-      "evening": "Evening",
-      "night": "Night",
-      "dow": { "0": "Sun", "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat" }
+      "avgValue": "{{count}} jours",
+      "paywallCta": "Voir ce qui déclenche tes rechutes",
+      "morning": "Matin",
+      "afternoon": "Après-midi",
+      "evening": "Soir",
+      "night": "Nuit",
+      "dow": { "0": "Dim", "1": "Lun", "2": "Mar", "3": "Mer", "4": "Jeu", "5": "Ven", "6": "Sam" }
     },
-    "milestonesTitle": "Milestones",
-    "milestonesUnlocked": "{{count}} of {{total}} unlocked",
-    "achieved": "✓ Achieved"
+    "milestonesTitle": "Jalons",
+    "milestonesUnlocked": "{{count}} sur {{total}} débloqués",
+    "achieved": "✓ Atteint"
   },
   "tools": {
-    "header": "Recovery Tools",
-    "subtitle": "Choose your weapon against the urge.",
-    "indexSubtitle": "Use what works.",
+    "header": "Outils de guérison",
+    "subtitle": "Choisis ton arme contre l'envie.",
+    "indexSubtitle": "Utilise ce qui fonctionne.",
     "reframes": {
-      "0": "Every time you resist, you literally grow new neural pathways.",
-      "1": "The urge isn't you — it's old wiring asking for one more hit.",
-      "2": "Discomfort now is your prefrontal cortex coming back online.",
-      "3": "Each clean day raises your dopamine baseline by a measurable amount.",
-      "4": "You're not giving something up. You're getting yourself back."
+      "0": "Chaque fois que tu résistes, tu crées littéralement de nouvelles voies neuronales.",
+      "1": "L'envie, ce n'est pas toi — c'est un ancien câblage qui demande une dernière dose.",
+      "2": "L'inconfort maintenant, c'est ton cortex préfrontal qui revient en ligne.",
+      "3": "Chaque jour propre élève ton niveau de dopamine de base d'une quantité mesurable.",
+      "4": "Tu ne renonces à rien. Tu te retrouves toi-même."
     },
     "coach": {
-      "name": "Recovery Coach",
-      "desc": "AI-powered 1-on-1 support",
-      "tagline": "Talk it through. No judgment."
+      "name": "Coach de guérison",
+      "desc": "Soutien personnalisé par IA",
+      "tagline": "Parle-en. Sans jugement."
     },
     "sos": {
-      "name": "Emergency SOS",
-      "desc": "Instant urge intervention",
-      "heroLine1": "Urge hitting?",
-      "heroLine2": "We've got you.",
-      "heroSub": "Tap to start urge surfing · 3 min"
+      "name": "SOS d'urgence",
+      "desc": "Intervention immédiate contre l'envie",
+      "heroLine1": "Une envie te frappe ?",
+      "heroLine2": "On est là pour toi.",
+      "heroSub": "Appuie pour surfer sur l'envie · 3 min"
     },
-    "gamesTitle": "Cut the Signal Games",
-    "gamesDesc": "Train your brain. Beat the urge.",
-    "mindPulse": "Mind Pulse",
-    "impulseShift": "Impulse Shift",
-    "neuralLink": "Neural Link",
-    "moreGames": "More games available",
-    "reframeTitle": "Reframe",
-    "reframeDesc": "Rewire your reaction in one thought.",
-    "reframeCta": "Show me one",
-    "coldTitle": "Cold Exposure",
-    "coldDesc": "2-min guided cold shower breathing.",
-    "coldCta": "Start →",
-    "planTitle": "Implementation Plan",
-    "planDesc": "If/then strategies for your triggers.",
-    "planAdd": "Add plan",
-    "planClose": "Close",
-    "planTriggerPlaceholder": "If I feel… (trigger)",
-    "planActionPlaceholder": "…I will (action)",
-    "planSave": "Save plan",
-    "planIfI": "If I",
-    "planIWill": "I will",
+    "gamesTitle": "Jeux Couper le signal",
+    "gamesDesc": "Entraîne ton cerveau. Bats l'envie.",
+    "mindPulse": "Pulse mental",
+    "impulseShift": "Décalage d'impulsion",
+    "neuralLink": "Lien neuronal",
+    "moreGames": "Plus de jeux disponibles",
+    "reframeTitle": "Recadrage",
+    "reframeDesc": "Recâble ta réaction en une seule pensée.",
+    "reframeCta": "Montre-m'en un",
+    "coldTitle": "Exposition au froid",
+    "coldDesc": "Respiration guidée sous douche froide 2 min.",
+    "coldCta": "Commencer →",
+    "planTitle": "Plan d'action",
+    "planDesc": "Stratégies si/alors pour tes déclencheurs.",
+    "planAdd": "Ajouter un plan",
+    "planClose": "Fermer",
+    "planTriggerPlaceholder": "Si je ressens… (déclencheur)",
+    "planActionPlaceholder": "…je vais (action)",
+    "planSave": "Enregistrer le plan",
+    "planIfI": "Si je",
+    "planIWill": "je vais",
     "breath": {
-      "name": "Breathe",
-      "desc": "Box breathing to reset"
+      "name": "Respirer",
+      "desc": "Respiration en boîte pour se réinitialiser"
     },
     "cold": {
-      "name": "Cold Shower",
-      "desc": "Dopamine boost protocol"
+      "name": "Douche froide",
+      "desc": "Protocole de boost de dopamine"
     },
     "tap": {
-      "name": "Urge Tapper",
-      "desc": "Tap it out until it fades"
+      "name": "Tapoteur d'envie",
+      "desc": "Tapote jusqu'à ce que ça passe"
     },
     "memory": {
-      "name": "Memory Palace",
-      "desc": "Anchor your strongest reason"
+      "name": "Palais de la mémoire",
+      "desc": "Ancre ta raison la plus forte"
     },
     "darkroom": {
-      "name": "Dark Room",
-      "desc": "Sensory deprivation mode"
+      "name": "Chambre noire",
+      "desc": "Mode de privation sensorielle"
     },
     "voidstare": {
-      "name": "Void Stare",
-      "desc": "Stare into the abyss"
+      "name": "Regard dans le vide",
+      "desc": "Fixe l'abîme"
     },
     "noisefilter": {
-      "name": "Noise Filter",
-      "desc": "Brown noise focus field"
+      "name": "Filtre de bruit",
+      "desc": "Champ de concentration bruit brun"
     },
     "echochamber": {
-      "name": "Echo Chamber",
-      "desc": "Hear your own conviction"
+      "name": "Chambre d'écho",
+      "desc": "Entends ta propre conviction"
     },
     "identitystack": {
-      "name": "Identity Stack",
-      "desc": "Who you're becoming"
+      "name": "Pile d'identité",
+      "desc": "Qui tu deviens"
     },
     "clarityclimb": {
-      "name": "Clarity Climb",
-      "desc": "Mindfulness staircase"
+      "name": "Montée de clarté",
+      "desc": "Escalier de pleine conscience"
     },
     "coldswitch": {
-      "name": "Cold Switch",
-      "desc": "Emergency temp drop"
+      "name": "Interrupteur froid",
+      "desc": "Baisse de température d'urgence"
     },
     "steadyhand": {
-      "name": "Steady Hand",
-      "desc": "Precision focus drill"
+      "name": "Main ferme",
+      "desc": "Exercice de concentration précise"
     }
   },
   "settings": {
-    "title": "Settings",
+    "title": "Paramètres",
     "sections": {
-      "account": "Account",
-      "billing": "Billing & Plan",
-      "language": "Language",
+      "account": "Compte",
+      "billing": "Facturation & abonnement",
+      "language": "Langue",
       "notifications": "Notifications",
-      "privacy": "Privacy & Data",
-      "habits": "Tracked Habits",
-      "startDate": "Recovery Start Date",
+      "privacy": "Confidentialité & données",
+      "habits": "Habitudes suivies",
+      "startDate": "Date de début de guérison",
       "badges": "Badges",
-      "about": "About"
+      "about": "À propos"
     },
     "account": {
-      "profilePhoto": "Profile Photo",
-      "takePhoto": "Take Photo",
-      "chooseLibrary": "Choose from Library",
-      "name": "Name",
-      "email": "Email",
-      "changePassword": "Change Password",
-      "notSet": "Not set",
-      "notConnected": "Not connected"
+      "profilePhoto": "Photo de profil",
+      "takePhoto": "Prendre une photo",
+      "chooseLibrary": "Choisir depuis la bibliothèque",
+      "name": "Nom",
+      "email": "E-mail",
+      "changePassword": "Changer le mot de passe",
+      "notSet": "Non défini",
+      "notConnected": "Non connecté"
     },
     "billing": {
-      "currentPlan": "Current Plan",
-      "paymentMethod": "Payment Method",
-      "noCard": "No card on file",
-      "promo": "PRO unlocks full analytics · $39.99/year (~$3.33/mo) · 7-day free trial.",
-      "restore": "Restore purchase"
+      "currentPlan": "Abonnement actuel",
+      "paymentMethod": "Moyen de paiement",
+      "noCard": "Aucune carte enregistrée",
+      "promo": "PRO débloque toutes les analyses · 39,99 $/an (~3,33 $/mois) · 7 jours d'essai gratuit.",
+      "restore": "Restaurer l'achat"
     },
     "notifications": {
-      "push": "Push notifications",
-      "pushSub": "Urge warnings, milestones & streaks",
-      "email": "Email notifications",
-      "emailSub": "Recovery tips and updates",
-      "weekly": "Weekly progress report",
-      "weeklySub": "Sent every Sunday morning"
+      "push": "Notifications push",
+      "pushSub": "Alertes d'envie, jalons & séries",
+      "email": "Notifications par e-mail",
+      "emailSub": "Conseils de guérison et mises à jour",
+      "weekly": "Rapport hebdomadaire",
+      "weeklySub": "Envoyé chaque dimanche matin"
     },
     "privacy": {
-      "export": "Export my data",
-      "exportHelp": "Exporting downloads a JSON file with all your app data.",
-      "delete": "Delete account",
-      "deleteConfirm": "Tap again to confirm deletion"
+      "export": "Exporter mes données",
+      "exportHelp": "L'exportation télécharge un fichier JSON avec toutes vos données d'application.",
+      "delete": "Supprimer le compte",
+      "deleteConfirm": "Appuyer à nouveau pour confirmer la suppression"
     },
     "habits": {
-      "add": "Add",
-      "empty": "No habits tracked yet.",
-      "dayLabel": "Day {{day}}"
+      "add": "Ajouter",
+      "empty": "Aucune habitude suivie pour l'instant.",
+      "dayLabel": "Jour {{day}}"
     },
     "startDate": {
-      "label": "Start Date",
-      "modalTitle": "When did you last reset?",
-      "modalDesc": "Pick the date you started this streak. This can only be set once.",
-      "confirmBtn": "Confirm Start Date",
-      "helpText": "Set a past date if you were already clean before installing the app."
+      "label": "Date de début",
+      "modalTitle": "Quand as-tu dernièrement réinitialisé ?",
+      "modalDesc": "Choisis la date à laquelle tu as commencé cette série. Ne peut être défini qu'une seule fois.",
+      "confirmBtn": "Confirmer la date de début",
+      "helpText": "Définis une date passée si tu étais déjà propre avant d'installer l'application."
     },
     "badges": {
-      "dayThreshold": "Day {{day}}",
-      "legend": "{{earned}}/{{total}} unlocked",
-      "next": "Next: {{name}} in {{days}}d"
+      "dayThreshold": "Jour {{day}}",
+      "legend": "{{earned}}/{{total}} débloqués",
+      "next": "Suivant : {{name}} dans {{days}}j"
     },
     "about": {
-      "version": "App Version",
-      "terms": "Terms of Service",
-      "privacy": "Privacy Policy"
+      "version": "Version de l'application",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité"
     }
   },
   "onboarding": {
     "habits": {
-      "porn": "Pornography",
-      "socialMedia": "Social media doomscrolling",
-      "sugar": "Sugar / junk food",
-      "alcohol": "Alcohol",
-      "nicotine": "Nicotine / vaping",
+      "porn": "Pornographie",
+      "socialMedia": "Doomscrolling sur les réseaux sociaux",
+      "sugar": "Sucre / malbouffe",
+      "alcohol": "Alcool",
+      "nicotine": "Nicotine / vapotage",
       "cannabis": "Cannabis",
-      "gambling": "Online gambling / betting",
-      "gaming": "Video game binges",
+      "gambling": "Jeux d'argent en ligne / paris",
+      "gaming": "Binges de jeux vidéo",
       "procrastination": "Procrastination"
     },
     "durations": {
-      "short": "Less than 6 months",
-      "medium": "1-2 years",
-      "long": "3-5 years",
-      "veryLong": "More than 5 years"
+      "short": "Moins de 6 mois",
+      "medium": "1 à 2 ans",
+      "long": "3 à 5 ans",
+      "veryLong": "Plus de 5 ans"
     },
     "costs": {
-      "relationships": "Relationships",
-      "focus": "Focus & work",
-      "confidence": "Self-confidence",
-      "sleep": "Sleep",
-      "social": "Social life",
-      "mental": "Mental health"
+      "relationships": "Relations",
+      "focus": "Concentration & travail",
+      "confidence": "Estime de soi",
+      "sleep": "Sommeil",
+      "social": "Vie sociale",
+      "mental": "Santé mentale"
     },
     "triggers": {
-      "lateNight": "Late at night",
-      "bored": "When bored",
-      "stressed": "When stressed",
-      "alone": "When alone",
-      "rejection": "After rejection"
+      "lateNight": "Tard le soir",
+      "bored": "Quand je m'ennuie",
+      "stressed": "Quand je suis stressé",
+      "alone": "Quand je suis seul",
+      "rejection": "Après un rejet"
     },
     "identity": {
-      "control": "is in full control of his mind",
-      "validation": "no longer needs external validation",
-      "discomfort": "chooses discomfort over instant gratification",
-      "proud": "is someone his future self is proud of",
-      "discipline": "shows up with discipline, not mood"
+      "control": "a le plein contrôle de son esprit",
+      "validation": "n'a plus besoin de validation externe",
+      "discomfort": "choisit l'inconfort plutôt que la gratification immédiate",
+      "proud": "est quelqu'un dont son futur moi est fier",
+      "discipline": "agit avec discipline, pas selon son humeur"
     },
     "notifications": {
       "styles": {
-        "friend": "A short message, like a text from a friend",
-        "insight": "A fact or insight that surprises me",
-        "question": "A question that makes me think",
-        "quiet": "A quiet nudge — nothing intense"
+        "friend": "Un court message, comme un texto d'un ami",
+        "insight": "Un fait ou une information qui me surprend",
+        "question": "Une question qui me fait réfléchir",
+        "quiet": "Un doux rappel — rien d'intense"
       },
       "apps": {
         "imessage": "iMessage / WhatsApp",
         "instagram": "Instagram",
-        "email": "Email",
-        "rarely": "I rarely open notifications"
+        "email": "E-mail",
+        "rarely": "J'ouvre rarement les notifications"
       }
     },
-    "step": "Step {{step}} of {{total}}"
+    "step": "Étape {{step}} sur {{total}}"
   },
   "tree": {
-    "yourCompanion": "Your Companion",
+    "yourCompanion": "Ton compagnon",
     "ranks": {
-      "beginning": "Beginning",
-      "awakening": "Awakening",
-      "building": "Building",
-      "established": "Established",
-      "rising": "Rising",
-      "legendary": "Legendary"
+      "beginning": "Début",
+      "awakening": "Éveil",
+      "building": "Construction",
+      "established": "Établi",
+      "rising": "Ascension",
+      "legendary": "Légendaire"
     },
     "wolfRanks": {
-      "beginning": "Beginning",
-      "awakening": "Awakening",
-      "building": "Building",
-      "established": "Established",
-      "rising": "Rising",
-      "fierce": "Fierce",
+      "beginning": "Début",
+      "awakening": "Éveil",
+      "building": "Construction",
+      "established": "Établi",
+      "rising": "Ascension",
+      "fierce": "Féroce",
       "dominant": "Dominant",
-      "legendary": "Legendary"
+      "legendary": "Légendaire"
     },
     "stageNames": {
-      "day1": "Day 1",
-      "week1": "Week 1",
-      "twoWeeks": "2 Weeks",
-      "month1": "Month 1",
-      "twoMonths": "2 Months",
-      "ninetyDays": "90 Days"
+      "day1": "Jour 1",
+      "week1": "Semaine 1",
+      "twoWeeks": "2 semaines",
+      "month1": "Mois 1",
+      "twoMonths": "2 mois",
+      "ninetyDays": "90 jours"
     },
     "wolfStages": {
-      "newborn": "Newborn",
-      "pup": "Pup",
-      "young": "Young",
+      "newborn": "Nouveau-né",
+      "pup": "Chiot",
+      "young": "Jeune",
       "adolescent": "Adolescent",
-      "adult": "Adult",
-      "strong": "Strong",
+      "adult": "Adulte",
+      "strong": "Fort",
       "alpha": "Alpha",
-      "legendary": "Legendary"
+      "legendary": "Légendaire"
     },
     "upgrades": {
-      "sacredGround": "Sacred Ground"
+      "sacredGround": "Terre sacrée"
     },
-    "hallOfLegends": "Hall of Legends",
+    "hallOfLegends": "Hall des légendes",
     "sky": {
-      "morning": "Morning",
-      "afternoon": "Afternoon",
-      "evening": "Evening",
-      "night": "Night"
+      "morning": "Matin",
+      "afternoon": "Après-midi",
+      "evening": "Soir",
+      "night": "Nuit"
     }
   },
   "relapse": {
     "confirm": {
-      "title": "Did you relapse?",
-      "body": "Be honest with yourself. Logging it is an act of courage — your counter stays exactly where it is.",
-      "yes": "Yes, log it honestly",
-      "no": "No, I'm still clean"
+      "title": "As-tu rechuté ?",
+      "body": "Sois honnête avec toi-même. L'enregistrer est un acte de courage — ton compteur reste exactement là où il est.",
+      "yes": "Oui, l'enregistrer honnêtement",
+      "no": "Non, je suis toujours propre"
     },
     "trigger": {
-      "step": "Step 1 of 2",
-      "title": "What happened right before?",
-      "subtitle": "Be specific. This shapes your reframe.",
-      "stressed": "I was stressed",
-      "bored": "I was bored",
-      "alone": "I was alone",
-      "late": "It was late at night",
-      "online": "Something triggered me online",
-      "unknown": "I don't know"
+      "step": "Étape 1 sur 2",
+      "title": "Que s'est-il passé juste avant ?",
+      "subtitle": "Sois précis. Cela façonne ton recadrage.",
+      "stressed": "J'étais stressé",
+      "bored": "Je m'ennuyais",
+      "alone": "J'étais seul",
+      "late": "C'était tard le soir",
+      "online": "Quelque chose m'a déclenché en ligne",
+      "unknown": "Je ne sais pas"
     },
     "reframe": {
-      "readThis": "Read this.",
-      "analysing": "Analysing your pattern…",
-      "totalClean": "Total clean days",
-      "cta": "Day 1 starts now. Keep going."
+      "readThis": "Lis ceci.",
+      "analysing": "Analyse de ton schéma…",
+      "totalClean": "Total des jours propres",
+      "cta": "Le jour 1 commence maintenant. Continue."
     },
     "done": {
-      "title": "You're still in the game.",
-      "body": "Logging that took guts. Close this, open the SOS tools, and identify what triggered it. That's the work.",
-      "cta": "Back to dashboard"
+      "title": "Tu es encore dans la partie.",
+      "body": "L'enregistrer a demandé du courage. Ferme ceci, ouvre les outils SOS et identifie ce qui l'a déclenché. C'est ça le travail.",
+      "cta": "Retour au tableau de bord"
     }
   }
 }

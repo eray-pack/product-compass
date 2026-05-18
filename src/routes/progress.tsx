@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
@@ -103,6 +103,181 @@ function RecoveryRing({ pct, day, t }: { pct: number; day: number; t: TFunction 
         </text>
       </svg>
     </div>
+  );
+}
+
+// ── Premium Coin Card ─────────────────────────────────────────────────────────
+function CoinCard({
+  name, icon, earned, hint, index, t,
+}: {
+  name: string; icon: string; earned: boolean; hint: string; index: number; t: TFunction;
+}) {
+  const spinControls = useAnimation();
+
+  const handleClick = async () => {
+    if (!earned) return;
+    await spinControls.start({
+      rotateY: 360,
+      transition: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
+    });
+    spinControls.set({ rotateY: 0 });
+  };
+
+  return (
+    // Outer wrapper handles stagger entry
+    <motion.div
+      variants={earned ? undefined : msItem}
+      initial={earned ? { scale: 0.82, opacity: 0 } : "hidden"}
+      animate={earned ? { scale: [0.82, 1.08, 1], opacity: 1 } : "visible"}
+      transition={
+        earned
+          ? { duration: 0.55, times: [0, 0.6, 1], delay: index * 0.1 }
+          : { type: "spring", stiffness: 320, damping: 26 }
+      }
+    >
+      {/* Inner wrapper handles interactivity + spin */}
+      <motion.div
+        animate={spinControls}
+        whileHover={earned ? { scale: 1.05, y: -4, transition: { duration: 0.2, ease: "easeOut" } } : undefined}
+        whileTap={earned ? { scale: 0.96 } : undefined}
+        onClick={handleClick}
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: 16,
+          padding: 16,
+          cursor: earned ? "pointer" : "default",
+          background: earned
+            ? "linear-gradient(145deg, rgba(201,168,76,0.10) 0%, rgba(15,12,6,0.95) 100%)"
+            : "#0f0c06",
+          border: earned ? "1.5px solid rgba(201,168,76,0.45)" : "1px solid #1e1a10",
+          boxShadow: earned
+            ? "0 0 0 1px rgba(201,168,76,0.06), 0 4px 20px rgba(201,168,76,0.20), 0 0 56px rgba(201,168,76,0.08)"
+            : "none",
+          opacity: earned ? 1 : 0.4,
+          transformStyle: "preserve-3d",
+          willChange: "transform",
+        }}
+      >
+        {/* ── Diagonal shimmer sweep — unlocked only ── */}
+        {earned && (
+          <motion.div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              borderRadius: 16,
+              background:
+                "linear-gradient(108deg, transparent 30%, rgba(255,220,120,0.06) 46%, rgba(201,168,76,0.20) 50%, rgba(255,220,120,0.06) 54%, transparent 70%)",
+            }}
+            animate={{ x: ["-110%", "210%"] }}
+            transition={{
+              duration: 2.0,
+              repeat: Infinity,
+              repeatDelay: 4,
+              ease: "easeInOut",
+            }}
+          />
+        )}
+
+        {/* ── Icon circle ── */}
+        <div
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            background: earned
+              ? "radial-gradient(circle at 35% 30%, rgba(255,230,140,0.28), rgba(201,168,76,0.10))"
+              : "rgba(255,255,255,0.03)",
+            border: earned
+              ? "1.5px solid rgba(201,168,76,0.45)"
+              : "1px solid #2a2010",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 22,
+            flexShrink: 0,
+            filter: earned
+              ? "drop-shadow(0 2px 10px rgba(201,168,76,0.5))"
+              : "grayscale(1) brightness(0.4)",
+            boxShadow: earned ? "0 0 18px rgba(201,168,76,0.30)" : "none",
+          }}
+        >
+          {icon}
+        </div>
+
+        {/* ── Name ── */}
+        <p
+          style={{
+            marginTop: 12,
+            marginBottom: 0,
+            fontSize: 14,
+            fontWeight: earned ? 700 : 500,
+            color: earned ? "#ffffff" : "#3d3520",
+            lineHeight: 1.3,
+            fontFamily: "DM Sans, sans-serif",
+          }}
+        >
+          {name}
+        </p>
+
+        {/* ── Status pill or progress hint ── */}
+        {earned ? (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              marginTop: 8,
+              background: "rgba(201,168,76,0.14)",
+              border: "1px solid rgba(201,168,76,0.38)",
+              borderRadius: 20,
+              padding: "3px 10px",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              color: GOLD,
+            }}
+          >
+            {t("progress.achieved")}
+          </div>
+        ) : (
+          <p
+            style={{
+              marginTop: 6,
+              marginBottom: 0,
+              fontSize: 11,
+              color: "#3a3020",
+              lineHeight: 1.45,
+              fontFamily: "DM Sans, sans-serif",
+            }}
+          >
+            {hint}
+          </p>
+        )}
+
+        {/* ── Lock badge — locked cards ── */}
+        {!earned && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 12,
+              right: 12,
+              width: 24,
+              height: 24,
+              borderRadius: "50%",
+              background: "#0f0c06",
+              border: "1px solid #2a2010",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Lock size={12} color="#3a3020" strokeWidth={2.5} />
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -353,12 +528,12 @@ function ProgressScreen() {
         {/* Section header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <SectionTitle>{t("progress.milestonesTitle")}</SectionTitle>
-          <p style={{ fontSize: 11, color: "#3a3020", margin: 0 }}>
+          <p style={{ fontSize: 11, color: "#5a4a30", margin: 0, fontFamily: "DM Sans, sans-serif" }}>
             {t("progress.milestonesUnlocked", { count: unlockedCount, total: milestones.length })}
           </p>
         </div>
 
-        {/* Cards grid */}
+        {/* Coin cards grid */}
         <motion.div
           className="grid grid-cols-2 gap-3"
           variants={msContainer}
@@ -366,118 +541,15 @@ function ProgressScreen() {
           animate="visible"
         >
           {milestones.map(({ name, icon, earned, hint }, i) => (
-            <motion.div
+            <CoinCard
               key={name}
-              // Unlocked: keyframe pop animation with staggered delay
-              // Locked: stagger variant
-              variants={earned ? undefined : msItem}
-              initial={earned ? { scale: 0.9, opacity: 0 } : "hidden"}
-              animate={earned ? { scale: [0.9, 1.05, 1], opacity: 1 } : "visible"}
-              transition={
-                earned
-                  ? { duration: 0.5, times: [0, 0.6, 1], delay: i * 0.1 }
-                  : { type: "spring", stiffness: 320, damping: 26 }
-              }
-              whileTap={{ scale: 0.97 }}
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: 16,
-                padding: 16,
-                background: earned ? "rgba(201,168,76,0.08)" : "#0f0c06",
-                border: earned
-                  ? "1.5px solid rgba(201,168,76,0.4)"
-                  : "1px solid #1e1a10",
-                boxShadow: earned ? "0 0 20px rgba(201,168,76,0.08)" : "none",
-                opacity: earned ? 1 : 0.5,
-              }}
-            >
-              {/* Gold shimmer — unlocked only */}
-              {earned && (
-                <motion.div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    pointerEvents: "none",
-                    background:
-                      "linear-gradient(105deg, transparent 40%, rgba(201,168,76,0.08) 50%, transparent 60%)",
-                    borderRadius: 16,
-                  }}
-                  animate={{ x: ["-100%", "200%"] }}
-                  transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-                />
-              )}
-
-              {/* Icon circle */}
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  background: earned ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
-                  border: earned ? "1px solid rgba(201,168,76,0.3)" : "1px solid #2a2010",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 20,
-                  filter: earned ? "none" : "grayscale(1)",
-                }}
-              >
-                {icon}
-              </div>
-
-              {/* Name */}
-              <p
-                style={{
-                  marginTop: 10,
-                  marginBottom: 0,
-                  fontSize: 14,
-                  fontWeight: earned ? 700 : 600,
-                  color: earned ? "#fff" : "#555",
-                  lineHeight: 1.3,
-                }}
-              >
-                {name}
-              </p>
-
-              {/* Status */}
-              {earned ? (
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    marginTop: 6,
-                    background: "rgba(201,168,76,0.15)",
-                    border: "1px solid rgba(201,168,76,0.3)",
-                    borderRadius: 20,
-                    padding: "2px 10px",
-                    fontSize: 10,
-                    color: GOLD,
-                  }}
-                >
-                  {t("progress.achieved")}
-                </div>
-              ) : (
-                <p style={{ marginTop: 6, marginBottom: 0, fontSize: 11, color: "#3a3020" }}>
-                  {hint}
-                </p>
-              )}
-
-              {/* Lock icon — locked only */}
-              {!earned && (
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: 12,
-                    right: 12,
-                    fontSize: 12,
-                    color: "#2a2010",
-                  }}
-                >
-                  🔒
-                </span>
-              )}
-            </motion.div>
+              name={name}
+              icon={icon}
+              earned={earned}
+              hint={hint}
+              index={i}
+              t={t}
+            />
           ))}
         </motion.div>
       </section>
