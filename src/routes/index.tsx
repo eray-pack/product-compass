@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Coins, X, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence, useAnimation, type Variants } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, activeAddiction, inactivityDays, loadState, type Addiction } from "@/lib/store";
 import { BADGES, currentBadge, nextBadge, badgeSplit } from "@/lib/badges";
@@ -33,6 +33,16 @@ const seq = (delay = 0, gap = 0.1): Variants => ({
 });
 
 const vp = { once: true, margin: "-24px" } as const;
+
+const questContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09, delayChildren: 0.12 } },
+};
+
+const questItem: Variants = {
+  hidden: { opacity: 0, y: 14, scale: 0.86 },
+  show:   { opacity: 1, y: 0,  scale: 1,    transition: { duration: 0.52, ease: [0.16, 1, 0.3, 1] } },
+};
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const MILESTONES = [
@@ -402,6 +412,73 @@ function Hairline() {
 }
 
 
+// ─── Quest Pill ───────────────────────────────────────────────────────────────
+function QuestPill({
+  addiction, isActive, onClick,
+}: {
+  addiction: Addiction; isActive: boolean; onClick: (id: string) => void;
+}) {
+  const bounceControls = useAnimation();
+
+  const handleClick = async () => {
+    onClick(addiction.id);
+    await bounceControls.start({
+      scale: [1, 0.84, 1.14, 1],
+      transition: { duration: 0.4, times: [0, 0.2, 0.65, 1] },
+    });
+  };
+
+  return (
+    <motion.div variants={questItem}>
+      <motion.button
+        animate={bounceControls}
+        whileHover={{ scale: 1.05, y: -4, transition: { duration: 0.18, ease: "easeOut" } }}
+        whileTap={{ scale: 0.93 }}
+        onClick={handleClick}
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          padding: "6px 18px",
+          borderRadius: 20,
+          fontSize: 12,
+          fontWeight: isActive ? 700 : 500,
+          fontFamily: "DM Sans, sans-serif",
+          cursor: "pointer",
+          background: isActive
+            ? "linear-gradient(135deg, rgba(201,168,76,0.18) 0%, rgba(196,135,58,0.08) 100%)"
+            : "rgba(255,255,255,0.05)",
+          border: `1.5px solid ${isActive ? "rgba(201,168,76,0.52)" : "rgba(255,255,255,0.08)"}`,
+          color: isActive ? "#C9A84C" : "rgba(255,255,255,0.35)",
+          boxShadow: isActive
+            ? "0 0 0 1px rgba(201,168,76,0.07), 0 0 18px rgba(201,168,76,0.32), 0 4px 22px rgba(201,168,76,0.16)"
+            : "none",
+          willChange: "transform",
+        }}
+      >
+        {/* ── Diagonal shimmer sweep — active pill only ── */}
+        {isActive && (
+          <motion.span
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              borderRadius: "inherit",
+              background:
+                "linear-gradient(108deg, transparent 28%, rgba(255,220,120,0.07) 44%, rgba(201,168,76,0.24) 50%, rgba(255,220,120,0.07) 56%, transparent 72%)",
+            }}
+            animate={{ x: ["-115%", "215%"] }}
+            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5, ease: "easeInOut" }}
+          />
+        )}
+        <span style={{ position: "relative", zIndex: 1 }}>
+          {addiction.emoji} {addiction.name}
+        </span>
+      </motion.button>
+    </motion.div>
+  );
+}
+
 // ─── Habit Switcher ───────────────────────────────────────────────────────────
 function HabitSwitcher({
   addictions, activeId, isPremium, onSwitch, onAdd,
@@ -413,46 +490,42 @@ function HabitSwitcher({
   onAdd: () => void;
 }) {
   const pills = (
-    <div className="flex justify-center items-center gap-2 flex-wrap">
-      {addictions.map((a) => {
-        const isActive = a.id === activeId;
-        return (
-          <button
-            key={a.id}
-            onClick={() => onSwitch(a.id)}
-            style={{
-              padding: "5px 16px", borderRadius: 20,
-              fontSize: 12, fontWeight: isActive ? 700 : 500,
-              background: isActive ? "rgba(196,135,58,0.14)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${isActive ? "rgba(196,135,58,0.38)" : "rgba(255,255,255,0.08)"}`,
-              color: isActive ? "#C4873A" : "rgba(255,255,255,0.35)",
-              transition: "all 0.2s ease",
-              cursor: "pointer",
-            }}
-          >
-            {a.emoji} {a.name}
-          </button>
-        );
-      })}
+    <motion.div
+      className="flex justify-center items-center gap-2 flex-wrap"
+      variants={questContainer}
+      initial="hidden"
+      animate="show"
+    >
+      {addictions.map((a) => (
+        <QuestPill
+          key={a.id}
+          addiction={a}
+          isActive={a.id === activeId}
+          onClick={onSwitch}
+        />
+      ))}
 
       {/* + button — PRO gate */}
-      <button
-        onClick={onAdd}
-        style={{
-          width: 28, height: 28, borderRadius: "50%",
-          border: "1px solid rgba(255,255,255,0.10)",
-          background: "rgba(255,255,255,0.04)",
-          color: "rgba(255,255,255,0.35)",
-          fontSize: 16, lineHeight: 1,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", flexShrink: 0,
-          transition: "all 0.2s ease",
-        }}
-        aria-label="Add habit"
-      >
-        +
-      </button>
-    </div>
+      <motion.div variants={questItem}>
+        <motion.button
+          onClick={onAdd}
+          whileHover={{ scale: 1.12, y: -2, transition: { duration: 0.15 } }}
+          whileTap={{ scale: 0.88 }}
+          style={{
+            width: 28, height: 28, borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.04)",
+            color: "rgba(255,255,255,0.35)",
+            fontSize: 16, lineHeight: 1,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", flexShrink: 0,
+          }}
+          aria-label="Add habit"
+        >
+          +
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 
   if (addictions.length <= 1) {
