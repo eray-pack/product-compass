@@ -689,6 +689,7 @@ function TrackedHabitsSection({
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<typeof state.addictions[0] | null>(null);
+  const [dateTarget, setDateTarget] = useState<string | null>(null);
 
   const confirmDelete = () => {
     if (!deleteTarget) return;
@@ -762,8 +763,7 @@ function TrackedHabitsSection({
                   transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: 12,
+                    flexDirection: "column",
                     padding: "10px 12px",
                     borderRadius: 16,
                     marginBottom: 6,
@@ -774,81 +774,164 @@ function TrackedHabitsSection({
                     boxShadow: isActive ? "inset 0 0 24px rgba(201,168,76,0.04)" : "none",
                   }}
                 >
-                  {/* Tap to activate */}
-                  <button
-                    onClick={() => update({ activeAddictionId: a.id })}
-                    style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, textAlign: "left", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                  >
-                    {/* Emoji with ambient glow */}
-                    <div style={{ position: "relative", flexShrink: 0, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {/* Main row */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    {/* Tap to activate */}
+                    <button
+                      onClick={() => update({ activeAddictionId: a.id })}
+                      style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, textAlign: "left", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    >
+                      {/* Emoji with ambient glow */}
+                      <div style={{ position: "relative", flexShrink: 0, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {isActive && (
+                          <div style={{
+                            position: "absolute", inset: -8, borderRadius: "50%",
+                            background: "radial-gradient(circle, rgba(201,168,76,0.38) 0%, transparent 72%)",
+                            filter: "blur(7px)",
+                            pointerEvents: "none",
+                          }} />
+                        )}
+                        <span style={{
+                          fontSize: 26,
+                          lineHeight: 1,
+                          position: "relative",
+                          filter: isActive ? "drop-shadow(0 0 8px rgba(201,168,76,0.65))" : "none",
+                          transition: "filter 0.3s ease",
+                        }}>
+                          {a.emoji}
+                        </span>
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: isActive ? "#f5ede0" : "rgba(255,255,255,0.65)",
+                          marginBottom: 1,
+                          transition: "color 0.3s ease",
+                        }}>
+                          {a.name}
+                        </p>
+                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em" }}>
+                          Day {day}
+                        </p>
+                      </div>
+
                       {isActive && (
-                        <div style={{
-                          position: "absolute", inset: -8, borderRadius: "50%",
-                          background: "radial-gradient(circle, rgba(201,168,76,0.38) 0%, transparent 72%)",
-                          filter: "blur(7px)",
-                          pointerEvents: "none",
-                        }} />
+                        <span style={{
+                          fontSize: 9,
+                          fontWeight: 800,
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase" as const,
+                          padding: "3px 10px",
+                          borderRadius: 999,
+                          flexShrink: 0,
+                          background: "rgba(201,168,76,0.12)",
+                          border: "1px solid rgba(201,168,76,0.40)",
+                          color: "#C9A84C",
+                          boxShadow: "0 0 10px rgba(201,168,76,0.32), 0 0 22px rgba(201,168,76,0.10)",
+                        }}>
+                          Active
+                        </span>
                       )}
-                      <span style={{
-                        fontSize: 26,
-                        lineHeight: 1,
-                        position: "relative",
-                        filter: isActive ? "drop-shadow(0 0 8px rgba(201,168,76,0.65))" : "none",
-                        transition: "filter 0.3s ease",
-                      }}>
-                        {a.emoji}
-                      </span>
-                    </div>
+                    </button>
 
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{
-                        fontSize: 14,
-                        fontWeight: 700,
-                        color: isActive ? "#f5ede0" : "rgba(255,255,255,0.65)",
-                        marginBottom: 1,
-                        transition: "color 0.3s ease",
-                      }}>
-                        {a.name}
-                      </p>
-                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em" }}>
-                        Day {day}
-                      </p>
-                    </div>
-
-                    {isActive && (
-                      <span style={{
-                        fontSize: 9,
-                        fontWeight: 800,
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase" as const,
-                        padding: "3px 10px",
-                        borderRadius: 999,
+                    {/* Date picker button */}
+                    <motion.button
+                      whileTap={{ scale: 0.82 }}
+                      onClick={() => setDateTarget(dateTarget === a.id ? null : a.id)}
+                      style={{
+                        height: 28, width: 28, borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
                         flexShrink: 0,
-                        background: "rgba(201,168,76,0.12)",
-                        border: "1px solid rgba(201,168,76,0.40)",
-                        color: "#C9A84C",
-                        boxShadow: "0 0 10px rgba(201,168,76,0.32), 0 0 22px rgba(201,168,76,0.10)",
-                      }}>
-                        Active
-                      </span>
-                    )}
-                  </button>
+                        background: dateTarget === a.id ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
+                        border: `1px solid ${dateTarget === a.id ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.08)"}`,
+                        color: dateTarget === a.id ? "#C9A84C" : "rgba(255,255,255,0.22)", cursor: "pointer",
+                      }}
+                      aria-label={`Set start date for ${a.name}`}
+                    >
+                      <Calendar style={{ height: 12, width: 12 }} />
+                    </motion.button>
 
-                  {/* Remove button */}
-                  <motion.button
-                    whileTap={{ scale: 0.82 }}
-                    onClick={() => setDeleteTarget(a)}
-                    style={{
-                      height: 28, width: 28, borderRadius: "50%",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.22)", cursor: "pointer",
-                    }}
-                    aria-label={`Remove ${a.name}`}
-                  >
-                    <X style={{ height: 12, width: 12 }} />
-                  </motion.button>
+                    {/* Remove button */}
+                    <motion.button
+                      whileTap={{ scale: 0.82 }}
+                      onClick={() => setDeleteTarget(a)}
+                      style={{
+                        height: 28, width: 28, borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "rgba(255,255,255,0.22)", cursor: "pointer",
+                      }}
+                      aria-label={`Remove ${a.name}`}
+                    >
+                      <X style={{ height: 12, width: 12 }} />
+                    </motion.button>
+                  </div>
+
+                  {/* Inline date picker — expands below the row */}
+                  <AnimatePresence>
+                    {dateTarget === a.id && (
+                      <motion.div
+                        key="datepicker"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div style={{
+                          marginTop: 10,
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          background: "rgba(201,168,76,0.06)",
+                          border: "1px solid rgba(201,168,76,0.18)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                        }}>
+                          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", whiteSpace: "nowrap" }}>Start date</span>
+                          <input
+                            type="date"
+                            defaultValue={new Date(a.startDate).toISOString().slice(0, 10)}
+                            max={new Date().toISOString().slice(0, 10)}
+                            onChange={(e) => {
+                              if (!e.target.value) return;
+                              const ts = new Date(e.target.value).getTime();
+                              update((s) => ({
+                                addictions: s.addictions.map((ad) =>
+                                  ad.id === a.id ? { ...ad, startDate: ts } : ad
+                                ),
+                              }));
+                            }}
+                            style={{
+                              flex: 1,
+                              background: "transparent",
+                              border: "none",
+                              color: "#C9A84C",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              outline: "none",
+                              cursor: "pointer",
+                              colorScheme: "dark",
+                            }}
+                          />
+                          <motion.button
+                            whileTap={{ scale: 0.88 }}
+                            onClick={() => setDateTarget(null)}
+                            style={{
+                              fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                              color: "#C9A84C", background: "none", border: "none",
+                              cursor: "pointer", opacity: 0.7, padding: 0,
+                            }}
+                          >
+                            Done
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               );
             })}
