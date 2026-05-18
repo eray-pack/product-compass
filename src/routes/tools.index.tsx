@@ -470,64 +470,94 @@ function Tools() {
     <PageShell>
       {/* ── Aurora Borealis background ───────────────────────────────────── */}
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
-        {/* Blob 1 — deep cyber-violet, left */}
+
+        {/*
+          Purple blob — anchored top-left.
+          Drifts RIGHT across the screen (passing the green), oscillates vertically
+          with a gentle breathing scale, then eases all the way back. 50s cycle.
+        */}
         <motion.div
           animate={{
-            x: ["0%", "8%", "-5%", "2%", "0%"],
-            y: ["0%", "6%", "-8%", "4%", "0%"],
-            scale: [1, 1.07, 0.96, 1.03, 1],
-            opacity: [0.25, 0.30, 0.22, 0.27, 0.25],
+            x:       ["0vw", "25vw", "48vw", "25vw", "0vw"],
+            y:       ["0vh",  "4vh", "-3vh",  "6vh",  "0vh"],
+            scale:   [1,      1.06,   0.97,   1.04,   1],
+            opacity: [0.22,   0.26,   0.20,   0.24,   0.22],
           }}
-          transition={{ duration: 25, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
+          transition={{
+            duration:   50,
+            ease:       "easeInOut",
+            repeat:     Infinity,
+            repeatType: "loop",
+          }}
           style={{
-            position: "absolute",
-            top: "-12%",
-            left: "-18%",
-            width: "75vw",
-            height: "75vw",
+            position:     "absolute",
+            top:          "-15%",
+            left:         "-20%",
+            width:        "80vw",
+            height:       "80vw",
             borderRadius: "50%",
-            background: "radial-gradient(circle, #a855f7 0%, transparent 68%)",
-            filter: "blur(130px)",
+            background:   "radial-gradient(circle, #a855f7 0%, transparent 65%)",
+            filter:       "blur(140px)",
           }}
         />
-        {/* Blob 2 — radiant emerald seafoam, right */}
+
+        {/*
+          Green blob — anchored top-right.
+          Drifts LEFT (opposite direction), slightly different vertical oscillation
+          so the two blobs pass each other asymmetrically. 55s cycle.
+        */}
         <motion.div
           animate={{
-            x: ["0%", "-9%", "6%", "-3%", "0%"],
-            y: ["0%", "9%", "-5%", "7%", "0%"],
-            scale: [1, 0.94, 1.08, 0.98, 1],
-            opacity: [0.25, 0.29, 0.20, 0.26, 0.25],
+            x:       ["0vw", "-26vw", "-50vw", "-26vw", "0vw"],
+            y:       ["0vh",  "6vh",   "2vh",  "-4vh",  "0vh"],
+            scale:   [1,      0.95,    1.08,    0.98,    1],
+            opacity: [0.22,   0.20,    0.25,    0.21,    0.22],
           }}
-          transition={{ duration: 28, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 5 }}
+          transition={{
+            duration:   55,
+            ease:       "easeInOut",
+            repeat:     Infinity,
+            repeatType: "loop",
+          }}
           style={{
-            position: "absolute",
-            top: "-10%",
-            right: "-22%",
-            width: "70vw",
-            height: "70vw",
+            position:     "absolute",
+            top:          "-12%",
+            right:        "-24%",
+            width:        "75vw",
+            height:       "75vw",
             borderRadius: "50%",
-            background: "radial-gradient(circle, #10b981 0%, transparent 68%)",
-            filter: "blur(130px)",
+            background:   "radial-gradient(circle, #10b981 0%, transparent 65%)",
+            filter:       "blur(140px)",
           }}
         />
-        {/* Blob 3 — cosmic indigo, center-low */}
+
+        {/*
+          Indigo blob — fixed centre-low anchor, very slow gentle breathe only.
+          Acts as the deep atmospheric floor that never moves far.
+          60s cycle so it never phases with either moving blob.
+        */}
         <motion.div
           animate={{
-            x: ["0%", "6%", "-7%", "3%", "0%"],
-            y: ["0%", "-6%", "10%", "-4%", "0%"],
-            scale: [1, 1.05, 0.97, 1.04, 1],
-            opacity: [0.20, 0.25, 0.17, 0.23, 0.20],
+            x:       ["0vw",  "4vw", "-5vw",  "2vw",  "0vw"],
+            y:       ["0vh", "-5vh",  "8vh",  "-3vh",  "0vh"],
+            scale:   [1,      1.04,   0.96,    1.03,   1],
+            opacity: [0.18,   0.22,   0.15,    0.20,   0.18],
           }}
-          transition={{ duration: 32, ease: "easeInOut", repeat: Infinity, repeatType: "loop", delay: 11 }}
+          transition={{
+            duration:   60,
+            ease:       "easeInOut",
+            repeat:     Infinity,
+            repeatType: "loop",
+          }}
           style={{
-            position: "absolute",
-            top: "20%",
-            left: "5%",
-            width: "85vw",
-            height: "65vw",
+            position:     "absolute",
+            top:          "18%",
+            left:         "8%",
+            width:        "90vw",
+            height:       "70vw",
             borderRadius: "50%",
-            background: "radial-gradient(circle, #6366f1 0%, transparent 68%)",
-            filter: "blur(130px)",
+            background:   "radial-gradient(circle, #6366f1 0%, transparent 65%)",
+            filter:       "blur(150px)",
           }}
         />
       </div>
