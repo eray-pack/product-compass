@@ -27,6 +27,25 @@ const GOLD    = "#C9A84C";
 const AMBER   = "#E8A030";
 const CRIMSON = "#DC2626";
 
+// ── Sparkle particles — deterministic, no Math.random() in render ────────────
+const SOS_SPARKLES = [
+  { x:  6, y: 12, size: 1.7, delay: 0.0, dur: 7.8 },
+  { x: 22, y:  5, size: 1.4, delay: 1.9, dur: 9.0 },
+  { x: 48, y:  8, size: 2.0, delay: 0.6, dur: 7.2 },
+  { x: 74, y:  4, size: 1.5, delay: 2.8, dur: 8.5 },
+  { x: 91, y: 15, size: 1.8, delay: 0.3, dur: 9.3 },
+  { x: 11, y: 44, size: 1.6, delay: 3.4, dur: 7.5 },
+  { x: 36, y: 52, size: 1.9, delay: 1.2, dur: 8.8 },
+  { x: 63, y: 48, size: 1.5, delay: 4.5, dur: 7.0 },
+  { x: 83, y: 62, size: 2.0, delay: 2.1, dur: 9.5 },
+  { x:  4, y: 78, size: 1.6, delay: 5.2, dur: 8.0 },
+  { x: 29, y: 85, size: 1.4, delay: 1.7, dur: 7.6 },
+  { x: 58, y: 91, size: 1.8, delay: 0.9, dur: 8.2 },
+  { x: 88, y: 82, size: 1.5, delay: 3.8, dur: 9.1 },
+  { x: 42, y: 22, size: 1.7, delay: 6.0, dur: 7.4 },
+  { x: 77, y: 33, size: 1.4, delay: 2.5, dur: 8.7 },
+];
+
 // ═════════════════════════════════════════════════════════════════════════════
 // ── Active Urge pulsing module ───────────────────────────────────────────────
 // ═════════════════════════════════════════════════════════════════════════════
@@ -298,16 +317,43 @@ function SOS() {
   const sphereTarget = phase.label === "Inhale" ? 1.16 : phase.label === "Hold" ? 1.16 : 0.96;
 
   return (
+    <>
+    <style>{`
+      @keyframes sos-sparkle {
+        0%   { transform: translateY(0px) scale(1.0); opacity: 0; }
+        12%  { opacity: 1; }
+        88%  { opacity: 1; }
+        100% { transform: translateY(-22px) scale(0.70); opacity: 0; }
+      }
+      @keyframes sos-aurora {
+        0%, 100% { opacity: 0.82; transform: scale(0.94); }
+        50%       { opacity: 1.00; transform: scale(1.06); }
+      }
+    `}</style>
     <div
       style={{
         minHeight: "100dvh",
-        background: "linear-gradient(175deg, #0d0a06 0%, #090705 55%, #0c0804 100%)",
+        background: "radial-gradient(circle at 50% 50%, #0c0812 0%, #06040a 60%, #000000 100%)",
         display: "flex", flexDirection: "column",
+        position: "relative", overflow: "hidden",
       }}
       className="mx-auto max-w-md px-6 pt-10 pb-12"
     >
+      {/* ── Ambient sparkle particles ── */}
+      {SOS_SPARKLES.map((s, i) => (
+        <div key={i} aria-hidden style={{
+          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: "50%",
+          background: i % 5 === 0 ? "#8ab4f8" : "#ffd700",
+          boxShadow: i % 5 === 0
+            ? "0 0 5px 2px rgba(138,180,248,0.60)"
+            : "0 0 6px 2px rgba(255,215,0,0.60)",
+          animation: `sos-sparkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+          pointerEvents: "none", zIndex: 0,
+        }} />
+      ))}
       {/* ── Header ──────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-shrink-0">
+      <div className="flex items-center justify-between flex-shrink-0" style={{ position: "relative", zIndex: 1 }}>
         <Link
           to="/"
           className="inline-flex items-center gap-1 font-medium"
@@ -360,9 +406,29 @@ function SOS() {
           className="relative"
           style={{ width: 220, height: 220, display: "grid", placeItems: "center" }}
         >
+          {/* Aurora blob — neon-purple + gold halo breathing behind the orb */}
+          <div aria-hidden style={{
+            position: "absolute",
+            width: 260, height: 260,
+            top: "50%", left: "50%",
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
+            background: [
+              "radial-gradient(ellipse at 38% 42%,",
+              "rgba(212,175,55,0.22) 0%,",
+              "rgba(90,40,180,0.18) 40%,",
+              "rgba(30,15,70,0.12) 65%,",
+              "transparent 80%)",
+            ].join(" "),
+            filter: "blur(40px)",
+            animation: "sos-aurora 3.8s ease-in-out infinite",
+            pointerEvents: "none",
+            zIndex: 0,
+          }} />
+
           {/* Radial ambient halo */}
           <div className="absolute inset-0 rounded-full pointer-events-none" style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(201,168,76,0.14) 0%, transparent 70%)",
             filter: "blur(22px)",
           }} />
 
@@ -494,5 +560,6 @@ function SOS() {
         )}
       </div>
     </div>
+    </>
   );
 }
