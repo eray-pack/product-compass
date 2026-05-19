@@ -2874,10 +2874,23 @@ function LifeTreePage({
   );
 }
 
+// ── Companion Switcher — sparkle particles (deterministic, no jitter) ─────────
+const CS_SPARKLES = [
+  { x: 8,  y: 14, size: 1.8, delay: 0.0, dur: 7.5 },
+  { x: 28, y: 6,  size: 1.4, delay: 1.6, dur: 8.8 },
+  { x: 52, y: 10, size: 2.0, delay: 0.8, dur: 7.0 },
+  { x: 75, y: 8,  size: 1.6, delay: 2.4, dur: 9.2 },
+  { x: 92, y: 20, size: 1.5, delay: 0.3, dur: 8.0 },
+  { x: 15, y: 52, size: 1.8, delay: 3.5, dur: 7.5 },
+  { x: 42, y: 60, size: 1.6, delay: 1.1, dur: 9.0 },
+  { x: 68, y: 55, size: 2.0, delay: 4.2, dur: 8.0 },
+  { x: 85, y: 68, size: 1.4, delay: 2.0, dur: 7.8 },
+  { x: 5,  y: 82, size: 1.7, delay: 5.0, dur: 8.5 },
+  { x: 35, y: 88, size: 1.5, delay: 1.8, dur: 9.5 },
+  { x: 60, y: 92, size: 1.8, delay: 0.5, dur: 7.2 },
+];
+
 // ── Companion Switcher ────────────────────────────────────────────────────────
-// Renders on both LifeTreePage and WolfPage.
-// currentCompanion: which is active right now. Caller passes the correct value.
-// onSwitchToTree / onSwitchToWolf: caller handles paywall guard + state update.
 function CompanionSwitcher({
   isPremium,
   currentCompanion,
@@ -2892,183 +2905,449 @@ function CompanionSwitcher({
   const treeActive = currentCompanion === "tree";
   const wolfActive = currentCompanion === "wolf";
 
-  // ── Shared pill token styles ──
-  const activePill: React.CSSProperties = {
-    position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
-    fontSize: 8, fontWeight: 800, letterSpacing: "0.16em",
-    color: "#050308",
-    background: "linear-gradient(145deg, #D4954A 0%, #C4873A 100%)",
-    borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap",
-  };
-  const lockPill: React.CSSProperties = {
-    position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
-    display: "flex", alignItems: "center", gap: 3,
-    fontSize: 8, fontWeight: 800, letterSpacing: "0.14em",
-    color: "rgba(255,255,255,0.65)",
-    background: "rgba(15,10,25,0.92)",
-    border: "1px solid rgba(255,255,255,0.16)",
-    borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
-  };
-
-  // ── Shared card base ──
-  const cardBase: React.CSSProperties = {
-    position: "relative",
-    borderRadius: 16,
-    padding: "18px 12px 14px",
-    display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-    cursor: "pointer",
-    border: "none",
-    textAlign: "center",
-  };
-  const cardActive: React.CSSProperties = {
-    ...cardBase,
-    background: "rgba(201,168,76,0.08)",
-    outline: "1.5px solid rgba(201,168,76,0.55)",
-    boxShadow: "0 0 0 0.5px rgba(232,200,100,0.22), 0 0 20px rgba(201,168,76,0.14)",
-  };
-  const cardIdleGold: React.CSSProperties = {
-    ...cardBase,
-    background: "rgba(196,135,58,0.06)",
-    outline: "1.5px solid rgba(196,135,58,0.38)",
-  };
-  const cardLocked: React.CSSProperties = {
-    ...cardBase,
-    background: "rgba(255,255,255,0.02)",
-    outline: "1.5px solid rgba(255,255,255,0.10)",
-  };
-
-  // ── Icon box tokens ──
-  const iconBoxGold: React.CSSProperties = {
-    width: 46, height: 46, borderRadius: 12,
-    background: "rgba(201,168,76,0.10)",
-    border: "1px solid rgba(201,168,76,0.22)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-  };
-  const iconBoxAmber: React.CSSProperties = {
-    width: 46, height: 46, borderRadius: 12,
-    background: "rgba(196,135,58,0.08)",
-    border: "1px solid rgba(196,135,58,0.22)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-  };
-  const iconBoxDim: React.CSSProperties = {
-    width: 46, height: 46, borderRadius: 12,
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    opacity: 0.50,
-  };
-
   return (
-    <section className="px-6 mt-4 pb-4">
-      <div style={{
-        background: "linear-gradient(145deg, rgba(12,8,18,0.90) 0%, rgba(6,4,10,0.94) 100%)",
-        border: "1px solid rgba(201,168,76,0.18)",
-        borderRadius: 22,
-        padding: "20px 18px 18px",
-        boxShadow: "0 0 0 1px rgba(201,168,76,0.05), 0 8px 32px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}>
-        <p style={{
-          fontSize: 9, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "rgba(201,168,76,0.55)", marginBottom: 5, fontFamily: "DM Sans, sans-serif",
-        }}>
-          Companion
-        </p>
-        <h3 style={{
-          fontSize: 17, fontWeight: 700, color: "#f5ede0",
-          marginBottom: 4, letterSpacing: "-0.01em", fontFamily: "DM Sans, sans-serif",
-        }}>
-          Choose Your Companion
-        </h3>
-        <p style={{
-          fontSize: 12, color: "rgba(255,255,255,0.36)", marginBottom: 18,
-          lineHeight: 1.55, fontFamily: "DM Sans, sans-serif",
-        }}>
-          Good if you want an extra one, look at your tree also.
-        </p>
+    <>
+      <style>{`
+        /* Outer border wrapper pulses between dim and bright */
+        @keyframes cs-border-pulse {
+          0%, 100% { opacity: 0.52; }
+          50%       { opacity: 1.00; }
+        }
+        /* Soft halo behind the whole card breathes */
+        @keyframes cs-halo-pulse {
+          0%, 100% { opacity: 0.55; transform: scale(0.96); }
+          50%       { opacity: 1.00; transform: scale(1.04); }
+        }
+        /* Gold sparkle particles float upward and fade */
+        @keyframes cs-sparkle {
+          0%   { transform: translateY(0px) scale(1.0); opacity: 0; }
+          12%  { opacity: 1; }
+          88%  { opacity: 1; }
+          100% { transform: translateY(-20px) scale(0.75); opacity: 0; }
+        }
+        /* ACTIVE badge ripple rings expand and dissolve */
+        @keyframes cs-ripple {
+          0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.70; }
+          100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+        }
+        /* Card border glimmer sweep */
+        @keyframes cs-glimmer {
+          0%   { opacity: 0.38; }
+          50%  { opacity: 0.80; }
+          100% { opacity: 0.38; }
+        }
+      `}</style>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <section className="px-6 mt-4 pb-4">
 
-          {/* ── Sacred Tree card ── */}
-          <motion.button
-            onClick={treeActive ? undefined : onSwitchToTree}
-            whileTap={treeActive ? {} : { scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 500, damping: 22 }}
-            style={treeActive ? cardActive : cardIdleGold}
-          >
-            {treeActive && <span style={activePill}>ACTIVE</span>}
+        {/* ── Outer ambient halo ── */}
+        <div style={{ position: "relative" }}>
+          <div aria-hidden style={{
+            position: "absolute", inset: -18, borderRadius: 40,
+            background: "radial-gradient(ellipse, rgba(201,168,76,0.16) 0%, transparent 68%)",
+            filter: "blur(24px)", pointerEvents: "none",
+            animation: "cs-halo-pulse 4.0s ease-in-out infinite",
+          }} />
 
-            <div style={iconBoxGold}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-                stroke="#C9A84C" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="22" x2="12" y2="13"/>
-                <path d="M5 17l7-4 7 4"/>
-                <path d="M7 13l5-4 5 4"/>
-                <path d="M9 9l3-5 3 5"/>
-              </svg>
-            </div>
+          {/* ── Laser-etched gradient border wrapper ── */}
+          <div style={{
+            padding: 1.5, borderRadius: 24,
+            background: "linear-gradient(135deg, rgba(212,175,55,0.80) 0%, rgba(140,100,28,0.35) 28%, rgba(201,168,76,0.75) 50%, rgba(100,70,18,0.30) 72%, rgba(220,188,80,0.80) 100%)",
+            animation: "cs-border-pulse 3.6s ease-in-out infinite",
+          }}>
 
-            <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", marginBottom: 2, fontFamily: "DM Sans, sans-serif" }}>
-                Sacred Tree
-              </p>
-              <p style={{ fontSize: 10, color: "rgba(201,168,76,0.50)", fontFamily: "DM Sans, sans-serif" }}>
-                {treeActive ? "Your life tree" : "Tap to switch"}
-              </p>
-            </div>
-          </motion.button>
+            {/* ── Inner card — midnight gradient + grid + sparkles ── */}
+            <div style={{
+              background: "radial-gradient(ellipse at 50% 30%, #0c0812 0%, #07050e 55%, #020104 100%)",
+              borderRadius: 22, padding: "20px 18px 20px",
+              position: "relative", overflow: "hidden",
+            }}>
 
-          {/* ── Wolf Companion card ── */}
-          <motion.button
-            onClick={wolfActive ? undefined : onSwitchToWolf}
-            whileTap={wolfActive ? {} : { scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 500, damping: 22 }}
-            style={wolfActive ? cardActive : isPremium ? cardIdleGold : cardLocked}
-          >
-            {wolfActive && <span style={activePill}>ACTIVE</span>}
-            {!isPremium && !wolfActive && (
-              <div style={lockPill}>
-                <Lock style={{ width: 7, height: 7 }} />
-                PRO
-              </div>
-            )}
-
-            <div style={wolfActive ? iconBoxGold : isPremium ? iconBoxAmber : iconBoxDim}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-                stroke={wolfActive ? "#C9A84C" : isPremium ? "#C4873A" : "rgba(255,255,255,0.60)"}
-                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 8 L6 2 L9 7"/>
-                <path d="M15 7 L18 2 L20 8"/>
-                <path d="M4 8 Q4 14 12 14 Q20 14 20 8 Q20 4 15 3 Q12 2 9 3 Q4 4 4 8Z"/>
-                <path d="M9 12 Q12 15 15 12"/>
-                <path d="M7 14 Q4 18 5 22"/>
-                <path d="M17 14 Q20 18 19 22"/>
-                <path d="M5 22 Q12 20 19 22"/>
-                <path d="M5 16 Q1 12 3 8"/>
-              </svg>
-            </div>
-
-            <div style={{ textAlign: "center" }}>
-              <p style={{
-                fontSize: 12, fontWeight: 700, marginBottom: 2, fontFamily: "DM Sans, sans-serif",
-                color: wolfActive ? "#C9A84C" : isPremium ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.40)",
+              {/* Gold vector grid overlay */}
+              <svg aria-hidden style={{
+                position: "absolute", inset: 0, width: "100%", height: "100%",
+                opacity: 0.06, pointerEvents: "none",
               }}>
-                Wolf Companion
-              </p>
-              <p style={{
-                fontSize: 10, fontFamily: "DM Sans, sans-serif",
-                color: wolfActive
-                  ? "rgba(201,168,76,0.50)"
-                  : isPremium ? "rgba(201,168,76,0.55)"
-                  : "rgba(255,255,255,0.30)",
-              }}>
-                {wolfActive ? "Your wolf" : isPremium ? "Tap to switch" : "Unlock with Pro"}
-              </p>
-            </div>
-          </motion.button>
+                <defs>
+                  <pattern id="cs-grid" x="0" y="0" width="44" height="44" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="44" y2="44" stroke="#C9A84C" strokeWidth="0.5"/>
+                    <line x1="44" y1="0" x2="0" y2="44" stroke="#C9A84C" strokeWidth="0.35"/>
+                    <circle cx="0"  cy="0"  r="1.3" fill="#C9A84C" opacity="0.9"/>
+                    <circle cx="44" cy="0"  r="1.3" fill="#C9A84C" opacity="0.9"/>
+                    <circle cx="0"  cy="44" r="1.3" fill="#C9A84C" opacity="0.9"/>
+                    <circle cx="44" cy="44" r="1.3" fill="#C9A84C" opacity="0.9"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#cs-grid)"/>
+              </svg>
 
-        </div>
-      </div>
-    </section>
+              {/* Sparkle particles */}
+              {CS_SPARKLES.map((s, i) => (
+                <div key={i} aria-hidden style={{
+                  position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
+                  width: s.size, height: s.size, borderRadius: "50%",
+                  background: i % 4 === 0 ? "#8ab4f8" : "#ffd700",
+                  boxShadow: i % 4 === 0
+                    ? "0 0 5px 2px rgba(138,180,248,0.65)"
+                    : "0 0 6px 2px rgba(255,215,0,0.65)",
+                  animation: `cs-sparkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+                  pointerEvents: "none",
+                }} />
+              ))}
+
+              {/* ── Header text ── */}
+              <p style={{
+                position: "relative", zIndex: 1,
+                fontSize: 9, fontWeight: 800, letterSpacing: "0.24em", textTransform: "uppercase",
+                color: "#C9A84C", marginBottom: 5, fontFamily: "DM Sans, sans-serif",
+                textShadow: "0 0 16px rgba(201,168,76,0.45)",
+              }}>
+                Companion
+              </p>
+              <h3 style={{
+                position: "relative", zIndex: 1,
+                fontSize: 17, fontWeight: 700, color: "#f5ede0",
+                marginBottom: 4, letterSpacing: "-0.01em", fontFamily: "DM Sans, sans-serif",
+              }}>
+                Choose Your Companion
+              </h3>
+              <p style={{
+                position: "relative", zIndex: 1,
+                fontSize: 12, color: "rgba(255,255,255,0.42)", marginBottom: 20,
+                lineHeight: 1.55, fontFamily: "DM Sans, sans-serif",
+              }}>
+                Good if you want an extra one, look at your tree also.
+              </p>
+
+              {/* ── Companion cards grid ── */}
+              <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+
+                {/* ════ Sacred Tree card ════ */}
+                <motion.button
+                  onClick={treeActive ? undefined : onSwitchToTree}
+                  whileTap={treeActive ? {} : { scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                  style={{
+                    position: "relative", border: "none", borderRadius: 16,
+                    padding: "20px 10px 14px",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                    cursor: treeActive ? "default" : "pointer",
+                    textAlign: "center" as const,
+                    /* wood-grain texture via layered CSS gradients */
+                    background: treeActive
+                      ? [
+                          "repeating-linear-gradient(-18deg, transparent, transparent 5px, rgba(140,80,20,0.055) 5px, rgba(140,80,20,0.055) 6px)",
+                          "linear-gradient(160deg, rgba(30,16,6,0.97) 0%, rgba(18,10,4,0.99) 100%)",
+                        ].join(", ")
+                      : [
+                          "repeating-linear-gradient(-18deg, transparent, transparent 5px, rgba(100,60,15,0.04) 5px, rgba(100,60,15,0.04) 6px)",
+                          "linear-gradient(160deg, rgba(20,11,4,0.95) 0%, rgba(12,7,3,0.97) 100%)",
+                        ].join(", "),
+                    outline: treeActive
+                      ? "1.5px solid rgba(212,175,55,0.60)"
+                      : "1.5px solid rgba(196,135,58,0.32)",
+                    boxShadow: treeActive
+                      ? "0 0 0 0.5px rgba(232,200,100,0.24), 0 0 22px rgba(201,168,76,0.18), inset 0 0 30px rgba(140,80,20,0.08)"
+                      : "inset 0 0 20px rgba(100,60,15,0.05)",
+                    animation: treeActive ? "cs-glimmer 4.2s ease-in-out infinite" : "none",
+                  }}
+                >
+                  {/* ACTIVE badge + ripple rings */}
+                  {treeActive && (
+                    <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)" }}>
+                      {/* Ripple rings */}
+                      <div aria-hidden style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        width: 28, height: 18, borderRadius: 999,
+                        border: "1px solid rgba(212,175,55,0.55)",
+                        animation: "cs-ripple 2.2s ease-out infinite",
+                      }}/>
+                      <div aria-hidden style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        width: 28, height: 18, borderRadius: 999,
+                        border: "1px solid rgba(212,175,55,0.40)",
+                        animation: "cs-ripple 2.2s ease-out 0.8s infinite",
+                      }}/>
+                      <span style={{
+                        position: "relative", zIndex: 1,
+                        display: "inline-block",
+                        fontSize: 8, fontWeight: 800, letterSpacing: "0.18em",
+                        color: "#050308",
+                        background: "linear-gradient(135deg, #e8c96a 0%, #C4873A 50%, #d4af37 100%)",
+                        borderRadius: 999, padding: "3.5px 11px", whiteSpace: "nowrap",
+                        boxShadow: "0 2px 10px rgba(212,175,55,0.45)",
+                      }}>
+                        ACTIVE
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Bonsai tree icon */}
+                  <div style={{
+                    width: 54, height: 54, borderRadius: 14,
+                    background: treeActive
+                      ? "radial-gradient(circle at 40% 35%, rgba(212,175,55,0.18) 0%, rgba(140,80,20,0.08) 60%, transparent 80%)"
+                      : "rgba(201,168,76,0.06)",
+                    border: `1px solid ${treeActive ? "rgba(212,175,55,0.35)" : "rgba(196,135,58,0.18)"}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <svg width="38" height="40" viewBox="0 0 38 40" fill="none">
+                      <defs>
+                        <linearGradient id="cs-trunk" x1="19" y1="40" x2="19" y2="10" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#8a5c20"/>
+                          <stop offset="55%" stopColor="#c9a84c"/>
+                          <stop offset="100%" stopColor="#e8c86a"/>
+                        </linearGradient>
+                        <radialGradient id="cs-leaf" cx="45%" cy="42%" r="52%">
+                          <stop offset="0%" stopColor="#f0d47a"/>
+                          <stop offset="60%" stopColor="#c9a84c"/>
+                          <stop offset="100%" stopColor="#a07828"/>
+                        </radialGradient>
+                      </defs>
+                      {/* Roots */}
+                      <path d="M17 39 Q13 38 10 39" stroke="#8a5c20" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.75"/>
+                      <path d="M20 39 Q24 38 27 39" stroke="#8a5c20" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.75"/>
+                      <path d="M18 39 Q15 40 13 39.5" stroke="#8a5c20" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.55"/>
+                      {/* Main trunk — gnarled S-curve */}
+                      <path d="M19 39 Q17 33 18 27 Q16 21 19 17" stroke="url(#cs-trunk)" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
+                      {/* Bark texture lines */}
+                      <path d="M18 36 Q16 35.5 15.5 36" stroke="rgba(201,168,76,0.40)" strokeWidth="0.75" strokeLinecap="round" fill="none"/>
+                      <path d="M18.5 31 Q20 30.5 20.5 31" stroke="rgba(201,168,76,0.35)" strokeWidth="0.70" strokeLinecap="round" fill="none"/>
+                      <path d="M17.5 26 Q15.5 25.5 15 26" stroke="rgba(201,168,76,0.30)" strokeWidth="0.65" strokeLinecap="round" fill="none"/>
+                      {/* Left branch */}
+                      <path d="M18 23 Q12 18 7 14" stroke="url(#cs-trunk)" strokeWidth="1.9" strokeLinecap="round" fill="none"/>
+                      <path d="M7 14 Q4 10 3 7"  stroke="#c9a84c" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                      <path d="M7 14 Q9 11 10 8" stroke="#c9a84c" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                      <path d="M11 18 Q8 15 6 14" stroke="#c9a84c" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.75"/>
+                      {/* Right branch */}
+                      <path d="M19 20 Q26 15 31 12" stroke="url(#cs-trunk)" strokeWidth="1.9" strokeLinecap="round" fill="none"/>
+                      <path d="M31 12 Q34 8 35 6"  stroke="#c9a84c" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                      <path d="M31 12 Q30 9 29 7"  stroke="#c9a84c" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                      {/* Centre upward branch */}
+                      <path d="M19 19 Q19 13 19 9" stroke="#c9a84c" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+                      <path d="M19 9 Q17 6 15 4"  stroke="#c9a84c" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                      <path d="M19 9 Q21 6 23 4"  stroke="#c9a84c" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                      {/* Leaf clusters */}
+                      <ellipse cx="4"  cy="7"  rx="4.5" ry="3.5" fill="url(#cs-leaf)" opacity="0.92"/>
+                      <ellipse cx="2"  cy="9"  rx="2.8" ry="2.2" fill="#c9a84c"       opacity="0.70"/>
+                      <ellipse cx="10" cy="8"  rx="4.0" ry="3.2" fill="url(#cs-leaf)" opacity="0.90"/>
+                      <ellipse cx="7"  cy="13" rx="3.2" ry="2.6" fill="#d4a84c"       opacity="0.72"/>
+                      <ellipse cx="15" cy="3"  rx="3.8" ry="3.0" fill="url(#cs-leaf)" opacity="0.93"/>
+                      <ellipse cx="19" cy="2"  rx="4.8" ry="3.6" fill="url(#cs-leaf)" opacity="0.96"/>
+                      <ellipse cx="23" cy="3"  rx="3.8" ry="3.0" fill="url(#cs-leaf)" opacity="0.93"/>
+                      <ellipse cx="29" cy="7"  rx="3.8" ry="3.0" fill="url(#cs-leaf)" opacity="0.90"/>
+                      <ellipse cx="35" cy="6"  rx="3.5" ry="2.8" fill="url(#cs-leaf)" opacity="0.92"/>
+                      <ellipse cx="28" cy="9"  rx="2.6" ry="2.2" fill="#d4a84c"       opacity="0.70"/>
+                      {/* Leaf shimmer highlights */}
+                      <ellipse cx="18.5" cy="1.5" rx="2.8" ry="1.6" fill="rgba(255,240,180,0.36)"/>
+                      <ellipse cx="4"    cy="6.5" rx="2.0" ry="1.2" fill="rgba(255,240,180,0.28)"/>
+                      <ellipse cx="34.5" cy="5.5" rx="1.8" ry="1.1" fill="rgba(255,240,180,0.26)"/>
+                    </svg>
+                  </div>
+
+                  <div style={{ textAlign: "center" }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", marginBottom: 2, fontFamily: "DM Sans, sans-serif" }}>
+                      Sacred Tree
+                    </p>
+                    <p style={{ fontSize: 10, color: "rgba(201,168,76,0.55)", fontFamily: "DM Sans, sans-serif" }}>
+                      {treeActive ? "Your life tree" : "Tap to switch"}
+                    </p>
+                  </div>
+                </motion.button>
+
+                {/* ════ Wolf Companion card ════ */}
+                <motion.button
+                  onClick={wolfActive ? undefined : onSwitchToWolf}
+                  whileTap={wolfActive ? {} : { scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                  style={{
+                    position: "relative", border: "none", borderRadius: 16,
+                    padding: "20px 10px 14px",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                    cursor: wolfActive ? "default" : "pointer",
+                    textAlign: "center" as const,
+                    /* wolf-fur texture: diagonal strands + nebula glow */
+                    background: wolfActive
+                      ? [
+                          "repeating-linear-gradient(-50deg, transparent, transparent 4px, rgba(60,50,35,0.07) 4px, rgba(60,50,35,0.07) 5px)",
+                          "radial-gradient(ellipse at 30% 65%, rgba(30,20,70,0.35) 0%, transparent 60%)",
+                          "linear-gradient(155deg, rgba(12,8,18,0.97) 0%, rgba(6,4,12,0.99) 100%)",
+                        ].join(", ")
+                      : isPremium
+                        ? [
+                            "repeating-linear-gradient(-50deg, transparent, transparent 4px, rgba(50,40,28,0.05) 4px, rgba(50,40,28,0.05) 5px)",
+                            "linear-gradient(155deg, rgba(10,6,16,0.95) 0%, rgba(5,3,10,0.97) 100%)",
+                          ].join(", ")
+                        : "rgba(8,5,14,0.95)",
+                    outline: wolfActive
+                      ? "1.5px solid rgba(212,175,55,0.60)"
+                      : isPremium
+                        ? "1.5px solid rgba(196,135,58,0.32)"
+                        : "1.5px solid rgba(255,255,255,0.10)",
+                    boxShadow: wolfActive
+                      ? "0 0 0 0.5px rgba(232,200,100,0.24), 0 0 22px rgba(201,168,76,0.18), inset 0 0 30px rgba(30,20,60,0.25)"
+                      : "none",
+                    opacity: !isPremium && !wolfActive ? 0.72 : 1,
+                    animation: wolfActive ? "cs-glimmer 4.2s ease-in-out 0.6s infinite" : "none",
+                  }}
+                >
+                  {/* ACTIVE badge + ripple (wolf active) */}
+                  {wolfActive && (
+                    <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)" }}>
+                      <div aria-hidden style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        width: 28, height: 18, borderRadius: 999,
+                        border: "1px solid rgba(212,175,55,0.55)",
+                        animation: "cs-ripple 2.2s ease-out infinite",
+                      }}/>
+                      <div aria-hidden style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        width: 28, height: 18, borderRadius: 999,
+                        border: "1px solid rgba(212,175,55,0.40)",
+                        animation: "cs-ripple 2.2s ease-out 0.8s infinite",
+                      }}/>
+                      <span style={{
+                        position: "relative", zIndex: 1,
+                        display: "inline-block",
+                        fontSize: 8, fontWeight: 800, letterSpacing: "0.18em",
+                        color: "#050308",
+                        background: "linear-gradient(135deg, #e8c96a 0%, #C4873A 50%, #d4af37 100%)",
+                        borderRadius: 999, padding: "3.5px 11px", whiteSpace: "nowrap",
+                        boxShadow: "0 2px 10px rgba(212,175,55,0.45)",
+                      }}>
+                        ACTIVE
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 🔒 PRO badge (non-premium only) */}
+                  {!isPremium && !wolfActive && (
+                    <div style={{
+                      position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+                      display: "flex", alignItems: "center", gap: 3,
+                      fontSize: 8, fontWeight: 800, letterSpacing: "0.14em",
+                      color: "rgba(255,255,255,0.65)",
+                      background: "rgba(15,10,25,0.92)",
+                      border: "1px solid rgba(255,255,255,0.16)",
+                      borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
+                    }}>
+                      <Lock style={{ width: 7, height: 7 }} />
+                      PRO
+                    </div>
+                  )}
+
+                  {/* Howling wolf icon */}
+                  <div style={{
+                    width: 54, height: 54, borderRadius: 14,
+                    background: wolfActive
+                      ? "radial-gradient(circle at 40% 35%, rgba(212,175,55,0.16) 0%, rgba(30,18,60,0.18) 55%, transparent 80%)"
+                      : isPremium
+                        ? "rgba(196,135,58,0.06)"
+                        : "rgba(255,255,255,0.025)",
+                    border: `1px solid ${wolfActive ? "rgba(212,175,55,0.35)" : isPremium ? "rgba(196,135,58,0.18)" : "rgba(255,255,255,0.07)"}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    opacity: !isPremium && !wolfActive ? 0.55 : 1,
+                  }}>
+                    <svg width="36" height="38" viewBox="0 0 36 38" fill="none">
+                      <defs>
+                        <linearGradient id="cs-wolf-body" x1="2" y1="4" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%"   stopColor="#f0d47a"/>
+                          <stop offset="40%"  stopColor="#d4af37"/>
+                          <stop offset="80%"  stopColor="#a07820"/>
+                          <stop offset="100%" stopColor="#8a6010"/>
+                        </linearGradient>
+                        <radialGradient id="cs-eye-core" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%"   stopColor="#aaddff"/>
+                          <stop offset="55%"  stopColor="#4499ff"/>
+                          <stop offset="100%" stopColor="#1166cc"/>
+                        </radialGradient>
+                        <filter id="cs-eye-glow" x="-120%" y="-120%" width="340%" height="340%">
+                          <feGaussianBlur stdDeviation="1.8" result="b"/>
+                          <feFlood floodColor="#4499ff" floodOpacity="0.9" result="c"/>
+                          <feComposite in="c" in2="b" operator="in" result="g"/>
+                          <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                        <filter id="cs-wolf-glow" x="-15%" y="-15%" width="130%" height="130%">
+                          <feGaussianBlur stdDeviation="1.2" result="b"/>
+                          <feFlood floodColor="#d4af37" floodOpacity="0.4" result="c"/>
+                          <feComposite in="c" in2="b" operator="in" result="g"/>
+                          <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                      </defs>
+
+                      {/* ── Ear tips (left ear visible) ── */}
+                      <path d="M6 2 L4 9 L10 8 Z" fill="url(#cs-wolf-body)" opacity="0.95"/>
+                      <path d="M5 4 L4.5 8 L8 7.5 Z" fill="rgba(212,175,55,0.30)"/>
+                      {/* Right ear (partially behind head) */}
+                      <path d="M18 2 L16 8 L22 7 Z" fill="url(#cs-wolf-body)" opacity="0.80"/>
+
+                      {/* ── Head shape ── */}
+                      <path d="M4 9 Q3 13 5 16 Q7 20 12 21 Q17 22 22 20 Q27 18 28 14 Q29 10 26 7 Q22 4 18 3 Q13 2 10 4 Q7 6 4 9 Z"
+                        fill="url(#cs-wolf-body)" filter="url(#cs-wolf-glow)"/>
+
+                      {/* ── Forehead fur detail lines ── */}
+                      <path d="M9 8 Q11 7 12 8"   stroke="rgba(255,248,200,0.28)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+                      <path d="M14 6 Q16 5.5 17 6" stroke="rgba(255,248,200,0.22)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
+                      <path d="M8 11 Q9 10 10 11"  stroke="rgba(255,248,200,0.20)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
+
+                      {/* ── Muzzle / snout ── */}
+                      <path d="M5 16 Q4 19 6 21 Q8 23 12 23 Q9 21 7 18 Z" fill="url(#cs-wolf-body)" opacity="0.90"/>
+                      {/* Nose */}
+                      <ellipse cx="7" cy="21" rx="2.2" ry="1.4" fill="#3a2808" opacity="0.95"/>
+                      <ellipse cx="6.8" cy="20.6" rx="0.9" ry="0.6" fill="rgba(255,255,255,0.30)"/>
+
+                      {/* ── Cheek fur tufts ── */}
+                      <path d="M4 14 Q2 15 3 17" stroke="url(#cs-wolf-body)" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.65"/>
+                      <path d="M22 16 Q25 17 24 20" stroke="url(#cs-wolf-body)" strokeWidth="1.0" fill="none" strokeLinecap="round" opacity="0.55"/>
+
+                      {/* ── Neck / body base ── */}
+                      <path d="M9 21 Q7 25 8 30 Q9 34 14 36 Q20 38 24 35 Q28 32 28 28 Q28 24 26 21 Q22 20 18 21 Q14 22 9 21 Z"
+                        fill="url(#cs-wolf-body)" opacity="0.88"/>
+
+                      {/* ── Chest fur texture ── */}
+                      <path d="M12 25 Q14 24 16 25 Q18 24 20 25" stroke="rgba(255,248,200,0.20)" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+                      <path d="M11 29 Q14 28 17 29 Q20 28 22 29" stroke="rgba(255,248,200,0.18)" strokeWidth="0.60" fill="none" strokeLinecap="round"/>
+                      <path d="M12 33 Q15 32 18 33 Q21 32 23 33" stroke="rgba(255,248,200,0.15)" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
+
+                      {/* ── Body shine / specular ── */}
+                      <path d="M14 22 Q16 21.5 19 22.5 Q21 23 22 25 Q20 23.5 17 23 Z" fill="rgba(255,240,160,0.18)"/>
+
+                      {/* ── Piercing blue eye (with glow filter) ── */}
+                      <circle cx="14" cy="13" r="2.8" fill="#0a1428" filter="url(#cs-eye-glow)"/>
+                      <circle cx="14" cy="13" r="2.2" fill="url(#cs-eye-core)" filter="url(#cs-eye-glow)"/>
+                      {/* Pupil */}
+                      <ellipse cx="14" cy="13" rx="1.0" ry="1.4" fill="#020a18"/>
+                      {/* Eye specular */}
+                      <circle cx="13.2" cy="12.3" r="0.65" fill="rgba(200,230,255,0.75)"/>
+                      <circle cx="14.8" cy="13.6" r="0.35" fill="rgba(180,220,255,0.45)"/>
+                    </svg>
+                  </div>
+
+                  <div style={{ textAlign: "center" }}>
+                    <p style={{
+                      fontSize: 12, fontWeight: 700, marginBottom: 2, fontFamily: "DM Sans, sans-serif",
+                      color: wolfActive ? "#C9A84C" : isPremium ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.38)",
+                    }}>
+                      Wolf Companion
+                    </p>
+                    <p style={{
+                      fontSize: 10, fontFamily: "DM Sans, sans-serif",
+                      color: wolfActive
+                        ? "rgba(201,168,76,0.55)"
+                        : isPremium ? "rgba(201,168,76,0.55)"
+                        : "rgba(255,255,255,0.28)",
+                    }}>
+                      {wolfActive ? "Your wolf" : isPremium ? "Tap to switch" : "Unlock with Pro"}
+                    </p>
+                  </div>
+                </motion.button>
+
+              </div>{/* end cards grid */}
+            </div>{/* end inner card */}
+          </div>{/* end border wrapper */}
+        </div>{/* end relative position wrapper */}
+      </section>
+    </>
   );
 }
 
