@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Check, X, Sparkles, Crown, Shield, Star, Loader2 } from "lucide-react";
 import { useAppState } from "@/lib/store";
-import { purchaseMonthly, restorePurchases } from "@/lib/purchases";
+import { purchaseMonthly, purchaseAnnual, restorePurchases } from "@/lib/purchases";
 
 export const Route = createFileRoute("/paywall")({
   component: Paywall,
@@ -196,10 +196,21 @@ function Paywall() {
     return () => clearInterval(t);
   }, []);
 
+  // Main paywall — routes by selected plan card
   const subscribe = async () => {
     setPurchasing(true);
     try {
-      const ok = await purchaseMonthly();
+      const ok = plan === "annual" ? await purchaseAnnual() : await purchaseMonthly();
+      if (ok) { update({ paywallSeen: true, isPremium: true }); setStage("upsell"); }
+    } catch (e) { console.error(e); }
+    finally { setPurchasing(false); }
+  };
+
+  // Final offer — always annual (the 92% off deal shown on that screen)
+  const subscribeFinal = async () => {
+    setPurchasing(true);
+    try {
+      const ok = await purchaseAnnual();
       if (ok) { update({ paywallSeen: true, isPremium: true }); setStage("upsell"); }
     } catch (e) { console.error(e); }
     finally { setPurchasing(false); }
@@ -326,29 +337,134 @@ function Paywall() {
     );
   }
 
-  // ── FINAL (last-chance discount) ───────────────────────────────────────────
+  // ── FINAL (last-chance discount) — redesigned ─────────────────────────────
   if (stage === "final") {
-    return (
-      <div style={{ minHeight: "100svh", background: BG, fontFamily: "DM Sans, sans-serif" }}>
-        <motion.div className="mx-auto w-full max-w-md px-5 pt-10 pb-12 flex flex-col gap-6"
-          variants={stagger} initial="hidden" animate="show">
 
-          {/* Close — this one actually exits */}
+    // Deterministic sparkle positions — no jitter on re-render
+    const SPARKLES = [
+      { x: 8,  y: 14, size: 2.5, delay: 0.0,  dur: 3.8 },
+      { x: 88, y: 9,  size: 2.0, delay: 0.9,  dur: 4.2 },
+      { x: 22, y: 72, size: 3.0, delay: 0.4,  dur: 3.5 },
+      { x: 75, y: 68, size: 2.5, delay: 1.6,  dur: 4.0 },
+      { x: 50, y: 5,  size: 2.0, delay: 0.7,  dur: 3.6 },
+      { x: 93, y: 42, size: 1.8, delay: 1.2,  dur: 4.5 },
+      { x: 6,  y: 55, size: 2.2, delay: 0.3,  dur: 3.9 },
+      { x: 62, y: 88, size: 2.8, delay: 1.8,  dur: 3.4 },
+      { x: 38, y: 92, size: 1.8, delay: 0.6,  dur: 4.1 },
+      { x: 82, y: 78, size: 2.0, delay: 1.0,  dur: 3.7 },
+      { x: 18, y: 38, size: 1.6, delay: 2.1,  dur: 4.3 },
+      { x: 68, y: 22, size: 2.4, delay: 1.4,  dur: 3.5 },
+    ];
+
+    return (
+      <div style={{
+        minHeight: "100svh", fontFamily: "DM Sans, sans-serif",
+        position: "relative", overflow: "hidden",
+        background: "radial-gradient(ellipse at 50% 28%, #1a0905 0%, #0e0807 40%, #000000 100%)",
+      }}>
+
+        {/* ── Aurora: crimson + ember gold blobs ── */}
+        <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+          <motion.div
+            animate={{ x: ["0vw","22vw","42vw","18vw","0vw"], y: ["0vh","6vh","-4vh","8vh","0vh"],
+              scale: [1, 1.08, 0.96, 1.05, 1], opacity: [0.20, 0.26, 0.18, 0.24, 0.20] }}
+            transition={{ duration: 46, ease: "easeInOut", repeat: Infinity }}
+            style={{ position: "absolute", top: "-18%", left: "-22%",
+              width: "80vw", height: "80vw", borderRadius: "50%",
+              background: "radial-gradient(circle, #dc2626 0%, transparent 68%)",
+              filter: "blur(130px)" }}
+          />
+          <motion.div
+            animate={{ x: ["0vw","-18vw","-36vw","-14vw","0vw"], y: ["0vh","8vh","2vh","10vh","0vh"],
+              scale: [1, 0.94, 1.10, 0.98, 1], opacity: [0.18, 0.14, 0.22, 0.16, 0.18] }}
+            transition={{ duration: 52, ease: "easeInOut", repeat: Infinity, delay: 6 }}
+            style={{ position: "absolute", top: "5%", right: "-25%",
+              width: "72vw", height: "72vw", borderRadius: "50%",
+              background: "radial-gradient(circle, #C4873A 0%, transparent 68%)",
+              filter: "blur(120px)" }}
+          />
+          <motion.div
+            animate={{ x: ["0vw","12vw","-8vw","16vw","0vw"], y: ["0vh","-6vh","4vh","-8vh","0vh"],
+              scale: [1, 1.06, 0.98, 1.04, 1], opacity: [0.12, 0.18, 0.10, 0.16, 0.12] }}
+            transition={{ duration: 38, ease: "easeInOut", repeat: Infinity, delay: 12 }}
+            style={{ position: "absolute", bottom: "-10%", left: "15%",
+              width: "60vw", height: "60vw", borderRadius: "50%",
+              background: "radial-gradient(circle, #b91c1c 0%, transparent 65%)",
+              filter: "blur(110px)" }}
+          />
+        </div>
+
+        {/* ── Breathing mesh grid ── */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.030, 0.048, 0.030] }}
+          transition={{ duration: 20, ease: "easeInOut", repeat: Infinity }}
+          style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}
+        >
+          <svg width="100%" height="100%" viewBox="0 0 390 844"
+            preserveAspectRatio="xMidYMid slice" fill="none">
+            <line x1="-20" y1="0"   x2="240" y2="844" stroke="rgba(196,135,58,0.8)"  strokeWidth="0.6"/>
+            <line x1="130" y1="0"   x2="390" y2="844" stroke="rgba(196,135,58,0.8)"  strokeWidth="0.5"/>
+            <line x1="260" y1="0"   x2="520" y2="844" stroke="rgba(220,38,38,0.7)"   strokeWidth="0.5"/>
+            <line x1="420" y1="0"   x2="160" y2="844" stroke="rgba(196,135,58,0.8)"  strokeWidth="0.6"/>
+            <line x1="280" y1="0"   x2="20"  y2="844" stroke="rgba(220,38,38,0.7)"   strokeWidth="0.5"/>
+          </svg>
+        </motion.div>
+
+        {/* ── Floating gold sparkle particles ── */}
+        <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+          {SPARKLES.map((p, i) => (
+            <motion.div
+              key={i}
+              animate={{ y: [0, -22, 0], opacity: [0, 0.75, 0], scale: [0.6, 1.2, 0.6] }}
+              transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
+              style={{
+                position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
+                width: p.size, height: p.size, borderRadius: "50%",
+                background: i % 3 === 0 ? "#dc2626" : "#C4873A",
+                boxShadow: i % 3 === 0
+                  ? "0 0 6px 2px rgba(220,38,38,0.70)"
+                  : "0 0 6px 2px rgba(196,135,58,0.75)",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* ── Page content ── */}
+        <motion.div
+          className="mx-auto w-full max-w-md px-5 pt-10 pb-12 flex flex-col gap-6"
+          style={{ position: "relative", zIndex: 1 }}
+          variants={stagger} initial="hidden" animate="show"
+        >
+
+          {/* Close */}
           <motion.div variants={up} className="flex justify-end">
             <button onClick={skipForReal}
-              style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
-                border: `1px solid rgba(255,255,255,0.1)`, color: TEXT_SUB, cursor: "pointer",
+              style={{ width: 36, height: 36, borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)",
+                color: TEXT_SUB, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center" }}>
               <X className="h-4 w-4" />
             </button>
           </motion.div>
 
-          {/* Badge */}
+          {/* Pulsing FINAL OFFER badge */}
           <motion.div variants={up} className="flex justify-center">
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.25em] uppercase"
-              style={{ background: "rgba(196,58,58,0.12)", border: "1px solid rgba(196,58,58,0.35)", color: "#E07070" }}>
+            <motion.span
+              animate={{
+                scale: [1, 1.07, 1],
+                boxShadow: [
+                  "0 0 0px rgba(220,38,38,0)",
+                  "0 0 20px rgba(220,38,38,0.55), 0 0 40px rgba(220,38,38,0.20)",
+                  "0 0 0px rgba(220,38,38,0)",
+                ],
+              }}
+              transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.25em] uppercase"
+              style={{ background: "rgba(220,38,38,0.16)", border: "1px solid rgba(220,38,38,0.45)", color: "#FF7575" }}
+            >
               ⚡ Final Offer
-            </span>
+            </motion.span>
           </motion.div>
 
           {/* Headline */}
@@ -362,13 +478,27 @@ function Paywall() {
             </p>
           </motion.div>
 
-          {/* Countdown */}
+          {/* Countdown — sharp, crisp */}
           <motion.div variants={up} className="flex justify-center">
-            <div style={{ borderRadius: 24, background: "rgba(196,58,58,0.08)", border: "1px solid rgba(196,58,58,0.30)",
-              padding: "7px 18px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <span className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
-                style={{ background: "#E07070", boxShadow: "0 0 6px rgba(224,112,112,0.6)" }} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#E07070", fontVariantNumeric: "tabular-nums" }}>
+            <div style={{
+              borderRadius: 24,
+              background: "rgba(220,38,38,0.10)",
+              border: "1px solid rgba(220,38,38,0.38)",
+              padding: "8px 20px",
+              display: "inline-flex", alignItems: "center", gap: 10,
+              boxShadow: "0 0 18px rgba(220,38,38,0.18)",
+            }}>
+              <motion.span
+                animate={{ opacity: [1, 0.4, 1] }}
+                transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%",
+                  background: "#FF4444", boxShadow: "0 0 8px rgba(255,68,68,0.80)", flexShrink: 0 }}
+              />
+              <span style={{
+                fontSize: 14, fontWeight: 800, letterSpacing: "0.04em",
+                color: "#FF5555", fontVariantNumeric: "tabular-nums",
+                textShadow: "0 0 12px rgba(255,85,85,0.55)",
+              }}>
                 Expires in {fmt(finalSeconds)}
               </span>
             </div>
@@ -376,30 +506,42 @@ function Paywall() {
 
           {/* Offer card */}
           <motion.div variants={up} style={{
-            borderRadius: 20, padding: "22px 20px",
-            background: G_MUTED, border: `1px solid ${G}55`,
-            boxShadow: `0 0 32px ${G_GLOW}`,
+            borderRadius: 22, padding: "24px 22px",
+            background: "linear-gradient(145deg, rgba(30,14,6,0.92) 0%, rgba(18,8,2,0.96) 100%)",
+            border: `1px solid ${G}55`,
+            boxShadow: `0 0 0 1px rgba(196,135,58,0.10), 0 8px 48px rgba(196,135,58,0.18), 0 2px 12px rgba(0,0,0,0.60)`,
+            backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           }}>
             <div className="flex items-center justify-between mb-1">
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase", color: G }}>
+              <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.38em", textTransform: "uppercase", color: G }}>
                 Annual — 92% off
               </p>
               <p style={{ fontSize: 11, color: TEXT_DIM, textDecoration: "line-through" }}>$39.99/yr</p>
             </div>
-            <p style={{ fontSize: 44, fontWeight: 800, color: TEXT, lineHeight: 1 }}>
-              $1.49<span style={{ fontSize: 15, fontWeight: 400, color: TEXT_SUB }}>/month</span>
-            </p>
-            <p style={{ fontSize: 12, color: TEXT_DIM, marginTop: 4 }}>$17.88 billed once a year</p>
 
-            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-              {["Everything in the full PRO plan", "Locked-in price for life", "Cancel anytime"].map((f) => (
+            <div className="flex items-end gap-2 mt-2 mb-1">
+              <p style={{ fontSize: 52, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: "-0.02em" }}>
+                $1.49
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 400, color: TEXT_SUB, paddingBottom: 8 }}>/month</p>
+            </div>
+            <p style={{ fontSize: 12, color: TEXT_DIM, marginBottom: 18 }}>$17.88 billed once a year</p>
+
+            <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${G}33, transparent)`, marginBottom: 16 }} />
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                "Everything in the full PRO plan",
+                "Locked-in price for life",
+                "Cancel anytime — no questions asked",
+              ].map((f) => (
                 <div key={f} className="flex items-center gap-3">
-                  <div style={{ width: 18, height: 18, borderRadius: "50%", background: G_MUTED,
-                    border: `1px solid ${G}44`, display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0 }}>
-                    <Check style={{ width: 10, height: 10, color: G, strokeWidth: 3 }} />
+                  <div style={{ width: 20, height: 20, borderRadius: "50%",
+                    background: "rgba(196,135,58,0.14)", border: `1px solid ${G}55`,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Check style={{ width: 11, height: 11, color: G, strokeWidth: 3 }} />
                   </div>
-                  <p style={{ fontSize: 13, color: TEXT_SUB }}>{f}</p>
+                  <p style={{ fontSize: 13, color: TEXT, fontWeight: 500 }}>{f}</p>
                 </div>
               ))}
             </div>
@@ -407,15 +549,25 @@ function Paywall() {
 
           {/* CTA */}
           <motion.div variants={up} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <motion.button onClick={subscribe} disabled={purchasing} whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 500, damping: 20 }}
+            <motion.button
+              onClick={subscribeFinal} disabled={purchasing}
+              whileTap={{ scale: 0.97 }}
+              animate={{
+                boxShadow: purchasing ? "none" : [
+                  `0 4px 24px rgba(196,135,58,0.30)`,
+                  `0 4px 42px rgba(196,135,58,0.58)`,
+                  `0 4px 24px rgba(196,135,58,0.30)`,
+                ],
+              }}
+              transition={{ type: "spring", stiffness: 500, damping: 20,
+                boxShadow: { duration: 2.2, repeat: Infinity, ease: "easeInOut" } }}
               style={{
-                width: "100%", height: 58, borderRadius: 18, fontSize: 16, fontWeight: 700,
-                background: `linear-gradient(135deg, ${G}, #E8A84A)`,
-                color: BG, border: "none", cursor: "pointer",
-                boxShadow: `0 4px 32px ${G_GLOW}`,
+                width: "100%", height: 60, borderRadius: 18, fontSize: 16, fontWeight: 800,
+                background: `linear-gradient(135deg, #E8A84A 0%, ${G} 50%, #b86a1a 100%)`,
+                color: "#0e0807", border: "none", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 opacity: purchasing ? 0.7 : 1,
+                letterSpacing: "0.01em",
               }}>
               {purchasing
                 ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
@@ -424,11 +576,17 @@ function Paywall() {
 
             <button onClick={skipForReal} style={{
               width: "100%", height: 44, borderRadius: 14, fontSize: 13,
-              background: "none", border: `1px solid rgba(255,255,255,0.07)`,
+              background: "none", border: "1px solid rgba(255,255,255,0.07)",
               color: TEXT_DIM, cursor: "pointer",
             }}>
               No thanks, continue free
             </button>
+
+            <p style={{ textAlign: "center", fontSize: 11, color: TEXT_DIM,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Lock style={{ width: 11, height: 11 }} />
+              7-day free trial · Cancel anytime · 256-bit encryption
+            </p>
           </motion.div>
 
         </motion.div>

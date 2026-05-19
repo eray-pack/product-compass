@@ -41,6 +41,26 @@ export async function checkPremium(): Promise<boolean> {
   }
 }
 
+export async function purchaseAnnual(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    const Purchases = await getPlugin();
+    if (!Purchases) return false;
+    const result = await Purchases.getOfferings();
+    const offerings = ((result as unknown as Record<string, unknown>).offerings ?? result) as {
+      current?: { annual?: unknown };
+    };
+    const annual = offerings.current?.annual;
+    if (!annual) throw new Error("No annual package found");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { customerInfo } = await Purchases.purchasePackage({ aPackage: annual as any });
+    return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+  } catch (e: any) {
+    if (e?.userCancelled) return false;
+    throw e;
+  }
+}
+
 export async function purchaseMonthly(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
