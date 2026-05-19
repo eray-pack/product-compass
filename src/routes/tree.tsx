@@ -2851,7 +2851,210 @@ function LifeTreePage({
           </p>
         </div>
       </section>
+
+      {/* ── Companion Switcher ── */}
+      <CompanionSwitcher
+        isPremium={state.isPremium}
+        onSwitchToWolf={() => {
+          if (!state.isPremium) { triggerPaywall(); return; }
+          update({ companion: "wolf" });
+        }}
+      />
     </PageShell>
+  );
+}
+
+// ── Companion Switcher ────────────────────────────────────────────────────────
+function CompanionSwitcher({
+  isPremium,
+  onSwitchToWolf,
+}: {
+  isPremium: boolean;
+  onSwitchToWolf: () => void;
+}) {
+  return (
+    <section className="px-6 mt-4 pb-4">
+      <div
+        style={{
+          background: "linear-gradient(145deg, rgba(12,8,18,0.90) 0%, rgba(6,4,10,0.94) 100%)",
+          border: "1px solid rgba(201,168,76,0.18)",
+          borderRadius: 22,
+          padding: "20px 18px 18px",
+          boxShadow: [
+            "0 0 0 1px rgba(201,168,76,0.05)",
+            "0 8px 32px rgba(0,0,0,0.38)",
+            "inset 0 1px 0 rgba(255,255,255,0.04)",
+          ].join(", "),
+        }}
+      >
+        {/* Label */}
+        <p style={{
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase",
+          color: "rgba(201,168,76,0.55)", marginBottom: 5,
+          fontFamily: "DM Sans, sans-serif",
+        }}>
+          Companion
+        </p>
+
+        {/* Heading */}
+        <h3 style={{
+          fontSize: 17, fontWeight: 700, color: "#f5ede0",
+          marginBottom: 4, letterSpacing: "-0.01em",
+          fontFamily: "DM Sans, sans-serif",
+        }}>
+          Choose Your Companion
+        </h3>
+
+        {/* Subtext */}
+        <p style={{
+          fontSize: 12, color: "rgba(255,255,255,0.36)", marginBottom: 18,
+          lineHeight: 1.55, fontFamily: "DM Sans, sans-serif",
+        }}>
+          Good if you want an extra one, look at your tree also.
+        </p>
+
+        {/* Option cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+
+          {/* ── Sacred Tree — active ── */}
+          <div
+            style={{
+              position: "relative",
+              background: "rgba(201,168,76,0.08)",
+              border: "1.5px solid rgba(201,168,76,0.55)",
+              borderRadius: 16,
+              padding: "18px 12px 14px",
+              boxShadow: [
+                "0 0 0 0.5px rgba(232,200,100,0.22)",
+                "0 0 20px rgba(201,168,76,0.14)",
+              ].join(", "),
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+            }}
+          >
+            {/* ACTIVE pill */}
+            <span style={{
+              position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+              fontSize: 8, fontWeight: 800, letterSpacing: "0.16em",
+              color: "#050308",
+              background: "linear-gradient(145deg, #D4954A 0%, #C4873A 100%)",
+              borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap",
+            }}>
+              ACTIVE
+            </span>
+
+            {/* Tree icon */}
+            <div style={{
+              width: 46, height: 46, borderRadius: 12,
+              background: "rgba(201,168,76,0.10)",
+              border: "1px solid rgba(201,168,76,0.22)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                stroke="#C9A84C" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="22" x2="12" y2="13"/>
+                <path d="M5 17l7-4 7 4"/>
+                <path d="M7 13l5-4 5 4"/>
+                <path d="M9 9l3-5 3 5"/>
+              </svg>
+            </div>
+
+            <div style={{ textAlign: "center" }}>
+              <p style={{
+                fontSize: 12, fontWeight: 700, color: "#C9A84C",
+                marginBottom: 2, fontFamily: "DM Sans, sans-serif",
+              }}>
+                Sacred Tree
+              </p>
+              <p style={{
+                fontSize: 10, color: "rgba(201,168,76,0.50)",
+                fontFamily: "DM Sans, sans-serif",
+              }}>
+                Your life tree
+              </p>
+            </div>
+          </div>
+
+          {/* ── Wolf Companion — pro locked / unlocked ── */}
+          <motion.button
+            onClick={onSwitchToWolf}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 500, damping: 22 }}
+            style={{
+              position: "relative",
+              background: isPremium
+                ? "rgba(196,135,58,0.06)"
+                : "rgba(255,255,255,0.02)",
+              border: isPremium
+                ? "1px solid rgba(196,135,58,0.35)"
+                : "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 16,
+              padding: "18px 12px 14px",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+              cursor: "pointer",
+              textAlign: "center" as const,
+            }}
+          >
+            {/* PRO lock pill */}
+            <div style={{
+              position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+              display: "flex", alignItems: "center", gap: 4,
+              fontSize: 8, fontWeight: 800, letterSpacing: "0.14em",
+              color: isPremium ? "#C9A84C" : "rgba(255,255,255,0.65)",
+              background: isPremium
+                ? "rgba(201,168,76,0.14)"
+                : "rgba(15,10,25,0.92)",
+              border: `1px solid ${isPremium ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.14)"}`,
+              borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
+            }}>
+              <Lock style={{ width: 7, height: 7 }} />
+              PRO
+            </div>
+
+            {/* Wolf icon */}
+            <div style={{
+              width: 46, height: 46, borderRadius: 12,
+              background: isPremium
+                ? "rgba(196,135,58,0.08)"
+                : "rgba(255,255,255,0.03)",
+              border: `1px solid ${isPremium ? "rgba(196,135,58,0.22)" : "rgba(255,255,255,0.07)"}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              opacity: isPremium ? 1 : 0.55,
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                stroke={isPremium ? "#C4873A" : "rgba(255,255,255,0.55)"}
+                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 8 L6 2 L9 7"/>
+                <path d="M15 7 L18 2 L20 8"/>
+                <path d="M4 8 Q4 14 12 14 Q20 14 20 8 Q20 4 15 3 Q12 2 9 3 Q4 4 4 8Z"/>
+                <path d="M9 12 Q12 15 15 12"/>
+                <path d="M7 14 Q4 18 5 22"/>
+                <path d="M17 14 Q20 18 19 22"/>
+                <path d="M5 22 Q12 20 19 22"/>
+                <path d="M5 16 Q1 12 3 8"/>
+              </svg>
+            </div>
+
+            <div>
+              <p style={{
+                fontSize: 12, fontWeight: 700,
+                color: isPremium ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.38)",
+                marginBottom: 2, fontFamily: "DM Sans, sans-serif",
+              }}>
+                Wolf Companion
+              </p>
+              <p style={{
+                fontSize: 10,
+                color: isPremium ? "rgba(196,135,58,0.65)" : "rgba(255,255,255,0.24)",
+                fontFamily: "DM Sans, sans-serif",
+              }}>
+                {isPremium ? "Tap to switch" : "Unlock with Pro"}
+              </p>
+            </div>
+          </motion.button>
+
+        </div>
+      </div>
+    </section>
   );
 }
 
