@@ -160,7 +160,7 @@ function TreeSkyBackground({ timeOfDay }: { timeOfDay: keyof typeof SKY_CONFIGS 
             />
           ))}
           {/* Crescent moon */}
-          <svg className="absolute" style={{ top: "8%", right: "12%" }} width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <svg className="absolute" style={{ top: "22%", right: "30%" }} width="48" height="48" viewBox="0 0 48 48" fill="none">
             <circle cx="24" cy="24" r="18" fill="#F5E8C0" opacity="0.92"/>
             <circle cx="31" cy="18" r="14" fill="#0E1238"/>
             <circle cx="24" cy="24" r="18" fill="#F5E8C0" opacity="0.08"/>
@@ -203,7 +203,7 @@ function TreeSkyBackground({ timeOfDay }: { timeOfDay: keyof typeof SKY_CONFIGS 
         <div
           className="absolute anim-sun"
           style={{
-            top: "10%",
+            top: "20%",
             left: "50%",
             transform: "translateX(-50%)",
             width: "56px",
@@ -2603,10 +2603,8 @@ function LifeTreePage({
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div style={{
               position: "relative", width: 340, height: 340,
-              maskImage: "radial-gradient(ellipse at center, black 52%, transparent 80%)",
-              WebkitMaskImage: "radial-gradient(ellipse at center, black 52%, transparent 80%)",
-              filter: health.companionFilter,
-              transition: "filter 1.2s ease",
+              maskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
             }}>
               {/* Sky fills the oval */}
               <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%" }}>
