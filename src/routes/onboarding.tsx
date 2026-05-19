@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
+import { triggerPaywall } from "@/lib/paywall";
 import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
 import { WolfSittingPreview } from "@/components/avatars/WolfStages";
 import { PremiumBackground } from "@/components/PremiumBackground";
@@ -304,7 +305,8 @@ export const Route = createFileRoute("/onboarding")({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 function Onboarding() {
-  const [, update] = useAppState();
+  const [state, update] = useAppState();
+  const [showProAlert, setShowProAlert] = useState(false);
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
@@ -515,14 +517,22 @@ function Onboarding() {
                 <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 16, lineHeight: 1.5 }}>
                   Skip and add them anytime.
                 </p>
-                {/* PRO badge */}
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  background: "rgba(201,168,76,0.1)",
-                  border: "1px solid rgba(201,168,76,0.35)",
-                  borderRadius: 12, padding: "10px 16px",
-                  marginBottom: 16,
-                }}>
+
+                {/* PRO badge — clickable, opens paywall */}
+                <button
+                  onClick={() => triggerPaywall()}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    background: "rgba(201,168,76,0.1)",
+                    border: "1px solid rgba(201,168,76,0.35)",
+                    borderRadius: 12, padding: "10px 16px",
+                    marginBottom: 16, width: "100%", textAlign: "left",
+                    cursor: "pointer",
+                    transition: "background 0.18s",
+                  }}
+                  onPointerEnter={e => (e.currentTarget.style.background = "rgba(201,168,76,0.18)")}
+                  onPointerLeave={e => (e.currentTarget.style.background = "rgba(201,168,76,0.10)")}
+                >
                   <span style={{ fontSize: 18 }}>🔓</span>
                   <div>
                     <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: 1, textTransform: "uppercase", margin: 0 }}>
@@ -532,17 +542,113 @@ function Onboarding() {
                       Track multiple addictions side-by-side
                     </p>
                   </div>
-                </div>
+                  <span style={{ marginLeft: "auto", fontSize: 14, color: G, opacity: 0.7 }}>›</span>
+                </button>
+
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {otherHabitOptions.map((h) => (
-                    <CheckCard key={h.label} emoji={h.emoji} label={h.label}
-                      selected={pickedHabits.includes(h.label)}
-                      onClick={() => toggle(pickedHabits, h.label, setPickedHabits)} />
-                  ))}
+                  {otherHabitOptions.map((h) => {
+                    const isSelected = pickedHabits.includes(h.label);
+                    const handleClick = () => {
+                      // Always allow deselection
+                      if (isSelected) { toggle(pickedHabits, h.label, setPickedHabits); return; }
+                      // Free users: max 1 selection
+                      if (!state.isPremium && pickedHabits.length >= 1) { setShowProAlert(true); return; }
+                      toggle(pickedHabits, h.label, setPickedHabits);
+                    };
+                    return (
+                      <CheckCard key={h.label} emoji={h.emoji} label={h.label}
+                        selected={isSelected} onClick={handleClick} />
+                    );
+                  })}
                 </div>
+
                 <GoldButton onClick={next}>
                   <span>Continue</span><ArrowRight size={16} />
                 </GoldButton>
+
+                {/* ── Pro upgrade alert modal ── */}
+                <AnimatePresence>
+                  {showProAlert && (
+                    <motion.div
+                      key="pro-alert-backdrop"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      onClick={() => setShowProAlert(false)}
+                      style={{
+                        position: "fixed", inset: 0, zIndex: 100,
+                        background: "rgba(0,0,0,0.72)",
+                        display: "flex", alignItems: "flex-end",
+                        padding: "0 0 32px",
+                        backdropFilter: "blur(6px)",
+                        WebkitBackdropFilter: "blur(6px)",
+                      }}
+                    >
+                      <motion.div
+                        key="pro-alert-sheet"
+                        initial={{ y: 60, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 60, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          width: "100%", maxWidth: 448, margin: "0 auto",
+                          background: "linear-gradient(160deg, #1a1508 0%, #0f0c06 100%)",
+                          border: "1px solid rgba(201,168,76,0.28)",
+                          borderRadius: "24px 24px 16px 16px",
+                          padding: "28px 24px 24px",
+                          boxShadow: "0 -8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,168,76,0.08)",
+                        }}
+                      >
+                        {/* Icon */}
+                        <div style={{
+                          width: 48, height: 48, borderRadius: "50%", margin: "0 auto 16px",
+                          background: "rgba(201,168,76,0.12)",
+                          border: "1px solid rgba(201,168,76,0.32)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 22,
+                        }}>🔒</div>
+
+                        <p style={{ fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", margin: "0 0 8px", lineHeight: 1.3 }}>
+                          PRO required
+                        </p>
+                        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.52)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.55 }}>
+                          You need a Pro account to track multiple addictions side-by-side.
+                        </p>
+
+                        {/* Upgrade button */}
+                        <button
+                          onClick={() => { setShowProAlert(false); triggerPaywall(); }}
+                          style={{
+                            width: "100%", padding: "14px 0",
+                            background: "linear-gradient(135deg, #C9A84C, #E8C96A)",
+                            border: "none", borderRadius: 14,
+                            fontSize: 15, fontWeight: 700,
+                            color: "#1a1000", cursor: "pointer",
+                            marginBottom: 10,
+                            boxShadow: "0 4px 18px rgba(201,168,76,0.32)",
+                          }}
+                        >
+                          Upgrade Now
+                        </button>
+
+                        {/* Dismiss */}
+                        <button
+                          onClick={() => setShowProAlert(false)}
+                          style={{
+                            width: "100%", padding: "12px 0",
+                            background: "transparent", border: "none",
+                            fontSize: 14, color: "rgba(255,255,255,0.38)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Maybe later
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
