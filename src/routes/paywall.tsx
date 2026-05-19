@@ -75,6 +75,28 @@ const UPSELLS = [
 
 type Stage = "main" | "final" | "upsell";
 
+// ── Main paywall sparkle particles — slow drifting gold ────────────────────────
+const MAIN_SPARKLES = [
+  { x: 5,  y: 8,  size: 2.0, opacity: 0.58, delay: 0.0,  dur: 9.0 },
+  { x: 85, y: 12, size: 1.8, opacity: 0.48, delay: 2.2,  dur: 11.0 },
+  { x: 22, y: 35, size: 2.5, opacity: 0.52, delay: 1.1,  dur: 8.5 },
+  { x: 78, y: 42, size: 2.0, opacity: 0.44, delay: 3.5,  dur: 10.0 },
+  { x: 45, y: 18, size: 1.6, opacity: 0.62, delay: 0.7,  dur: 9.5 },
+  { x: 92, y: 55, size: 1.8, opacity: 0.38, delay: 4.0,  dur: 12.0 },
+  { x: 8,  y: 60, size: 2.2, opacity: 0.52, delay: 1.8,  dur: 8.0 },
+  { x: 65, y: 72, size: 2.5, opacity: 0.48, delay: 5.0,  dur: 10.5 },
+  { x: 38, y: 80, size: 1.5, opacity: 0.44, delay: 2.7,  dur: 9.0 },
+  { x: 88, y: 78, size: 2.0, opacity: 0.38, delay: 1.4,  dur: 11.5 },
+  { x: 18, y: 90, size: 1.8, opacity: 0.48, delay: 6.2,  dur: 8.5 },
+  { x: 55, y: 28, size: 2.2, opacity: 0.52, delay: 3.8,  dur: 10.0 },
+  { x: 72, y: 15, size: 1.5, opacity: 0.44, delay: 0.5,  dur: 9.5 },
+  { x: 30, y: 65, size: 2.0, opacity: 0.58, delay: 4.6,  dur: 11.0 },
+  { x: 95, y: 32, size: 1.8, opacity: 0.38, delay: 2.0,  dur: 8.0 },
+  { x: 12, y: 48, size: 2.5, opacity: 0.48, delay: 5.5,  dur: 10.5 },
+  { x: 60, y: 95, size: 1.5, opacity: 0.52, delay: 1.5,  dur: 9.0 },
+  { x: 42, y: 5,  size: 2.0, opacity: 0.44, delay: 7.0,  dur: 12.0 },
+];
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function fmt(n: number) {
   return `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
@@ -596,28 +618,180 @@ function Paywall() {
 
   // ── MAIN ───────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: "100svh", background: BG, fontFamily: "DM Sans, sans-serif" }}>
+    <div style={{
+      minHeight: "100svh",
+      fontFamily: "DM Sans, sans-serif",
+      position: "relative",
+      overflow: "hidden",
+      background: "radial-gradient(ellipse at 50% 32%, #0c0812 0%, #07050f 48%, #030205 100%)",
+    }}>
+
+      {/* ── Aurora blobs — gold + indigo, calm and slow ── */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <motion.div
+          animate={{ x: ["0%","10%","18%","6%","0%"], y: ["0%","5%","-3%","7%","0%"], scale: [1,1.06,0.96,1.04,1], opacity: [0.18,0.24,0.16,0.22,0.18] }}
+          transition={{ duration: 50, ease: "easeInOut", repeat: Infinity }}
+          style={{
+            position: "absolute", top: "-20%", left: "5%",
+            width: "80vw", height: "80vw", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(196,135,58,0.30) 0%, transparent 65%)",
+            filter: "blur(150px)",
+          }}
+        />
+        <motion.div
+          animate={{ x: ["0%","-12%","-20%","-8%","0%"], y: ["0%","7%","3%","9%","0%"], scale: [1,0.92,1.10,0.96,1], opacity: [0.14,0.10,0.18,0.12,0.14] }}
+          transition={{ duration: 58, ease: "easeInOut", repeat: Infinity, delay: 10 }}
+          style={{
+            position: "absolute", top: "8%", right: "-22%",
+            width: "68vw", height: "68vw", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(80,110,200,0.28) 0%, transparent 65%)",
+            filter: "blur(140px)",
+          }}
+        />
+        <motion.div
+          animate={{ x: ["0%","8%","-5%","12%","0%"], y: ["0%","-10%","6%","-8%","0%"], scale: [1,1.08,0.94,1.05,1], opacity: [0.10,0.16,0.08,0.14,0.10] }}
+          transition={{ duration: 44, ease: "easeInOut", repeat: Infinity, delay: 20 }}
+          style={{
+            position: "absolute", top: "45%", left: "-18%",
+            width: "58vw", height: "58vw", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(196,135,58,0.22) 0%, transparent 65%)",
+            filter: "blur(130px)",
+          }}
+        />
+      </div>
+
+      {/* ── Interconnected network grid — pulses on 6s cycle ── */}
+      <motion.div
+        aria-hidden
+        animate={{ opacity: [0.22, 0.48, 0.22] }}
+        transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
+        style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}
+      >
+        <svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" fill="none">
+          {/* Network lines */}
+          <g stroke="rgba(196,135,58,0.38)" strokeWidth="0.55">
+            <line x1="0"   y1="120" x2="80"  y2="60"/>
+            <line x1="80"  y1="60"  x2="195" y2="90"/>
+            <line x1="195" y1="90"  x2="310" y2="50"/>
+            <line x1="310" y1="50"  x2="390" y2="140"/>
+            <line x1="0"   y1="120" x2="30"  y2="250"/>
+            <line x1="80"  y1="60"  x2="130" y2="300"/>
+            <line x1="195" y1="90"  x2="260" y2="230"/>
+            <line x1="310" y1="50"  x2="360" y2="290"/>
+            <line x1="390" y1="140" x2="360" y2="290"/>
+            <line x1="30"  y1="250" x2="130" y2="300"/>
+            <line x1="130" y1="300" x2="260" y2="230"/>
+            <line x1="260" y1="230" x2="360" y2="290"/>
+            <line x1="30"  y1="250" x2="60"  y2="420"/>
+            <line x1="130" y1="300" x2="190" y2="380"/>
+            <line x1="260" y1="230" x2="310" y2="450"/>
+            <line x1="360" y1="290" x2="390" y2="400"/>
+            <line x1="60"  y1="420" x2="190" y2="380"/>
+            <line x1="190" y1="380" x2="310" y2="450"/>
+            <line x1="310" y1="450" x2="390" y2="400"/>
+            <line x1="60"  y1="420" x2="20"  y2="560"/>
+            <line x1="190" y1="380" x2="140" y2="520"/>
+            <line x1="310" y1="450" x2="250" y2="590"/>
+            <line x1="390" y1="400" x2="370" y2="540"/>
+            <line x1="20"  y1="560" x2="140" y2="520"/>
+            <line x1="140" y1="520" x2="250" y2="590"/>
+            <line x1="250" y1="590" x2="370" y2="540"/>
+            <line x1="20"  y1="560" x2="80"  y2="690"/>
+            <line x1="140" y1="520" x2="200" y2="650"/>
+            <line x1="250" y1="590" x2="320" y2="710"/>
+            <line x1="370" y1="540" x2="390" y2="660"/>
+            <line x1="80"  y1="690" x2="200" y2="650"/>
+            <line x1="200" y1="650" x2="320" y2="710"/>
+            <line x1="320" y1="710" x2="390" y2="660"/>
+            <line x1="80"  y1="690" x2="30"  y2="820"/>
+            <line x1="200" y1="650" x2="195" y2="780"/>
+            <line x1="320" y1="710" x2="360" y2="830"/>
+            <line x1="30"  y1="820" x2="195" y2="780"/>
+            <line x1="195" y1="780" x2="360" y2="830"/>
+            {/* Cross-diagonals for depth */}
+            <line x1="80"  y1="60"  x2="260" y2="230"/>
+            <line x1="195" y1="90"  x2="130" y2="300"/>
+            <line x1="60"  y1="420" x2="140" y2="520"/>
+            <line x1="190" y1="380" x2="250" y2="590"/>
+            <line x1="140" y1="520" x2="200" y2="650"/>
+            <line x1="80"  y1="690" x2="195" y2="780"/>
+          </g>
+          {/* Gold network nodes */}
+          <g fill="rgba(196,135,58,0.55)">
+            <circle cx="80"  cy="60"  r="2.5"/><circle cx="195" cy="90"  r="2.0"/><circle cx="310" cy="50"  r="2.5"/>
+            <circle cx="130" cy="300" r="3.0"/><circle cx="260" cy="230" r="2.5"/><circle cx="360" cy="290" r="2.0"/>
+            <circle cx="190" cy="380" r="3.0"/><circle cx="310" cy="450" r="2.5"/>
+            <circle cx="140" cy="520" r="3.0"/><circle cx="250" cy="590" r="2.5"/>
+            <circle cx="200" cy="650" r="3.0"/><circle cx="320" cy="710" r="2.5"/>
+            <circle cx="195" cy="780" r="2.5"/>
+          </g>
+          {/* Blue accent nodes */}
+          <g fill="rgba(100,140,220,0.42)">
+            <circle cx="195" cy="90"  r="1.5"/>
+            <circle cx="60"  cy="420" r="1.5"/>
+            <circle cx="370" cy="540" r="1.5"/>
+            <circle cx="195" cy="780" r="1.5"/>
+          </g>
+        </svg>
+      </motion.div>
+
+      {/* ── Slow drifting gold + blue sparkle particles ── */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+        {MAIN_SPARKLES.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ y: [0, -28, 0], opacity: [0, p.opacity, 0], scale: [0.4, 1.1, 0.4] }}
+            transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
+            style={{
+              position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
+              width: p.size, height: p.size, borderRadius: "50%",
+              background: i % 5 === 0 ? "rgba(110,150,230,0.95)" : "#C4873A",
+              boxShadow: i % 5 === 0
+                ? "0 0 5px 1px rgba(110,150,230,0.55)"
+                : "0 0 5px 2px rgba(196,135,58,0.60)",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ── Page content ── */}
       <motion.div className="mx-auto w-full max-w-md px-5 pt-10 pb-12 flex flex-col gap-6"
+        style={{ position: "relative", zIndex: 1 }}
         variants={stagger} initial="hidden" animate="show">
 
         {/* Close */}
         <motion.div variants={up} className="flex justify-end">
           <button onClick={finishUpsell}
-            style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.06)",
-              border: `1px solid rgba(255,255,255,0.1)`, color: TEXT_SUB, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center" }}>
+            style={{
+              width: 36, height: 36, borderRadius: "50%",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(196,135,58,0.22)",
+              color: TEXT_SUB, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              backdropFilter: "blur(8px)",
+            }}>
             <X className="h-4 w-4" />
           </button>
         </motion.div>
 
         {/* Hero */}
         <motion.div variants={up} className="text-center space-y-2">
-          <span className="inline-block text-[10px] font-bold tracking-[0.4em] uppercase"
-            style={{ color: G }}>
-            PRO Plan
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.5em", textTransform: "uppercase",
+            color: "#C9A84C",
+            padding: "4px 16px", borderRadius: 99,
+            background: "rgba(196,135,58,0.08)",
+            border: "1px solid rgba(196,135,58,0.24)",
+          }}>
+            ✦ PRO PLAN ✦
           </span>
-          <h1 style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: "clamp(2rem, 8vw, 2.6rem)",
-            fontWeight: 700, lineHeight: 1.15, color: TEXT }}>
+          <h1 style={{
+            fontFamily: "Cormorant Garamond, Georgia, serif",
+            fontSize: "clamp(2rem, 8vw, 2.6rem)",
+            fontWeight: 700, lineHeight: 1.15, color: TEXT,
+            textShadow: "0 0 80px rgba(196,135,58,0.14)",
+          }}>
             Your recovery,<br />fully unlocked.
           </h1>
           <p style={{ color: TEXT_SUB, fontSize: 14 }}>
@@ -631,7 +805,8 @@ function Paywall() {
             {AVATARS.map((l, i) => (
               <div key={i} style={{
                 width: 32, height: 32, borderRadius: "50%", marginLeft: i > 0 ? -10 : 0,
-                background: AVATAR_COLORS[i], border: `2px solid ${BG}`,
+                background: AVATAR_COLORS[i],
+                border: "2px solid rgba(3,2,5,0.90)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 11, fontWeight: 700, color: "white",
               }}>{l}</div>
@@ -645,8 +820,12 @@ function Paywall() {
 
         {/* Live feed ticker */}
         <motion.div variants={up} style={{
-          borderRadius: 24, background: CARD_BG, border: `1px solid ${CARD_BD}`,
+          borderRadius: 24,
+          background: "linear-gradient(145deg, rgba(12,8,18,0.78) 0%, rgba(7,5,15,0.84) 100%)",
+          border: "1px solid rgba(196,135,58,0.18)",
           padding: "10px 16px", textAlign: "center", overflow: "hidden",
+          backdropFilter: "blur(10px)",
+          boxShadow: "inset 0 0 0 1px rgba(196,135,58,0.05), 0 2px 20px rgba(0,0,0,0.22)",
         }}>
           <AnimatePresence mode="wait">
             <motion.p key={feedIdx} style={{ fontSize: 12, color: TEXT_SUB }}
@@ -657,29 +836,53 @@ function Paywall() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Countdown */}
+        {/* Countdown — refined dark gold, sophisticated pulse */}
         <motion.div variants={up} className="flex justify-center">
-          <div style={{ borderRadius: 24, background: "rgba(196,135,58,0.08)", border: `1px solid ${G}30`,
-            padding: "7px 18px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <span className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
-              style={{ background: G, boxShadow: `0 0 6px ${G}` }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: G, fontVariantNumeric: "tabular-nums" }}>
+          <div style={{
+            borderRadius: 24,
+            background: "linear-gradient(135deg, rgba(28,20,8,0.88) 0%, rgba(16,11,4,0.92) 100%)",
+            border: "1px solid rgba(196,135,58,0.34)",
+            padding: "8px 20px",
+            display: "inline-flex", alignItems: "center", gap: 10,
+            boxShadow: "0 0 22px rgba(196,135,58,0.10), inset 0 1px 0 rgba(196,135,58,0.14)",
+            backdropFilter: "blur(10px)",
+          }}>
+            <motion.span
+              animate={{ opacity: [1, 0.30, 1] }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                display: "inline-block", width: 6, height: 6, borderRadius: "50%",
+                background: "#C9A84C", boxShadow: "0 0 6px rgba(201,168,76,0.70)", flexShrink: 0,
+              }}
+            />
+            <span style={{
+              fontSize: 13, fontWeight: 700, letterSpacing: "0.05em",
+              color: "#C9A84C", fontVariantNumeric: "tabular-nums",
+            }}>
               Offer expires in {fmt(seconds)}
             </span>
           </div>
         </motion.div>
 
-        {/* Pricing */}
+        {/* Pricing cards — etched gold borders */}
         <motion.div variants={up} className="grid grid-cols-2 gap-3">
           {/* Monthly */}
           <button onClick={() => setPlan("monthly")} style={{
             borderRadius: 18, padding: "16px 14px", textAlign: "left", cursor: "pointer",
-            background: plan === "monthly" ? G_MUTED : CARD_BG,
-            border: `1px solid ${plan === "monthly" ? G + "55" : CARD_BD}`,
-            transition: "all 0.2s ease",
+            background: plan === "monthly"
+              ? "linear-gradient(145deg, rgba(196,135,58,0.10) 0%, rgba(196,135,58,0.05) 100%)"
+              : "rgba(255,255,255,0.025)",
+            border: `1px solid ${plan === "monthly" ? "rgba(196,135,58,0.52)" : "rgba(196,135,58,0.16)"}`,
+            boxShadow: plan === "monthly"
+              ? "inset 0 0 0 1px rgba(196,135,58,0.08), 0 0 26px rgba(196,135,58,0.12), 0 1px 0 rgba(196,135,58,0.20) inset"
+              : "inset 0 0 0 1px rgba(255,255,255,0.02)",
+            backdropFilter: "blur(8px)",
+            transition: "all 0.3s ease",
           }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase",
-              color: plan === "monthly" ? G : TEXT_DIM }}>Monthly</p>
+            <p style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase",
+              color: plan === "monthly" ? G : TEXT_DIM,
+            }}>Monthly</p>
             <p style={{ marginTop: 8, fontSize: 26, fontWeight: 800, color: TEXT }}>
               $19.99<span style={{ fontSize: 11, fontWeight: 400, color: TEXT_SUB }}>/mo</span>
             </p>
@@ -689,16 +892,21 @@ function Paywall() {
           <button onClick={() => setPlan("annual")} style={{
             borderRadius: 18, padding: "16px 14px", textAlign: "left", cursor: "pointer",
             position: "relative",
-            background: plan === "annual" ? G_MUTED : CARD_BG,
-            border: `1px solid ${plan === "annual" ? G + "70" : G + "25"}`,
-            boxShadow: plan === "annual" ? `0 0 20px ${G_GLOW}` : "none",
-            transition: "all 0.2s ease",
+            background: plan === "annual"
+              ? "linear-gradient(145deg, rgba(196,135,58,0.12) 0%, rgba(196,135,58,0.06) 100%)"
+              : "rgba(255,255,255,0.025)",
+            border: `1px solid ${plan === "annual" ? "rgba(196,135,58,0.62)" : "rgba(196,135,58,0.22)"}`,
+            boxShadow: plan === "annual"
+              ? "inset 0 0 0 1px rgba(196,135,58,0.10), 0 0 34px rgba(196,135,58,0.16), 0 1px 0 rgba(196,135,58,0.24) inset"
+              : "inset 0 0 0 1px rgba(196,135,58,0.04)",
+            backdropFilter: "blur(8px)",
+            transition: "all 0.3s ease",
           }}>
             <span style={{
               position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
               whiteSpace: "nowrap", fontSize: 9, fontWeight: 800, letterSpacing: "0.15em",
               textTransform: "uppercase", padding: "3px 10px", borderRadius: 12,
-              background: `linear-gradient(90deg, ${G}, #E8A84A)`, color: BG,
+              background: "linear-gradient(90deg, #C4873A, #E8A84A)", color: "#030205",
             }}>83% OFF</span>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: G }}>
               Annual
@@ -719,14 +927,22 @@ function Paywall() {
 
         {/* Features */}
         <motion.div variants={up} style={{
-          borderRadius: 18, background: CARD_BG, border: `1px solid ${CARD_BD}`,
+          borderRadius: 20,
+          background: "linear-gradient(145deg, rgba(12,8,18,0.86) 0%, rgba(7,5,15,0.92) 100%)",
+          border: "1px solid rgba(196,135,58,0.18)",
+          boxShadow: "inset 0 0 0 1px rgba(196,135,58,0.05), 0 0 30px rgba(196,135,58,0.04)",
           padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12,
+          backdropFilter: "blur(12px)",
         }}>
           {FEATURES.map((f) => (
             <div key={f} className="flex items-start gap-3">
-              <div style={{ width: 18, height: 18, borderRadius: "50%", background: G_MUTED,
-                border: `1px solid ${G}44`, display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, marginTop: 1 }}>
+              <div style={{
+                width: 18, height: 18, borderRadius: "50%",
+                background: "rgba(196,135,58,0.10)",
+                border: "1px solid rgba(196,135,58,0.36)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, marginTop: 1,
+              }}>
                 <Check style={{ width: 10, height: 10, color: G, strokeWidth: 3 }} />
               </div>
               <p style={{ fontSize: 13, color: TEXT_SUB, lineHeight: 1.4 }}>{f}</p>
@@ -736,13 +952,19 @@ function Paywall() {
 
         {/* Testimonials */}
         <motion.div variants={up}>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase",
-            color: TEXT_DIM, marginBottom: 12 }}>Real people, real results</p>
+          <p style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase",
+            color: TEXT_DIM, marginBottom: 12,
+          }}>Real people, real results</p>
           <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             {TESTIMONIALS.map(({ name, age, text }) => (
               <div key={name} style={{
-                flexShrink: 0, width: 240, borderRadius: 16, padding: "14px 16px",
-                background: CARD_BG, border: `1px solid ${CARD_BD}`, display: "flex", flexDirection: "column", gap: 10,
+                flexShrink: 0, width: 240, borderRadius: 18, padding: "14px 16px",
+                background: "linear-gradient(145deg, rgba(12,8,18,0.90) 0%, rgba(7,5,15,0.94) 100%)",
+                border: "1px solid rgba(196,135,58,0.16)",
+                boxShadow: "inset 0 0 0 1px rgba(196,135,58,0.04), 0 2px 20px rgba(0,0,0,0.28)",
+                display: "flex", flexDirection: "column", gap: 10,
+                backdropFilter: "blur(8px)",
               }}>
                 <div className="flex items-center gap-2">
                   <div style={{
@@ -766,18 +988,32 @@ function Paywall() {
           </div>
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA — brushed matte gold with shimmer sweep */}
         <motion.div variants={up} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <motion.button onClick={subscribe} disabled={purchasing} whileTap={{ scale: 0.97 }}
+          <motion.button
+            onClick={subscribe} disabled={purchasing}
+            whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 500, damping: 20 }}
             style={{
               width: "100%", height: 58, borderRadius: 18, fontSize: 16, fontWeight: 700,
-              background: `linear-gradient(135deg, ${G}, #E8A84A)`,
-              color: "#08090e", border: "none", cursor: "pointer",
-              boxShadow: `0 4px 32px ${G_GLOW}, 0 2px 8px rgba(0,0,0,0.3)`,
+              background: "linear-gradient(145deg, #D4954A 0%, #C4873A 35%, #A87030 65%, #C08840 100%)",
+              color: "#0c0812", border: "none", cursor: "pointer",
+              boxShadow: "0 4px 32px rgba(196,135,58,0.28), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.18)",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              position: "relative", overflow: "hidden",
               opacity: purchasing ? 0.7 : 1,
+              letterSpacing: "0.01em",
             }}>
+            {/* Brushed shimmer sweep */}
+            <motion.div
+              animate={{ x: ["-100%", "280%"] }}
+              transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 2.2 }}
+              style={{
+                position: "absolute", top: 0, bottom: 0, width: "32%",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent)",
+                pointerEvents: "none",
+              }}
+            />
             {purchasing
               ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
               : "Start reclaiming your life"}
@@ -785,7 +1021,8 @@ function Paywall() {
 
           <button onClick={continueFree} style={{
             width: "100%", height: 44, borderRadius: 14, fontSize: 13, fontWeight: 500,
-            background: "rgba(255,255,255,0.04)", border: `1px solid rgba(255,255,255,0.08)`,
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(196,135,58,0.14)",
             color: TEXT_DIM, cursor: "pointer",
           }}>
             Continue with free plan
@@ -794,14 +1031,17 @@ function Paywall() {
           <button onClick={handleRestore} disabled={restoring} style={{
             width: "100%", height: 36, background: "none", border: "none",
             fontSize: 12, color: TEXT_DIM, cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: restoring ? 0.5 : 1,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            opacity: restoring ? 0.5 : 1,
           }}>
             {restoring && <Loader2 className="h-3 w-3 animate-spin" />}
             Restore purchase
           </button>
 
-          <p style={{ textAlign: "center", fontSize: 11, color: TEXT_DIM,
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <p style={{
+            textAlign: "center", fontSize: 11, color: TEXT_DIM,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          }}>
             <Lock style={{ width: 11, height: 11 }} />
             7-day free trial · Cancel anytime · 256-bit encryption
           </p>
