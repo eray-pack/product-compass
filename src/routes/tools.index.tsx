@@ -731,43 +731,83 @@ function Tools() {
       {/* ── SOS hero — tactical distress button ─────────────────────────── */}
       <section className="flex justify-center mt-10 mb-2">
         <Link to="/tools/sos" style={{ display: "block", position: "relative" }}>
-          {/* Ambient distress ripples */}
+
+          {/* ── Constant warm amber ambient blob ── */}
           <motion.span
             aria-hidden
-            animate={{ scale: [1, 1.4], opacity: [0.35, 0] }}
-            transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 0 }}
+            animate={{ opacity: [0.48, 0.78, 0.48], scale: [0.94, 1.10, 0.94] }}
+            transition={{ duration: 3.8, ease: "easeInOut", repeat: Infinity }}
             style={{
-              position: "absolute", inset: 0, borderRadius: "50%",
-              border: "1.5px solid rgba(200,60,40,0.70)",
-              pointerEvents: "none",
-            }}
-          />
-          <motion.span
-            aria-hidden
-            animate={{ scale: [1, 1.4], opacity: [0.22, 0] }}
-            transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 0, delay: 0.7 }}
-            style={{
-              position: "absolute", inset: 0, borderRadius: "50%",
-              border: "1.5px solid rgba(200,60,40,0.50)",
+              position: "absolute", inset: -30, borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(196,135,58,0.26) 0%, transparent 64%)",
+              filter: "blur(18px)",
               pointerEvents: "none",
             }}
           />
 
-          {/* Hover glow layer */}
+          {/* ── Amber aura ring 1 — close, slow breathe ── */}
+          <motion.span
+            aria-hidden
+            animate={{ scale: [0.94, 1.20, 0.94], opacity: [0.55, 0.16, 0.55] }}
+            transition={{ duration: 3.8, ease: "easeInOut", repeat: Infinity }}
+            style={{
+              position: "absolute", inset: -6, borderRadius: "50%",
+              border: "1.5px solid rgba(196,135,58,0.65)",
+              boxShadow: "0 0 14px 3px rgba(196,135,58,0.24)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* ── Amber aura ring 2 — wider, offset timing ── */}
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1.0, 1.30, 1.0], opacity: [0.30, 0.06, 0.30] }}
+            transition={{ duration: 5.0, ease: "easeInOut", repeat: Infinity, delay: 1.4 }}
+            style={{
+              position: "absolute", inset: -16, borderRadius: "50%",
+              border: "1px solid rgba(232,168,74,0.48)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* ── Crimson distress ripple 1 ── */}
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 1.42], opacity: [0.32, 0] }}
+            transition={{ duration: 2.2, ease: "easeOut", repeat: Infinity }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(200,60,40,0.62)",
+              pointerEvents: "none",
+            }}
+          />
+          {/* ── Crimson distress ripple 2 ── */}
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 1.42], opacity: [0.18, 0] }}
+            transition={{ duration: 2.2, ease: "easeOut", repeat: Infinity, delay: 0.85 }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              border: "1.5px solid rgba(200,60,40,0.42)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* ── Hover glow — amber + ember blend ── */}
           <motion.span
             aria-hidden
             initial={{ opacity: 0 }}
             whileHover={{ opacity: 1 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.28 }}
             style={{
-              position: "absolute", inset: -18, borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(200,60,40,0.28) 0%, transparent 70%)",
-              filter: "blur(12px)",
+              position: "absolute", inset: -24, borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(196,135,58,0.32) 0%, rgba(200,60,40,0.16) 52%, transparent 70%)",
+              filter: "blur(16px)",
               pointerEvents: "none",
             }}
           />
 
-          {/* Main button */}
+          {/* ── Main button ── */}
           <motion.div
             className="flex flex-col items-center justify-center text-center"
             animate={{ scale: [1, 1.03, 1] }}
@@ -779,33 +819,39 @@ function Tools() {
               height: 220,
               borderRadius: "50%",
               background: "radial-gradient(circle at 40% 35%, #2a1010, #160808)",
-              border: "1.5px solid rgba(200,80,60,0.45)",
-              boxShadow: "0 0 40px 10px rgba(200,60,40,0.30), inset 0 0 30px 4px rgba(220,80,60,0.08)",
+              border: "1.5px solid rgba(196,135,58,0.36)",
+              boxShadow: [
+                "0 0 0 1px rgba(200,80,60,0.22)",
+                "0 0 42px 12px rgba(200,60,40,0.28)",
+                "0 0 80px 24px rgba(196,135,58,0.13)",
+                "inset 0 0 32px 5px rgba(220,80,60,0.08)",
+                "inset 0 0 64px 12px rgba(196,135,58,0.04)",
+              ].join(", "),
               cursor: "pointer",
               position: "relative",
               zIndex: 1,
             }}
           >
             <p style={{
-              fontSize: 16,
+              fontSize: 20,
               fontWeight: 800,
               color: "#ffffff",
-              lineHeight: 1.35,
-              padding: "0 32px",
-              textShadow: "0 0 18px rgba(255,120,100,0.70), 0 1px 3px rgba(0,0,0,0.60)",
-              letterSpacing: "0.01em",
+              lineHeight: 1.22,
+              padding: "0 26px",
+              textShadow: "0 0 22px rgba(255,120,100,0.65), 0 1px 3px rgba(0,0,0,0.65)",
+              letterSpacing: "-0.01em",
             }}>
               {t("tools.sos.heroLine1")}<br />{t("tools.sos.heroLine2")}
             </p>
             <p style={{
-              marginTop: 10,
-              fontSize: 11.5,
+              marginTop: 13,
+              fontSize: 13,
               fontWeight: 700,
-              color: "rgba(255,180,160,0.90)",
-              lineHeight: 1.5,
-              padding: "0 24px",
-              letterSpacing: "0.03em",
-              textShadow: "0 0 10px rgba(255,100,80,0.50)",
+              color: "rgba(255,232,212,0.96)",
+              lineHeight: 1.38,
+              padding: "0 20px",
+              letterSpacing: "0.025em",
+              textShadow: "0 0 14px rgba(196,135,58,0.50), 0 1px 2px rgba(0,0,0,0.55)",
             }}>
               {t("tools.sos.heroSub")}
             </p>
