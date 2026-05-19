@@ -4,19 +4,34 @@ import { X, Loader2 } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
 
-// ── Tokens (hardcoded — no CSS variables) ─────────────────────────────────────
-const BG       = "#090705";
-const CARD_BG  = "#0f0c06";
-const GOLD     = "#C9A84C";
-const WHITE    = "#f5f0e8";
-const MUTED    = "#5a5040";
-const BORDER   = "1px solid #1e1a10";
-const SEL_BORDER = "1.5px solid #C9A84C";
-const SEL_SHADOW = "0 0 16px rgba(201,168,76,0.15)";
-const GOLD_BTN_BG = "linear-gradient(135deg,#C9A84C,#E8C96A)";
+// ── Tokens ─────────────────────────────────────────────────────────────────────
+const GOLD          = "#C9A84C";
+const WHITE         = "#f5f0e8";
+const MUTED         = "#5a5040";
+const CARD_BG_HEX   = "#080512";
+const BORDER_SUB    = "1px solid rgba(201,168,76,0.09)";
+const SEL_SHADOW_ANNUAL  = "0 0 0 0.5px rgba(232,200,100,0.42), 0 0 22px rgba(201,168,76,0.30), 0 0 44px rgba(201,168,76,0.14)";
+const SEL_SHADOW_MONTHLY = "0 0 16px rgba(201,168,76,0.16)";
+const GOLD_BTN_BG   = "linear-gradient(145deg, #D4954A 0%, #C4873A 35%, #A87030 65%, #C08840 100%)";
 
 const RENAG_AFTER_MS = 24 * 60 * 60 * 1000;
 const TIMER_START    = 14 * 60 + 51;
+
+// ── Sparkle particles ─────────────────────────────────────────────────────────
+const MODAL_SPARKLES = [
+  { x: 7,  y: 10, size: 2.0, delay: 0.0, dur: 8.0,  blue: false },
+  { x: 22, y: 4,  size: 1.5, delay: 1.3, dur: 9.5,  blue: false },
+  { x: 38, y: 16, size: 2.2, delay: 2.8, dur: 7.5,  blue: false },
+  { x: 57, y: 7,  size: 1.8, delay: 0.7, dur: 10.0, blue: true  },
+  { x: 73, y: 13, size: 2.0, delay: 3.5, dur: 8.5,  blue: false },
+  { x: 89, y: 5,  size: 1.6, delay: 1.9, dur: 9.0,  blue: false },
+  { x: 15, y: 38, size: 1.8, delay: 4.3, dur: 8.2,  blue: false },
+  { x: 44, y: 32, size: 1.5, delay: 0.5, dur: 11.0, blue: false },
+  { x: 79, y: 45, size: 2.3, delay: 2.1, dur: 7.8,  blue: true  },
+  { x: 30, y: 60, size: 1.8, delay: 5.1, dur: 9.2,  blue: false },
+  { x: 64, y: 68, size: 2.0, delay: 1.6, dur: 8.4,  blue: false },
+  { x: 91, y: 55, size: 1.6, delay: 3.9, dur: 10.5, blue: false },
+];
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 const TESTIMONIALS = [
@@ -172,20 +187,23 @@ export function PaywallContent({
                   fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
                   padding: "3px 9px", borderRadius: 20,
                   background: GOLD_BTN_BG,
-                  color: BG, whiteSpace: "nowrap", zIndex: 1, lineHeight: 1.6,
+                  color: "#050308", whiteSpace: "nowrap", zIndex: 1, lineHeight: 1.6,
                 }}>
                   83% OFF
                 </span>
               )}
               <motion.div
                 animate={{
-                  borderColor: sel ? GOLD : "#1e1a10",
-                  boxShadow: sel ? SEL_SHADOW : "none",
+                  borderColor: sel ? GOLD : "rgba(201,168,76,0.09)",
+                  boxShadow: sel
+                    ? isAnnual ? SEL_SHADOW_ANNUAL : SEL_SHADOW_MONTHLY
+                    : "none",
                 }}
                 transition={{ duration: 0.2 }}
                 style={{
-                  background: CARD_BG,
-                  borderWidth: 1.5, borderStyle: "solid",
+                  background: CARD_BG_HEX,
+                  borderWidth: sel && isAnnual ? 1.5 : 1,
+                  borderStyle: "solid",
                   borderRadius: 16, padding: "16px 14px",
                 }}
               >
@@ -222,8 +240,8 @@ export function PaywallContent({
             key={label}
             variants={iV}
             style={{
-              background: CARD_BG,
-              border: BORDER,
+              background: CARD_BG_HEX,
+              border: BORDER_SUB,
               borderRadius: 14, padding: "14px 8px",
               display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
             }}
@@ -240,8 +258,8 @@ export function PaywallContent({
       <motion.div
         variants={iV}
         style={{
-          background: CARD_BG,
-          border: BORDER,
+          background: CARD_BG_HEX,
+          border: BORDER_SUB,
           borderRadius: 16, padding: "18px 20px",
           minHeight: 90, display: "flex", alignItems: "center",
         }}
@@ -273,18 +291,31 @@ export function PaywallContent({
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 500, damping: 20 }}
           style={{
+            position: "relative",
             width: "100%", height: 56,
             background: GOLD_BTN_BG,
             border: "none", borderRadius: 16,
             fontFamily: "DM Sans, sans-serif",
-            fontSize: 15, fontWeight: 700, color: BG,
-            boxShadow: "0 0 32px rgba(201,168,76,0.35)",
+            fontSize: 15, fontWeight: 700, color: "#050308",
+            boxShadow: "0 4px 24px rgba(196,135,58,0.42), 0 1px 8px rgba(0,0,0,0.60)",
             cursor: purchasing ? "not-allowed" : "pointer",
             opacity: purchasing ? 0.7 : 1,
             display: "flex", alignItems: "center", justifyContent: "center",
             gap: 8, overflow: "hidden",
           }}
         >
+          {/* Shimmer sweep */}
+          {!purchasing && (
+            <motion.div
+              animate={{ x: ["-100%", "280%"] }}
+              transition={{ duration: 3.8, ease: "easeInOut", repeat: Infinity, repeatDelay: 2.2 }}
+              style={{
+                position: "absolute", top: 0, bottom: 0, width: "60%",
+                background: "linear-gradient(105deg, transparent 20%, rgba(255,245,200,0.38) 50%, transparent 80%)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
           {purchasing ? (
             <>
               <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />
@@ -298,6 +329,7 @@ export function PaywallContent({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.18 }}
+                style={{ position: "relative", zIndex: 1 }}
               >
                 {plan === "annual" ? "Get Annual — $3.33/mo" : "Get Monthly — $19.99/mo"}
               </motion.span>
@@ -325,11 +357,11 @@ export function PaywallContent({
 
 // ── Modal overlay ─────────────────────────────────────────────────────────────
 export function PaywallModal() {
-  const open                = usePaywallOpen();
-  const [state, update]     = useAppState();
+  const open              = usePaywallOpen();
+  const [state, update]   = useAppState();
   const [seconds, setSeconds] = useState(TIMER_START);
-  const [plan, setPlan]     = useState<"annual" | "monthly">("annual");
-  const hasOpenedRef        = useRef(false);
+  const [plan, setPlan]   = useState<"annual" | "monthly">("annual");
+  const hasOpenedRef      = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -361,58 +393,118 @@ export function PaywallModal() {
   };
 
   return (
-    <div
-      style={{
-        position: "fixed", inset: 0, zIndex: 50,
-        display: "flex", alignItems: "flex-end", justifyContent: "center",
-        background: "rgba(0,0,0,0.82)", backdropFilter: "blur(6px)",
-      }}
-      onClick={(e) => { if (e.target === e.currentTarget) dismiss(); }}
-    >
-      <motion.div
-        initial={{ y: "100%", opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 280, damping: 30 }}
-        style={{
-          position: "relative", width: "100%", maxWidth: 480,
-          background: CARD_BG,
-          border: "1px solid #2a2010",
-          borderRadius: "24px 24px 0 0",
-          maxHeight: "93dvh", overflowY: "auto",
-        }}
-      >
-        {/* Drag handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: "#2a2010" }} />
-        </div>
+    <>
+      <style>{`
+        @keyframes pm-sparkle {
+          0%   { transform: translateY(0px) scale(1.0); opacity: 0; }
+          12%  { opacity: 1; }
+          88%  { opacity: 1; }
+          100% { transform: translateY(-22px) scale(0.80); opacity: 0; }
+        }
+      `}</style>
 
-        {/* Close */}
-        <button
-          onClick={dismiss}
-          aria-label="Close"
+      <div
+        style={{
+          position: "fixed", inset: 0, zIndex: 50,
+          display: "flex", alignItems: "flex-end", justifyContent: "center",
+          background: "rgba(0,0,0,0.84)", backdropFilter: "blur(6px)",
+        }}
+        onClick={(e) => { if (e.target === e.currentTarget) dismiss(); }}
+      >
+        <motion.div
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 280, damping: 30 }}
           style={{
-            position: "absolute", top: 14, right: 16, zIndex: 10,
-            width: 32, height: 32, borderRadius: "50%",
-            background: "#1a1508",
-            border: "1px solid #2a2010",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", color: MUTED,
+            position: "relative", width: "100%", maxWidth: 480,
+            background: "radial-gradient(ellipse at 50% 20%, #0c0812 0%, #07050e 55%, #020104 100%)",
+            border: "1px solid rgba(201,168,76,0.13)",
+            borderRadius: "24px 24px 0 0",
+            maxHeight: "93dvh",
+            overflow: "hidden",
           }}
         >
-          <X style={{ width: 14, height: 14 }} />
-        </button>
+          {/* ── Gold vector grid overlay ── */}
+          <svg
+            aria-hidden="true"
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              opacity: 0.05, pointerEvents: "none",
+            }}
+          >
+            <defs>
+              <pattern id="pm-grid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+                <line x1="0" y1="0" x2="48" y2="48" stroke="#C9A84C" strokeWidth="0.5" />
+                <line x1="48" y1="0" x2="0" y2="48" stroke="#C9A84C" strokeWidth="0.35" />
+                <circle cx="0"  cy="0"  r="1.4" fill="#C9A84C" opacity="0.9" />
+                <circle cx="48" cy="0"  r="1.4" fill="#C9A84C" opacity="0.9" />
+                <circle cx="0"  cy="48" r="1.4" fill="#C9A84C" opacity="0.9" />
+                <circle cx="48" cy="48" r="1.4" fill="#C9A84C" opacity="0.9" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#pm-grid)" />
+          </svg>
 
-        <div style={{ padding: "16px 20px 36px" }}>
-          <PaywallContent
-            timerSeconds={seconds}
-            plan={plan}
-            onPlanChange={setPlan}
-            onClaim={claim}
-            onDismiss={dismiss}
-            isFinalOffer={isFinalOffer}
-          />
-        </div>
-      </motion.div>
-    </div>
+          {/* ── Drifting sparkle particles ── */}
+          {MODAL_SPARKLES.map((s, i) => (
+            <div
+              key={i}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: `${s.x}%`,
+                top: `${s.y}%`,
+                width: s.size,
+                height: s.size,
+                borderRadius: "50%",
+                background: s.blue ? "#8ab4f8" : "#ffd700",
+                boxShadow: s.blue
+                  ? "0 0 6px 2px rgba(138,180,248,0.72)"
+                  : "0 0 7px 2px rgba(255,215,0,0.72)",
+                animation: `pm-sparkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+                pointerEvents: "none",
+                zIndex: 0,
+              }}
+            />
+          ))}
+
+          {/* ── Scrollable content ── */}
+          <div style={{ position: "relative", zIndex: 1, overflowY: "auto", maxHeight: "93dvh" }}>
+            {/* Drag handle */}
+            <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.22)" }} />
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={dismiss}
+              aria-label="Close"
+              style={{
+                position: "absolute", top: 14, right: 16, zIndex: 10,
+                width: 32, height: 32, borderRadius: "50%",
+                background: "rgba(8,5,18,0.82)",
+                border: "1px solid rgba(201,168,76,0.18)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", color: MUTED,
+              }}
+            >
+              <X style={{ width: 14, height: 14 }} />
+            </button>
+
+            <div style={{ padding: "16px 20px 36px" }}>
+              <PaywallContent
+                timerSeconds={seconds}
+                plan={plan}
+                onPlanChange={setPlan}
+                onClaim={claim}
+                onDismiss={dismiss}
+                isFinalOffer={isFinalOffer}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </>
   );
 }
