@@ -2855,6 +2855,7 @@ function LifeTreePage({
       {/* ── Companion Switcher ── */}
       <CompanionSwitcher
         isPremium={state.isPremium}
+        currentCompanion="tree"
         onSwitchToWolf={() => {
           if (!state.isPremium) { triggerPaywall(); return; }
           update({ companion: "wolf" });
@@ -2865,33 +2866,106 @@ function LifeTreePage({
 }
 
 // ── Companion Switcher ────────────────────────────────────────────────────────
+// currentCompanion: which companion is active RIGHT NOW on this screen.
+// onSwitchToWolf: caller handles paywall guard + state update.
 function CompanionSwitcher({
   isPremium,
+  currentCompanion,
   onSwitchToWolf,
 }: {
   isPremium: boolean;
+  currentCompanion: "tree" | "wolf";
   onSwitchToWolf: () => void;
 }) {
+  const treeActive = currentCompanion === "tree";
+  const wolfActive = currentCompanion === "wolf";
+
+  // Shared pill styles
+  const activePill: React.CSSProperties = {
+    position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+    fontSize: 8, fontWeight: 800, letterSpacing: "0.16em",
+    color: "#050308",
+    background: "linear-gradient(145deg, #D4954A 0%, #C4873A 100%)",
+    borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap",
+  };
+  const lockPill: React.CSSProperties = {
+    position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+    display: "flex", alignItems: "center", gap: 3,
+    fontSize: 8, fontWeight: 800, letterSpacing: "0.14em",
+    color: "rgba(255,255,255,0.65)",
+    background: "rgba(15,10,25,0.92)",
+    border: "1px solid rgba(255,255,255,0.16)",
+    borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
+  };
+
+  // Shared card styles — identical structure for both
+  const cardBase: React.CSSProperties = {
+    position: "relative",
+    borderRadius: 16,
+    padding: "18px 12px 14px",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+    cursor: "pointer",
+    border: "none",
+    textAlign: "center",
+  };
+  const cardActive: React.CSSProperties = {
+    ...cardBase,
+    background: "rgba(201,168,76,0.08)",
+    outline: "1.5px solid rgba(201,168,76,0.55)",
+    boxShadow: [
+      "0 0 0 0.5px rgba(232,200,100,0.22)",
+      "0 0 20px rgba(201,168,76,0.14)",
+    ].join(", "),
+  };
+  const cardIdleGold: React.CSSProperties = {
+    ...cardBase,
+    background: "rgba(196,135,58,0.06)",
+    outline: "1.5px solid rgba(196,135,58,0.38)",
+  };
+  const cardLocked: React.CSSProperties = {
+    ...cardBase,
+    background: "rgba(255,255,255,0.02)",
+    outline: "1.5px solid rgba(255,255,255,0.10)",
+  };
+
+  // Shared icon box styles
+  const iconBoxGold: React.CSSProperties = {
+    width: 46, height: 46, borderRadius: 12,
+    background: "rgba(201,168,76,0.10)",
+    border: "1px solid rgba(201,168,76,0.22)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+  };
+  const iconBoxAmber: React.CSSProperties = {
+    width: 46, height: 46, borderRadius: 12,
+    background: "rgba(196,135,58,0.08)",
+    border: "1px solid rgba(196,135,58,0.22)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+  };
+  const iconBoxDim: React.CSSProperties = {
+    width: 46, height: 46, borderRadius: 12,
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    opacity: 0.50,
+  };
+
   return (
     <section className="px-6 mt-4 pb-4">
-      <div
-        style={{
-          background: "linear-gradient(145deg, rgba(12,8,18,0.90) 0%, rgba(6,4,10,0.94) 100%)",
-          border: "1px solid rgba(201,168,76,0.18)",
-          borderRadius: 22,
-          padding: "20px 18px 18px",
-          boxShadow: [
-            "0 0 0 1px rgba(201,168,76,0.05)",
-            "0 8px 32px rgba(0,0,0,0.38)",
-            "inset 0 1px 0 rgba(255,255,255,0.04)",
-          ].join(", "),
-        }}
-      >
+      <div style={{
+        background: "linear-gradient(145deg, rgba(12,8,18,0.90) 0%, rgba(6,4,10,0.94) 100%)",
+        border: "1px solid rgba(201,168,76,0.18)",
+        borderRadius: 22,
+        padding: "20px 18px 18px",
+        boxShadow: [
+          "0 0 0 1px rgba(201,168,76,0.05)",
+          "0 8px 32px rgba(0,0,0,0.38)",
+          "inset 0 1px 0 rgba(255,255,255,0.04)",
+        ].join(", "),
+      }}>
         {/* Label */}
         <p style={{
           fontSize: 9, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "rgba(201,168,76,0.55)", marginBottom: 5,
-          fontFamily: "DM Sans, sans-serif",
+          color: "rgba(201,168,76,0.55)", marginBottom: 5, fontFamily: "DM Sans, sans-serif",
         }}>
           Companion
         </p>
@@ -2899,8 +2973,7 @@ function CompanionSwitcher({
         {/* Heading */}
         <h3 style={{
           fontSize: 17, fontWeight: 700, color: "#f5ede0",
-          marginBottom: 4, letterSpacing: "-0.01em",
-          fontFamily: "DM Sans, sans-serif",
+          marginBottom: 4, letterSpacing: "-0.01em", fontFamily: "DM Sans, sans-serif",
         }}>
           Choose Your Companion
         </h3>
@@ -2916,39 +2989,15 @@ function CompanionSwitcher({
         {/* Option cards */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
 
-          {/* ── Sacred Tree — active ── */}
-          <div
-            style={{
-              position: "relative",
-              background: "rgba(201,168,76,0.08)",
-              border: "1.5px solid rgba(201,168,76,0.55)",
-              borderRadius: 16,
-              padding: "18px 12px 14px",
-              boxShadow: [
-                "0 0 0 0.5px rgba(232,200,100,0.22)",
-                "0 0 20px rgba(201,168,76,0.14)",
-              ].join(", "),
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-            }}
+          {/* ── Sacred Tree ── */}
+          <motion.button
+            whileTap={treeActive ? {} : { scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 500, damping: 22 }}
+            style={treeActive ? cardActive : cardIdleGold}
           >
-            {/* ACTIVE pill */}
-            <span style={{
-              position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
-              fontSize: 8, fontWeight: 800, letterSpacing: "0.16em",
-              color: "#050308",
-              background: "linear-gradient(145deg, #D4954A 0%, #C4873A 100%)",
-              borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap",
-            }}>
-              ACTIVE
-            </span>
+            {treeActive && <span style={activePill}>ACTIVE</span>}
 
-            {/* Tree icon */}
-            <div style={{
-              width: 46, height: 46, borderRadius: 12,
-              background: "rgba(201,168,76,0.10)",
-              border: "1px solid rgba(201,168,76,0.22)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
+            <div style={iconBoxGold}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
                 stroke="#C9A84C" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="22" x2="12" y2="13"/>
@@ -2959,69 +3008,34 @@ function CompanionSwitcher({
             </div>
 
             <div style={{ textAlign: "center" }}>
-              <p style={{
-                fontSize: 12, fontWeight: 700, color: "#C9A84C",
-                marginBottom: 2, fontFamily: "DM Sans, sans-serif",
-              }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", marginBottom: 2, fontFamily: "DM Sans, sans-serif" }}>
                 Sacred Tree
               </p>
-              <p style={{
-                fontSize: 10, color: "rgba(201,168,76,0.50)",
-                fontFamily: "DM Sans, sans-serif",
-              }}>
+              <p style={{ fontSize: 10, color: "rgba(201,168,76,0.50)", fontFamily: "DM Sans, sans-serif" }}>
                 Your life tree
               </p>
             </div>
-          </div>
+          </motion.button>
 
-          {/* ── Wolf Companion — pro locked / unlocked ── */}
+          {/* ── Wolf Companion ── */}
           <motion.button
             onClick={onSwitchToWolf}
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 500, damping: 22 }}
-            style={{
-              position: "relative",
-              background: isPremium
-                ? "rgba(196,135,58,0.06)"
-                : "rgba(255,255,255,0.02)",
-              border: isPremium
-                ? "1px solid rgba(196,135,58,0.35)"
-                : "1px solid rgba(255,255,255,0.09)",
-              borderRadius: 16,
-              padding: "18px 12px 14px",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-              cursor: "pointer",
-              textAlign: "center" as const,
-            }}
+            style={wolfActive ? cardActive : isPremium ? cardIdleGold : cardLocked}
           >
-            {/* PRO lock pill */}
-            <div style={{
-              position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
-              display: "flex", alignItems: "center", gap: 4,
-              fontSize: 8, fontWeight: 800, letterSpacing: "0.14em",
-              color: isPremium ? "#C9A84C" : "rgba(255,255,255,0.65)",
-              background: isPremium
-                ? "rgba(201,168,76,0.14)"
-                : "rgba(15,10,25,0.92)",
-              border: `1px solid ${isPremium ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.14)"}`,
-              borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
-            }}>
-              <Lock style={{ width: 7, height: 7 }} />
-              PRO
-            </div>
+            {/* Badge: ACTIVE when wolf is current, 🔒 PRO when not premium, nothing when premium+idle */}
+            {wolfActive && <span style={activePill}>ACTIVE</span>}
+            {!isPremium && (
+              <div style={lockPill}>
+                <Lock style={{ width: 7, height: 7 }} />
+                PRO
+              </div>
+            )}
 
-            {/* Wolf icon */}
-            <div style={{
-              width: 46, height: 46, borderRadius: 12,
-              background: isPremium
-                ? "rgba(196,135,58,0.08)"
-                : "rgba(255,255,255,0.03)",
-              border: `1px solid ${isPremium ? "rgba(196,135,58,0.22)" : "rgba(255,255,255,0.07)"}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              opacity: isPremium ? 1 : 0.55,
-            }}>
+            <div style={wolfActive ? iconBoxGold : isPremium ? iconBoxAmber : iconBoxDim}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-                stroke={isPremium ? "#C4873A" : "rgba(255,255,255,0.55)"}
+                stroke={wolfActive ? "#C9A84C" : isPremium ? "#C4873A" : "rgba(255,255,255,0.60)"}
                 strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 8 L6 2 L9 7"/>
                 <path d="M15 7 L18 2 L20 8"/>
@@ -3034,20 +3048,22 @@ function CompanionSwitcher({
               </svg>
             </div>
 
-            <div>
+            <div style={{ textAlign: "center" }}>
               <p style={{
-                fontSize: 12, fontWeight: 700,
-                color: isPremium ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.38)",
-                marginBottom: 2, fontFamily: "DM Sans, sans-serif",
+                fontSize: 12, fontWeight: 700, marginBottom: 2, fontFamily: "DM Sans, sans-serif",
+                color: wolfActive ? "#C9A84C" : isPremium ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.40)",
               }}>
                 Wolf Companion
               </p>
               <p style={{
-                fontSize: 10,
-                color: isPremium ? "rgba(196,135,58,0.65)" : "rgba(255,255,255,0.24)",
-                fontFamily: "DM Sans, sans-serif",
+                fontSize: 10, fontFamily: "DM Sans, sans-serif",
+                color: wolfActive
+                  ? "rgba(201,168,76,0.50)"
+                  : isPremium
+                    ? "rgba(201,168,76,0.55)"
+                    : "rgba(255,255,255,0.30)",
               }}>
-                {isPremium ? "Tap to switch" : "Unlock with Pro"}
+                {wolfActive ? "Your wolf" : isPremium ? "Tap to switch" : "Unlock with Pro"}
               </p>
             </div>
           </motion.button>
