@@ -114,6 +114,24 @@ const DUST = Array.from({ length: 9 }, (_, i) => {
   };
 });
 
+// ── Screen sparkle particles (deterministic) ─────────────────────────────────
+const SCREEN_SPARKLES = [
+  { x: 8,  y: 12, size: 2.0, opacity: 0.55, delay: 0.0, dur: 10.0 },
+  { x: 88, y: 8,  size: 1.6, opacity: 0.45, delay: 2.8, dur: 12.0 },
+  { x: 15, y: 45, size: 2.2, opacity: 0.50, delay: 1.2, dur: 9.0  },
+  { x: 82, y: 38, size: 1.8, opacity: 0.42, delay: 4.0, dur: 11.5 },
+  { x: 48, y: 6,  size: 1.5, opacity: 0.58, delay: 0.6, dur: 8.5  },
+  { x: 92, y: 52, size: 1.7, opacity: 0.38, delay: 3.5, dur: 13.0 },
+  { x: 5,  y: 68, size: 2.0, opacity: 0.48, delay: 1.7, dur: 9.5  },
+  { x: 72, y: 72, size: 2.4, opacity: 0.44, delay: 5.2, dur: 10.5 },
+  { x: 35, y: 82, size: 1.5, opacity: 0.40, delay: 2.4, dur: 8.0  },
+  { x: 78, y: 85, size: 1.8, opacity: 0.35, delay: 1.0, dur: 11.0 },
+  { x: 20, y: 28, size: 1.6, opacity: 0.50, delay: 6.0, dur: 9.0  },
+  { x: 62, y: 18, size: 2.0, opacity: 0.48, delay: 3.2, dur: 10.0 },
+  { x: 55, y: 94, size: 1.4, opacity: 0.42, delay: 0.8, dur: 12.5 },
+  { x: 25, y: 92, size: 1.8, opacity: 0.38, delay: 4.5, dur: 9.5  },
+];
+
 // ═════════════════════════════════════════════════════════════════════════════
 // Sub-components
 // ═════════════════════════════════════════════════════════════════════════════
@@ -322,12 +340,17 @@ function UrgeChart({ elapsed }: { elapsed: number }) {
             <feComposite in="c" in2="b" operator="in" result="g" />
             <feMerge><feMergeNode in="g" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
-          {/* Star-white glow for marker */}
-          <filter id="wg" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="4" result="b" />
-            <feFlood floodColor="#ffffff" floodOpacity="1" result="c" />
+          {/* Golden "YOU ARE HERE" glow for marker */}
+          <filter id="wg" x="-70%" y="-70%" width="240%" height="240%">
+            <feGaussianBlur stdDeviation="4.5" result="b" />
+            <feFlood floodColor={GOLD} floodOpacity="0.95" result="c" />
             <feComposite in="c" in2="b" operator="in" result="g" />
             <feMerge><feMergeNode in="g" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          {/* Trail glow blur */}
+          <filter id="trail-glow" x="-20%" y="-80%" width="140%" height="260%">
+            <feGaussianBlur stdDeviation="2.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
           {/* Soft edge glow for neural lines */}
           <filter id="ng" x="-20%" y="-20%" width="140%" height="140%">
@@ -406,25 +429,38 @@ function UrgeChart({ elapsed }: { elapsed: number }) {
           />
         ))}
 
-        {/* ── Historical light trail ── */}
+        {/* ── Historical light trail — soft glow layer + crisp line ── */}
         {trailD && (
-          <path d={trailD} fill="none"
-            stroke="url(#trail-g)" strokeWidth="3"
-            strokeLinecap="round" opacity="0.65" />
+          <>
+            {/* Wide soft glow behind trail */}
+            <path d={trailD} fill="none"
+              stroke="url(#trail-g)" strokeWidth="8"
+              strokeLinecap="round" opacity="0.20" filter="url(#trail-glow)" />
+            {/* Crisp leading trail line */}
+            <path d={trailD} fill="none"
+              stroke="url(#trail-g)" strokeWidth="2.8"
+              strokeLinecap="round" opacity="0.85" />
+          </>
         )}
 
-        {/* ── Star marker — user's current position ── */}
-        {/* Outer pulse ring */}
-        <motion.circle cx={mx} cy={my} r={8}
-          fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="0.8"
-          animate={{ r: [7, 14, 7], opacity: [0.5, 0, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2.2, ease: "easeOut" }}
+        {/* ── Golden "YOU ARE HERE" marker ── */}
+        {/* Wide outer pulse ring */}
+        <motion.circle cx={mx} cy={my} r={10}
+          fill="none" stroke={`${GOLD}55`} strokeWidth="1.0"
+          animate={{ r: [8, 18, 8], opacity: [0.55, 0, 0.55] }}
+          transition={{ repeat: Infinity, duration: 2.4, ease: "easeOut" }}
         />
-        {/* Inner bright core */}
+        {/* Mid pulse ring */}
+        <motion.circle cx={mx} cy={my} r={6}
+          fill="none" stroke={`${GOLD}88`} strokeWidth="0.9"
+          animate={{ r: [5, 11, 5], opacity: [0.70, 0.12, 0.70] }}
+          transition={{ repeat: Infinity, duration: 2.4, ease: "easeOut", delay: 0.4 }}
+        />
+        {/* Inner golden core */}
         <motion.circle cx={mx} cy={my} r={3.5}
-          fill="#ffffff" filter="url(#wg)"
-          animate={{ r: [2.8, 4.8, 2.8], opacity: [1, 0.55, 1] }}
-          transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+          fill={GOLD} filter="url(#wg)"
+          animate={{ r: [2.8, 4.6, 2.8], opacity: [1, 0.60, 1] }}
+          transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
         />
 
         {/* ── 90-second peak marker ── */}
@@ -506,182 +542,396 @@ function UrgeSurfing() {
   const ss = String(elapsed % 60).padStart(2, "0");
 
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        background: "linear-gradient(175deg, #0d0a06 0%, #090705 55%, #0c0804 100%)",
-        display: "flex",
-        flexDirection: "column",
-        overflowY: "auto",
-      }}
-    >
-      {/* ══ Header ══════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between px-5 pt-12 pb-3 flex-shrink-0">
-        <motion.button
-          onClick={() => navigate({ to: "/tools" })}
-          whileTap={{ scale: 0.88 }}
-          className="flex items-center gap-1.5"
+    <div style={{
+      minHeight: "100dvh",
+      background: "radial-gradient(ellipse at 50% 36%, #0c0812 0%, #060410 50%, #030205 100%)",
+      position: "relative",
+    }}>
+
+      {/* ── Aurora blobs — gold + deep blue, slow and calm ── */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <motion.div
+          animate={{ x: ["0%","12%","22%","8%","0%"], y: ["0%","6%","-4%","8%","0%"], scale: [1,1.06,0.96,1.04,1], opacity: [0.16,0.22,0.14,0.20,0.16] }}
+          transition={{ duration: 52, ease: "easeInOut", repeat: Infinity }}
           style={{
-            color: "rgba(255,255,255,0.42)",
-            fontSize: 13, fontWeight: 500,
-            fontFamily: "DM Sans, sans-serif",
+            position: "absolute", top: "-20%", left: "0%",
+            width: "80vw", height: "80vw", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(196,135,58,0.28) 0%, transparent 65%)",
+            filter: "blur(160px)",
           }}
-        >
-          <ArrowLeft size={15} />
-          Back
-        </motion.button>
-        <ActiveUrgeShield />
+        />
+        <motion.div
+          animate={{ x: ["0%","-14%","-24%","-10%","0%"], y: ["0%","8%","2%","10%","0%"], scale: [1,0.92,1.10,0.96,1], opacity: [0.12,0.08,0.16,0.10,0.12] }}
+          transition={{ duration: 60, ease: "easeInOut", repeat: Infinity, delay: 12 }}
+          style={{
+            position: "absolute", top: "10%", right: "-20%",
+            width: "70vw", height: "70vw", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(70,100,200,0.24) 0%, transparent 65%)",
+            filter: "blur(150px)",
+          }}
+        />
+        <motion.div
+          animate={{ x: ["0%","6%","-8%","10%","0%"], y: ["0%","-8%","6%","-10%","0%"], scale: [1,1.08,0.94,1.05,1], opacity: [0.10,0.16,0.08,0.14,0.10] }}
+          transition={{ duration: 46, ease: "easeInOut", repeat: Infinity, delay: 24 }}
+          style={{
+            position: "absolute", top: "42%", left: "-10%",
+            width: "60vw", height: "60vw", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(196,135,58,0.18) 0%, transparent 65%)",
+            filter: "blur(140px)",
+          }}
+        />
       </div>
 
-      {/* ══ Titles ══════════════════════════════════════════════════ */}
+      {/* ── Interconnected network grid — breathes on 8s cycle at ~4% opacity ── */}
       <motion.div
-        className="text-center px-6 pb-1 flex-shrink-0"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+        aria-hidden
+        animate={{ opacity: [0.04, 0.09, 0.04] }}
+        transition={{ duration: 8, ease: "easeInOut", repeat: Infinity }}
+        style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}
       >
-        <p style={{
-          fontSize: 10, fontWeight: 800, letterSpacing: "0.38em",
-          color: GOLD, marginBottom: 8,
-          fontFamily: "DM Sans, sans-serif",
-          textShadow: `0 0 18px ${GOLD}65`,
-        }}>
-          URGE SURFING
-        </p>
-        <h1 style={{
-          fontSize: 26, fontWeight: 800, color: "#ffffff",
-          lineHeight: 1.2, letterSpacing: "-0.01em",
-          fontFamily: "Cormorant Garamond, serif",
-          textShadow: [
-            "0 0 40px rgba(201,168,76,0.2)",
-            "0 0 80px rgba(201,168,76,0.08)",
-            "0 2px 6px rgba(0,0,0,0.55)",
-          ].join(", "),
-          marginBottom: 8,
-        }}>
-          Don't fight it.<br />Watch it.
-        </h1>
-        <p style={{
-          fontSize: 12, color: "rgba(255,255,255,0.44)", lineHeight: 1.58,
-          fontFamily: "DM Sans, sans-serif", maxWidth: 265, margin: "0 auto",
-        }}>
-          Urges peak around 90 seconds and then fade.{" "}
-          <span style={{ color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>Stay with it.</span>
-        </p>
+        <svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" fill="none">
+          <g stroke="rgba(196,135,58,0.9)" strokeWidth="0.55">
+            <line x1="0"   y1="120" x2="80"  y2="60"/>
+            <line x1="80"  y1="60"  x2="195" y2="90"/>
+            <line x1="195" y1="90"  x2="310" y2="50"/>
+            <line x1="310" y1="50"  x2="390" y2="140"/>
+            <line x1="30"  y1="250" x2="130" y2="300"/>
+            <line x1="130" y1="300" x2="260" y2="230"/>
+            <line x1="260" y1="230" x2="360" y2="290"/>
+            <line x1="60"  y1="420" x2="190" y2="380"/>
+            <line x1="190" y1="380" x2="310" y2="450"/>
+            <line x1="20"  y1="560" x2="140" y2="520"/>
+            <line x1="140" y1="520" x2="250" y2="590"/>
+            <line x1="80"  y1="690" x2="200" y2="650"/>
+            <line x1="200" y1="650" x2="320" y2="710"/>
+            <line x1="80"  y1="60"  x2="260" y2="230"/>
+            <line x1="60"  y1="420" x2="140" y2="520"/>
+            <line x1="80"  y1="690" x2="195" y2="780"/>
+          </g>
+          <g stroke="rgba(80,110,200,0.9)" strokeWidth="0.45">
+            <line x1="390" y1="140" x2="360" y2="290"/>
+            <line x1="360" y1="290" x2="390" y2="400"/>
+            <line x1="310" y1="450" x2="250" y2="590"/>
+            <line x1="250" y1="590" x2="370" y2="540"/>
+            <line x1="320" y1="710" x2="360" y2="830"/>
+          </g>
+          <g fill="rgba(196,135,58,0.9)">
+            <circle cx="80"  cy="60"  r="2.0"/>
+            <circle cx="195" cy="90"  r="1.8"/>
+            <circle cx="130" cy="300" r="2.5"/>
+            <circle cx="190" cy="380" r="2.5"/>
+            <circle cx="200" cy="650" r="2.5"/>
+          </g>
+          <g fill="rgba(80,110,200,0.9)">
+            <circle cx="360" cy="290" r="1.8"/>
+            <circle cx="370" cy="540" r="1.8"/>
+          </g>
+        </svg>
       </motion.div>
 
-      {/* ══ Central sphere ══════════════════════════════════════════ */}
-      <div className="flex justify-center items-center flex-shrink-0" style={{ padding: "18px 0 10px" }}>
-        <div style={{ position: "relative", width: 156, height: 156 }}>
+      {/* ── Intimate focused centre light ── */}
+      <div aria-hidden style={{
+        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+        background: "radial-gradient(ellipse at 50% 44%, rgba(196,135,58,0.07) 0%, transparent 52%)",
+      }} />
 
-          {/* Plasma orbital rings */}
-          <PlasmaField color={phase.color} />
-
-          {/* Drawing progress ring */}
-          <ProgressRing pct={phase.phasePct} color={phase.color} />
-
-          {/* Phase-change shockwave */}
-          <AnimatePresence>
-            <motion.div
-              key={shockKey}
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{ border: `2px solid ${phase.color}` }}
-              initial={{ scale: 1.0, opacity: 0.9 }}
-              animate={{ scale: 2.5, opacity: 0 }}
-              transition={{ duration: 0.95, ease: [0.0, 0.0, 0.18, 1] }}
-            />
-          </AnimatePresence>
-
-          {/* Gold 3-D sphere — radial gradient simulates a directional light */}
-          <div
-            className="absolute inset-0 rounded-full"
+      {/* ── Slow drifting gold + blue sparkle particles ── */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+        {SCREEN_SPARKLES.map((p, i) => (
+          <motion.div
+            key={i}
+            animate={{ y: [0, -26, 0], opacity: [0, p.opacity, 0], scale: [0.4, 1.1, 0.4] }}
+            transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
             style={{
-              background: [
-                "radial-gradient(circle at 36% 30%,",
-                "#FCF0C0 0%,",
-                "#E8C46A 12%,",
-                `${GOLD} 26%,`,
-                "#9A6A18 50%,",
-                "#4B310A 72%,",
-                "#1A0F04 100%)",
-              ].join(" "),
-              boxShadow: [
-                "0 0 0 1.5px rgba(201,168,76,0.22)",
-                "0 0 30px 8px rgba(201,168,76,0.2)",
-                "0 8px 28px rgba(0,0,0,0.75)",
-                "inset 12px 12px 28px rgba(255,240,170,0.14)",
-                "inset -8px -8px 20px rgba(0,0,0,0.58)",
-              ].join(", "),
+              position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
+              width: p.size, height: p.size, borderRadius: "50%",
+              background: i % 5 === 0 ? "rgba(100,140,230,0.95)" : GOLD,
+              boxShadow: i % 5 === 0
+                ? "0 0 5px 1px rgba(100,140,230,0.55)"
+                : "0 0 5px 2px rgba(201,168,76,0.60)",
             }}
           />
+        ))}
+      </div>
 
-          {/* Phase label + countdown — etched look via textShadow */}
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-            style={{ zIndex: 2 }}
+      {/* ── Page content (above all fixed layers) ── */}
+      <div style={{
+        position: "relative", zIndex: 1,
+        display: "flex", flexDirection: "column",
+        minHeight: "100dvh", overflowY: "auto",
+      }}>
+
+        {/* ══ Header ════════════════════════════════════════════════ */}
+        <div className="flex items-center justify-between px-5 pt-12 pb-3 flex-shrink-0">
+          <motion.button
+            onClick={() => navigate({ to: "/tools" })}
+            whileTap={{ scale: 0.88 }}
+            className="flex items-center gap-1.5"
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontSize: 13, fontWeight: 600,
+              fontFamily: "DM Sans, sans-serif",
+            }}
           >
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={phase.label}
-                initial={{ opacity: 0, scale: 0.75 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.75 }}
-                transition={{ duration: 0.28 }}
-                style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: "0.28em",
-                  color: phase.color, marginBottom: 4,
-                  fontFamily: "DM Sans, sans-serif",
-                  textShadow: `0 0 14px ${phase.color}, 0 0 28px ${phase.color}80`,
-                }}
-              >
-                {phase.label}
-              </motion.p>
+            <ArrowLeft size={15} />
+            Back
+          </motion.button>
+          <ActiveUrgeShield />
+        </div>
+
+        {/* ══ Titles ═══════════════════════════════════════════════ */}
+        <motion.div
+          className="text-center px-6 pb-1 flex-shrink-0"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p style={{
+            fontSize: 10, fontWeight: 800, letterSpacing: "0.38em",
+            color: GOLD, marginBottom: 8,
+            fontFamily: "DM Sans, sans-serif",
+            textShadow: `0 0 18px ${GOLD}65`,
+          }}>
+            URGE SURFING
+          </p>
+          <h1 style={{
+            fontSize: 26, fontWeight: 800, color: "#ffffff",
+            lineHeight: 1.2, letterSpacing: "-0.01em",
+            fontFamily: "Cormorant Garamond, serif",
+            textShadow: [
+              "0 0 40px rgba(201,168,76,0.22)",
+              "0 0 80px rgba(201,168,76,0.08)",
+              "0 2px 8px rgba(0,0,0,0.70)",
+            ].join(", "),
+            marginBottom: 8,
+          }}>
+            Don't fight it.<br />Watch it.
+          </h1>
+          <p style={{
+            fontSize: 12, color: "rgba(255,255,255,0.50)", lineHeight: 1.58,
+            fontFamily: "DM Sans, sans-serif", maxWidth: 265, margin: "0 auto",
+          }}>
+            Urges peak around 90 seconds and then fade.{" "}
+            <span style={{ color: "rgba(255,255,255,0.72)", fontWeight: 500 }}>Stay with it.</span>
+          </p>
+        </motion.div>
+
+        {/* ══ Central sphere ═══════════════════════════════════════ */}
+        <div className="flex justify-center items-center flex-shrink-0" style={{ padding: "18px 0 10px" }}>
+          <div style={{ position: "relative", width: 156, height: 156 }}>
+
+            {/* ── Outer amber ambient halo — constant warm glow ── */}
+            <motion.div
+              aria-hidden
+              animate={{ opacity: [0.52, 0.84, 0.52], scale: [0.96, 1.12, 0.96] }}
+              transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+              style={{
+                position: "absolute", inset: -38, borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(196,135,58,0.30) 0%, transparent 62%)",
+                filter: "blur(26px)",
+                pointerEvents: "none",
+              }}
+            />
+            {/* ── Amber pulse ring 1 — close breathe ── */}
+            <motion.div
+              aria-hidden
+              animate={{ scale: [0.93, 1.24, 0.93], opacity: [0.54, 0.13, 0.54] }}
+              transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
+              style={{
+                position: "absolute", inset: -9, borderRadius: "50%",
+                border: "1.5px solid rgba(196,135,58,0.66)",
+                boxShadow: "0 0 18px 5px rgba(196,135,58,0.26)",
+                pointerEvents: "none",
+              }}
+            />
+            {/* ── Amber pulse ring 2 — wider, offset timing ── */}
+            <motion.div
+              aria-hidden
+              animate={{ scale: [1.0, 1.36, 1.0], opacity: [0.28, 0.05, 0.28] }}
+              transition={{ duration: 5.6, ease: "easeInOut", repeat: Infinity, delay: 1.7 }}
+              style={{
+                position: "absolute", inset: -23, borderRadius: "50%",
+                border: "1px solid rgba(232,168,74,0.45)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Plasma orbital rings */}
+            <PlasmaField color={phase.color} />
+
+            {/* Drawing progress ring */}
+            <ProgressRing pct={phase.phasePct} color={phase.color} />
+
+            {/* Phase-change shockwave */}
+            <AnimatePresence>
+              <motion.div
+                key={shockKey}
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ border: `2px solid ${phase.color}` }}
+                initial={{ scale: 1.0, opacity: 0.9 }}
+                animate={{ scale: 2.5, opacity: 0 }}
+                transition={{ duration: 0.95, ease: [0.0, 0.0, 0.18, 1] }}
+              />
             </AnimatePresence>
-            <p style={{
-              fontSize: 32, fontWeight: 800, color: "#ffffff", lineHeight: 1,
-              fontFamily: "DM Sans, sans-serif", fontVariantNumeric: "tabular-nums",
-              textShadow: "0 0 22px rgba(255,255,255,0.75), 0 0 44px rgba(255,255,255,0.3)",
-            }}>
-              {phase.secsLeft}s
-            </p>
+
+            {/* ── Molten amber-gold sphere — multi-layer ── */}
+            <div
+              className="absolute inset-0 rounded-full overflow-hidden"
+              style={{
+                background: [
+                  "radial-gradient(circle at 36% 30%,",
+                  "#FFF4CC 0%,",
+                  "#EECB5A 8%,",
+                  "#CC8C32 22%,",
+                  "#8A5C1A 44%,",
+                  "#4A2A08 66%,",
+                  "#180C02 100%)",
+                ].join(" "),
+                boxShadow: [
+                  "0 0 0 1.5px rgba(201,168,76,0.32)",
+                  "0 0 40px 14px rgba(196,135,58,0.28)",
+                  "0 10px 36px rgba(0,0,0,0.84)",
+                  "inset 14px 14px 34px rgba(255,238,160,0.20)",
+                  "inset -10px -10px 26px rgba(0,0,0,0.70)",
+                ].join(", "),
+              }}
+            >
+              {/* Molten floating highlight — shifts slowly for living texture */}
+              <motion.div
+                animate={{ x: [0, 10, -5, 8, 0], y: [0, -8, 5, -10, 0] }}
+                transition={{ duration: 9, ease: "easeInOut", repeat: Infinity }}
+                style={{
+                  position: "absolute",
+                  width: "68%", height: "68%",
+                  top: "5%", left: "12%",
+                  background: "radial-gradient(circle at 42% 40%, rgba(255,234,155,0.54) 0%, rgba(210,148,55,0.26) 48%, transparent 72%)",
+                  borderRadius: "50%",
+                  filter: "blur(8px)",
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Deep molten shadow — bottom-right for 3D depth */}
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: "radial-gradient(circle at 72% 76%, rgba(120,50,8,0.52) 0%, transparent 58%)",
+                pointerEvents: "none",
+              }} />
+            </div>
+
+            {/* Phase label + countdown — etched look via textShadow */}
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+              style={{ zIndex: 2 }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={phase.label}
+                  initial={{ opacity: 0, scale: 0.75 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.75 }}
+                  transition={{ duration: 0.28 }}
+                  style={{
+                    fontSize: 9, fontWeight: 800, letterSpacing: "0.28em",
+                    color: phase.color, marginBottom: 4,
+                    fontFamily: "DM Sans, sans-serif",
+                    textShadow: `0 0 14px ${phase.color}, 0 0 28px ${phase.color}80`,
+                  }}
+                >
+                  {phase.label}
+                </motion.p>
+              </AnimatePresence>
+              <p style={{
+                fontSize: 32, fontWeight: 800, color: "#ffffff", lineHeight: 1,
+                fontFamily: "DM Sans, sans-serif", fontVariantNumeric: "tabular-nums",
+                textShadow: "0 0 22px rgba(255,255,255,0.75), 0 0 44px rgba(255,255,255,0.30)",
+              }}>
+                {phase.secsLeft}s
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ══ Master timer ════════════════════════════════════════════ */}
-      <motion.div
-        className="text-center flex-shrink-0"
-        style={{ paddingBottom: 14 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.8 }}
-      >
-        <p style={{
-          fontSize: 48, fontWeight: 800, color: "#ffffff",
-          fontVariantNumeric: "tabular-nums", letterSpacing: "0.06em",
-          lineHeight: 1, fontFamily: "DM Sans, sans-serif",
-          textShadow: [
-            `0 0 28px rgba(201,168,76,0.5)`,
-            `0 0 60px rgba(201,168,76,0.2)`,
-            `0 2px 10px rgba(0,0,0,0.65)`,
-          ].join(", "),
-        }}>
-          {mm}:{ss}
-        </p>
-        <p style={{
-          fontSize: 9, fontWeight: 800, letterSpacing: "0.32em",
-          color: GOLD, marginTop: 6,
-          fontFamily: "DM Sans, sans-serif",
-          textShadow: `0 0 14px ${GOLD}55`,
-        }}>
-          TIME WITH THE URGE
-        </p>
-      </motion.div>
+        {/* ══ Master timer ══════════════════════════════════════════ */}
+        <motion.div
+          className="text-center flex-shrink-0"
+          style={{ paddingBottom: 14 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+        >
+          <p style={{
+            fontSize: 48, fontWeight: 800, color: "#ffffff",
+            fontVariantNumeric: "tabular-nums", letterSpacing: "0.06em",
+            lineHeight: 1, fontFamily: "DM Sans, sans-serif",
+            textShadow: [
+              `0 0 28px rgba(201,168,76,0.52)`,
+              `0 0 60px rgba(201,168,76,0.20)`,
+              `0 2px 10px rgba(0,0,0,0.72)`,
+            ].join(", "),
+          }}>
+            {mm}:{ss}
+          </p>
+          <p style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: "0.32em",
+            color: GOLD, marginTop: 6,
+            fontFamily: "DM Sans, sans-serif",
+            textShadow: `0 0 14px ${GOLD}55`,
+          }}>
+            TIME WITH THE URGE
+          </p>
+        </motion.div>
 
-      {/* ══ Urge intensity chart ════════════════════════════════════ */}
-      <div className="px-5 pb-10 flex-shrink-0">
-        <UrgeChart elapsed={elapsed} />
-      </div>
+        {/* ══ Urge intensity chart ═══════════════════════════════════ */}
+        <div className="px-5 pb-6 flex-shrink-0">
+          <UrgeChart elapsed={elapsed} />
+        </div>
+
+        {/* ══ Social proof strip ════════════════════════════════════ */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            margin: "0 20px 28px",
+            borderRadius: 18,
+            background: "linear-gradient(145deg, rgba(12,8,18,0.78) 0%, rgba(7,5,15,0.84) 100%)",
+            border: "1px solid rgba(196,135,58,0.18)",
+            boxShadow: "inset 0 0 0 1px rgba(196,135,58,0.05), 0 2px 22px rgba(0,0,0,0.30)",
+            padding: "13px 16px",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            display: "flex", alignItems: "center", gap: 13,
+            flexShrink: 0,
+          }}
+        >
+          {/* Avatar cluster */}
+          <div style={{ display: "flex", flexShrink: 0 }}>
+            {([
+              ["K", "oklch(0.50 0.15 290)"],
+              ["J", "oklch(0.52 0.16 145)"],
+              ["M", "oklch(0.55 0.18 260)"],
+            ] as [string, string][]).map(([l, bg], i) => (
+              <div key={i} style={{
+                width: 26, height: 26, borderRadius: "50%",
+                background: bg,
+                border: "1.5px solid rgba(3,2,5,0.88)",
+                marginLeft: i > 0 ? -8 : 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 10, fontWeight: 700, color: "white",
+              }}>{l}</div>
+            ))}
+          </div>
+          {/* Quote */}
+          <p style={{
+            fontSize: 12, color: "rgba(255,255,255,0.58)",
+            lineHeight: 1.4, fontFamily: "DM Sans, sans-serif",
+          }}>
+            <span style={{ color: GOLD, fontWeight: 700 }}>✦ Kenji</span>
+            {" — "}<em>"This app hits different"</em>
+          </p>
+        </motion.div>
+
+      </div>{/* end page content */}
     </div>
   );
 }
