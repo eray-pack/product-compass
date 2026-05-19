@@ -114,22 +114,22 @@ const DUST = Array.from({ length: 9 }, (_, i) => {
   };
 });
 
-// ── Screen sparkle particles (deterministic) ─────────────────────────────────
+// ── Screen sparkle particles — bright gold, clearly visible ──────────────────
 const SCREEN_SPARKLES = [
-  { x: 8,  y: 12, size: 2.0, opacity: 0.55, delay: 0.0, dur: 10.0 },
-  { x: 88, y: 8,  size: 1.6, opacity: 0.45, delay: 2.8, dur: 12.0 },
-  { x: 15, y: 45, size: 2.2, opacity: 0.50, delay: 1.2, dur: 9.0  },
-  { x: 82, y: 38, size: 1.8, opacity: 0.42, delay: 4.0, dur: 11.5 },
-  { x: 48, y: 6,  size: 1.5, opacity: 0.58, delay: 0.6, dur: 8.5  },
-  { x: 92, y: 52, size: 1.7, opacity: 0.38, delay: 3.5, dur: 13.0 },
-  { x: 5,  y: 68, size: 2.0, opacity: 0.48, delay: 1.7, dur: 9.5  },
-  { x: 72, y: 72, size: 2.4, opacity: 0.44, delay: 5.2, dur: 10.5 },
-  { x: 35, y: 82, size: 1.5, opacity: 0.40, delay: 2.4, dur: 8.0  },
-  { x: 78, y: 85, size: 1.8, opacity: 0.35, delay: 1.0, dur: 11.0 },
-  { x: 20, y: 28, size: 1.6, opacity: 0.50, delay: 6.0, dur: 9.0  },
-  { x: 62, y: 18, size: 2.0, opacity: 0.48, delay: 3.2, dur: 10.0 },
-  { x: 55, y: 94, size: 1.4, opacity: 0.42, delay: 0.8, dur: 12.5 },
-  { x: 25, y: 92, size: 1.8, opacity: 0.38, delay: 4.5, dur: 9.5  },
+  { x: 8,  y: 12, size: 3.5, opacity: 0.70, delay: 0.0, dur: 7.0 },
+  { x: 88, y: 8,  size: 3.0, opacity: 0.60, delay: 2.8, dur: 9.0 },
+  { x: 15, y: 45, size: 4.0, opacity: 0.65, delay: 1.2, dur: 8.0 },
+  { x: 82, y: 38, size: 3.2, opacity: 0.55, delay: 4.0, dur: 10.0 },
+  { x: 48, y: 6,  size: 2.8, opacity: 0.70, delay: 0.6, dur: 7.5 },
+  { x: 92, y: 52, size: 3.0, opacity: 0.50, delay: 3.5, dur: 11.0 },
+  { x: 5,  y: 68, size: 3.5, opacity: 0.62, delay: 1.7, dur: 8.5 },
+  { x: 72, y: 72, size: 4.0, opacity: 0.58, delay: 5.2, dur: 9.5 },
+  { x: 35, y: 82, size: 2.8, opacity: 0.50, delay: 2.4, dur: 7.0 },
+  { x: 78, y: 85, size: 3.2, opacity: 0.45, delay: 1.0, dur: 9.0 },
+  { x: 20, y: 28, size: 3.0, opacity: 0.65, delay: 6.0, dur: 8.0 },
+  { x: 62, y: 18, size: 3.5, opacity: 0.60, delay: 3.2, dur: 9.0 },
+  { x: 55, y: 94, size: 2.5, opacity: 0.55, delay: 0.8, dur: 10.5 },
+  { x: 25, y: 92, size: 3.0, opacity: 0.50, delay: 4.5, dur: 8.5 },
 ];
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -542,55 +542,79 @@ function UrgeSurfing() {
   const ss = String(elapsed % 60).padStart(2, "0");
 
   return (
-    <div style={{
-      minHeight: "100dvh",
-      background: "radial-gradient(ellipse at 50% 36%, #0c0812 0%, #060410 50%, #030205 100%)",
-      position: "relative",
-    }}>
+    <>
+      {/* ── CSS keyframe animations for aurora blobs ── */}
+      <style>{`
+        @keyframes us-aurora-1 {
+          0%   { transform: translate(0px, 0px) scale(1); }
+          25%  { transform: translate(18vw, 8vh) scale(1.10); }
+          50%  { transform: translate(28vw, -5vh) scale(0.94); }
+          75%  { transform: translate(12vw, 14vh) scale(1.06); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes us-aurora-2 {
+          0%   { transform: translate(0px, 0px) scale(1); }
+          25%  { transform: translate(-20vw, 10vh) scale(0.90); }
+          50%  { transform: translate(-32vw, 2vh) scale(1.12); }
+          75%  { transform: translate(-14vw, -10vh) scale(0.96); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .us-aurora-1 { animation: us-aurora-1 20s ease-in-out infinite; }
+        .us-aurora-2 { animation: us-aurora-2 20s ease-in-out infinite 3s; }
+      `}</style>
 
-      {/* ── Aurora blobs — gold + deep blue, slow and calm ── */}
+      <div style={{
+        minHeight: "100dvh",
+        background: "radial-gradient(circle at 50% 50%, #130b24 0%, #06040a 60%, #000000 100%)",
+        position: "relative",
+      }}>
+
+      {/* ── Aurora blobs — CSS keyframe, concentrated blur, clearly visible ── */}
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
-        <motion.div
-          animate={{ x: ["0%","12%","22%","8%","0%"], y: ["0%","6%","-4%","8%","0%"], scale: [1,1.06,0.96,1.04,1], opacity: [0.16,0.22,0.14,0.20,0.16] }}
-          transition={{ duration: 52, ease: "easeInOut", repeat: Infinity }}
+        {/* Deep gold blob — top-left */}
+        <div
+          className="us-aurora-1"
           style={{
-            position: "absolute", top: "-20%", left: "0%",
-            width: "80vw", height: "80vw", borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(196,135,58,0.28) 0%, transparent 65%)",
-            filter: "blur(160px)",
-          }}
-        />
-        <motion.div
-          animate={{ x: ["0%","-14%","-24%","-10%","0%"], y: ["0%","8%","2%","10%","0%"], scale: [1,0.92,1.10,0.96,1], opacity: [0.12,0.08,0.16,0.10,0.12] }}
-          transition={{ duration: 60, ease: "easeInOut", repeat: Infinity, delay: 12 }}
-          style={{
-            position: "absolute", top: "10%", right: "-20%",
+            position: "absolute", top: "-10%", left: "-5%",
             width: "70vw", height: "70vw", borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(70,100,200,0.24) 0%, transparent 65%)",
-            filter: "blur(150px)",
+            background: "radial-gradient(circle, #d4891a 0%, #8a5010 40%, transparent 70%)",
+            filter: "blur(80px)",
+            opacity: 0.15,
           }}
         />
-        <motion.div
-          animate={{ x: ["0%","6%","-8%","10%","0%"], y: ["0%","-8%","6%","-10%","0%"], scale: [1,1.08,0.94,1.05,1], opacity: [0.10,0.16,0.08,0.14,0.10] }}
-          transition={{ duration: 46, ease: "easeInOut", repeat: Infinity, delay: 24 }}
+        {/* Deep purple/indigo blob — top-right */}
+        <div
+          className="us-aurora-2"
           style={{
-            position: "absolute", top: "42%", left: "-10%",
-            width: "60vw", height: "60vw", borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(196,135,58,0.18) 0%, transparent 65%)",
-            filter: "blur(140px)",
+            position: "absolute", top: "5%", right: "-10%",
+            width: "65vw", height: "65vw", borderRadius: "50%",
+            background: "radial-gradient(circle, #4a2a9a 0%, #1a0a5a 40%, transparent 70%)",
+            filter: "blur(80px)",
+            opacity: 0.15,
+          }}
+        />
+        {/* Tertiary warm gold — lower-left */}
+        <div
+          style={{
+            position: "absolute", top: "50%", left: "-8%",
+            width: "50vw", height: "50vw", borderRadius: "50%",
+            background: "radial-gradient(circle, #b87820 0%, #5a3a08 40%, transparent 70%)",
+            filter: "blur(80px)",
+            opacity: 0.12,
+            animation: "us-aurora-1 28s ease-in-out infinite 8s",
           }}
         />
       </div>
 
-      {/* ── Interconnected network grid — breathes on 8s cycle at ~4% opacity ── */}
+      {/* ── Network grid mesh — clearly visible at 6% ── */}
       <motion.div
         aria-hidden
-        animate={{ opacity: [0.04, 0.09, 0.04] }}
+        animate={{ opacity: [0.06, 0.11, 0.06] }}
         transition={{ duration: 8, ease: "easeInOut", repeat: Infinity }}
         style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}
       >
         <svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" fill="none">
-          <g stroke="rgba(196,135,58,0.9)" strokeWidth="0.55">
+          <g stroke="#c9a84c" strokeWidth="0.7">
             <line x1="0"   y1="120" x2="80"  y2="60"/>
             <line x1="80"  y1="60"  x2="195" y2="90"/>
             <line x1="195" y1="90"  x2="310" y2="50"/>
@@ -608,47 +632,47 @@ function UrgeSurfing() {
             <line x1="60"  y1="420" x2="140" y2="520"/>
             <line x1="80"  y1="690" x2="195" y2="780"/>
           </g>
-          <g stroke="rgba(80,110,200,0.9)" strokeWidth="0.45">
+          <g stroke="#5a6ec8" strokeWidth="0.55">
             <line x1="390" y1="140" x2="360" y2="290"/>
             <line x1="360" y1="290" x2="390" y2="400"/>
             <line x1="310" y1="450" x2="250" y2="590"/>
             <line x1="250" y1="590" x2="370" y2="540"/>
             <line x1="320" y1="710" x2="360" y2="830"/>
           </g>
-          <g fill="rgba(196,135,58,0.9)">
-            <circle cx="80"  cy="60"  r="2.0"/>
-            <circle cx="195" cy="90"  r="1.8"/>
-            <circle cx="130" cy="300" r="2.5"/>
-            <circle cx="190" cy="380" r="2.5"/>
-            <circle cx="200" cy="650" r="2.5"/>
+          <g fill="#c9a84c">
+            <circle cx="80"  cy="60"  r="2.5"/>
+            <circle cx="195" cy="90"  r="2.2"/>
+            <circle cx="130" cy="300" r="3.0"/>
+            <circle cx="190" cy="380" r="3.0"/>
+            <circle cx="200" cy="650" r="3.0"/>
           </g>
-          <g fill="rgba(80,110,200,0.9)">
-            <circle cx="360" cy="290" r="1.8"/>
-            <circle cx="370" cy="540" r="1.8"/>
+          <g fill="#5a6ec8">
+            <circle cx="360" cy="290" r="2.2"/>
+            <circle cx="370" cy="540" r="2.2"/>
           </g>
         </svg>
       </motion.div>
 
-      {/* ── Intimate focused centre light ── */}
+      {/* ── Intimate focused centre glow ── */}
       <div aria-hidden style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 44%, rgba(196,135,58,0.07) 0%, transparent 52%)",
+        background: "radial-gradient(ellipse at 50% 44%, rgba(196,135,58,0.10) 0%, transparent 50%)",
       }} />
 
-      {/* ── Slow drifting gold + blue sparkle particles ── */}
+      {/* ── Bright gold sparkle particles (#ffd700, 0.3–0.7 opacity) ── */}
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
         {SCREEN_SPARKLES.map((p, i) => (
           <motion.div
             key={i}
-            animate={{ y: [0, -26, 0], opacity: [0, p.opacity, 0], scale: [0.4, 1.1, 0.4] }}
+            animate={{ y: [0, -32, 0], opacity: [0, p.opacity, 0], scale: [0.5, 1.3, 0.5] }}
             transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
             style={{
               position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
               width: p.size, height: p.size, borderRadius: "50%",
-              background: i % 5 === 0 ? "rgba(100,140,230,0.95)" : GOLD,
-              boxShadow: i % 5 === 0
-                ? "0 0 5px 1px rgba(100,140,230,0.55)"
-                : "0 0 5px 2px rgba(201,168,76,0.60)",
+              background: i % 4 === 0 ? "#8888ff" : "#ffd700",
+              boxShadow: i % 4 === 0
+                ? `0 0 8px 3px rgba(136,136,255,0.70)`
+                : `0 0 8px 3px rgba(255,215,0,0.75)`,
             }}
           />
         ))}
@@ -788,11 +812,13 @@ function UrgeSurfing() {
                   "#180C02 100%)",
                 ].join(" "),
                 boxShadow: [
-                  "0 0 0 1.5px rgba(201,168,76,0.32)",
-                  "0 0 40px 14px rgba(196,135,58,0.28)",
-                  "0 10px 36px rgba(0,0,0,0.84)",
-                  "inset 14px 14px 34px rgba(255,238,160,0.20)",
-                  "inset -10px -10px 26px rgba(0,0,0,0.70)",
+                  "0 0 0 1.5px rgba(212,175,55,0.45)",
+                  "0 0 40px rgba(212,175,55,0.30)",
+                  "0 0 80px rgba(212,175,55,0.15)",
+                  "0 0 140px 20px rgba(196,135,58,0.18)",
+                  "0 12px 40px rgba(0,0,0,0.85)",
+                  "inset 14px 14px 34px rgba(255,238,160,0.22)",
+                  "inset -10px -10px 26px rgba(0,0,0,0.72)",
                 ].join(", "),
               }}
             >
@@ -933,5 +959,6 @@ function UrgeSurfing() {
 
       </div>{/* end page content */}
     </div>
+    </>
   );
 }
