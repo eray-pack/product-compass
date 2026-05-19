@@ -565,41 +565,41 @@ function UrgeSurfing() {
 
       <div style={{
         minHeight: "100dvh",
-        background: "radial-gradient(circle at 50% 50%, #130b24 0%, #06040a 60%, #000000 100%)",
+        background: "radial-gradient(circle at 50% 50%, #0c0812 0%, #06040a 60%, #020104 100%)",
         position: "relative",
       }}>
 
       {/* ── Aurora blobs — CSS keyframe, concentrated blur, clearly visible ── */}
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
-        {/* Deep gold blob — top-left */}
+        {/* Amber/gold blob — top-left */}
         <div
           className="us-aurora-1"
           style={{
             position: "absolute", top: "-10%", left: "-5%",
-            width: "70vw", height: "70vw", borderRadius: "50%",
-            background: "radial-gradient(circle, #d4891a 0%, #8a5010 40%, transparent 70%)",
-            filter: "blur(80px)",
+            width: "72vw", height: "72vw", borderRadius: "50%",
+            background: "rgba(212, 175, 55, 0.85)",
+            filter: "blur(100px)",
             opacity: 0.15,
           }}
         />
-        {/* Deep purple/indigo blob — top-right */}
+        {/* Deep blue/purple blob — top-right */}
         <div
           className="us-aurora-2"
           style={{
             position: "absolute", top: "5%", right: "-10%",
-            width: "65vw", height: "65vw", borderRadius: "50%",
-            background: "radial-gradient(circle, #4a2a9a 0%, #1a0a5a 40%, transparent 70%)",
-            filter: "blur(80px)",
-            opacity: 0.15,
+            width: "68vw", height: "68vw", borderRadius: "50%",
+            background: "rgba(30, 20, 80, 0.95)",
+            filter: "blur(100px)",
+            opacity: 0.20,
           }}
         />
         {/* Tertiary warm gold — lower-left */}
         <div
           style={{
             position: "absolute", top: "50%", left: "-8%",
-            width: "50vw", height: "50vw", borderRadius: "50%",
-            background: "radial-gradient(circle, #b87820 0%, #5a3a08 40%, transparent 70%)",
-            filter: "blur(80px)",
+            width: "52vw", height: "52vw", borderRadius: "50%",
+            background: "rgba(212, 175, 55, 0.70)",
+            filter: "blur(100px)",
             opacity: 0.12,
             animation: "us-aurora-1 28s ease-in-out infinite 8s",
           }}
@@ -607,11 +607,9 @@ function UrgeSurfing() {
       </div>
 
       {/* ── Network grid mesh — clearly visible at 6% ── */}
-      <motion.div
+      <div
         aria-hidden
-        animate={{ opacity: [0.06, 0.11, 0.06] }}
-        transition={{ duration: 8, ease: "easeInOut", repeat: Infinity }}
-        style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}
+        style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", opacity: 0.06 }}
       >
         <svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" fill="none">
           <g stroke="#c9a84c" strokeWidth="0.7">
@@ -651,7 +649,7 @@ function UrgeSurfing() {
             <circle cx="370" cy="540" r="2.2"/>
           </g>
         </svg>
-      </motion.div>
+      </div>
 
       {/* ── Intimate focused centre glow ── */}
       <div aria-hidden style={{
@@ -802,19 +800,11 @@ function UrgeSurfing() {
             <div
               className="absolute inset-0 rounded-full overflow-hidden"
               style={{
-                background: [
-                  "radial-gradient(circle at 36% 30%,",
-                  "#FFF4CC 0%,",
-                  "#EECB5A 8%,",
-                  "#CC8C32 22%,",
-                  "#8A5C1A 44%,",
-                  "#4A2A08 66%,",
-                  "#180C02 100%)",
-                ].join(" "),
+                background: "radial-gradient(circle at 35% 35%, #ffe89e 0%, #d4af37 40%, #8a640f 100%)",
                 boxShadow: [
-                  "0 0 0 1.5px rgba(212,175,55,0.45)",
-                  "0 0 40px rgba(212,175,55,0.30)",
-                  "0 0 80px rgba(212,175,55,0.15)",
+                  "0 0 0 1.5px rgba(212,175,55,0.50)",
+                  "0 0 50px rgba(212,175,55,0.40)",
+                  "0 0 100px rgba(212,175,55,0.20)",
                   "0 0 140px 20px rgba(196,135,58,0.18)",
                   "0 12px 40px rgba(0,0,0,0.85)",
                   "inset 14px 14px 34px rgba(255,238,160,0.22)",
