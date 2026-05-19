@@ -3236,90 +3236,92 @@ function CompanionSwitcher({
                     </div>
                   )}
 
-                  {/* Howling wolf icon */}
+                  {/* Wolf icon — minimalist gold line-art */}
                   <div style={{
                     width: 54, height: 54, borderRadius: 14,
                     background: wolfActive
-                      ? "radial-gradient(circle at 40% 35%, rgba(212,175,55,0.16) 0%, rgba(30,18,60,0.18) 55%, transparent 80%)"
+                      ? "radial-gradient(circle at 42% 38%, rgba(20,14,4,0.96) 0%, rgba(10,7,2,0.99) 100%)"
                       : isPremium
-                        ? "rgba(196,135,58,0.06)"
-                        : "rgba(255,255,255,0.025)",
-                    border: `1px solid ${wolfActive ? "rgba(212,175,55,0.35)" : isPremium ? "rgba(196,135,58,0.18)" : "rgba(255,255,255,0.07)"}`,
+                        ? "rgba(10,7,2,0.90)"
+                        : "rgba(8,5,2,0.85)",
+                    border: `1px solid ${wolfActive ? "rgba(212,175,55,0.40)" : isPremium ? "rgba(196,135,58,0.20)" : "rgba(255,255,255,0.07)"}`,
+                    boxShadow: wolfActive
+                      ? "inset 0 0 18px rgba(212,175,55,0.10), 0 0 14px rgba(212,175,55,0.18)"
+                      : "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    opacity: !isPremium && !wolfActive ? 0.55 : 1,
+                    opacity: !isPremium && !wolfActive ? 0.50 : 1,
                   }}>
-                    <svg width="36" height="38" viewBox="0 0 36 38" fill="none">
+                    {/* Fierce forward-facing wolf head — clean gold stroke line-art */}
+                    <svg width="34" height="34" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <defs>
-                        <linearGradient id="cs-wolf-body" x1="2" y1="4" x2="34" y2="38" gradientUnits="userSpaceOnUse">
-                          <stop offset="0%"   stopColor="#f0d47a"/>
-                          <stop offset="40%"  stopColor="#d4af37"/>
-                          <stop offset="80%"  stopColor="#a07820"/>
-                          <stop offset="100%" stopColor="#8a6010"/>
-                        </linearGradient>
-                        <radialGradient id="cs-eye-core" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%"   stopColor="#aaddff"/>
-                          <stop offset="55%"  stopColor="#4499ff"/>
-                          <stop offset="100%" stopColor="#1166cc"/>
-                        </radialGradient>
-                        <filter id="cs-eye-glow" x="-120%" y="-120%" width="340%" height="340%">
-                          <feGaussianBlur stdDeviation="1.8" result="b"/>
-                          <feFlood floodColor="#4499ff" floodOpacity="0.9" result="c"/>
-                          <feComposite in="c" in2="b" operator="in" result="g"/>
-                          <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                        <filter id="cs-wolf-glow" x="-15%" y="-15%" width="130%" height="130%">
-                          <feGaussianBlur stdDeviation="1.2" result="b"/>
-                          <feFlood floodColor="#d4af37" floodOpacity="0.4" result="c"/>
+                        <filter id="cs-wf-glow" x="-30%" y="-30%" width="160%" height="160%">
+                          <feGaussianBlur stdDeviation="1.4" result="b"/>
+                          <feFlood floodColor="#d4af37" floodOpacity="0.55" result="c"/>
                           <feComposite in="c" in2="b" operator="in" result="g"/>
                           <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
                       </defs>
 
-                      {/* ── Ear tips (left ear visible) ── */}
-                      <path d="M6 2 L4 9 L10 8 Z" fill="url(#cs-wolf-body)" opacity="0.95"/>
-                      <path d="M5 4 L4.5 8 L8 7.5 Z" fill="rgba(212,175,55,0.30)"/>
-                      {/* Right ear (partially behind head) */}
-                      <path d="M18 2 L16 8 L22 7 Z" fill="url(#cs-wolf-body)" opacity="0.80"/>
+                      {/* Left ear — sharp upright triangle */}
+                      <path d="M13 18 L10 4 L20 14 Z"
+                        stroke="#d4af37" strokeWidth="1.4" strokeLinejoin="round" fill="rgba(212,175,55,0.08)"/>
+                      {/* Left ear inner */}
+                      <path d="M13.5 16 L11.5 7 L18 13 Z"
+                        fill="rgba(212,175,55,0.14)" stroke="none"/>
 
-                      {/* ── Head shape ── */}
-                      <path d="M4 9 Q3 13 5 16 Q7 20 12 21 Q17 22 22 20 Q27 18 28 14 Q29 10 26 7 Q22 4 18 3 Q13 2 10 4 Q7 6 4 9 Z"
-                        fill="url(#cs-wolf-body)" filter="url(#cs-wolf-glow)"/>
+                      {/* Right ear — sharp upright triangle */}
+                      <path d="M35 18 L38 4 L28 14 Z"
+                        stroke="#d4af37" strokeWidth="1.4" strokeLinejoin="round" fill="rgba(212,175,55,0.08)"/>
+                      {/* Right ear inner */}
+                      <path d="M34.5 16 L36.5 7 L30 13 Z"
+                        fill="rgba(212,175,55,0.14)" stroke="none"/>
 
-                      {/* ── Forehead fur detail lines ── */}
-                      <path d="M9 8 Q11 7 12 8"   stroke="rgba(255,248,200,0.28)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
-                      <path d="M14 6 Q16 5.5 17 6" stroke="rgba(255,248,200,0.22)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
-                      <path d="M8 11 Q9 10 10 11"  stroke="rgba(255,248,200,0.20)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
+                      {/* Head outline — broad angular wolf skull */}
+                      <path d="M13 18 Q8 20 7 26 Q6 31 9 34 Q12 37 16 38 Q20 39 24 39 Q28 39 32 38 Q36 37 39 34 Q42 31 41 26 Q40 20 35 18 Q31 14 24 14 Q17 14 13 18 Z"
+                        stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round"
+                        fill="rgba(212,175,55,0.04)" filter="url(#cs-wf-glow)"/>
 
-                      {/* ── Muzzle / snout ── */}
-                      <path d="M5 16 Q4 19 6 21 Q8 23 12 23 Q9 21 7 18 Z" fill="url(#cs-wolf-body)" opacity="0.90"/>
-                      {/* Nose */}
-                      <ellipse cx="7" cy="21" rx="2.2" ry="1.4" fill="#3a2808" opacity="0.95"/>
-                      <ellipse cx="6.8" cy="20.6" rx="0.9" ry="0.6" fill="rgba(255,255,255,0.30)"/>
+                      {/* Muzzle — angular forward snout */}
+                      <path d="M16 34 Q18 40 24 42 Q30 40 32 34 Q29 36 24 36 Q19 36 16 34 Z"
+                        stroke="#d4af37" strokeWidth="1.3" strokeLinejoin="round" fill="rgba(212,175,55,0.06)"/>
 
-                      {/* ── Cheek fur tufts ── */}
-                      <path d="M4 14 Q2 15 3 17" stroke="url(#cs-wolf-body)" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.65"/>
-                      <path d="M22 16 Q25 17 24 20" stroke="url(#cs-wolf-body)" strokeWidth="1.0" fill="none" strokeLinecap="round" opacity="0.55"/>
+                      {/* Centre brow ridge — gives ferocity */}
+                      <path d="M20 22 Q24 20 28 22"
+                        stroke="#d4af37" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.75"/>
 
-                      {/* ── Neck / body base ── */}
-                      <path d="M9 21 Q7 25 8 30 Q9 34 14 36 Q20 38 24 35 Q28 32 28 28 Q28 24 26 21 Q22 20 18 21 Q14 22 9 21 Z"
-                        fill="url(#cs-wolf-body)" opacity="0.88"/>
+                      {/* Left brow furrow */}
+                      <path d="M13 21 Q16 19 18 21"
+                        stroke="#d4af37" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.60"/>
+                      {/* Right brow furrow */}
+                      <path d="M35 21 Q32 19 30 21"
+                        stroke="#d4af37" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.60"/>
 
-                      {/* ── Chest fur texture ── */}
-                      <path d="M12 25 Q14 24 16 25 Q18 24 20 25" stroke="rgba(255,248,200,0.20)" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-                      <path d="M11 29 Q14 28 17 29 Q20 28 22 29" stroke="rgba(255,248,200,0.18)" strokeWidth="0.60" fill="none" strokeLinecap="round"/>
-                      <path d="M12 33 Q15 32 18 33 Q21 32 23 33" stroke="rgba(255,248,200,0.15)" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
+                      {/* Left eye — almond shape */}
+                      <path d="M15 26 Q17 23 20 25 Q18 28 15 26 Z"
+                        stroke="#d4af37" strokeWidth="1.1" strokeLinejoin="round" fill="rgba(212,175,55,0.18)"/>
+                      {/* Left pupil slit */}
+                      <line x1="17.5" y1="24.5" x2="17.5" y2="27" stroke="rgba(10,6,2,0.90)" strokeWidth="1.2" strokeLinecap="round"/>
 
-                      {/* ── Body shine / specular ── */}
-                      <path d="M14 22 Q16 21.5 19 22.5 Q21 23 22 25 Q20 23.5 17 23 Z" fill="rgba(255,240,160,0.18)"/>
+                      {/* Right eye — almond shape */}
+                      <path d="M33 26 Q31 23 28 25 Q30 28 33 26 Z"
+                        stroke="#d4af37" strokeWidth="1.1" strokeLinejoin="round" fill="rgba(212,175,55,0.18)"/>
+                      {/* Right pupil slit */}
+                      <line x1="30.5" y1="24.5" x2="30.5" y2="27" stroke="rgba(10,6,2,0.90)" strokeWidth="1.2" strokeLinecap="round"/>
 
-                      {/* ── Piercing blue eye (with glow filter) ── */}
-                      <circle cx="14" cy="13" r="2.8" fill="#0a1428" filter="url(#cs-eye-glow)"/>
-                      <circle cx="14" cy="13" r="2.2" fill="url(#cs-eye-core)" filter="url(#cs-eye-glow)"/>
-                      {/* Pupil */}
-                      <ellipse cx="14" cy="13" rx="1.0" ry="1.4" fill="#020a18"/>
-                      {/* Eye specular */}
-                      <circle cx="13.2" cy="12.3" r="0.65" fill="rgba(200,230,255,0.75)"/>
-                      <circle cx="14.8" cy="13.6" r="0.35" fill="rgba(180,220,255,0.45)"/>
+                      {/* Nose bridge */}
+                      <line x1="24" y1="28" x2="24" y2="33" stroke="#d4af37" strokeWidth="1.0" strokeLinecap="round" opacity="0.55"/>
+                      {/* Nose tip */}
+                      <ellipse cx="24" cy="34" rx="3" ry="1.8" fill="rgba(212,175,55,0.22)" stroke="#d4af37" strokeWidth="1.0"/>
+
+                      {/* Chin tuft lines */}
+                      <path d="M20 38 Q22 40 24 41" stroke="#d4af37" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.45"/>
+                      <path d="M28 38 Q26 40 24 41" stroke="#d4af37" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.45"/>
+
+                      {/* Neck / collar */}
+                      <path d="M16 38 Q14 43 16 46 Q20 48 24 48 Q28 48 32 46 Q34 43 32 38"
+                        stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" fill="rgba(212,175,55,0.04)"/>
+                      {/* Chest fur line */}
+                      <path d="M18 44 Q24 47 30 44" stroke="#d4af37" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.40"/>
                     </svg>
                   </div>
 
