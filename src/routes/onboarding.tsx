@@ -981,149 +981,291 @@ function Onboarding() {
                         {/* ── Illustration area ── */}
                         <div style={{ width: "100%", height: 160, position: "relative", overflow: "hidden" }}>
 
-                          {/* Nebula atmosphere */}
+                          {/* Deep midnight-purple nebula base — bleeds to all edges */}
                           <div style={{
                             position: "absolute", inset: 0,
                             background: [
-                              "radial-gradient(ellipse at 70% 30%, rgba(40,20,100,0.35) 0%, transparent 55%)",
-                              "radial-gradient(ellipse at 20% 70%, rgba(60,30,120,0.25) 0%, transparent 50%)",
+                              "radial-gradient(ellipse at 50% 55%, rgba(55,28,115,0.55) 0%, rgba(28,12,65,0.45) 38%, transparent 68%)",
+                              "radial-gradient(ellipse at 15% 20%, rgba(70,35,140,0.30) 0%, transparent 48%)",
+                              "radial-gradient(ellipse at 85% 15%, rgba(35,15,90,0.28) 0%, transparent 42%)",
+                              "linear-gradient(180deg, rgba(6,3,16,0.95) 0%, rgba(8,4,22,0.88) 50%, rgba(4,2,12,0.98) 100%)",
                             ].join(", "),
                           }}/>
 
-                          {/* Star field */}
+                          {/* Cosmic dust haze bands */}
+                          <div style={{
+                            position: "absolute", inset: 0,
+                            background: [
+                              "radial-gradient(ellipse at 30% 40%, rgba(80,40,180,0.14) 0%, transparent 50%)",
+                              "radial-gradient(ellipse at 75% 65%, rgba(40,20,100,0.12) 0%, transparent 45%)",
+                            ].join(", "),
+                          }}/>
+
+                          {/* Twinkling star field — 20 stars, varied sizes and brightness */}
                           {[
-                            { x: 15, y: 12, r: 0.9 }, { x: 78, y: 8,  r: 1.1 }, { x: 88, y: 22, r: 0.8 },
-                            { x: 8,  y: 35, r: 1.0 }, { x: 92, y: 48, r: 0.9 }, { x: 68, y: 18, r: 0.7 },
-                            { x: 32, y: 14, r: 0.8 }, { x: 55, y: 6,  r: 1.2 }, { x: 82, y: 62, r: 0.8 },
+                            { x: 8,  y: 6,  r: 0.9, o: 0.90 }, { x: 18, y: 14, r: 0.7, o: 0.65 },
+                            { x: 30, y: 5,  r: 1.2, o: 0.85 }, { x: 48, y: 8,  r: 0.8, o: 0.70 },
+                            { x: 62, y: 4,  r: 1.1, o: 0.92 }, { x: 76, y: 10, r: 0.7, o: 0.60 },
+                            { x: 88, y: 7,  r: 1.0, o: 0.80 }, { x: 93, y: 22, r: 0.8, o: 0.72 },
+                            { x: 5,  y: 28, r: 1.0, o: 0.68 }, { x: 14, y: 42, r: 0.7, o: 0.55 },
+                            { x: 85, y: 35, r: 0.9, o: 0.75 }, { x: 94, y: 50, r: 0.7, o: 0.60 },
+                            { x: 4,  y: 58, r: 0.8, o: 0.50 }, { x: 91, y: 65, r: 1.0, o: 0.65 },
+                            { x: 22, y: 18, r: 0.6, o: 0.58 }, { x: 70, y: 20, r: 0.8, o: 0.70 },
+                            { x: 55, y: 15, r: 1.3, o: 0.88 }, { x: 38, y: 22, r: 0.7, o: 0.55 },
+                            { x: 82, y: 48, r: 0.8, o: 0.62 }, { x: 12, y: 70, r: 0.9, o: 0.48 },
                           ].map((s, i) => (
                             <div key={i} aria-hidden style={{
                               position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
                               width: s.r * 2, height: s.r * 2, borderRadius: "50%",
-                              background: "rgba(200,210,255,0.75)",
-                              boxShadow: "0 0 3px 1px rgba(180,200,255,0.50)",
+                              background: i % 5 === 0 ? "rgba(180,200,255,0.90)" : "rgba(220,225,255,0.85)",
+                              opacity: s.o,
+                              boxShadow: i % 4 === 0
+                                ? `0 0 ${s.r * 4}px ${s.r}px rgba(160,180,255,0.55)`
+                                : `0 0 ${s.r * 3}px ${s.r * 0.5}px rgba(200,210,255,0.40)`,
                             }}/>
                           ))}
 
-                          {/* Wolf SVG — fierce forward-facing wolf cub, full illustration */}
+                          {/* Wolf SVG — seated, proud, forward-facing, deeply textured */}
                           <svg width="100%" height="160" viewBox="0 0 100 160" fill="none" style={{ position: "absolute", inset: 0 }}>
                             <defs>
-                              <linearGradient id="ob-wolf-fur" x1="20" y1="30" x2="80" y2="155" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%"   stopColor="#c8c0b0"/>
-                                <stop offset="40%"  stopColor="#888070"/>
-                                <stop offset="80%"  stopColor="#504840"/>
-                                <stop offset="100%" stopColor="#282018"/>
+                              {/* ── Fur gradients ── */}
+                              <linearGradient id="ob-wf-dark" x1="50" y1="20" x2="50" y2="160" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%"   stopColor="#b0a898"/>
+                                <stop offset="30%"  stopColor="#706860"/>
+                                <stop offset="65%"  stopColor="#3c3430"/>
+                                <stop offset="100%" stopColor="#18140e"/>
                               </linearGradient>
-                              <linearGradient id="ob-wolf-fur-light" x1="35" y1="30" x2="65" y2="90" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%"  stopColor="#e0d8c8"/>
-                                <stop offset="100%" stopColor="#a89880"/>
+                              <linearGradient id="ob-wf-mid" x1="50" y1="30" x2="50" y2="120" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%"   stopColor="#d8d0c0"/>
+                                <stop offset="50%"  stopColor="#989080"/>
+                                <stop offset="100%" stopColor="#585048"/>
                               </linearGradient>
-                              <radialGradient id="ob-eye-l" cx="50%" cy="40%" r="52%">
-                                <stop offset="0%"  stopColor="#80dfff"/>
-                                <stop offset="40%" stopColor="#28a8f0"/>
-                                <stop offset="100%" stopColor="#0050c0"/>
+                              <linearGradient id="ob-wf-light" x1="50" y1="55" x2="50" y2="105" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%"   stopColor="#ece8e0"/>
+                                <stop offset="100%" stopColor="#c0b8a8"/>
+                              </linearGradient>
+                              <linearGradient id="ob-wf-silver" x1="40" y1="50" x2="60" y2="110" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%"   stopColor="#e8e4dc"/>
+                                <stop offset="60%"  stopColor="#b8b0a0"/>
+                                <stop offset="100%" stopColor="#787060"/>
+                              </linearGradient>
+                              <radialGradient id="ob-wf-cheek" cx="50%" cy="50%" r="55%">
+                                <stop offset="0%"   stopColor="#d8d0be"/>
+                                <stop offset="100%" stopColor="#908878"/>
                               </radialGradient>
-                              <radialGradient id="ob-orb-g" cx="38%" cy="38%" r="55%">
-                                <stop offset="0%"  stopColor="#c0e8ff"/>
-                                <stop offset="50%" stopColor="#4090e0"/>
-                                <stop offset="100%" stopColor="#1040a0"/>
+                              {/* ── Eye gradients ── */}
+                              <radialGradient id="ob-wf-eye" cx="38%" cy="35%" r="55%">
+                                <stop offset="0%"   stopColor="#a8eeff"/>
+                                <stop offset="35%"  stopColor="#30b8f8"/>
+                                <stop offset="70%"  stopColor="#0870d0"/>
+                                <stop offset="100%" stopColor="#003888"/>
                               </radialGradient>
-                              <filter id="ob-eye-glow-f" x="-80%" y="-80%" width="260%" height="260%">
-                                <feGaussianBlur stdDeviation="2.5" result="b"/>
-                                <feFlood floodColor="#28b0ff" floodOpacity="1.0" result="c"/>
+                              <radialGradient id="ob-wf-orb" cx="35%" cy="35%" r="58%">
+                                <stop offset="0%"   stopColor="#d0eeff"/>
+                                <stop offset="45%"  stopColor="#5098e8"/>
+                                <stop offset="100%" stopColor="#1048a8"/>
+                              </radialGradient>
+                              {/* ── Glow filters ── */}
+                              <filter id="ob-wf-body-glow" x="-8%" y="-8%" width="116%" height="116%">
+                                <feGaussianBlur stdDeviation="2.8" result="b"/>
+                                <feFlood floodColor="#5040a0" floodOpacity="0.28" result="c"/>
                                 <feComposite in="c" in2="b" operator="in" result="g"/>
                                 <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
                               </filter>
-                              <filter id="ob-orb-glow-f" x="-100%" y="-100%" width="300%" height="300%">
+                              <filter id="ob-wf-eye-glow" x="-120%" y="-120%" width="340%" height="340%">
                                 <feGaussianBlur stdDeviation="3.0" result="b"/>
-                                <feFlood floodColor="#4090ff" floodOpacity="0.90" result="c"/>
+                                <feFlood floodColor="#20a8ff" floodOpacity="1.0" result="c"/>
                                 <feComposite in="c" in2="b" operator="in" result="g"/>
                                 <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
                               </filter>
-                              <filter id="ob-wolf-glow-f" x="-10%" y="-10%" width="120%" height="120%">
-                                <feGaussianBlur stdDeviation="2.5" result="b"/>
-                                <feFlood floodColor="#6050a0" floodOpacity="0.30" result="c"/>
+                              <filter id="ob-wf-orb-glow" x="-140%" y="-140%" width="380%" height="380%">
+                                <feGaussianBlur stdDeviation="4.0" result="b"/>
+                                <feFlood floodColor="#3080ff" floodOpacity="0.95" result="c"/>
+                                <feComposite in="c" in2="b" operator="in" result="g"/>
+                                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                              </filter>
+                              <filter id="ob-wf-rim" x="-5%" y="-5%" width="110%" height="110%">
+                                <feGaussianBlur stdDeviation="1.0" result="b"/>
+                                <feFlood floodColor="#c0b8e8" floodOpacity="0.40" result="c"/>
                                 <feComposite in="c" in2="b" operator="in" result="g"/>
                                 <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
                               </filter>
                             </defs>
 
-                            {/* Left ear */}
-                            <path d="M32 68 L26 42 L44 60 Z" fill="url(#ob-wolf-fur)" filter="url(#ob-wolf-glow-f)"/>
-                            <path d="M33 66 L28 48 L40 61 Z" fill="rgba(180,160,140,0.30)"/>
-                            {/* Right ear */}
-                            <path d="M68 68 L74 42 L56 60 Z" fill="url(#ob-wolf-fur)" filter="url(#ob-wolf-glow-f)"/>
-                            <path d="M67 66 L72 48 L60 61 Z" fill="rgba(180,160,140,0.30)"/>
+                            {/* ── Ground ambient glow ── */}
+                            <ellipse cx="50" cy="154" rx="30" ry="7" fill="rgba(60,30,120,0.35)"/>
+                            <ellipse cx="50" cy="156" rx="20" ry="4" fill="rgba(40,20,90,0.50)"/>
 
-                            {/* Head — broad cub skull */}
-                            <path d="M30 68 Q22 74 22 84 Q22 96 28 102 Q34 108 42 110 Q50 112 58 110 Q66 108 72 102 Q78 96 78 84 Q78 74 70 68 Q62 62 50 62 Q38 62 30 68 Z"
-                              fill="url(#ob-wolf-fur)" filter="url(#ob-wolf-glow-f)"/>
+                            {/* ── Haunches / seated lower body ── */}
+                            <path d="M18 140 Q14 130 16 120 Q18 112 24 110 Q30 115 32 128 Q34 142 30 152 Q24 155 18 152 Q14 148 18 140 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)" opacity="0.90"/>
+                            <path d="M82 140 Q86 130 84 120 Q82 112 76 110 Q70 115 68 128 Q66 142 70 152 Q76 155 82 152 Q86 148 82 140 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)" opacity="0.90"/>
+                            {/* Haunch fur texture — left */}
+                            <path d="M20 130 Q18 125 22 122" stroke="rgba(200,195,185,0.20)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            <path d="M22 138 Q19 133 24 130" stroke="rgba(200,195,185,0.16)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+                            {/* Haunch fur texture — right */}
+                            <path d="M80 130 Q82 125 78 122" stroke="rgba(200,195,185,0.20)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            <path d="M78 138 Q81 133 76 130" stroke="rgba(200,195,185,0.16)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
 
-                            {/* Lighter face mask — forehead to muzzle */}
-                            <path d="M38 68 Q50 64 62 68 Q68 76 66 88 Q64 98 58 104 Q54 108 50 109 Q46 108 42 104 Q36 98 34 88 Q32 76 38 68 Z"
-                              fill="url(#ob-wolf-fur-light)" opacity="0.55"/>
+                            {/* ── Body / chest mass ── */}
+                            <path d="M26 108 Q20 116 20 132 Q20 148 28 154 Q38 158 50 158 Q62 158 72 154 Q80 148 80 132 Q80 116 74 108 Q64 115 50 116 Q36 115 26 108 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)" opacity="0.92"/>
 
-                            {/* Forehead fur detail */}
-                            <path d="M42 70 Q50 67 58 70" stroke="rgba(220,210,195,0.35)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
-                            <path d="M40 75 Q50 71 60 75" stroke="rgba(220,210,195,0.25)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            {/* Chest pale fur panel */}
+                            <path d="M34 110 Q50 118 66 110 Q68 126 66 142 Q60 154 50 156 Q40 154 34 142 Q32 126 34 110 Z"
+                              fill="url(#ob-wf-light)" opacity="0.42"/>
 
-                            {/* Brow furrows — fierce */}
-                            <path d="M34 76 Q38 72 42 76" stroke="rgba(40,30,20,0.60)" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-                            <path d="M66 76 Q62 72 58 76" stroke="rgba(40,30,20,0.60)" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+                            {/* Chest fur layered strokes — many fine lines */}
+                            <path d="M36 114 Q43 112 50 113 Q57 112 64 114" stroke="rgba(240,236,228,0.28)" strokeWidth="0.85" fill="none" strokeLinecap="round"/>
+                            <path d="M34 120 Q42 117 50 118 Q58 117 66 120" stroke="rgba(235,230,220,0.22)" strokeWidth="0.80" fill="none" strokeLinecap="round"/>
+                            <path d="M35 127 Q43 124 50 125 Q57 124 65 127" stroke="rgba(230,224,214,0.18)" strokeWidth="0.75" fill="none" strokeLinecap="round"/>
+                            <path d="M36 134 Q43 131 50 132 Q57 131 64 134" stroke="rgba(225,218,208,0.15)" strokeWidth="0.70" fill="none" strokeLinecap="round"/>
+                            <path d="M38 141 Q44 138 50 139 Q56 138 62 141" stroke="rgba(220,214,202,0.12)" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+                            <path d="M40 148 Q45 146 50 147 Q55 146 60 148" stroke="rgba(215,208,196,0.10)" strokeWidth="0.60" fill="none" strokeLinecap="round"/>
 
-                            {/* LEFT EYE — glowing neon-blue cosmic */}
-                            <circle cx="38" cy="82" r="6.5" fill="#060a14" filter="url(#ob-eye-glow-f)" style={{ animation: "ob-eye-glow 2.4s ease-in-out infinite" }}/>
-                            <circle cx="38" cy="82" r="5.5" fill="url(#ob-eye-l)" filter="url(#ob-eye-glow-f)" style={{ animation: "ob-eye-glow 2.4s ease-in-out 0.2s infinite" }}/>
-                            <ellipse cx="38" cy="82" rx="2.2" ry="3.0" fill="#020408"/>
-                            <circle cx="36.5" cy="80.5" r="1.2" fill="rgba(220,240,255,0.80)"/>
-                            <circle cx="40.0" cy="83.5" r="0.6" fill="rgba(180,220,255,0.50)"/>
+                            {/* ── Front paws ── */}
+                            <path d="M32 150 Q28 148 26 154 Q28 158 34 158 Q40 158 40 154 Q38 150 32 150 Z"
+                              fill="url(#ob-wf-mid)" opacity="0.88"/>
+                            <path d="M68 150 Q72 148 74 154 Q72 158 66 158 Q60 158 60 154 Q62 150 68 150 Z"
+                              fill="url(#ob-wf-mid)" opacity="0.88"/>
+                            {/* Paw toe lines */}
+                            <path d="M29 155 Q31 157 33 155" stroke="rgba(180,170,158,0.50)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            <path d="M33 156 Q35 158 37 156" stroke="rgba(180,170,158,0.45)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            <path d="M71 155 Q69 157 67 155" stroke="rgba(180,170,158,0.50)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            <path d="M67 156 Q65 158 63 156" stroke="rgba(180,170,158,0.45)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
 
-                            {/* RIGHT EYE */}
-                            <circle cx="62" cy="82" r="6.5" fill="#060a14" filter="url(#ob-eye-glow-f)" style={{ animation: "ob-eye-glow 2.4s ease-in-out 0.4s infinite" }}/>
-                            <circle cx="62" cy="82" r="5.5" fill="url(#ob-eye-l)" filter="url(#ob-eye-glow-f)" style={{ animation: "ob-eye-glow 2.4s ease-in-out 0.6s infinite" }}/>
-                            <ellipse cx="62" cy="82" rx="2.2" ry="3.0" fill="#020408"/>
-                            <circle cx="60.5" cy="80.5" r="1.2" fill="rgba(220,240,255,0.80)"/>
-                            <circle cx="63.8" cy="83.5" r="0.6" fill="rgba(180,220,255,0.50)"/>
+                            {/* ── Tail curled behind left haunch ── */}
+                            <path d="M20 140 Q8 135 6 120 Q4 106 12 100 Q18 96 22 104 Q16 108 16 118 Q16 130 24 136"
+                              stroke="url(#ob-wf-dark)" strokeWidth="5.5" strokeLinecap="round" fill="none" filter="url(#ob-wf-body-glow)"/>
+                            {/* Tail tip lighter fur */}
+                            <path d="M6 120 Q4 106 12 100"
+                              stroke="url(#ob-wf-silver)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.55"/>
 
-                            {/* Nose bridge */}
-                            <line x1="50" y1="87" x2="50" y2="97" stroke="rgba(80,60,40,0.55)" strokeWidth="1.2" strokeLinecap="round"/>
-                            {/* Nose */}
-                            <path d="M44 97 Q50 101 56 97 Q54 105 50 106 Q46 105 44 97 Z" fill="#1a1008" opacity="0.90"/>
-                            <ellipse cx="47" cy="98" rx="2.0" ry="1.2" fill="rgba(255,255,255,0.22)"/>
+                            {/* ── Neck ── */}
+                            <path d="M32 108 Q28 98 30 88 Q32 80 40 76 Q50 72 60 76 Q68 80 70 88 Q72 98 68 108 Q60 114 50 116 Q40 114 32 108 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)"/>
+                            {/* Neck lighter ruff — mane effect */}
+                            <path d="M34 105 Q28 96 32 84 Q36 76 44 73"
+                              stroke="url(#ob-wf-silver)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.40"/>
+                            <path d="M66 105 Q72 96 68 84 Q64 76 56 73"
+                              stroke="url(#ob-wf-silver)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.40"/>
 
-                            {/* Muzzle cheeks */}
-                            <ellipse cx="37" cy="97" rx="7" ry="5" fill="url(#ob-wolf-fur-light)" opacity="0.40"/>
-                            <ellipse cx="63" cy="97" rx="7" ry="5" fill="url(#ob-wolf-fur-light)" opacity="0.40"/>
+                            {/* ── Left ear — tall pointed ── */}
+                            <path d="M33 74 L26 44 L44 64 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)" stroke="rgba(170,162,152,0.25)" strokeWidth="0.6"/>
+                            <path d="M34 72 L28 50 L41 63 Z" fill="rgba(200,185,168,0.28)"/>
+                            {/* Inner ear gradient — warm pink-beige */}
+                            <path d="M35 70 L30 54 L40 64 Z" fill="rgba(220,165,140,0.22)"/>
+                            {/* Ear fur lines */}
+                            <path d="M30 62 Q32 56 34 60" stroke="rgba(210,200,188,0.30)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+                            <path d="M34 56 Q35 50 37 55" stroke="rgba(210,200,188,0.22)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
 
-                            {/* Chin fur lines */}
-                            <path d="M44 104 Q50 108 56 104" stroke="rgba(180,165,145,0.35)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
-                            <path d="M46 107 Q50 110 54 107" stroke="rgba(180,165,145,0.25)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+                            {/* ── Right ear — tall pointed ── */}
+                            <path d="M67 74 L74 44 L56 64 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)" stroke="rgba(170,162,152,0.25)" strokeWidth="0.6"/>
+                            <path d="M66 72 L72 50 L59 63 Z" fill="rgba(200,185,168,0.28)"/>
+                            <path d="M65 70 L70 54 L60 64 Z" fill="rgba(220,165,140,0.22)"/>
+                            {/* Ear fur lines */}
+                            <path d="M70 62 Q68 56 66 60" stroke="rgba(210,200,188,0.30)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+                            <path d="M66 56 Q65 50 63 55" stroke="rgba(210,200,188,0.22)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
 
-                            {/* Body / chest */}
-                            <path d="M28 102 Q22 112 24 128 Q26 142 34 150 Q42 158 50 158 Q58 158 66 150 Q74 142 76 128 Q78 112 72 102 Q64 108 50 109 Q36 108 28 102 Z"
-                              fill="url(#ob-wolf-fur)" filter="url(#ob-wolf-glow-f)" opacity="0.90"/>
+                            {/* ── Head ── broad, strong wolf skull ── */}
+                            <path d="M31 74 Q23 80 22 90 Q21 100 26 106 Q32 112 42 114 Q50 116 58 114 Q68 112 74 106 Q79 100 78 90 Q77 80 69 74 Q62 68 50 67 Q38 68 31 74 Z"
+                              fill="url(#ob-wf-dark)" filter="url(#ob-wf-body-glow)"/>
 
-                            {/* Chest lighter fur */}
-                            <path d="M36 108 Q50 112 64 108 Q66 122 64 136 Q58 148 50 152 Q42 148 36 136 Q34 122 36 108 Z"
-                              fill="url(#ob-wolf-fur-light)" opacity="0.38"/>
+                            {/* Face silver mask — broad stripe from forehead down */}
+                            <path d="M38 72 Q50 67 62 72 Q70 80 68 92 Q66 103 60 109 Q55 113 50 114 Q45 113 40 109 Q34 103 32 92 Q30 80 38 72 Z"
+                              fill="url(#ob-wf-silver)" opacity="0.48"/>
 
-                            {/* Chest fur texture lines */}
-                            <path d="M40 116 Q50 114 60 116" stroke="rgba(220,210,195,0.22)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
-                            <path d="M38 124 Q50 122 62 124" stroke="rgba(220,210,195,0.18)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
-                            <path d="M40 132 Q50 130 60 132" stroke="rgba(220,210,195,0.15)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+                            {/* Rim lighting — left side cool highlight */}
+                            <path d="M31 74 Q23 80 22 90 Q21 100 26 106"
+                              stroke="rgba(180,190,220,0.35)" strokeWidth="1.8" strokeLinecap="round" fill="none" filter="url(#ob-wf-rim)"/>
+                            {/* Rim lighting — right side */}
+                            <path d="M69 74 Q77 80 78 90 Q79 100 74 106"
+                              stroke="rgba(180,190,220,0.30)" strokeWidth="1.8" strokeLinecap="round" fill="none" filter="url(#ob-wf-rim)"/>
 
-                            {/* Floating magical orb near right ear */}
-                            <circle cx="78" cy="52" r="6.5" fill="url(#ob-orb-g)"
-                              filter="url(#ob-orb-glow-f)"
-                              style={{ animation: "ob-orb-pulse 2.8s ease-in-out infinite" }}/>
-                            <circle cx="78" cy="52" r="6.5" fill="none" stroke="rgba(140,200,255,0.55)" strokeWidth="0.8"/>
-                            <circle cx="76" cy="50" r="2.0" fill="rgba(220,240,255,0.65)"/>
-                            {/* Orb sparkle trails */}
-                            <circle cx="72" cy="44" r="1.4" fill="rgba(100,180,255,0.50)" style={{ animation: "ob-orb-pulse 2.8s ease-in-out 0.5s infinite" }}/>
-                            <circle cx="83" cy="46" r="1.0" fill="rgba(100,180,255,0.40)" style={{ animation: "ob-orb-pulse 2.8s ease-in-out 1.0s infinite" }}/>
-                            <circle cx="86" cy="58" r="0.8" fill="rgba(100,180,255,0.35)" style={{ animation: "ob-orb-pulse 2.8s ease-in-out 1.4s infinite" }}/>
+                            {/* Forehead fur direction strokes */}
+                            <path d="M42 73 Q50 69 58 73" stroke="rgba(240,236,228,0.32)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
+                            <path d="M39 78 Q50 73 61 78" stroke="rgba(235,230,220,0.24)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+                            <path d="M36 84 Q50 79 64 84" stroke="rgba(228,222,212,0.18)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
 
-                            {/* Ground shadow */}
-                            <ellipse cx="50" cy="158" rx="22" ry="4" fill="rgba(40,30,80,0.45)"/>
+                            {/* Deep brow furrows — fierce expression */}
+                            <path d="M32 80 Q36 75 41 80" stroke="rgba(20,15,10,0.65)" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                            <path d="M68 80 Q64 75 59 80" stroke="rgba(20,15,10,0.65)" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                            {/* Inner brow shadow */}
+                            <path d="M37 82 Q40 78 43 82" stroke="rgba(0,0,0,0.35)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
+                            <path d="M63 82 Q60 78 57 82" stroke="rgba(0,0,0,0.35)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
+
+                            {/* ── LEFT EYE — piercing neon cosmic blue ── */}
+                            {/* Outer glow ring */}
+                            <circle cx="38.5" cy="87" r="8.5" fill="rgba(15,25,50,0.95)" filter="url(#ob-wf-eye-glow)"
+                              style={{ animation: "ob-eye-glow 2.8s ease-in-out infinite" }}/>
+                            {/* Sclera dark base */}
+                            <circle cx="38.5" cy="87" r="7.0" fill="#050a18"/>
+                            {/* Iris */}
+                            <circle cx="38.5" cy="87" r="5.8" fill="url(#ob-wf-eye)" filter="url(#ob-wf-eye-glow)"
+                              style={{ animation: "ob-eye-glow 2.8s ease-in-out 0.15s infinite" }}/>
+                            {/* Pupil — vertical slit */}
+                            <ellipse cx="38.5" cy="87" rx="1.8" ry="4.0" fill="#010306"/>
+                            {/* Primary specular */}
+                            <circle cx="36.5" cy="84.5" r="1.6" fill="rgba(230,248,255,0.90)"/>
+                            {/* Secondary specular */}
+                            <circle cx="41.0" cy="89.5" r="0.8" fill="rgba(180,230,255,0.55)"/>
+                            {/* Limbal ring */}
+                            <circle cx="38.5" cy="87" r="5.8" fill="none" stroke="rgba(0,80,180,0.45)" strokeWidth="0.8"/>
+
+                            {/* ── RIGHT EYE ── */}
+                            <circle cx="61.5" cy="87" r="8.5" fill="rgba(15,25,50,0.95)" filter="url(#ob-wf-eye-glow)"
+                              style={{ animation: "ob-eye-glow 2.8s ease-in-out 0.3s infinite" }}/>
+                            <circle cx="61.5" cy="87" r="7.0" fill="#050a18"/>
+                            <circle cx="61.5" cy="87" r="5.8" fill="url(#ob-wf-eye)" filter="url(#ob-wf-eye-glow)"
+                              style={{ animation: "ob-eye-glow 2.8s ease-in-out 0.45s infinite" }}/>
+                            <ellipse cx="61.5" cy="87" rx="1.8" ry="4.0" fill="#010306"/>
+                            <circle cx="59.5" cy="84.5" r="1.6" fill="rgba(230,248,255,0.90)"/>
+                            <circle cx="64.0" cy="89.5" r="0.8" fill="rgba(180,230,255,0.55)"/>
+                            <circle cx="61.5" cy="87" r="5.8" fill="none" stroke="rgba(0,80,180,0.45)" strokeWidth="0.8"/>
+
+                            {/* ── Nose bridge ── */}
+                            <line x1="50" y1="93" x2="50" y2="103" stroke="rgba(60,45,30,0.50)" strokeWidth="1.4" strokeLinecap="round"/>
+
+                            {/* ── Nose ── */}
+                            <path d="M43 103 Q50 107 57 103 Q55 111 50 113 Q45 111 43 103 Z"
+                              fill="#0e0a06" opacity="0.95"/>
+                            {/* Nose highlight */}
+                            <ellipse cx="46.5" cy="104" rx="2.5" ry="1.5" fill="rgba(255,255,255,0.18)"/>
+
+                            {/* ── Muzzle — cheek pads ── */}
+                            <ellipse cx="36" cy="101" rx="8.5" ry="6.5" fill="url(#ob-wf-cheek)" opacity="0.45"/>
+                            <ellipse cx="64" cy="101" rx="8.5" ry="6.5" fill="url(#ob-wf-cheek)" opacity="0.45"/>
+                            {/* Muzzle whisker dots */}
+                            <circle cx="30" cy="99"  r="0.9" fill="rgba(220,215,205,0.50)"/>
+                            <circle cx="32" cy="102" r="0.9" fill="rgba(220,215,205,0.45)"/>
+                            <circle cx="34" cy="105" r="0.9" fill="rgba(220,215,205,0.40)"/>
+                            <circle cx="70" cy="99"  r="0.9" fill="rgba(220,215,205,0.50)"/>
+                            <circle cx="68" cy="102" r="0.9" fill="rgba(220,215,205,0.45)"/>
+                            <circle cx="66" cy="105" r="0.9" fill="rgba(220,215,205,0.40)"/>
+
+                            {/* Chin fur */}
+                            <path d="M44 110 Q50 114 56 110" stroke="rgba(200,192,180,0.32)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+                            <path d="M46 113 Q50 116 54 113" stroke="rgba(195,186,174,0.24)" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+
+                            {/* ── Magical orb — floating beside right ear ── */}
+                            <circle cx="80" cy="50" r="8.0" fill="url(#ob-wf-orb)"
+                              filter="url(#ob-wf-orb-glow)"
+                              style={{ animation: "ob-orb-pulse 3.2s ease-in-out infinite" }}/>
+                            <circle cx="80" cy="50" r="8.0" fill="none" stroke="rgba(160,210,255,0.60)" strokeWidth="0.9"/>
+                            {/* Orb inner shimmer */}
+                            <circle cx="77.5" cy="47.5" r="2.8" fill="rgba(230,248,255,0.70)"/>
+                            <circle cx="81.5" cy="52.5" r="1.2" fill="rgba(160,210,255,0.45)"/>
+                            {/* Orb trailing sparks */}
+                            <circle cx="74" cy="40"  r="1.8" fill="rgba(120,190,255,0.55)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.6s infinite" }}/>
+                            <circle cx="86" cy="43"  r="1.4" fill="rgba(100,170,255,0.45)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.1s infinite" }}/>
+                            <circle cx="88" cy="58"  r="1.0" fill="rgba(90,160,255,0.38)"  style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.7s infinite" }}/>
+                            <circle cx="71" cy="57"  r="1.2" fill="rgba(110,180,255,0.42)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.4s infinite" }}/>
+
+                            {/* ── Ambient body rim glow from orb ── */}
+                            <path d="M68 74 Q74 68 78 58" stroke="rgba(80,160,255,0.15)" strokeWidth="6" strokeLinecap="round" fill="none" filter="url(#ob-wf-eye-glow)"/>
                           </svg>
                         </div>
 
