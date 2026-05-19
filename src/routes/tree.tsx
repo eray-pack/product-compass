@@ -2568,23 +2568,13 @@ function LifeTreePage({
 
   return (
     <PageShell>
-      <header className="px-6 pt-12">
+      <header className="px-6 pt-8">
         <SectionTitle>Sacred Ground</SectionTitle>
-        <h1 className="mt-2 text-3xl font-bold">Your Life Tree</h1>
-        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-          This tree is sacred. Every clean day is permanently etched into it.
-        </p>
+        <h1 className="mt-1 text-3xl font-bold">Your Life Tree</h1>
       </header>
 
-      {/* Info line — logins feed the tree */}
-      <div className="px-6 mt-3 mb-1 flex items-center gap-2">
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em" }}>
-          Every day you open the app waters your tree · <span style={{ color: health.color }}>{daysThisWeek}/7 this week</span>
-        </span>
-      </div>
-
       {/* Tree scene — full-bleed, no card frame */}
-      <section className="mt-4 relative" style={{ height: 360 }}>
+      <section className="mt-3 relative" style={{ height: 420 }}>
         {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
         {treeStyle === "3d" && (
           <>
@@ -2612,7 +2602,7 @@ function LifeTreePage({
           /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div style={{
-              position: "relative", width: 300, height: 300,
+              position: "relative", width: 340, height: 340,
               maskImage: "radial-gradient(ellipse at center, black 52%, transparent 80%)",
               WebkitMaskImage: "radial-gradient(ellipse at center, black 52%, transparent 80%)",
               filter: health.companionFilter,
