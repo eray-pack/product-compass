@@ -2505,6 +2505,14 @@ function WolfPage({
           </p>
         </div>
       </section>
+
+      {/* ── Companion Switcher ── */}
+      <CompanionSwitcher
+        isPremium={state.isPremium}
+        currentCompanion="wolf"
+        onSwitchToTree={() => update({ companion: "tree" })}
+        onSwitchToWolf={() => {}}
+      />
     </PageShell>
   );
 }
@@ -2856,6 +2864,7 @@ function LifeTreePage({
       <CompanionSwitcher
         isPremium={state.isPremium}
         currentCompanion="tree"
+        onSwitchToTree={() => {}}
         onSwitchToWolf={() => {
           if (!state.isPremium) { triggerPaywall(); return; }
           update({ companion: "wolf" });
@@ -2866,21 +2875,24 @@ function LifeTreePage({
 }
 
 // ── Companion Switcher ────────────────────────────────────────────────────────
-// currentCompanion: which companion is active RIGHT NOW on this screen.
-// onSwitchToWolf: caller handles paywall guard + state update.
+// Renders on both LifeTreePage and WolfPage.
+// currentCompanion: which is active right now. Caller passes the correct value.
+// onSwitchToTree / onSwitchToWolf: caller handles paywall guard + state update.
 function CompanionSwitcher({
   isPremium,
   currentCompanion,
+  onSwitchToTree,
   onSwitchToWolf,
 }: {
   isPremium: boolean;
   currentCompanion: "tree" | "wolf";
+  onSwitchToTree: () => void;
   onSwitchToWolf: () => void;
 }) {
   const treeActive = currentCompanion === "tree";
   const wolfActive = currentCompanion === "wolf";
 
-  // Shared pill styles
+  // ── Shared pill token styles ──
   const activePill: React.CSSProperties = {
     position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
     fontSize: 8, fontWeight: 800, letterSpacing: "0.16em",
@@ -2898,7 +2910,7 @@ function CompanionSwitcher({
     borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
   };
 
-  // Shared card styles — identical structure for both
+  // ── Shared card base ──
   const cardBase: React.CSSProperties = {
     position: "relative",
     borderRadius: 16,
@@ -2912,10 +2924,7 @@ function CompanionSwitcher({
     ...cardBase,
     background: "rgba(201,168,76,0.08)",
     outline: "1.5px solid rgba(201,168,76,0.55)",
-    boxShadow: [
-      "0 0 0 0.5px rgba(232,200,100,0.22)",
-      "0 0 20px rgba(201,168,76,0.14)",
-    ].join(", "),
+    boxShadow: "0 0 0 0.5px rgba(232,200,100,0.22), 0 0 20px rgba(201,168,76,0.14)",
   };
   const cardIdleGold: React.CSSProperties = {
     ...cardBase,
@@ -2928,7 +2937,7 @@ function CompanionSwitcher({
     outline: "1.5px solid rgba(255,255,255,0.10)",
   };
 
-  // Shared icon box styles
+  // ── Icon box tokens ──
   const iconBoxGold: React.CSSProperties = {
     width: 46, height: 46, borderRadius: 12,
     background: "rgba(201,168,76,0.10)",
@@ -2956,29 +2965,20 @@ function CompanionSwitcher({
         border: "1px solid rgba(201,168,76,0.18)",
         borderRadius: 22,
         padding: "20px 18px 18px",
-        boxShadow: [
-          "0 0 0 1px rgba(201,168,76,0.05)",
-          "0 8px 32px rgba(0,0,0,0.38)",
-          "inset 0 1px 0 rgba(255,255,255,0.04)",
-        ].join(", "),
+        boxShadow: "0 0 0 1px rgba(201,168,76,0.05), 0 8px 32px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.04)",
       }}>
-        {/* Label */}
         <p style={{
           fontSize: 9, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase",
           color: "rgba(201,168,76,0.55)", marginBottom: 5, fontFamily: "DM Sans, sans-serif",
         }}>
           Companion
         </p>
-
-        {/* Heading */}
         <h3 style={{
           fontSize: 17, fontWeight: 700, color: "#f5ede0",
           marginBottom: 4, letterSpacing: "-0.01em", fontFamily: "DM Sans, sans-serif",
         }}>
           Choose Your Companion
         </h3>
-
-        {/* Subtext */}
         <p style={{
           fontSize: 12, color: "rgba(255,255,255,0.36)", marginBottom: 18,
           lineHeight: 1.55, fontFamily: "DM Sans, sans-serif",
@@ -2986,11 +2986,11 @@ function CompanionSwitcher({
           Good if you want an extra one, look at your tree also.
         </p>
 
-        {/* Option cards */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
 
-          {/* ── Sacred Tree ── */}
+          {/* ── Sacred Tree card ── */}
           <motion.button
+            onClick={treeActive ? undefined : onSwitchToTree}
             whileTap={treeActive ? {} : { scale: 0.96 }}
             transition={{ type: "spring", stiffness: 500, damping: 22 }}
             style={treeActive ? cardActive : cardIdleGold}
@@ -3012,21 +3012,20 @@ function CompanionSwitcher({
                 Sacred Tree
               </p>
               <p style={{ fontSize: 10, color: "rgba(201,168,76,0.50)", fontFamily: "DM Sans, sans-serif" }}>
-                Your life tree
+                {treeActive ? "Your life tree" : "Tap to switch"}
               </p>
             </div>
           </motion.button>
 
-          {/* ── Wolf Companion ── */}
+          {/* ── Wolf Companion card ── */}
           <motion.button
-            onClick={onSwitchToWolf}
-            whileTap={{ scale: 0.96 }}
+            onClick={wolfActive ? undefined : onSwitchToWolf}
+            whileTap={wolfActive ? {} : { scale: 0.96 }}
             transition={{ type: "spring", stiffness: 500, damping: 22 }}
             style={wolfActive ? cardActive : isPremium ? cardIdleGold : cardLocked}
           >
-            {/* Badge: ACTIVE when wolf is current, 🔒 PRO when not premium, nothing when premium+idle */}
             {wolfActive && <span style={activePill}>ACTIVE</span>}
-            {!isPremium && (
+            {!isPremium && !wolfActive && (
               <div style={lockPill}>
                 <Lock style={{ width: 7, height: 7 }} />
                 PRO
@@ -3059,9 +3058,8 @@ function CompanionSwitcher({
                 fontSize: 10, fontFamily: "DM Sans, sans-serif",
                 color: wolfActive
                   ? "rgba(201,168,76,0.50)"
-                  : isPremium
-                    ? "rgba(201,168,76,0.55)"
-                    : "rgba(255,255,255,0.30)",
+                  : isPremium ? "rgba(201,168,76,0.55)"
+                  : "rgba(255,255,255,0.30)",
               }}>
                 {wolfActive ? "Your wolf" : isPremium ? "Tap to switch" : "Unlock with Pro"}
               </p>
