@@ -2600,46 +2600,6 @@ function LifeTreePage({
         <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
           style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
 
-        {/* Stage badge — top left */}
-        <div className="absolute top-4 left-5 z-20">
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
-            color: "#C9A84C", background: "rgba(0,0,0,0.40)",
-            border: "1px solid rgba(201,168,76,0.30)",
-            borderRadius: 999, padding: "4px 10px",
-            backdropFilter: "blur(10px)",
-          }}>
-            Stage {stage.stage} · {stage.name}
-          </span>
-        </div>
-
-        {/* Style toggle — top right */}
-        <div className="absolute top-4 right-5 z-20">
-          <div style={{
-            display: "inline-flex", borderRadius: 999, padding: 3,
-            background: "rgba(0,0,0,0.40)", border: "1px solid rgba(255,255,255,0.09)",
-            backdropFilter: "blur(10px)",
-          }}>
-            {(["cartoon", "3d"] as const).map((opt) => (
-              <button
-                key={opt}
-                onClick={() => toggleTreeStyle(opt)}
-                style={{
-                  padding: "3px 12px", borderRadius: 999,
-                  fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                  border: treeStyle === opt ? "1px solid rgba(201,168,76,0.50)" : "1px solid transparent",
-                  background: treeStyle === opt ? "rgba(201,168,76,0.18)" : "transparent",
-                  color: treeStyle === opt ? "#C9A84C" : "rgba(255,255,255,0.35)",
-                  cursor: "pointer", transition: "all 0.18s",
-                }}
-              >
-                {opt === "3d" ? "3D" : "Cartoon"}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Tree visual */}
         {treeStyle === "3d" ? (
           <div className="absolute inset-0 flex items-center justify-center z-10"
@@ -2673,39 +2633,29 @@ function LifeTreePage({
             </div>
           </div>
         )}
-
-        {/* Bottom row — rank left, health center, day right */}
-        <div className="absolute bottom-5 inset-x-5 z-20 flex items-center justify-between">
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-            color: "#C9A84C", background: "rgba(0,0,0,0.38)",
-            border: "1px solid rgba(201,168,76,0.30)", borderRadius: 999, padding: "4px 10px",
-            backdropFilter: "blur(10px)",
-          }}>
-            <Crown style={{ height: 11, width: 11 }} /> {RANK_BY_STAGE[stage.stage]}
-          </span>
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            fontSize: 10, fontWeight: 600,
-            color: health.color, background: "rgba(0,0,0,0.38)",
-            border: `1px solid ${health.color}40`, borderRadius: 999, padding: "4px 10px",
-            backdropFilter: "blur(10px)",
-          }}>
-            {health.emoji} {health.label} · {daysThisWeek}/7
-          </span>
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.55)",
-            background: "rgba(0,0,0,0.38)", border: "1px solid rgba(255,255,255,0.10)",
-            borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)",
-          }}>
-            <Sparkles style={{ height: 11, width: 11 }} /> Day {day}
-          </span>
-        </div>
       </section>
 
-      {/* XP + stats — sits on dark page background naturally */}
+      {/* Cartoon / 3D toggle — subtle text row below scene */}
+      <div className="flex items-center justify-center gap-1 mt-2">
+        {(["cartoon", "3d"] as const).map((opt, i) => (
+          <span key={opt} className="flex items-center gap-1">
+            {i > 0 && <span style={{ color: "rgba(255,255,255,0.15)", fontSize: 10 }}>·</span>}
+            <button
+              onClick={() => toggleTreeStyle(opt)}
+              style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                color: treeStyle === opt ? "#C9A84C" : "rgba(255,255,255,0.28)",
+                background: "none", border: "none", cursor: "pointer", padding: "2px 6px",
+                transition: "color 0.18s",
+              }}
+            >
+              {opt === "3d" ? "3D" : "Cartoon"}
+            </button>
+          </span>
+        ))}
+      </div>
+
+      {/* XP + stats */}
       <section className="px-6 mt-2">
         <div style={{
           background: "rgba(255,255,255,0.03)",
@@ -2714,8 +2664,11 @@ function LifeTreePage({
           borderRadius: 20, padding: "16px 18px",
         }}>
           <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-muted-foreground">{stage.name}</span>
-            <span className="text-muted-foreground tabular-nums">{state.treeXP} / {stage.next} XP</span>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">{stage.name}</span>
+              <span style={{ color: "#C9A84C", opacity: 0.65, fontSize: 10 }}>· {RANK_BY_STAGE[stage.stage]}</span>
+            </div>
+            <span className="text-muted-foreground tabular-nums">Day {day} · {state.treeXP} / {stage.next} XP</span>
           </div>
           <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
             <div className="h-full rounded-full transition-all duration-700"
@@ -2727,7 +2680,7 @@ function LifeTreePage({
               Top <span className="text-success font-semibold">{TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users
             </p>
             <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>
-              {health.emoji} {health.desc}
+              {health.emoji} {health.label} · {daysThisWeek}/7
             </p>
           </div>
         </div>
