@@ -34,11 +34,9 @@ export function CartoonTree({ day, xp = 0 }: Props) {
 }
 
 // ── Stage 0 — Tiny Tree ───────────────────────────────────────────────────────
-// A small, round, undeniably cute baby tree. Short stubby trunk,
-// big puffy crown relative to its size — classic cartoon tree proportion.
 function TinyTree() {
   return (
-    <g transform="translate(200, 268)">
+    <g transform="translate(200, 268) scale(3.16)">
       {/* Ground mound */}
       <ellipse cx="0" cy="0" rx="30" ry="6" fill="#2D5A27" opacity="0.65" />
 
@@ -59,10 +57,9 @@ function TinyTree() {
 }
 
 // ── Stage 1 — Small Tree ──────────────────────────────────────────────────────
-// Noticeably taller than Stage 0, first hint of branching structure.
 function SmallTree() {
   return (
-    <g transform="translate(200, 268)">
+    <g transform="translate(200, 268) scale(2.26)">
       {/* Ground */}
       <ellipse cx="0" cy="0" rx="40" ry="7" fill="#2D5A27" opacity="0.68" />
 
@@ -87,10 +84,9 @@ function SmallTree() {
 }
 
 // ── Stage 2 — Sapling ─────────────────────────────────────────────────────────
-// Distinctly taller, real branching begins, crown becomes layered.
 function Sapling() {
   return (
-    <g transform="translate(200, 268)">
+    <g transform="translate(200, 268) scale(1.60)">
       {/* Ground */}
       <ellipse cx="0" cy="0" rx="52" ry="8" fill="#2D5A27" opacity="0.70" />
 
@@ -118,7 +114,7 @@ function Sapling() {
 // ── Stage 3 — Young Tree ──────────────────────────────────────────────────────
 function YoungTree() {
   return (
-    <g transform="translate(200, 268)">
+    <g transform="translate(200, 268) scale(1.28)">
       {/* Ground */}
       <ellipse cx="0" cy="0" rx="66" ry="10" fill="#2D5A27" opacity="0.75" />
       {/* Root hints */}
@@ -152,7 +148,7 @@ function YoungTree() {
 // ── Stage 4 — Strong Tree ─────────────────────────────────────────────────────
 function StrongTree() {
   return (
-    <g transform="translate(200, 268)">
+    <g transform="translate(200, 268) scale(1.01)">
       {/* Ground */}
       <ellipse cx="0" cy="0" rx="80" ry="11" fill="#285223" opacity="0.80" />
       {/* Roots */}
@@ -198,7 +194,7 @@ function StrongTree() {
 // ── Stage 5 — Ancient Tree ────────────────────────────────────────────────────
 function AncientTree() {
   return (
-    <g transform="translate(200, 268)">
+    <g transform="translate(200, 268) scale(0.90)">
       {/* Ground glow */}
       <ellipse cx="0" cy="2"  rx="96" ry="14" fill="#1E3D1A" opacity="0.85" />
       <ellipse cx="0" cy="-2" rx="90" ry="8"  fill="#C4873A" opacity="0.07" />
