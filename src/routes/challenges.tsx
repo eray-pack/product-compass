@@ -54,7 +54,7 @@ function ChallengesPage() {
     if (completedIds.has(c.id)) return;
     update((s) => ({
       points: s.points + c.points,
-      treeXP: s.treeXP + Math.floor(c.points / 2),
+      treeXP: s.treeXP + c.points,
       completedChallenges: [...s.completedChallenges, { id: c.id, doneAt: Date.now() }],
     }));
   };
@@ -64,7 +64,7 @@ function ChallengesPage() {
     update((s) => ({
       points: s.points - cost,
       treeUnlocks: s.treeUnlocks.includes(id) ? s.treeUnlocks : [...s.treeUnlocks, id],
-      treeXP: id === "tree-leaves" ? s.treeXP + 50 : s.treeXP,
+      treeXP: id === "tree-leaves" ? s.treeXP + 100 : s.treeXP,
     }));
   };
 

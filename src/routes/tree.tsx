@@ -160,7 +160,7 @@ function TreeSkyBackground({ timeOfDay }: { timeOfDay: keyof typeof SKY_CONFIGS 
             />
           ))}
           {/* Crescent moon */}
-          <svg className="absolute" style={{ top: "22%", right: "30%" }} width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <svg className="absolute" style={{ top: "22%", right: "24%" }} width="48" height="48" viewBox="0 0 48 48" fill="none">
             <circle cx="24" cy="24" r="18" fill="#F5E8C0" opacity="0.92"/>
             <circle cx="31" cy="18" r="14" fill="#0E1238"/>
             <circle cx="24" cy="24" r="18" fill="#F5E8C0" opacity="0.08"/>
@@ -203,8 +203,8 @@ function TreeSkyBackground({ timeOfDay }: { timeOfDay: keyof typeof SKY_CONFIGS 
         <div
           className="absolute anim-sun"
           style={{
-            top: "20%",
-            left: "50%",
+            top: "22%",
+            left: "24%",
             transform: "translateX(-50%)",
             width: "56px",
             height: "56px",

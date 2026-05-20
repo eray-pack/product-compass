@@ -126,7 +126,7 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
     if (confirmed) return;
     setConfirmed(true);
     const r = rollReward();
-    if (r.xp > 0) update((s) => ({ points: s.points + r.xp, treeXP: s.treeXP + Math.floor(r.xp / 5) }));
+    if (r.xp > 0) update((s) => ({ points: s.points + r.xp, treeXP: s.treeXP + Math.floor(r.xp / 2) }));
     if (r.messageKey) { onReward(t(r.messageKey)); setTimeout(() => onReward(""), 3200); }
   };
 
@@ -894,7 +894,7 @@ function Dashboard() {
         lastLoginAt:       Date.now(),
         loginHistory:      [...(s.loginHistory ?? []).slice(-89), Date.now()],
         ...(waterToday ? {
-          treeXP:            s.treeXP + s.addictions.length * 10,
+          treeXP:            s.treeXP + s.addictions.length * 30,
           lastTreeWaterDate: today,
         } : {}),
       };
