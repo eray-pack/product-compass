@@ -13,6 +13,8 @@ import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
+import { ChangelogModal } from "@/components/ChangelogModal";
+import { shouldShowChangelog } from "@/lib/changelog";
 
 // ─── Motion ──────────────────────────────────────────────────────────────────
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -857,11 +859,12 @@ function Dashboard() {
   const { t } = useTranslation();
   const [state, update] = useAppState();
   const navigate        = useNavigate();
-  const [showRelapse,  setShowRelapse]  = useState(false);
-  const [rewardMsg,    setRewardMsg]    = useState<string | null>(null);
-  const [showIdentity, setShowIdentity] = useState(false);
-  const [reEntryDays,  setReEntryDays]  = useState(0);
-  const [showAddHabit, setShowAddHabit] = useState(false);
+  const [showRelapse,    setShowRelapse]    = useState(false);
+  const [rewardMsg,      setRewardMsg]      = useState<string | null>(null);
+  const [showIdentity,   setShowIdentity]   = useState(false);
+  const [reEntryDays,    setReEntryDays]    = useState(0);
+  const [showAddHabit,   setShowAddHabit]   = useState(false);
+  const [showChangelog,  setShowChangelog]  = useState(false);
 
   const active      = activeAddiction(state);
   const day         = active ? dayCount(active.startDate) : 1;
@@ -905,6 +908,12 @@ function Dashboard() {
     if (!state.onboarding?.identity) return;
     if (Date.now() - (state.lastIdentityShown ?? 0) > 7 * 86400000) setShowIdentity(true);
   }, [state.onboarding, state.lastIdentityShown]);
+
+  // Show changelog once per version — only after onboarding is done
+  useEffect(() => {
+    if (!state.onboarding) return;
+    if (shouldShowChangelog()) setShowChangelog(true);
+  }, [state.onboarding]);
 
   const relapses   = [...state.relapses].sort((a, b) => a.ts - b.ts);
   const points     = [active?.startDate ?? Date.now(), ...relapses.map((r) => r.ts), Date.now()];
@@ -1233,6 +1242,9 @@ function Dashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── CHANGELOG ─────────────────────────────────────────── */}
+      <ChangelogModal open={showChangelog} onClose={() => setShowChangelog(false)} />
 
     </PageShell>
   );
