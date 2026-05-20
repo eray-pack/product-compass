@@ -2574,7 +2574,7 @@ function LifeTreePage({
       </header>
 
       {/* Tree scene — full-bleed, no card frame */}
-      <section className="mt-3 relative" style={{ height: 420 }}>
+      <section className="mt-3 relative" style={{ height: 480 }}>
         {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
         {treeStyle === "3d" && (
           <>
@@ -2602,7 +2602,7 @@ function LifeTreePage({
           /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div style={{
-              position: "relative", width: 340, height: 340,
+              position: "relative", width: 420, height: 420,
               maskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
               WebkitMaskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
             }}>
