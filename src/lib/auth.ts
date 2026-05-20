@@ -26,13 +26,21 @@ export function useAuth() {
   return { user, loading };
 }
 
-export async function signUp(email: string, password: string, name: string) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { name } },
-  });
+export async function signUp(email: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
   return { data, error };
+}
+
+export async function signInWithApple(redirectTo: string) {
+  return supabase.auth.signInWithOAuth({ provider: "apple", options: { redirectTo } });
+}
+
+export async function signInWithGoogle(redirectTo: string) {
+  return supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+}
+
+export async function signInWithMicrosoft(redirectTo: string) {
+  return supabase.auth.signInWithOAuth({ provider: "azure", options: { redirectTo } });
 }
 
 export async function signIn(email: string, password: string) {
