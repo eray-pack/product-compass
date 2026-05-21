@@ -2574,7 +2574,7 @@ function LifeTreePage({
       </header>
 
       {/* Tree scene — full-bleed, no card frame */}
-      <section className="mt-3 relative" style={{ height: 480 }}>
+      <section className="mt-3 relative overflow-hidden" style={{ height: 380 }}>
         {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
         {treeStyle === "3d" && (
           <>
@@ -2601,8 +2601,8 @@ function LifeTreePage({
         ) : (
           /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            {/* Single 420px anchor — rings + oval all positioned relative to this */}
-            <div style={{ position: "relative", width: 420, height: 420, flexShrink: 0 }}>
+            {/* Single 300px anchor — sized for iPhone, rings + oval positioned relative to this */}
+            <div style={{ position: "relative", width: 300, height: 300, flexShrink: 0 }}>
 
               {/* ── Badge-style glow ring ── */}
               {(() => {
@@ -2619,8 +2619,8 @@ function LifeTreePage({
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -250, marginLeft: -250,
-                        width: 500, height: 500, borderRadius: "50%",
+                        top: "50%", left: "50%", marginTop: -188, marginLeft: -188,
+                        width: 376, height: 376, borderRadius: "50%",
                         background: `radial-gradient(circle, transparent 38%, ${glowBase}0.22) 52%, ${glowBase}0.10) 66%, transparent 80%)`,
                         pointerEvents: "none", zIndex: 3,
                       }}
@@ -2632,8 +2632,8 @@ function LifeTreePage({
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -232, marginLeft: -232,
-                        width: 464, height: 464, borderRadius: "50%",
+                        top: "50%", left: "50%", marginTop: -172, marginLeft: -172,
+                        width: 344, height: 344, borderRadius: "50%",
                         border: `2.5px solid ${glowBase}0.88)`,
                         filter: "blur(1.5px)",
                         boxShadow: `0 0 16px 6px ${glowBase}0.55), 0 0 36px 14px ${glowBase}0.20)`,
@@ -2647,8 +2647,8 @@ function LifeTreePage({
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -252, marginLeft: -252,
-                        width: 504, height: 504, borderRadius: "50%",
+                        top: "50%", left: "50%", marginTop: -190, marginLeft: -190,
+                        width: 380, height: 380, borderRadius: "50%",
                         border: `1px solid ${glowBase}0.30)`,
                         filter: "blur(2px)",
                         pointerEvents: "none", zIndex: 3,
@@ -2660,11 +2660,11 @@ function LifeTreePage({
                 );
               })()}
 
-              {/* Oval — masked sky + tree, sits on top of rings */}
+              {/* Oval — masked sky + tree, fills the 300px anchor */}
               <div style={{
                 position: "absolute", inset: 0,
-                maskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
-                WebkitMaskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
+                maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
                 zIndex: 2,
               }}>
                 {/* Sky fills the oval */}
