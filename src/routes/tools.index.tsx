@@ -1115,12 +1115,12 @@ function Tools() {
           </Link>
         </motion.div>
 
-        {/* ── Reframe + Cold Exposure — two-column ────────────────────── */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* ── Reframe + Trophy + Cold Exposure — three-column ─────────── */}
+        <div style={{ display: "flex", gap: 12, alignItems: "stretch" }}>
 
           {/* Reframe */}
           <motion.div
-            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18 }}
+            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18, flex: 1 }}
             whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.18)" }}
             transition={{ duration: 0.2 }}
           >
@@ -1146,9 +1146,31 @@ function Tools() {
             )}
           </motion.div>
 
+          {/* Trophy — Leaderboard */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, flexShrink: 0 }}>
+            <motion.button
+              onClick={() => setLbOpen(true)}
+              animate={{ boxShadow: ["0 0 20px rgba(201,168,76,0.3)", "0 0 35px rgba(201,168,76,0.6)", "0 0 20px rgba(201,168,76,0.3)"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              whileTap={{ scale: 0.93 }}
+              style={{
+                width: 70, height: 70, borderRadius: "50%",
+                background: "rgba(201,168,76,0.10)",
+                border: "1px solid rgba(201,168,76,0.30)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <Trophy size={28} color="#C9A84C" strokeWidth={1.8}/>
+            </motion.button>
+            <span style={{ fontSize: 11, color: "#C9A84C", fontWeight: 700, letterSpacing: "0.08em", fontFamily: "DM Sans, sans-serif" }}>
+              Leaderboard
+            </span>
+          </div>
+
           {/* Cold Exposure */}
           <motion.div
-            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18 }}
+            style={{ ...CARD, display: "flex", flexDirection: "column", gap: 14, padding: 18, flex: 1 }}
             whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.18)" }}
             transition={{ duration: 0.2 }}
           >
@@ -1264,28 +1286,6 @@ function Tools() {
         </motion.div>
 
       </section>
-
-      {/* ── Trophy / Leaderboard button ───────────────────────────────────── */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 120, paddingTop: 16, position: "relative", zIndex: 10 }}>
-        <motion.button
-          onClick={() => setLbOpen(true)}
-          animate={{ boxShadow: ["0 0 20px rgba(201,168,76,0.3)", "0 0 35px rgba(201,168,76,0.6)", "0 0 20px rgba(201,168,76,0.3)"] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          whileTap={{ scale: 0.93 }}
-          style={{
-            width: 70, height: 70, borderRadius: "50%",
-            background: "rgba(201,168,76,0.10)",
-            border: "1px solid rgba(201,168,76,0.30)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <Trophy size={28} color="#C9A84C" strokeWidth={1.8}/>
-        </motion.button>
-        <span style={{ fontSize: 11, color: "#C9A84C", marginTop: 8, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "DM Sans, sans-serif" }}>
-          Leaderboard
-        </span>
-      </div>
 
       </div>{/* end content z-1 */}
 
