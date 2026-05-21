@@ -2622,7 +2622,7 @@ function LifeTreePage({
                         background: `radial-gradient(circle, ${glowBase}0.00) 45%, ${glowBase}0.28) 65%, ${glowBase}0.10) 80%, transparent 92%)`,
                         pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
+                      animate={{ scale: [1, 1.03, 1], opacity: [0.6, 1, 0.6] }}
                       transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
                     />
                     {/* Primary crisp ring — above oval, rotates */}
@@ -2637,7 +2637,7 @@ function LifeTreePage({
                         boxShadow: `0 0 20px 8px ${glowBase}0.60), 0 0 40px 16px ${glowBase}0.25), inset 0 0 12px ${glowBase}0.20)`,
                         pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.05, 1], rotate: 360 }}
+                      animate={{ scale: [1, 1.02, 1], rotate: 360 }}
                       transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
                     />
                     {/* Outer softer ring — counter-rotates */}
@@ -2651,7 +2651,7 @@ function LifeTreePage({
                         filter: "blur(2px)",
                         pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.03, 1], rotate: -360 }}
+                      animate={{ scale: [1, 1.015, 1], rotate: -360 }}
                       transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
                     />
                   </>
