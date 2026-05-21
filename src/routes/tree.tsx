@@ -2614,30 +2614,30 @@ function LifeTreePage({
                 );
                 return (
                   <>
-                    {/* Outer atmospheric glow */}
+                    {/* Outer atmospheric glow — behind oval */}
                     <motion.div
                       aria-hidden
                       style={{
-                        position: "absolute", inset: 0, borderRadius: "50%",
-                        background: `radial-gradient(circle, ${glowBase}0.38) 0%, ${glowBase}0.12) 50%, transparent 72%)`,
-                        pointerEvents: "none", zIndex: 1,
+                        position: "absolute", inset: -30, borderRadius: "50%",
+                        background: `radial-gradient(circle, ${glowBase}0.00) 45%, ${glowBase}0.28) 65%, ${glowBase}0.10) 80%, transparent 92%)`,
+                        pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.12, 1], opacity: [0.5, 0.15, 0.5] }}
+                      animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
                       transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
                     />
-                    {/* Primary crisp ring — rotates */}
+                    {/* Primary crisp ring — above oval, rotates */}
                     <motion.div
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -172, marginLeft: -172,
-                        width: 344, height: 344, borderRadius: "50%",
-                        border: `2px solid ${glowBase}0.85)`,
-                        filter: "blur(2.5px)",
-                        boxShadow: `0 0 18px 6px ${glowBase}0.55), inset 0 0 10px ${glowBase}0.20)`,
-                        pointerEvents: "none", zIndex: 1,
+                        top: "50%", left: "50%", marginTop: -178, marginLeft: -178,
+                        width: 356, height: 356, borderRadius: "50%",
+                        border: `2.5px solid ${glowBase}0.90)`,
+                        filter: "blur(1.5px)",
+                        boxShadow: `0 0 20px 8px ${glowBase}0.60), 0 0 40px 16px ${glowBase}0.25), inset 0 0 12px ${glowBase}0.20)`,
+                        pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.06, 1], rotate: 360 }}
+                      animate={{ scale: [1, 1.05, 1], rotate: 360 }}
                       transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
                     />
                     {/* Outer softer ring — counter-rotates */}
@@ -2645,13 +2645,13 @@ function LifeTreePage({
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -184, marginLeft: -184,
-                        width: 368, height: 368, borderRadius: "50%",
-                        border: `1px solid ${glowBase}0.30)`,
-                        filter: "blur(1.5px)",
-                        pointerEvents: "none", zIndex: 1,
+                        top: "50%", left: "50%", marginTop: -196, marginLeft: -196,
+                        width: 392, height: 392, borderRadius: "50%",
+                        border: `1.5px solid ${glowBase}0.35)`,
+                        filter: "blur(2px)",
+                        pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.04, 1], rotate: -360 }}
+                      animate={{ scale: [1, 1.03, 1], rotate: -360 }}
                       transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
                     />
                   </>
