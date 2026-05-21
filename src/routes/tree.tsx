@@ -3,7 +3,7 @@ import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Tree3D } from "@/components/Tree3D";
 import { Wolf3D } from "@/components/Wolf3D";
@@ -2550,6 +2550,16 @@ function LifeTreePage({
 
   const [shopFeedback, setShopFeedback] = useState<string | null>(null);
 
+  // Scroll to shop section when navigated via credits chip (#grow-your-tree)
+  useEffect(() => {
+    if (window.location.hash === "#grow-your-tree") {
+      const el = document.getElementById("grow-your-tree");
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      }
+    }
+  }, []);
+
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
     if (state.points < cost) {
@@ -2825,7 +2835,7 @@ function LifeTreePage({
       })()}
 
       {/* Upgrades — etched glass shop */}
-      <section className="px-6 mt-6">
+      <section id="grow-your-tree" className="px-6 mt-6">
         <div className="flex items-center justify-between mb-1">
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82 }}>
             Grow your tree
