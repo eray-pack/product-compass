@@ -1080,11 +1080,6 @@ function Onboarding() {
                                 <stop offset="58%"  stopColor="#0880E4"/>
                                 <stop offset="100%" stopColor="#003C9A"/>
                               </radialGradient>
-                              <radialGradient id="wf-orb" cx="35%" cy="35%" r="58%">
-                                <stop offset="0%"   stopColor="#d0eeff"/>
-                                <stop offset="45%"  stopColor="#5098e8"/>
-                                <stop offset="100%" stopColor="#1048a8"/>
-                              </radialGradient>
                               {/* ── FILTERS ── */}
                               <filter id="wf-glow" x="-18%" y="-18%" width="136%" height="136%">
                                 <feGaussianBlur stdDeviation="3.2" result="b"/>
@@ -1104,12 +1099,6 @@ function Onboarding() {
                               <filter id="wf-rim" x="-8%" y="-8%" width="116%" height="116%">
                                 <feGaussianBlur stdDeviation="1.1" result="b"/>
                                 <feFlood floodColor="#A8C0F0" floodOpacity="0.48" result="c"/>
-                                <feComposite in="c" in2="b" operator="in" result="g"/>
-                                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-                              </filter>
-                              <filter id="wf-orb-glow" x="-140%" y="-140%" width="380%" height="380%">
-                                <feGaussianBlur stdDeviation="4.0" result="b"/>
-                                <feFlood floodColor="#3080ff" floodOpacity="0.95" result="c"/>
                                 <feComposite in="c" in2="b" operator="in" result="g"/>
                                 <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
                               </filter>
@@ -1276,18 +1265,6 @@ function Onboarding() {
 
                             </g>
 
-                            {/* ── ORB — unchanged, drawn on top ── */}
-                            <circle cx="80" cy="50" r="8.0" fill="url(#wf-orb)"
-                              filter="url(#wf-orb-glow)"
-                              style={{ animation: "ob-orb-pulse 3.2s ease-in-out infinite" }}/>
-                            <circle cx="80" cy="50" r="8.0" fill="none" stroke="rgba(160,210,255,0.60)" strokeWidth="0.9"/>
-                            <circle cx="77.5" cy="47.5" r="2.8" fill="rgba(230,248,255,0.70)"/>
-                            <circle cx="81.5" cy="52.5" r="1.2" fill="rgba(160,210,255,0.45)"/>
-                            <circle cx="74" cy="40" r="1.8" fill="rgba(120,190,255,0.55)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.6s infinite" }}/>
-                            <circle cx="86" cy="43" r="1.4" fill="rgba(100,170,255,0.45)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.1s infinite" }}/>
-                            <circle cx="88" cy="58" r="1.0" fill="rgba(90,160,255,0.38)"  style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.7s infinite" }}/>
-                            <circle cx="71" cy="57" r="1.2" fill="rgba(110,180,255,0.42)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.4s infinite" }}/>
-                            <path d="M 70 72 C 74 64 78 56 80 50" stroke="rgba(80,165,255,0.16)" strokeWidth="8" strokeLinecap="round" fill="none" filter="url(#wf-eye-glow)"/>
                           </svg>
                         </div>
 
