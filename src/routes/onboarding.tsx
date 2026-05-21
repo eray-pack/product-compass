@@ -1261,6 +1261,17 @@ function Onboarding() {
                               {/* Muzzle — tapered snout path, NOT a circle */}
                               <path d="M 32 76 C 32 68 40 62 50 62 C 60 62 68 68 68 76 C 68 86 62 94 50 96 C 38 94 32 86 32 76 Z"
                                 fill="url(#wf-muzzle)"/>
+
+                              {/* LEFT CHEEK FUR */}
+                              <path d="M 48 85 Q 44 88 46 93 Q 50 98 56 94 Q 52 90 54 85 Z" fill="#9a9aaa"/>
+                              <path d="M 46 87 Q 43 91 45 95" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
+                              <path d="M 49 84 Q 45 87 47 93" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
+
+                              {/* RIGHT CHEEK FUR */}
+                              <path d="M 112 85 Q 116 88 114 93 Q 110 98 104 94 Q 108 90 106 85 Z" fill="#9a9aaa"/>
+                              <path d="M 114 87 Q 117 91 115 95" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
+                              <path d="M 111 84 Q 115 87 113 93" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
+
                               {/* Muzzle top convex highlight */}
                               <ellipse cx="50" cy="68" rx="12" ry="5.5" fill="rgba(250,253,255,0.52)"/>
                               {/* Chin shadow */}
