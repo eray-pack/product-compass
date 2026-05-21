@@ -1267,6 +1267,9 @@ function Onboarding() {
                               <circle cx="67" cy="77"  r="1.1" fill="rgba(205,216,240,0.65)"/>
                               <circle cx="65" cy="81"  r="1.0" fill="rgba(205,216,240,0.55)"/>
                               <circle cx="63" cy="85"  r="0.9" fill="rgba(205,216,240,0.44)"/>
+                              {/* Smile — soft symmetrical 'w' curve, corners sweep gently up */}
+                              <path d="M 43 87 Q 46.5 92 50 88.5 Q 53.5 92 57 87"
+                                stroke="rgba(96,108,138,0.62)" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
 
                               {/* ── L8: FOREGROUND HIGHLIGHTS ── */}
                               <ellipse cx="50" cy="36" rx="11" ry="6" fill="rgba(218,230,255,0.18)"/>
