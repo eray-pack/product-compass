@@ -2602,25 +2602,61 @@ function LifeTreePage({
           /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
 
-            {/* Glow ring — outside the mask so it isn't clipped, color matches health */}
-            <motion.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity }}
-              style={{
-                position: "absolute",
-                top: "50%", left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 348, height: 348,
-                borderRadius: "50%",
-                boxShadow: [
-                  `0 0 0 1.5px ${health.color}55`,
-                  `0 0 22px 6px ${health.color}30`,
-                  `0 0 60px 22px ${health.color}14`,
-                ].join(", "),
-                pointerEvents: "none",
-                zIndex: 0,
-              }}
-            />
+            {/* ── Badge-style glow ring — same technique as BadgeCarousel ── */}
+            {(() => {
+              const glowBase = (
+                healthState === "thriving"  ? "rgba(63,184,106,"  :
+                healthState === "growing"   ? "rgba(143,190,90,"  :
+                healthState === "fading"    ? "rgba(201,168,76,"  :
+                                             "rgba(122,106,90,"
+              );
+              return (
+                <>
+                  {/* Outer atmospheric glow */}
+                  <motion.div
+                    aria-hidden
+                    style={{
+                      position: "absolute", top: "50%", left: "50%",
+                      transform: "translate(-50%,-50%)",
+                      width: 420, height: 420, borderRadius: "50%",
+                      background: `radial-gradient(circle, ${glowBase}0.38) 0%, ${glowBase}0.12) 50%, transparent 72%)`,
+                      pointerEvents: "none", zIndex: 0,
+                    }}
+                    animate={{ scale: [1, 1.12, 1], opacity: [0.5, 0.15, 0.5] }}
+                    transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+                  />
+                  {/* Primary crisp ring — rotates slowly */}
+                  <motion.div
+                    aria-hidden
+                    style={{
+                      position: "absolute", top: "50%", left: "50%",
+                      transform: "translate(-50%,-50%)",
+                      width: 344, height: 344, borderRadius: "50%",
+                      border: `2px solid ${glowBase}0.85)`,
+                      filter: "blur(2.5px)",
+                      boxShadow: `0 0 16px 4px ${glowBase}0.55), inset 0 0 10px ${glowBase}0.20)`,
+                      pointerEvents: "none", zIndex: 0,
+                    }}
+                    animate={{ scale: [1, 1.06, 1], rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                  />
+                  {/* Outer softer ring — counter-rotates */}
+                  <motion.div
+                    aria-hidden
+                    style={{
+                      position: "absolute", top: "50%", left: "50%",
+                      transform: "translate(-50%,-50%)",
+                      width: 368, height: 368, borderRadius: "50%",
+                      border: `1px solid ${glowBase}0.28)`,
+                      filter: "blur(1.5px)",
+                      pointerEvents: "none", zIndex: 0,
+                    }}
+                    animate={{ scale: [1, 1.04, 1], rotate: -360 }}
+                    transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                  />
+                </>
+              );
+            })()}
 
             <div style={{
               position: "relative", width: 420, height: 420,
