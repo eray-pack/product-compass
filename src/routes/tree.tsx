@@ -2787,12 +2787,27 @@ function LifeTreePage({
         </div>
       </section>
 
-      {/* Daily credit claim */}
-      {(() => {
-        const today = new Date().toISOString().slice(0, 10);
-        const claimed = state.lastDailyClaimDate === today;
-        return (
-          <section className="px-6 mt-4">
+      {/* Upgrades — etched glass shop (also contains daily claim) */}
+      <section id="grow-your-tree" className="px-6 mt-6">
+        <div className="flex items-center justify-between mb-1">
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82 }}>
+            Grow your tree
+          </p>
+          {shopFeedback && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: shopFeedback === "Unlocked!" ? "#3fb86a" : "#C9A84C", transition: "opacity 0.3s" }}>
+              {shopFeedback}
+            </span>
+          )}
+        </div>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
+          Spend credits you've earned — or speed it up.
+        </p>
+
+        {/* Daily credit claim */}
+        {(() => {
+          const today = new Date().toISOString().slice(0, 10);
+          const claimed = state.lastDailyClaimDate === today;
+          return (
             <motion.button
               whileTap={{ scale: 0.96 }}
               disabled={claimed}
@@ -2801,7 +2816,7 @@ function LifeTreePage({
                 update((s) => ({ points: s.points + 25, lastDailyClaimDate: today }));
               }}
               style={{
-                width: "100%", padding: "14px 20px", borderRadius: 16,
+                width: "100%", padding: "14px 20px", borderRadius: 16, marginBottom: 12,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 background: claimed ? "rgba(255,255,255,0.03)" : "radial-gradient(ellipse at 10% 50%, rgba(201,168,76,0.14) 0%, transparent 70%), rgba(255,255,255,0.04)",
                 border: claimed ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(201,168,76,0.30)",
@@ -2830,25 +2845,8 @@ function LifeTreePage({
                 </span>
               )}
             </motion.button>
-          </section>
-        );
-      })()}
-
-      {/* Upgrades — etched glass shop */}
-      <section id="grow-your-tree" className="px-6 mt-6">
-        <div className="flex items-center justify-between mb-1">
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82 }}>
-            Grow your tree
-          </p>
-          {shopFeedback && (
-            <span style={{ fontSize: 11, fontWeight: 600, color: shopFeedback === "Unlocked!" ? "#3fb86a" : "#C9A84C", transition: "opacity 0.3s" }}>
-              {shopFeedback}
-            </span>
-          )}
-        </div>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
-          Spend credits you've earned — or speed it up.
-        </p>
+          );
+        })()}
         {UPGRADES.map((u) => {
           const owned = state.treeUnlocks.includes(u.id);
           const canAfford = state.points >= u.costPoints;
