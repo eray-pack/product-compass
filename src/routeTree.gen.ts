@@ -19,6 +19,7 @@ import { Route as PaywallRouteImport } from './routes/paywall'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChallengesRouteImport } from './routes/challenges'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
@@ -87,6 +88,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const ChallengesRoute = ChallengesRouteImport.update({
   id: '/challenges',
   path: '/challenges',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/challenges': typeof ChallengesRoute
   '/community': typeof CommunityRoute
+  '/games': typeof GamesRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
   '/privacy': typeof PrivacyRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/challenges': typeof ChallengesRoute
   '/community': typeof CommunityRoute
+  '/games': typeof GamesRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
   '/privacy': typeof PrivacyRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/challenges': typeof ChallengesRoute
   '/community': typeof CommunityRoute
+  '/games': typeof GamesRoute
   '/onboarding': typeof OnboardingRoute
   '/paywall': typeof PaywallRoute
   '/privacy': typeof PrivacyRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/challenges'
     | '/community'
+    | '/games'
     | '/onboarding'
     | '/paywall'
     | '/privacy'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/challenges'
     | '/community'
+    | '/games'
     | '/onboarding'
     | '/paywall'
     | '/privacy'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/challenges'
     | '/community'
+    | '/games'
     | '/onboarding'
     | '/paywall'
     | '/privacy'
@@ -378,6 +390,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChallengesRoute: typeof ChallengesRoute
   CommunityRoute: typeof CommunityRoute
+  GamesRoute: typeof GamesRoute
   OnboardingRoute: typeof OnboardingRoute
   PaywallRoute: typeof PaywallRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -458,6 +471,13 @@ declare module '@tanstack/react-router' {
       path: '/challenges'
       fullPath: '/challenges'
       preLoaderRoute: typeof ChallengesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -643,6 +663,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChallengesRoute: ChallengesRoute,
   CommunityRoute: CommunityRoute,
+  GamesRoute: GamesRoute,
   OnboardingRoute: OnboardingRoute,
   PaywallRoute: PaywallRoute,
   PrivacyRoute: PrivacyRoute,

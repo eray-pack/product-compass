@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
+import { Home, Wrench, Users, BarChart2, Settings, Trophy } from "lucide-react";
 import { loadState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
@@ -91,6 +91,7 @@ const BASE_NAV_KEYS = [
   { to: "/",          labelKey: "nav.home",      Icon: Home      },
   { to: "/tools",     labelKey: "nav.tools",     Icon: Wrench    },
   { to: "/community", labelKey: "nav.community", Icon: Users     },
+  { to: "/games",     labelKey: "nav.games",     Icon: Trophy    },
   { to: "/progress",  labelKey: "nav.progress",  Icon: BarChart2 },
 ] as const;
 
