@@ -1297,6 +1297,20 @@ function Onboarding() {
                               {/* ── L8: FOREGROUND HIGHLIGHTS ── */}
                               <ellipse cx="50" cy="36" rx="11" ry="6" fill="rgba(218,230,255,0.18)"/>
 
+                              {/* LEFT CHEEK TUFT */}
+                              <ellipse cx="18" cy="72" rx="9" ry="7" fill="#b0b0be" opacity="0.9"/>
+                              <path d="M 12 68 Q 9 72 11 77 Q 14 80 19 77" fill="#9a9aaa"/>
+                              <line x1="11" y1="69" x2="10" y2="75" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
+                              <line x1="13" y1="67" x2="12" y2="74" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
+                              <line x1="15" y1="66" x2="14" y2="73" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
+
+                              {/* RIGHT CHEEK TUFT */}
+                              <ellipse cx="82" cy="72" rx="9" ry="7" fill="#b0b0be" opacity="0.9"/>
+                              <path d="M 88 68 Q 91 72 89 77 Q 86 80 81 77" fill="#9a9aaa"/>
+                              <line x1="89" y1="69" x2="90" y2="75" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
+                              <line x1="87" y1="67" x2="88" y2="74" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
+                              <line x1="85" y1="66" x2="86" y2="73" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
+
                             </g>
 
 
