@@ -2614,44 +2614,46 @@ function LifeTreePage({
                 );
                 return (
                   <>
-                    {/* Outer atmospheric glow — behind oval */}
+                    {/* Atmospheric halo — diffuse glow sitting outside the circle */}
                     <motion.div
                       aria-hidden
                       style={{
-                        position: "absolute", inset: -30, borderRadius: "50%",
-                        background: `radial-gradient(circle, ${glowBase}0.00) 45%, ${glowBase}0.28) 65%, ${glowBase}0.10) 80%, transparent 92%)`,
+                        position: "absolute",
+                        top: "50%", left: "50%", marginTop: -250, marginLeft: -250,
+                        width: 500, height: 500, borderRadius: "50%",
+                        background: `radial-gradient(circle, transparent 38%, ${glowBase}0.22) 52%, ${glowBase}0.10) 66%, transparent 80%)`,
                         pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.03, 1], opacity: [0.6, 1, 0.6] }}
+                      animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
                       transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
                     />
-                    {/* Primary crisp ring — above oval, rotates */}
+                    {/* Primary crisp ring — outside the circle */}
                     <motion.div
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -178, marginLeft: -178,
-                        width: 356, height: 356, borderRadius: "50%",
-                        border: `2.5px solid ${glowBase}0.90)`,
+                        top: "50%", left: "50%", marginTop: -232, marginLeft: -232,
+                        width: 464, height: 464, borderRadius: "50%",
+                        border: `2.5px solid ${glowBase}0.88)`,
                         filter: "blur(1.5px)",
-                        boxShadow: `0 0 20px 8px ${glowBase}0.60), 0 0 40px 16px ${glowBase}0.25), inset 0 0 12px ${glowBase}0.20)`,
+                        boxShadow: `0 0 16px 6px ${glowBase}0.55), 0 0 36px 14px ${glowBase}0.20)`,
                         pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.02, 1], rotate: 360 }}
+                      animate={{ scale: [1, 1.012, 1], rotate: 360 }}
                       transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
                     />
-                    {/* Outer softer ring — counter-rotates */}
+                    {/* Outer softer ring */}
                     <motion.div
                       aria-hidden
                       style={{
                         position: "absolute",
-                        top: "50%", left: "50%", marginTop: -196, marginLeft: -196,
-                        width: 392, height: 392, borderRadius: "50%",
-                        border: `1.5px solid ${glowBase}0.35)`,
+                        top: "50%", left: "50%", marginTop: -252, marginLeft: -252,
+                        width: 504, height: 504, borderRadius: "50%",
+                        border: `1px solid ${glowBase}0.30)`,
                         filter: "blur(2px)",
                         pointerEvents: "none", zIndex: 3,
                       }}
-                      animate={{ scale: [1, 1.015, 1], rotate: -360 }}
+                      animate={{ scale: [1, 1.008, 1], rotate: -360 }}
                       transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
                     />
                   </>
