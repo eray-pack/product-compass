@@ -3,7 +3,7 @@ import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Tree3D } from "@/components/Tree3D";
 import { Wolf3D } from "@/components/Wolf3D";
@@ -2550,6 +2550,16 @@ function LifeTreePage({
 
   const [shopFeedback, setShopFeedback] = useState<string | null>(null);
 
+  // Scroll to shop section when navigated via credits chip (#grow-your-tree)
+  useEffect(() => {
+    if (window.location.hash === "#grow-your-tree") {
+      const el = document.getElementById("grow-your-tree");
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      }
+    }
+  }, []);
+
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
     if (state.points < cost) {
@@ -2568,13 +2578,13 @@ function LifeTreePage({
 
   return (
     <PageShell>
-      <header className="px-6 pt-8">
+      <header className="px-6 pt-4">
         <SectionTitle>Sacred Ground</SectionTitle>
-        <h1 className="mt-1 text-3xl font-bold">Your Life Tree</h1>
+        <h1 className="mt-0.5 text-2xl font-bold">Your Life Tree</h1>
       </header>
 
       {/* Tree scene — full-bleed, no card frame */}
-      <section className="mt-3 relative" style={{ height: 480 }}>
+      <section className="mt-1 relative" style={{ height: 380 }}>
         {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
         {treeStyle === "3d" && (
           <>
@@ -2601,23 +2611,86 @@ function LifeTreePage({
         ) : (
           /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div style={{
-              position: "relative", width: 420, height: 420,
-              maskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
-              WebkitMaskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
-            }}>
-              {/* Sky fills the oval */}
-              <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%" }}>
-                <TreeSkyBackground timeOfDay={timeOfDay} />
-                <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
-              </div>
-              {/* Tree centered */}
-              <div className="anim-tree-float" style={{
+            {/* Single 300px anchor — sized for iPhone, rings + oval positioned relative to this */}
+            <div style={{ position: "relative", width: 300, height: 300, flexShrink: 0 }}>
+
+              {/* ── Badge-style glow ring ── */}
+              {(() => {
+                const glowBase = (
+                  healthState === "thriving"  ? "rgba(63,184,106,"  :
+                  healthState === "growing"   ? "rgba(143,190,90,"  :
+                  healthState === "fading"    ? "rgba(201,168,76,"  :
+                                               "rgba(122,106,90,"
+                );
+                return (
+                  <>
+                    {/* Atmospheric halo — diffuse glow sitting outside the circle */}
+                    <motion.div
+                      aria-hidden
+                      style={{
+                        position: "absolute",
+                        top: "50%", left: "50%", marginTop: -188, marginLeft: -188,
+                        width: 376, height: 376, borderRadius: "50%",
+                        background: `radial-gradient(circle, transparent 38%, ${glowBase}0.22) 52%, ${glowBase}0.10) 66%, transparent 80%)`,
+                        pointerEvents: "none", zIndex: 3,
+                      }}
+                      animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
+                      transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+                    />
+                    {/* Primary crisp ring — outside the circle */}
+                    <motion.div
+                      aria-hidden
+                      style={{
+                        position: "absolute",
+                        top: "50%", left: "50%", marginTop: -172, marginLeft: -172,
+                        width: 344, height: 344, borderRadius: "50%",
+                        border: `2.5px solid ${glowBase}0.88)`,
+                        filter: "blur(1.5px)",
+                        boxShadow: `0 0 16px 6px ${glowBase}0.55), 0 0 36px 14px ${glowBase}0.20)`,
+                        pointerEvents: "none", zIndex: 3,
+                      }}
+                      animate={{ scale: [1, 1.012, 1], rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                    />
+                    {/* Outer softer ring */}
+                    <motion.div
+                      aria-hidden
+                      style={{
+                        position: "absolute",
+                        top: "50%", left: "50%", marginTop: -190, marginLeft: -190,
+                        width: 380, height: 380, borderRadius: "50%",
+                        border: `1px solid ${glowBase}0.30)`,
+                        filter: "blur(2px)",
+                        pointerEvents: "none", zIndex: 3,
+                      }}
+                      animate={{ scale: [1, 1.008, 1], rotate: -360 }}
+                      transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                    />
+                  </>
+                );
+              })()}
+
+              {/* Oval — masked sky + tree, fills the 300px anchor */}
+              <div style={{
                 position: "absolute", inset: 0,
-                display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
+                maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                zIndex: 2,
               }}>
-                <CartoonTree day={day} xp={state.treeXP} />
+                {/* Sky fills the oval */}
+                <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%" }}>
+                  <TreeSkyBackground timeOfDay={timeOfDay} />
+                  <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
+                </div>
+                {/* Tree centered */}
+                <div className="anim-tree-float" style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
+                }}>
+                  <CartoonTree day={day} xp={state.treeXP} />
+                </div>
               </div>
+
             </div>
           </div>
         )}
@@ -2714,12 +2787,27 @@ function LifeTreePage({
         </div>
       </section>
 
-      {/* Daily credit claim */}
-      {(() => {
-        const today = new Date().toISOString().slice(0, 10);
-        const claimed = state.lastDailyClaimDate === today;
-        return (
-          <section className="px-6 mt-4">
+      {/* Upgrades — etched glass shop (also contains daily claim) */}
+      <section id="grow-your-tree" className="px-6 mt-6">
+        <div className="flex items-center justify-between mb-1">
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82 }}>
+            Grow your tree
+          </p>
+          {shopFeedback && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: shopFeedback === "Unlocked!" ? "#3fb86a" : "#C9A84C", transition: "opacity 0.3s" }}>
+              {shopFeedback}
+            </span>
+          )}
+        </div>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
+          Spend credits you've earned — or speed it up.
+        </p>
+
+        {/* Daily credit claim */}
+        {(() => {
+          const today = new Date().toISOString().slice(0, 10);
+          const claimed = state.lastDailyClaimDate === today;
+          return (
             <motion.button
               whileTap={{ scale: 0.96 }}
               disabled={claimed}
@@ -2728,7 +2816,7 @@ function LifeTreePage({
                 update((s) => ({ points: s.points + 25, lastDailyClaimDate: today }));
               }}
               style={{
-                width: "100%", padding: "14px 20px", borderRadius: 16,
+                width: "100%", padding: "14px 20px", borderRadius: 16, marginBottom: 12,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 background: claimed ? "rgba(255,255,255,0.03)" : "radial-gradient(ellipse at 10% 50%, rgba(201,168,76,0.14) 0%, transparent 70%), rgba(255,255,255,0.04)",
                 border: claimed ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(201,168,76,0.30)",
@@ -2757,25 +2845,8 @@ function LifeTreePage({
                 </span>
               )}
             </motion.button>
-          </section>
-        );
-      })()}
-
-      {/* Upgrades — etched glass shop */}
-      <section className="px-6 mt-6">
-        <div className="flex items-center justify-between mb-1">
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82 }}>
-            Grow your tree
-          </p>
-          {shopFeedback && (
-            <span style={{ fontSize: 11, fontWeight: 600, color: shopFeedback === "Unlocked!" ? "#3fb86a" : "#C9A84C", transition: "opacity 0.3s" }}>
-              {shopFeedback}
-            </span>
-          )}
-        </div>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 16, lineHeight: 1.5 }}>
-          Spend credits you've earned — or speed it up.
-        </p>
+          );
+        })()}
         {UPGRADES.map((u) => {
           const owned = state.treeUnlocks.includes(u.id);
           const canAfford = state.points >= u.costPoints;

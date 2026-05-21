@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
+import { useEffect } from "react";
 import { CHANGELOG, CURRENT_VERSION, markChangelogSeen } from "@/lib/changelog";
 
 type Props = {
@@ -9,12 +10,15 @@ type Props = {
 
 export function ChangelogModal({ open, onClose }: Props) {
   const entry = CHANGELOG.find((e) => e.version === CURRENT_VERSION);
+
+  // Mark seen the moment it appears — not on dismiss
+  useEffect(() => {
+    if (open) markChangelogSeen();
+  }, [open]);
+
   if (!entry) return null;
 
-  const handleClose = () => {
-    markChangelogSeen();
-    onClose();
-  };
+  const handleClose = () => onClose();
 
   return (
     <AnimatePresence>

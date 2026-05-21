@@ -193,7 +193,7 @@ function CreditsChip() {
 
   return (
     <Link
-      to="/tree"
+      to="/tree#grow-your-tree"
       style={{
         display: "inline-flex", alignItems: "center", gap: 5,
         padding: "5px 12px", borderRadius: 999,
