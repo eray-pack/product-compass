@@ -37,6 +37,7 @@ import { Route as ToolsColdRouteImport } from './routes/tools.cold'
 import { Route as ToolsCoachRouteImport } from './routes/tools.coach'
 import { Route as ToolsClarityclimbRouteImport } from './routes/tools.clarityclimb'
 import { Route as ToolsBreathRouteImport } from './routes/tools.breath'
+import { Route as ToolsNebulaflowRouteImport } from './routes/tools.nebulaflow'
 
 const TreeRoute = TreeRouteImport.update({
   id: '/tree',
@@ -178,6 +179,11 @@ const ToolsBreathRoute = ToolsBreathRouteImport.update({
   path: '/breath',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsNebulaflowRoute = ToolsNebulaflowRouteImport.update({
+  id: '/nebulaflow',
+  path: '/nebulaflow',
+  getParentRoute: () => ToolsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/tools/echochamber': typeof ToolsEchochamberRoute
   '/tools/identitystack': typeof ToolsIdentitystackRoute
   '/tools/memory': typeof ToolsMemoryRoute
+  '/tools/nebulaflow': typeof ToolsNebulaflowRoute
   '/tools/noisefilter': typeof ToolsNoisefilterRoute
   '/tools/sos': typeof ToolsSosRoute
   '/tools/steadyhand': typeof ToolsSteadyhandRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/tools/echochamber': typeof ToolsEchochamberRoute
   '/tools/identitystack': typeof ToolsIdentitystackRoute
   '/tools/memory': typeof ToolsMemoryRoute
+  '/tools/nebulaflow': typeof ToolsNebulaflowRoute
   '/tools/noisefilter': typeof ToolsNoisefilterRoute
   '/tools/sos': typeof ToolsSosRoute
   '/tools/steadyhand': typeof ToolsSteadyhandRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/tools/echochamber': typeof ToolsEchochamberRoute
   '/tools/identitystack': typeof ToolsIdentitystackRoute
   '/tools/memory': typeof ToolsMemoryRoute
+  '/tools/nebulaflow': typeof ToolsNebulaflowRoute
   '/tools/noisefilter': typeof ToolsNoisefilterRoute
   '/tools/sos': typeof ToolsSosRoute
   '/tools/steadyhand': typeof ToolsSteadyhandRoute
@@ -293,6 +302,7 @@ export interface FileRouteTypes {
     | '/tools/echochamber'
     | '/tools/identitystack'
     | '/tools/memory'
+    | '/tools/nebulaflow'
     | '/tools/noisefilter'
     | '/tools/sos'
     | '/tools/steadyhand'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/tools/echochamber'
     | '/tools/identitystack'
     | '/tools/memory'
+    | '/tools/nebulaflow'
     | '/tools/noisefilter'
     | '/tools/sos'
     | '/tools/steadyhand'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/tools/echochamber'
     | '/tools/identitystack'
     | '/tools/memory'
+    | '/tools/nebulaflow'
     | '/tools/noisefilter'
     | '/tools/sos'
     | '/tools/steadyhand'
@@ -504,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsSosRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/nebulaflow': {
+      id: '/tools/nebulaflow'
+      path: '/nebulaflow'
+      fullPath: '/tools/nebulaflow'
+      preLoaderRoute: typeof ToolsNebulaflowRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/noisefilter': {
       id: '/tools/noisefilter'
       path: '/noisefilter'
@@ -587,6 +606,7 @@ interface ToolsRouteChildren {
   ToolsEchochamberRoute: typeof ToolsEchochamberRoute
   ToolsIdentitystackRoute: typeof ToolsIdentitystackRoute
   ToolsMemoryRoute: typeof ToolsMemoryRoute
+  ToolsNebulaflowRoute: typeof ToolsNebulaflowRoute
   ToolsNoisefilterRoute: typeof ToolsNoisefilterRoute
   ToolsSosRoute: typeof ToolsSosRoute
   ToolsSteadyhandRoute: typeof ToolsSteadyhandRoute
@@ -606,6 +626,7 @@ const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsEchochamberRoute: ToolsEchochamberRoute,
   ToolsIdentitystackRoute: ToolsIdentitystackRoute,
   ToolsMemoryRoute: ToolsMemoryRoute,
+  ToolsNebulaflowRoute: ToolsNebulaflowRoute,
   ToolsNoisefilterRoute: ToolsNoisefilterRoute,
   ToolsSosRoute: ToolsSosRoute,
   ToolsSteadyhandRoute: ToolsSteadyhandRoute,
