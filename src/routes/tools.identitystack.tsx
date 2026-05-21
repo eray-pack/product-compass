@@ -370,10 +370,18 @@ function IdentityStack() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xl font-bold">Stack your identity.</p>
-              <p className="text-sm text-muted-foreground">
-                Keep good habits, discard the bad ones.<br />Choose fast — the timer doesn't wait.
+              <p className="text-xl font-bold">Build the person you're becoming.</p>
+              <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+                Identity doesn't appear fully formed — it's assembled, one<br />
+                choice at a time. Each card you keep is a value you've claimed.<br />
+                Each one you discard is a lie you've rejected. Stack quickly,<br />
+                because real identity is built under pressure.
               </p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 8 }}>
+                {["◈ Keep what defines you", "✦ Discard what diminishes you", "⟡ The timer is real pressure"].map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(225,29,72,0.10)", border: "1px solid rgba(225,29,72,0.25)", color: "rgba(251,113,133,0.85)", letterSpacing: "0.04em" }}>{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
           <motion.button

@@ -335,7 +335,12 @@ function BreathBall() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
               >
-                4s in · 4s hold · 4s out · {TOTAL_CYCLES} cycles
+                When dopamine crashes, your brain loses rhythm. Each breath here<br />
+                entrains your default mode network — the part that hijacks<br />
+                you with cravings. Match the ripple. Restore the signal.<br />
+                <span style={{ opacity: 0.55, marginTop: 6, display: "block", fontSize: 11, letterSpacing: "0.08em" }}>
+                  4s in · 4s hold · 4s out · {TOTAL_CYCLES} cycles
+                </span>
               </motion.p>
             )}
             {phase === "done" && (

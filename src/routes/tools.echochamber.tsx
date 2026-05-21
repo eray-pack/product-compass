@@ -303,10 +303,18 @@ function EchoChamber() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xl font-bold">Copy the pattern.</p>
-              <p className="text-sm text-muted-foreground">
-                Watch the sequence light up.<br />Repeat it back in order.<br />Gets longer each round.
+              <p className="text-xl font-bold">Filter your own voice.</p>
+              <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+                In recovery, the mind becomes a chamber of competing voices —<br />
+                urges, shame, logic, fear. This game forces you to isolate<br />
+                one signal from the chaos and recall it under pressure.<br />
+                The pattern you copy is the clarity you're building.
               </p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 8 }}>
+                {["◈ Watch the sequence", "✦ Repeat it precisely", "⟡ Signal grows each round"].map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(249,115,22,0.10)", border: "1px solid rgba(249,115,22,0.25)", color: "rgba(249,115,22,0.80)", letterSpacing: "0.04em" }}>{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
           <motion.button

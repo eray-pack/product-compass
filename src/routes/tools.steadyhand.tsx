@@ -316,10 +316,18 @@ function SteadyHand() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xl font-bold">Don't shake.</p>
-              <p className="text-sm text-muted-foreground">
-                Hold and drag the dot right to the finish.<br />The screen shakes — stay calm.<br />30 seconds.
+              <p className="text-xl font-bold">Stillness is strength.</p>
+              <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+                Physical tremors and anxiety share the same neural pathway.<br />
+                When the screen shakes, your cortisol fires. When you hold<br />
+                steady anyway, you teach your nervous system that discomfort<br />
+                is survivable. This is somatic recalibration.
               </p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 8 }}>
+                {["◈ Drag through the track", "✦ The world shakes — you don't", "⟡ 30s of pure presence"].map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(217,119,6,0.10)", border: "1px solid rgba(217,119,6,0.25)", color: "rgba(217,119,6,0.85)", letterSpacing: "0.04em" }}>{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
           <motion.button

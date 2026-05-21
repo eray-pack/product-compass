@@ -518,12 +518,18 @@ function ColdSwitch() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 <p className="text-xl font-bold" style={{ color: "rgba(255,255,255,0.88)" }}>
-                  Switch fast, switch clean.
+                  Override the trigger.
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.28)" }}>
-                  Tap the side matching the task shown.<br />
-                  Gets faster every correct switch.
+                  Every craving fires your "hot system" — emotional, impulsive, fast.<br />
+                  Cold Switch trains the "cool system" — rational, deliberate, slow.<br />
+                  Switch between them fast enough and you own both.
                 </p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 6 }}>
+                  {["◈ Classify triggers instantly", "✦ Speed increases each round", "⟡ Left/right logic switching"].map(t => (
+                    <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(0,188,212,0.12)", border: "1px solid rgba(0,188,212,0.25)", color: "rgba(0,188,212,0.8)", letterSpacing: "0.04em" }}>{t}</span>
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

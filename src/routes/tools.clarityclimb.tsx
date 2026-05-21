@@ -385,10 +385,18 @@ function ClarityClimb() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xl font-bold">Climb to the summit.</p>
-              <p className="text-sm text-muted-foreground">
-                Keep good choices, discard the bad.<br />Wrong answers slide you back down.
+              <p className="text-xl font-bold">Clarity is earned, not given.</p>
+              <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+                Every thought passing through you is either signal or static.<br />
+                Clarity Climb forces you to sort them under pressure. Each<br />
+                correct choice raises your elevation — each wrong one pulls<br />
+                you back. The summit isn't a place. It's a state of mind.
               </p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 8 }}>
+                {["◈ Swipe to keep or discard", "✦ Wrong choices slide you back", "⟡ Every good choice lifts you"].map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(16,185,129,0.09)", border: "1px solid rgba(16,185,129,0.22)", color: "rgba(16,185,129,0.85)", letterSpacing: "0.04em" }}>{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
           <motion.button

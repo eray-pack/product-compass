@@ -518,12 +518,19 @@ function MemoryMatch() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 <p className="text-xl font-bold" style={{ color: "rgba(255,255,255,0.88)" }}>
-                  Match all 6 pairs.
+                  Rewire the habit loop.
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.28)" }}>
-                  Flip two cards at a time.<br />
-                  Fewer moves = sharper mind.
+                  Every addiction has a circuit — cue, craving, routine, reward.<br />
+                  Each pair you match is a node of that circuit surfacing.<br />
+                  Connect them correctly and you interrupt the default pathway,<br />
+                  creating space for a new one to take hold.
                 </p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 6 }}>
+                  {["◈ Flip glowing nodes", "✦ Fewer moves = sharper circuit", "⟡ Working memory training"].map(t => (
+                    <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(74,222,128,0.09)", border: "1px solid rgba(74,222,128,0.22)", color: "rgba(74,222,128,0.80)", letterSpacing: "0.04em" }}>{t}</span>
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

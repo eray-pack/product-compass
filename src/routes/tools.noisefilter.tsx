@@ -305,10 +305,18 @@ function NoiseFilter() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xl font-bold">Find the signal.</p>
-              <p className="text-sm text-muted-foreground">
-                One item is bright and real.<br />The rest is noise. Don't be fooled.
+              <p className="text-xl font-bold">Silence the static.</p>
+              <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+                Your brain under stress can't tell the difference between<br />
+                real threats and phantom ones. Noise Filter trains signal<br />
+                discrimination — the ability to identify what's real, important,<br />
+                and true from what's manufactured panic.
               </p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 8 }}>
+                {["◈ One signal is real — find it", "✦ Trust your instinct", "⟡ Doubt costs you speed"].map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(37,99,235,0.12)", border: "1px solid rgba(37,99,235,0.28)", color: "rgba(96,165,250,0.85)", letterSpacing: "0.04em" }}>{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
           <motion.button

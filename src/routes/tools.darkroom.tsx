@@ -370,10 +370,18 @@ function DarkRoom() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xl font-bold">Find the exit.</p>
-              <p className="text-sm text-muted-foreground">
-                Navigate in the dark with only a small light.<br />Reach ⬆ before time runs out.
+              <p className="text-xl font-bold">Navigate in the dark.</p>
+              <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+                Deprivation isn't punishment — it's precision.<br />
+                When visual input drops to near zero, your prefrontal<br />
+                cortex activates your internal map. Find the exit using<br />
+                only spatial memory and nerve.
               </p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 8 }}>
+                {["◈ Minimal light radius", "✦ Spatial memory training", "⟡ Beat the clock"].map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(79,70,229,0.14)", border: "1px solid rgba(79,70,229,0.30)", color: "rgba(129,120,255,0.85)", letterSpacing: "0.04em" }}>{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
           <motion.button

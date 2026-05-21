@@ -398,18 +398,30 @@ function VoidStare() {
                     textShadow: `0 0 24px ${P}44`,
                   }}
                 >
-                  Hold. Don't move.
+                  Dissolve the void.
                 </motion.p>
                 <motion.p
                   className="text-sm leading-relaxed"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 1.6, delay: 0.7 }}
-                  style={{ color: "rgba(255,255,255,0.28)" }}
+                  style={{ color: "rgba(255,255,255,0.28)", lineHeight: 1.7 }}
                 >
-                  Touch anywhere and stay perfectly still.<br />
-                  Any movement stops the timer.
+                  Dark thoughts thrive in movement — in scrolling, switching,<br />
+                  avoiding. Void Stare forces complete stillness. Hold the gaze<br />
+                  long enough and the void begins to dissolve. What remains<br />
+                  is the part of you that was never afraid.
                 </motion.p>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2, delay: 1.4 }}
+                  style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 10 }}
+                >
+                  {["◈ Touch and hold perfectly still", "✦ Movement breaks the session", "⟡ Gaze-hold meditation"].map(t => (
+                    <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(123,47,190,0.14)", border: "1px solid rgba(123,47,190,0.30)", color: "rgba(167,113,240,0.85)", letterSpacing: "0.04em" }}>{t}</span>
+                  ))}
+                </motion.div>
               </motion.div>
             )}
 

@@ -573,21 +573,28 @@ function TapTheUrge() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 <p className="text-xl font-bold" style={{ color: "rgba(255,255,255,0.88)" }}>
-                  Tap only the gold orb.
+                  Redirect the impulse.
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.32)" }}>
-                  Ignore the blue ones — like ignoring cravings.<br />
-                  Miss the gold orb and your combo breaks.
+                  The gold orb is the constructive choice. The blue ones are noise —<br />
+                  distractions dressed as options. Every time you tap gold and resist<br />
+                  blue, you're physically practising impulse redirection. Your brain<br />
+                  registers this as a real win.
                 </p>
-                <div className="flex items-center justify-center gap-4 pt-1">
+                <div className="flex items-center justify-center gap-4 pt-2">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3.5 h-3.5 rounded-full" style={{ background: TARGET_COLOR, boxShadow: `0 0 8px ${TARGET_COLOR}` }} />
-                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Tap this</span>
+                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Constructive target</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3.5 h-3.5 rounded-full" style={{ background: DISTRACTOR_COLOR, boxShadow: `0 0 8px ${DISTRACTOR_COLOR}` }} />
-                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Avoid this</span>
+                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>Distraction — ignore</span>
                   </div>
+                </div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", paddingTop: 4 }}>
+                  {["⟡ Combos reinforce willpower loops"].map(t => (
+                    <span key={t} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 20, background: "rgba(222,188,122,0.10)", border: "1px solid rgba(222,188,122,0.22)", color: "rgba(222,188,122,0.75)", letterSpacing: "0.04em" }}>{t}</span>
+                  ))}
                 </div>
               </motion.div>
             )}
