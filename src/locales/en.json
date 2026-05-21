@@ -253,6 +253,10 @@
       "name": "Identity Stack",
       "desc": "Who you're becoming"
     },
+    "nebulaflow": {
+      "name": "Nebula Flow",
+      "desc": "Drift through the stars"
+    },
     "clarityclimb": {
       "name": "Clarity Climb",
       "desc": "Mindfulness staircase"

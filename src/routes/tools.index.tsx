@@ -309,6 +309,25 @@ function IdentityStackIcon() {
   );
 }
 
+function NebulaFlowIcon() {
+  return (
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+      {/* 4-pointed star — centre */}
+      <path d="M15 6 L16.1 13.9 L24 15 L16.1 16.1 L15 24 L13.9 16.1 L6 15 L13.9 13.9 Z"
+        fill="#d946ef" opacity="0.95"/>
+      {/* 4-pointed star — top-right, smaller */}
+      <path d="M22 5 L22.7 8.3 L26 9 L22.7 9.7 L22 13 L21.3 9.7 L18 9 L21.3 8.3 Z"
+        fill="#a855f7" opacity="0.85"/>
+      {/* 4-pointed star — bottom-left, smaller */}
+      <path d="M8 18 L8.7 21.3 L12 22 L8.7 22.7 L8 26 L7.3 22.7 L4 22 L7.3 21.3 Z"
+        fill="#c026d3" opacity="0.75"/>
+      {/* tiny sparkle — top-left */}
+      <path d="M9 7 L9.5 9.5 L12 10 L9.5 10.5 L9 13 L8.5 10.5 L6 10 L8.5 9.5 Z"
+        fill="#e879f9" opacity="0.60"/>
+    </svg>
+  );
+}
+
 type GameEntry = {
   to: string; glow: string; labelKey: string; icon: React.ReactNode; ambient: AmbientType;
   idleFilter?: string; hoverFilter?: string; hoverRotate?: number;
@@ -347,6 +366,7 @@ const PRO_GAMES: GameEntry[] = [
   { to: "/tools/noisefilter",   glow: "#2563EB", labelKey: "tools.noisefilter.name",   icon: <NoiseFilterIcon />,   ambient: "none"    },
   { to: "/tools/steadyhand",    glow: "#D97706", labelKey: "tools.steadyhand.name",    icon: <SteadyHandIcon />,    ambient: "rotate"  },
   { to: "/tools/identitystack", glow: "#E11D48", labelKey: "tools.identitystack.name", icon: <IdentityStackIcon />, ambient: "none"    },
+  { to: "/tools/nebulaflow",    glow: "#A855F7", labelKey: "tools.nebulaflow.name",    icon: <NebulaFlowIcon />,    ambient: "pulse"   },
 ];
 
 // ── Arcade panel static texture ───────────────────────────────────────────────
