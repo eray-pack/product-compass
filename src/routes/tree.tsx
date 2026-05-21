@@ -2601,6 +2601,27 @@ function LifeTreePage({
         ) : (
           /* Cartoon: oval scene — sky inside circle, edges fade out into black */
           <div className="absolute inset-0 flex items-center justify-center z-10">
+
+            {/* Glow ring — outside the mask so it isn't clipped, color matches health */}
+            <motion.div
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity }}
+              style={{
+                position: "absolute",
+                top: "50%", left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 348, height: 348,
+                borderRadius: "50%",
+                boxShadow: [
+                  `0 0 0 1.5px ${health.color}55`,
+                  `0 0 22px 6px ${health.color}30`,
+                  `0 0 60px 22px ${health.color}14`,
+                ].join(", "),
+                pointerEvents: "none",
+                zIndex: 0,
+              }}
+            />
+
             <div style={{
               position: "relative", width: 420, height: 420,
               maskImage: "radial-gradient(ellipse at center, black 60%, transparent 88%)",
