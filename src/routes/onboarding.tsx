@@ -1096,17 +1096,6 @@ function Onboarding() {
                               <filter id="wf-paw-shadow" x="-40%" y="-40%" width="180%" height="180%">
                                 <feGaussianBlur stdDeviation="2.2" result="b"/>
                               </filter>
-                              <radialGradient id="wf-orb" cx="35%" cy="35%" r="58%">
-                                <stop offset="0%"   stopColor="#d0eeff"/>
-                                <stop offset="45%"  stopColor="#5098e8"/>
-                                <stop offset="100%" stopColor="#1048a8"/>
-                              </radialGradient>
-                              <filter id="wf-orb-glow" x="-140%" y="-140%" width="380%" height="380%">
-                                <feGaussianBlur stdDeviation="4.0" result="b"/>
-                                <feFlood floodColor="#3080ff" floodOpacity="0.95" result="c"/>
-                                <feComposite in="c" in2="b" operator="in" result="g"/>
-                                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-                              </filter>
                               <filter id="wf-rim" x="-8%" y="-8%" width="116%" height="116%">
                                 <feGaussianBlur stdDeviation="1.1" result="b"/>
                                 <feFlood floodColor="#A8C0F0" floodOpacity="0.48" result="c"/>
@@ -1194,22 +1183,21 @@ function Onboarding() {
                               <path d="M 71 37 C 73 29 74 22 72 17" stroke="rgba(235,200,214,0.38)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
                               <path d="M 67 39 C 69 32 70 25 68 20" stroke="rgba(230,195,210,0.28)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
 
-                              {/* ── L5: HEAD ── */}
-                              {/* Wide tapered wolf skull */}
-                              <path d="M 50 30 C 66 30 80 40 80 56 C 80 70 76 82 68 88 C 62 92 56 94 50 94 C 44 94 38 92 32 88 C 24 82 20 70 20 56 C 20 40 34 30 50 30 Z"
+                              {/* ── L5: HEAD — sleek lupine skull, widens at temples then tapers ── */}
+                              <path d="M 50 30 C 63 29 74 37 74 50 C 74 63 70 78 62 86 C 58 90 54 92 50 92 C 46 92 42 90 38 86 C 30 78 26 63 26 50 C 26 37 37 29 50 30 Z"
                                 fill="url(#wf-head)" filter="url(#wf-glow)"/>
                               {/* Face silver mask */}
-                              <path d="M 35 36 C 28 46 27 62 33 74 C 39 84 50 90 50 90 C 50 90 61 84 67 74 C 73 62 72 46 65 36 C 60 28 50 26 50 26 C 50 26 40 28 35 36 Z"
+                              <path d="M 36 36 C 30 46 29 61 34 73 C 39 83 50 89 50 89 C 50 89 61 83 66 73 C 71 61 70 46 64 36 C 60 28 50 27 50 27 C 50 27 40 28 36 36 Z"
                                 fill="url(#wf-face)" opacity="0.42"/>
-                              {/* Head rim lights */}
-                              <path d="M 20 56 C 20 42 34 30 50 30" stroke="rgba(175,196,235,0.40)" strokeWidth="2.2" fill="none" strokeLinecap="round" filter="url(#wf-rim)"/>
-                              <path d="M 80 56 C 80 42 66 30 50 30" stroke="rgba(175,196,235,0.32)" strokeWidth="2.2" fill="none" strokeLinecap="round" filter="url(#wf-rim)"/>
+                              {/* Head rim lights — follow updated contour */}
+                              <path d="M 26 50 C 26 37 37 29 50 30" stroke="rgba(175,196,235,0.40)" strokeWidth="2.2" fill="none" strokeLinecap="round" filter="url(#wf-rim)"/>
+                              <path d="M 74 50 C 74 37 63 29 50 30" stroke="rgba(175,196,235,0.32)" strokeWidth="2.2" fill="none" strokeLinecap="round" filter="url(#wf-rim)"/>
                               {/* Forehead fur strokes */}
                               <path d="M 40 34 C 44 30 50 28 56 30 C 59 31 61 33 63 35" stroke="rgba(225,233,252,0.32)" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
-                              <path d="M 37 40 C 42 36 50 34 58 36 C 61 37 63 39 64 41" stroke="rgba(218,228,250,0.22)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
+                              <path d="M 38 40 C 42 37 50 35 58 37 C 61 38 63 40 64 41" stroke="rgba(218,228,250,0.22)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
                               {/* Eyebrow arcs — curious, intelligent */}
-                              <path d="M 25 54 C 30 47 38 45 45 51" stroke="rgba(36,40,58,0.60)" strokeWidth="2.1" fill="none" strokeLinecap="round"/>
-                              <path d="M 75 54 C 70 47 62 45 55 51" stroke="rgba(36,40,58,0.60)" strokeWidth="2.1" fill="none" strokeLinecap="round"/>
+                              <path d="M 27 52 C 31 46 38 44 45 50" stroke="rgba(36,40,58,0.60)" strokeWidth="2.1" fill="none" strokeLinecap="round"/>
+                              <path d="M 73 52 C 69 46 62 44 55 50" stroke="rgba(36,40,58,0.60)" strokeWidth="2.1" fill="none" strokeLinecap="round"/>
 
                               {/* ── L6: EYES (large anime/chibi glowing blue) ── */}
                               {/* LEFT EYE */}
@@ -1268,24 +1256,6 @@ function Onboarding() {
 
                             </g>
 
-                            {/* ── ENERGY ORB — floating above wolf's head ── */}
-                            <circle cx="76" cy="28" r="9.0" fill="url(#wf-orb)"
-                              filter="url(#wf-orb-glow)"
-                              style={{ animation: "ob-orb-pulse 3.2s ease-in-out infinite" }}/>
-                            <circle cx="76" cy="28" r="9.0" fill="none" stroke="rgba(160,210,255,0.55)" strokeWidth="1.0"/>
-                            {/* Orb inner shimmer */}
-                            <circle cx="73" cy="25" r="3.2" fill="rgba(230,248,255,0.72)"/>
-                            <circle cx="79" cy="31" r="1.4" fill="rgba(160,210,255,0.48)"/>
-                            {/* Swirl arc across orb face */}
-                            <path d="M 70 24 Q 76 20 82 26 Q 80 32 74 30"
-                              stroke="rgba(200,238,255,0.50)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-                            {/* Trailing sparks */}
-                            <circle cx="68" cy="18" r="2.0" fill="rgba(120,190,255,0.58)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.6s infinite" }}/>
-                            <circle cx="84" cy="16" r="1.5" fill="rgba(100,170,255,0.48)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.1s infinite" }}/>
-                            <circle cx="86" cy="34" r="1.1" fill="rgba(90,160,255,0.40)"  style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.7s infinite" }}/>
-                            <circle cx="65" cy="32" r="1.3" fill="rgba(110,180,255,0.44)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.4s infinite" }}/>
-                            {/* Soft glow cast downward onto wolf's head */}
-                            <ellipse cx="76" cy="42" rx="10" ry="4" fill="rgba(80,150,255,0.10)"/>
 
                           </svg>
                         </div>
