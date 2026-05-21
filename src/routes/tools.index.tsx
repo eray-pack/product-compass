@@ -1301,7 +1301,7 @@ function Tools() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.22 }}
               onClick={() => setLbOpen(false)}
-              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 50 }}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", zIndex: 50 }}
             />
 
             {/* Sheet */}
@@ -1313,109 +1313,177 @@ function Tools() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               style={{
                 position: "fixed", bottom: 0, left: 0, right: 0,
-                height: "75vh", zIndex: 51,
-                background: "#0f0c06",
+                height: "80vh", zIndex: 51,
+                background: "#090705",
                 borderRadius: "24px 24px 0 0",
                 borderTop: "1px solid #1e1a10",
                 display: "flex", flexDirection: "column",
                 overflow: "hidden",
               }}
             >
+              {/* Cormorant Garamond font */}
+              <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&display=swap');`}</style>
+
               {/* Drag handle */}
-              <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
-                <div style={{ width: 40, height: 4, borderRadius: 2, background: "#2a2010" }}/>
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 8, flexShrink: 0 }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "#2a2010" }} />
               </div>
 
-              {/* Header */}
-              <div style={{ padding: "12px 20px 0", flexShrink: 0 }}>
-                <SectionTitle>Leaderboard</SectionTitle>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: "4px 0 14px", fontFamily: "DM Sans, sans-serif" }}>
-                  Top players this week
-                </p>
+              {/* Inner container */}
+              <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "0 16px 32px" }}>
+                <div style={{
+                  background: "#0f0c06",
+                  border: "1px solid #1e1a10",
+                  borderRadius: 20,
+                  padding: 20,
+                }}>
 
-                {/* Filter pills */}
-                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 14, scrollbarWidth: "none" }}>
-                  {["All", "Steady Hand", "Clarity Climb", "Cold Switch", "Mind Pulse"].map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setLbFilter(f)}
-                      style={{
-                        flexShrink: 0, padding: "6px 16px", borderRadius: 20,
-                        fontSize: 12, fontWeight: lbFilter === f ? 700 : 500,
-                        fontFamily: "DM Sans, sans-serif", cursor: "pointer",
-                        border: lbFilter === f ? "none" : "1px solid #1e1a10",
-                        background: lbFilter === f ? "#C9A84C" : "#0f0c06",
-                        color: lbFilter === f ? "#090705" : "#5a5040",
-                        transition: "background 0.18s, color 0.18s",
-                      }}
-                    >{f}</button>
-                  ))}
-                </div>
-              </div>
+                  {/* Header */}
+                  <h2 style={{
+                    margin: 0,
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    fontSize: 22,
+                    fontStyle: "italic",
+                    fontWeight: 600,
+                    color: "#C9A84C",
+                    lineHeight: 1.2,
+                  }}>
+                    Leaderboard
+                  </h2>
+                  <p style={{
+                    margin: "4px 0 16px",
+                    fontSize: 12,
+                    color: "rgba(255,255,255,0.40)",
+                    fontFamily: "DM Sans, sans-serif",
+                  }}>
+                    Top players this week
+                  </p>
 
-              {/* List */}
-              <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none" }}>
-                {/* Column labels */}
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "0 20px 8px", borderBottom: "1px solid #1e1a10" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", fontFamily: "DM Sans, sans-serif" }}>Player</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", fontFamily: "DM Sans, sans-serif" }}>Score</span>
-                </div>
-
-                {[
-                  { rank: 1, username: "Marcus", score: 2840, game: "Steady Hand"   },
-                  { rank: 2, username: "Jaylen", score: 2210, game: "Clarity Climb" },
-                  { rank: 3, username: "Sven",   score: 1990, game: "Cold Switch"   },
-                  { rank: 4, username: "Alex",   score: 1750, game: "Mind Pulse"    },
-                  { rank: 5, username: "Ryan",   score: 1420, game: "Steady Hand"   },
-                  { rank: 6, username: "Tobias", score: 1180, game: "Clarity Climb" },
-                  { rank: 7, username: "Dante",  score:  940, game: "Mind Pulse"    },
-                  { rank: 8, username: "Elias",  score:  780, game: "Cold Switch"   },
-                  { rank: 9, username: "Noah",   score:  610, game: "Steady Hand"   },
-                  { rank: 10,username: "Luka",   score:  490, game: "Clarity Climb" },
-                ]
-                  .filter(r => lbFilter === "All" || r.game === lbFilter)
-                  .map((row, i) => {
-                    const medals: Record<number, { icon: string; color: string }> = {
-                      1: { icon: "👑", color: "#C9A84C" },
-                      2: { icon: "🥈", color: "#a0a0b0" },
-                      3: { icon: "🥉", color: "#cd7f32" },
-                    };
-                    const medal = medals[row.rank];
-                    return (
-                      <motion.div
-                        key={row.username}
-                        initial={{ opacity: 0, x: -16 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05, type: "spring", stiffness: 380, damping: 26 }}
+                  {/* Filter pills */}
+                  <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 16, scrollbarWidth: "none" }}>
+                    {["All", "Steady Hand", "Clarity Climb", "Cold Switch", "Mind Pulse"].map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setLbFilter(f)}
                         style={{
-                          height: 56, borderBottom: "1px solid #1e1a10",
-                          padding: "0 20px", display: "flex", alignItems: "center",
-                          justifyContent: "space-between", fontFamily: "DM Sans, sans-serif",
+                          flexShrink: 0,
+                          padding: "6px 16px",
+                          borderRadius: 20,
+                          fontSize: 12,
+                          fontWeight: lbFilter === f ? 700 : 500,
+                          fontFamily: "DM Sans, sans-serif",
+                          cursor: "pointer",
+                          border: lbFilter === f ? "none" : "1px solid #1e1a10",
+                          background: lbFilter === f ? "#C9A84C" : "#0f0c06",
+                          color: lbFilter === f ? "#090705" : "#5a5040",
+                          transition: "background 0.18s, color 0.18s",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                          <div style={{
-                            width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                            background: medal ? `${medal.color}18` : "rgba(255,255,255,0.04)",
-                            border: `1px solid ${medal ? `${medal.color}40` : "rgba(255,255,255,0.08)"}`,
-                          }}>
-                            {medal
-                              ? <span style={{ fontSize: 13, lineHeight: 1 }}>{medal.icon}</span>
-                              : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.30)" }}>{row.rank}</span>
-                            }
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Column labels */}
+                  <div style={{
+                    display: "flex", justifyContent: "space-between",
+                    paddingBottom: 8,
+                    borderBottom: "1px solid #1e1a10",
+                    marginBottom: 4,
+                  }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", fontFamily: "DM Sans, sans-serif" }}>
+                      Player
+                    </span>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", fontFamily: "DM Sans, sans-serif" }}>
+                      Score
+                    </span>
+                  </div>
+
+                  {/* Rows */}
+                  {([
+                    { rank: 1,  username: "Marcus", score: 2840, game: "Steady Hand"   },
+                    { rank: 2,  username: "Jaylen", score: 2210, game: "Clarity Climb" },
+                    { rank: 3,  username: "Sven",   score: 1990, game: "Cold Switch"   },
+                    { rank: 4,  username: "Alex",   score: 1750, game: "Mind Pulse"    },
+                    { rank: 5,  username: "Ryan",   score: 1420, game: "Steady Hand"   },
+                    { rank: 6,  username: "Tobias", score: 1180, game: "Clarity Climb" },
+                    { rank: 7,  username: "Dante",  score:  940, game: "Mind Pulse"    },
+                    { rank: 8,  username: "Elias",  score:  780, game: "Cold Switch"   },
+                    { rank: 9,  username: "Noah",   score:  610, game: "Steady Hand"   },
+                    { rank: 10, username: "Luka",   score:  490, game: "Clarity Climb" },
+                  ] as { rank: number; username: string; score: number; game: string }[])
+                    .filter(r => lbFilter === "All" || r.game === lbFilter)
+                    .map((row, i) => {
+                      const TOP3: Record<number, { icon: string; borderColor: string; bg?: string }> = {
+                        1: { icon: "👑", borderColor: "#C9A84C", bg: "rgba(201,168,76,0.06)" },
+                        2: { icon: "🥈", borderColor: "#a0a0b0" },
+                        3: { icon: "🥉", borderColor: "#cd7f32" },
+                      };
+                      const top3 = TOP3[row.rank];
+                      const isTop3 = !!top3;
+
+                      return (
+                        <motion.div
+                          key={row.username}
+                          initial={{ opacity: 0, x: -16 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.05, type: "spring", stiffness: 380, damping: 26 }}
+                          style={{
+                            minHeight: 56,
+                            padding: "0 0 0 12px",
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            fontFamily: "DM Sans, sans-serif",
+                            borderBottom: "1px solid #1e1a10",
+                            borderLeft: isTop3 ? `2px solid ${top3.borderColor}` : "2px solid transparent",
+                            background: top3?.bg ?? "transparent",
+                            marginLeft: -4,
+                            paddingRight: 0,
+                          }}
+                        >
+                          {/* Left: badge + name */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+                            {/* Rank badge */}
+                            <div style={{
+                              width: 30, height: 30,
+                              borderRadius: "50%",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              flexShrink: 0,
+                              background: isTop3 ? `${top3.borderColor}18` : "rgba(255,255,255,0.04)",
+                              border: `1px solid ${isTop3 ? `${top3.borderColor}40` : "rgba(255,255,255,0.08)"}`,
+                            }}>
+                              {isTop3
+                                ? <span style={{ fontSize: 14, lineHeight: 1 }}>{top3.icon}</span>
+                                : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.30)" }}>{row.rank}</span>
+                              }
+                            </div>
+
+                            {/* Name + game */}
+                            <div style={{ padding: "14px 0" }}>
+                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isTop3 ? "#f0e8d0" : "rgba(255,255,255,0.75)", lineHeight: 1.25 }}>
+                                {row.username}
+                              </p>
+                              {lbFilter === "All" && (
+                                <p style={{ margin: 0, fontSize: 11, color: "#5a5040", lineHeight: 1.2 }}>
+                                  {row.game}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: medal ? "#f0e8d0" : "rgba(255,255,255,0.75)", lineHeight: 1.2 }}>{row.username}</p>
-                            {lbFilter === "All" && <p style={{ margin: 0, fontSize: 10, color: "rgba(201,168,76,0.50)", letterSpacing: "0.06em" }}>{row.game}</p>}
+
+                          {/* Right: score */}
+                          <div style={{ textAlign: "right", paddingRight: 4 }}>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: "#C9A84C" }}>
+                              {row.score.toLocaleString()}
+                            </div>
+                            <div style={{ fontSize: 10, color: "#3a3020", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                              pts
+                            </div>
                           </div>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <span style={{ fontSize: 16, fontWeight: 800, color: medal ? "#C9A84C" : "rgba(201,168,76,0.60)" }}>{row.score.toLocaleString()}</span>
-                          <p style={{ margin: 0, fontSize: 9, color: "rgba(255,255,255,0.20)", letterSpacing: "0.1em", textTransform: "uppercase" }}>pts</p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                        </motion.div>
+                      );
+                    })
+                  }
+                </div>
               </div>
             </motion.div>
           </>
