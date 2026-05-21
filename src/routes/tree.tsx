@@ -2568,13 +2568,13 @@ function LifeTreePage({
 
   return (
     <PageShell>
-      <header className="px-6 pt-8">
+      <header className="px-6 pt-4">
         <SectionTitle>Sacred Ground</SectionTitle>
-        <h1 className="mt-1 text-3xl font-bold">Your Life Tree</h1>
+        <h1 className="mt-0.5 text-2xl font-bold">Your Life Tree</h1>
       </header>
 
       {/* Tree scene — full-bleed, no card frame */}
-      <section className="mt-3 relative overflow-hidden" style={{ height: 380 }}>
+      <section className="mt-1 relative" style={{ height: 380 }}>
         {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
         {treeStyle === "3d" && (
           <>
