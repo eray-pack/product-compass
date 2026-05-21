@@ -1186,6 +1186,38 @@ function Onboarding() {
                               {/* ── L5: HEAD — sleek lupine skull, widens at temples then tapers ── */}
                               <path d="M 50 30 C 63 29 74 37 74 50 C 74 63 70 78 62 86 C 58 90 54 92 50 92 C 46 92 42 90 38 86 C 30 78 26 63 26 50 C 26 37 37 29 50 30 Z"
                                 fill="url(#wf-head)" filter="url(#wf-glow)"/>
+
+                              {/* ── Lower-cheek & jaw fur volume (jagged tufts, below eye-level) ── */}
+                              {/* LEFT — upper jaw tuft */}
+                              <path d="M 28 69 C 22 72 18 79 22 84 C 25 87 29 85 28 78 Z"
+                                fill="url(#wf-head)" opacity="0.82" filter="url(#wf-glow)"/>
+                              <path d="M 28 70 C 23 73 20 79 23 83 C 25 85 28 84 28 79 Z"
+                                fill="rgba(178,190,218,0.36)"/>
+                              {/* LEFT — lower jaw tuft */}
+                              <path d="M 30 80 C 23 84 20 90 24 93 C 27 95 31 92 30 87 Z"
+                                fill="url(#wf-head)" opacity="0.76" filter="url(#wf-glow)"/>
+                              <path d="M 30 81 C 24 85 22 90 25 93 C 27 94 30 92 30 87 Z"
+                                fill="rgba(178,190,218,0.28)"/>
+                              {/* LEFT — fur direction strokes */}
+                              <path d="M 21 74 C 19 78 19 83 21 86" stroke="rgba(202,214,238,0.44)" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+                              <path d="M 20 82 C 18 87 19 91 21 93" stroke="rgba(196,210,234,0.34)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
+                              <path d="M 24 87 C 23 90 23 93 25 95" stroke="rgba(190,204,230,0.26)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+
+                              {/* RIGHT — upper jaw tuft */}
+                              <path d="M 72 69 C 78 72 82 79 78 84 C 75 87 71 85 72 78 Z"
+                                fill="url(#wf-head)" opacity="0.82" filter="url(#wf-glow)"/>
+                              <path d="M 72 70 C 77 73 80 79 77 83 C 75 85 72 84 72 79 Z"
+                                fill="rgba(178,190,218,0.36)"/>
+                              {/* RIGHT — lower jaw tuft */}
+                              <path d="M 70 80 C 77 84 80 90 76 93 C 73 95 69 92 70 87 Z"
+                                fill="url(#wf-head)" opacity="0.76" filter="url(#wf-glow)"/>
+                              <path d="M 70 81 C 76 85 78 90 75 93 C 73 94 70 92 70 87 Z"
+                                fill="rgba(178,190,218,0.28)"/>
+                              {/* RIGHT — fur direction strokes */}
+                              <path d="M 79 74 C 81 78 81 83 79 86" stroke="rgba(202,214,238,0.44)" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+                              <path d="M 80 82 C 82 87 81 91 79 93" stroke="rgba(196,210,234,0.34)" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
+                              <path d="M 76 87 C 77 90 77 93 75 95" stroke="rgba(190,204,230,0.26)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+
                               {/* Face silver mask */}
                               <path d="M 36 36 C 30 46 29 61 34 73 C 39 83 50 89 50 89 C 50 89 61 83 66 73 C 71 61 70 46 64 36 C 60 28 50 27 50 27 C 50 27 40 28 36 36 Z"
                                 fill="url(#wf-face)" opacity="0.42"/>
