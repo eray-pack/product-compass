@@ -1186,6 +1186,8 @@ function Onboarding() {
                               {/* ── L5: HEAD — sleek lupine skull, widens at temples then tapers ── */}
                               <path d="M 50 30 C 63 29 74 37 74 50 C 74 63 70 78 62 86 C 58 90 54 92 50 92 C 46 92 42 90 38 86 C 30 78 26 63 26 50 C 26 37 37 29 50 30 Z"
                                 fill="url(#wf-head)" filter="url(#wf-glow)"/>
+                              <ellipse cx="24" cy="74" rx="8" ry="6" fill="#b8b8c8" opacity="0.85"/>
+                              <ellipse cx="76" cy="74" rx="8" ry="6" fill="#b8b8c8" opacity="0.85"/>
 
                               {/* ── Lower-cheek & jaw fur volume (jagged tufts, below eye-level) ── */}
                               {/* LEFT — upper jaw tuft */}
@@ -1262,15 +1264,6 @@ function Onboarding() {
                               <path d="M 32 76 C 32 68 40 62 50 62 C 60 62 68 68 68 76 C 68 86 62 94 50 96 C 38 94 32 86 32 76 Z"
                                 fill="url(#wf-muzzle)"/>
 
-                              {/* LEFT CHEEK FUR */}
-                              <path d="M 48 85 Q 44 88 46 93 Q 50 98 56 94 Q 52 90 54 85 Z" fill="#9a9aaa"/>
-                              <path d="M 46 87 Q 43 91 45 95" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
-                              <path d="M 49 84 Q 45 87 47 93" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
-
-                              {/* RIGHT CHEEK FUR */}
-                              <path d="M 112 85 Q 116 88 114 93 Q 110 98 104 94 Q 108 90 106 85 Z" fill="#9a9aaa"/>
-                              <path d="M 114 87 Q 117 91 115 95" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
-                              <path d="M 111 84 Q 115 87 113 93" stroke="#7a7a8a" strokeWidth="1" fill="none"/>
 
                               {/* Muzzle top convex highlight */}
                               <ellipse cx="50" cy="68" rx="12" ry="5.5" fill="rgba(250,253,255,0.52)"/>
@@ -1297,19 +1290,6 @@ function Onboarding() {
                               {/* ── L8: FOREGROUND HIGHLIGHTS ── */}
                               <ellipse cx="50" cy="36" rx="11" ry="6" fill="rgba(218,230,255,0.18)"/>
 
-                              {/* LEFT CHEEK TUFT */}
-                              <ellipse cx="18" cy="72" rx="9" ry="7" fill="#b0b0be" opacity="0.9"/>
-                              <path d="M 12 68 Q 9 72 11 77 Q 14 80 19 77" fill="#9a9aaa"/>
-                              <line x1="11" y1="69" x2="10" y2="75" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
-                              <line x1="13" y1="67" x2="12" y2="74" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
-                              <line x1="15" y1="66" x2="14" y2="73" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
-
-                              {/* RIGHT CHEEK TUFT */}
-                              <ellipse cx="82" cy="72" rx="9" ry="7" fill="#b0b0be" opacity="0.9"/>
-                              <path d="M 88 68 Q 91 72 89 77 Q 86 80 81 77" fill="#9a9aaa"/>
-                              <line x1="89" y1="69" x2="90" y2="75" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
-                              <line x1="87" y1="67" x2="88" y2="74" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
-                              <line x1="85" y1="66" x2="86" y2="73" stroke="#8a8a9a" strokeWidth="0.8" opacity="0.6"/>
 
                             </g>
 
