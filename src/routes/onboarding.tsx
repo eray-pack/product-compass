@@ -1184,7 +1184,7 @@ function Onboarding() {
                               <path d="M 67 39 C 69 32 70 25 68 20" stroke="rgba(230,195,210,0.28)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
 
                               {/* ── L5: HEAD — sleek lupine skull, widens at temples then tapers ── */}
-                              <circle cx="50" cy="61" r="24" fill="url(#wf-head)" filter="url(#wf-glow)"/>
+                              <circle cx="50" cy="61" r="28" fill="url(#wf-head)" filter="url(#wf-glow)"/>
 
                               {/* Face silver mask */}
                               <path d="M 36 36 C 30 46 29 61 34 73 C 39 83 50 89 50 89 C 50 89 61 83 66 73 C 71 61 70 46 64 36 C 60 28 50 27 50 27 C 50 27 40 28 36 36 Z"
