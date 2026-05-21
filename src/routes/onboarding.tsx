@@ -1096,6 +1096,17 @@ function Onboarding() {
                               <filter id="wf-paw-shadow" x="-40%" y="-40%" width="180%" height="180%">
                                 <feGaussianBlur stdDeviation="2.2" result="b"/>
                               </filter>
+                              <radialGradient id="wf-orb" cx="35%" cy="35%" r="58%">
+                                <stop offset="0%"   stopColor="#d0eeff"/>
+                                <stop offset="45%"  stopColor="#5098e8"/>
+                                <stop offset="100%" stopColor="#1048a8"/>
+                              </radialGradient>
+                              <filter id="wf-orb-glow" x="-140%" y="-140%" width="380%" height="380%">
+                                <feGaussianBlur stdDeviation="4.0" result="b"/>
+                                <feFlood floodColor="#3080ff" floodOpacity="0.95" result="c"/>
+                                <feComposite in="c" in2="b" operator="in" result="g"/>
+                                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                              </filter>
                               <filter id="wf-rim" x="-8%" y="-8%" width="116%" height="116%">
                                 <feGaussianBlur stdDeviation="1.1" result="b"/>
                                 <feFlood floodColor="#A8C0F0" floodOpacity="0.48" result="c"/>
@@ -1187,14 +1198,6 @@ function Onboarding() {
                               {/* Wide tapered wolf skull */}
                               <path d="M 50 30 C 66 30 80 40 80 56 C 80 70 76 82 68 88 C 62 92 56 94 50 94 C 44 94 38 92 32 88 C 24 82 20 70 20 56 C 20 40 34 30 50 30 Z"
                                 fill="url(#wf-head)" filter="url(#wf-glow)"/>
-                              {/* Cheek fur tuft LEFT */}
-                              <path d="M 22 55 C 14 50 9 62 15 70 C 19 75 27 72 29 66 Z" fill="url(#wf-head)" filter="url(#wf-glow)"/>
-                              <path d="M 23 56 C 15 52 11 62 16 69 C 19 73 26 70 28 65 Z" fill="rgba(188,198,222,0.38)"/>
-                              <path d="M 12 60 C 10 64 11 69 14 71" stroke="rgba(198,212,238,0.42)" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
-                              {/* Cheek fur tuft RIGHT */}
-                              <path d="M 78 55 C 86 50 91 62 85 70 C 81 75 73 72 71 66 Z" fill="url(#wf-head)" filter="url(#wf-glow)"/>
-                              <path d="M 77 56 C 85 52 89 62 84 69 C 81 73 74 70 72 65 Z" fill="rgba(188,198,222,0.38)"/>
-                              <path d="M 88 60 C 90 64 89 69 86 71" stroke="rgba(198,212,238,0.42)" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
                               {/* Face silver mask */}
                               <path d="M 35 36 C 28 46 27 62 33 74 C 39 84 50 90 50 90 C 50 90 61 84 67 74 C 73 62 72 46 65 36 C 60 28 50 26 50 26 C 50 26 40 28 35 36 Z"
                                 fill="url(#wf-face)" opacity="0.42"/>
@@ -1264,6 +1267,25 @@ function Onboarding() {
                               <ellipse cx="50" cy="36" rx="11" ry="6" fill="rgba(218,230,255,0.18)"/>
 
                             </g>
+
+                            {/* ── ENERGY ORB — floating above wolf's head ── */}
+                            <circle cx="76" cy="28" r="9.0" fill="url(#wf-orb)"
+                              filter="url(#wf-orb-glow)"
+                              style={{ animation: "ob-orb-pulse 3.2s ease-in-out infinite" }}/>
+                            <circle cx="76" cy="28" r="9.0" fill="none" stroke="rgba(160,210,255,0.55)" strokeWidth="1.0"/>
+                            {/* Orb inner shimmer */}
+                            <circle cx="73" cy="25" r="3.2" fill="rgba(230,248,255,0.72)"/>
+                            <circle cx="79" cy="31" r="1.4" fill="rgba(160,210,255,0.48)"/>
+                            {/* Swirl arc across orb face */}
+                            <path d="M 70 24 Q 76 20 82 26 Q 80 32 74 30"
+                              stroke="rgba(200,238,255,0.50)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+                            {/* Trailing sparks */}
+                            <circle cx="68" cy="18" r="2.0" fill="rgba(120,190,255,0.58)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.6s infinite" }}/>
+                            <circle cx="84" cy="16" r="1.5" fill="rgba(100,170,255,0.48)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.1s infinite" }}/>
+                            <circle cx="86" cy="34" r="1.1" fill="rgba(90,160,255,0.40)"  style={{ animation: "ob-orb-pulse 3.2s ease-in-out 1.7s infinite" }}/>
+                            <circle cx="65" cy="32" r="1.3" fill="rgba(110,180,255,0.44)" style={{ animation: "ob-orb-pulse 3.2s ease-in-out 0.4s infinite" }}/>
+                            {/* Soft glow cast downward onto wolf's head */}
+                            <ellipse cx="76" cy="42" rx="10" ry="4" fill="rgba(80,150,255,0.10)"/>
 
                           </svg>
                         </div>
