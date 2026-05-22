@@ -149,13 +149,13 @@ function CoinCard({
           padding: 16,
           cursor: earned ? "pointer" : "default",
           background: earned
-            ? "linear-gradient(145deg, rgba(201,168,76,0.10) 0%, rgba(15,12,6,0.95) 100%)"
+            ? "rgba(201,168,76,0.08)"
             : "#0f0c06",
-          border: earned ? "1.5px solid rgba(201,168,76,0.45)" : "1px solid #1e1a10",
+          border: earned ? "1.5px solid rgba(201,168,76,0.4)" : "1px solid #2a2010",
           boxShadow: earned
-            ? "0 0 0 1px rgba(201,168,76,0.06), 0 4px 20px rgba(201,168,76,0.20), 0 0 56px rgba(201,168,76,0.08)"
+            ? "0 0 20px rgba(201,168,76,0.08)"
             : "none",
-          opacity: earned ? 1 : 0.4,
+          opacity: 1,
           transformStyle: "preserve-3d",
           willChange: "transform",
         }}
@@ -201,7 +201,7 @@ function CoinCard({
             flexShrink: 0,
             filter: earned
               ? "drop-shadow(0 2px 10px rgba(201,168,76,0.5))"
-              : "grayscale(1) brightness(0.4)",
+              : "grayscale(1) opacity(0.5)",
             boxShadow: earned ? "0 0 18px rgba(201,168,76,0.30)" : "none",
           }}
         >
@@ -214,8 +214,8 @@ function CoinCard({
             marginTop: 12,
             marginBottom: 0,
             fontSize: 14,
-            fontWeight: earned ? 700 : 500,
-            color: earned ? "#ffffff" : "#3d3520",
+            fontWeight: earned ? 700 : 600,
+            color: earned ? "#ffffff" : "rgba(255,255,255,0.5)",
             lineHeight: 1.3,
             fontFamily: "DM Sans, sans-serif",
           }}
@@ -240,7 +240,7 @@ function CoinCard({
               color: GOLD,
             }}
           >
-            {t("progress.achieved")}
+            ✓ {t("progress.achieved")}
           </div>
         ) : (
           <p
@@ -274,7 +274,7 @@ function CoinCard({
               justifyContent: "center",
             }}
           >
-            <Lock size={12} color="#3a3020" strokeWidth={2.5} />
+            <Lock size={16} color="#2a2010" strokeWidth={2.5} />
           </div>
         )}
       </motion.div>
