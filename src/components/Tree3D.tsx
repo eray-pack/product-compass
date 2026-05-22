@@ -277,22 +277,15 @@ export function Tree3D({ day }: Props) {
     el.appendChild(renderer.domElement);
 
     // ── Lights ──
-    const ambient = new THREE.AmbientLight(env.ambientColor, env.ambientIntensity);
-    scene.add(ambient);
+    scene.add(new THREE.AmbientLight(0xffffff, 2.5));
 
-    const sun = new THREE.DirectionalLight(env.sunColor, env.sunIntensity);
-    sun.position.set(...env.sunPosition);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(512, 512);
+    const sun = new THREE.DirectionalLight(0xfff5e0, 3.0);
+    sun.position.set(5, 10, 5);
     scene.add(sun);
 
-    const fill = new THREE.PointLight(env.fillColor, env.fillIntensity, 8);
-    fill.position.set(0, -0.5, 0);
+    const fill = new THREE.DirectionalLight(0xC9A84C, 1.0);
+    fill.position.set(-5, 5, -5);
     scene.add(fill);
-
-    const rim = new THREE.DirectionalLight(env.rimColor, env.rimIntensity);
-    rim.position.set(...env.rimPosition);
-    scene.add(rim);
 
     // Stars (night only)
     if (env.stars) addStars(scene);
@@ -339,5 +332,9 @@ export function Tree3D({ day }: Props) {
     };
   }, [day]);
 
-  return <div ref={mountRef} className="w-full h-full" />;
+  return (
+    <div style={{ borderRadius: '50%', boxShadow: '0 0 40px rgba(201,168,76,0.6), 0 0 80px rgba(201,168,76,0.3), 0 0 120px rgba(201,168,76,0.1)', border: '2px solid rgba(201,168,76,0.4)', width: '100%', height: '100%' }}>
+      <div ref={mountRef} style={{ borderRadius: '50%', overflow: 'hidden', width: '100%', height: '100%' }} />
+    </div>
+  );
 }
