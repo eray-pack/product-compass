@@ -39,6 +39,10 @@ type AnimRefs = {
   wolfGroup: THREE.Group | null;
   breathGroup: THREE.Group | null;
   tailGroup: THREE.Group | null;
+  frontLeftLeg: THREE.Group | null;
+  frontRightLeg: THREE.Group | null;
+  backLeftLeg: THREE.Group | null;
+  backRightLeg: THREE.Group | null;
 };
 
 function buildWolf(scene: THREE.Scene, stageIdx: number, refs: AnimRefs): THREE.Group {
@@ -138,30 +142,33 @@ function buildWolf(scene: THREE.Scene, stageIdx: number, refs: AnimRefs): THREE.
     headGroup.add(innerEar);
   }
 
-  // ── Legs (4×) ─────────────────────────────────────────────────────────────
-  const legDefs = [
-    { x: 0.36, z:  0.21 },
-    { x: 0.36, z: -0.21 },
-    { x: -0.36, z:  0.21 },
-    { x: -0.36, z: -0.21 },
-  ];
-
-  for (const { x, z } of legDefs) {
-    // Upper leg (thigh)
+  // ── Legs (4×) — grouped for walk animation ────────────────────────────────
+  const makeLeg = (x: number, z: number): THREE.Group => {
+    const group = new THREE.Group();
+    group.position.set(x, 0.76, z);           // pivot at top of thigh
     const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.28, 6), bodyMat);
-    upper.position.set(x, 0.62, z);
+    upper.position.set(0, -0.14, 0);          // center of 0.28 cylinder below pivot
     upper.castShadow = true;
-    wolfGroup.add(upper);
-    // Lower leg
+    group.add(upper);
     const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.058, 0.28, 6), bodyMat);
-    lower.position.set(x, 0.32, z);
+    lower.position.set(0, -0.44, 0);
     lower.castShadow = true;
-    wolfGroup.add(lower);
-    // Paw
+    group.add(lower);
     const paw = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.06, 0.12), accMat);
-    paw.position.set(x, 0.06, z);
-    wolfGroup.add(paw);
-  }
+    paw.position.set(0, -0.70, 0);
+    group.add(paw);
+    return group;
+  };
+
+  const frontLeftLeg  = makeLeg( 0.36,  0.21);
+  const frontRightLeg = makeLeg( 0.36, -0.21);
+  const backLeftLeg   = makeLeg(-0.36,  0.21);
+  const backRightLeg  = makeLeg(-0.36, -0.21);
+  wolfGroup.add(frontLeftLeg, frontRightLeg, backLeftLeg, backRightLeg);
+  refs.frontLeftLeg  = frontLeftLeg;
+  refs.frontRightLeg = frontRightLeg;
+  refs.backLeftLeg   = backLeftLeg;
+  refs.backRightLeg  = backRightLeg;
 
   // ── Tail (3 tapered segments, curled up) ───────────────────────────────────
   const tailGroup = new THREE.Group();
@@ -278,32 +285,25 @@ export function Wolf3D({ stage }: Props) {
     el.appendChild(renderer.domElement);
 
     // ── Lights ─────────────────────────────────────────────────────────────
-    // Cool ambient (night)
-    scene.add(new THREE.AmbientLight(0x1a2a4a, 1.0));
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
 
-    // Moonlight (key)
-    const moon = new THREE.DirectionalLight(0xc0d0ff, 0.85);
-    moon.position.set(-3, 8, -5);
-    moon.castShadow = true;
-    moon.shadow.mapSize.set(512, 512);
-    scene.add(moon);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    mainLight.position.set(5, 8, 5);
+    scene.add(mainLight);
 
-    // Soft under-fill
-    const fill = new THREE.PointLight(0x001144, 0.28, 10);
-    fill.position.set(0, -0.5, 0);
-    scene.add(fill);
+    const fillLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
+    fillLight.position.set(-5, 3, -3);
+    scene.add(fillLight);
 
-    // Amber rim — warm and predatory; brighter for higher stages
-    const cfg = STAGES[Math.min(stage, 7)];
-    const rim = new THREE.DirectionalLight(cfg.rimColor, cfg.rimIntensity);
-    rim.position.set(3.5, 2.5, 3.5);
-    scene.add(rim);
+    const goldRim = new THREE.DirectionalLight(0xC9A84C, 0.8);
+    goldRim.position.set(0, -2, -5);
+    scene.add(goldRim);
 
     // Stars
     addStars(scene);
 
     // ── Wolf ───────────────────────────────────────────────────────────────
-    const refs: AnimRefs = { wolfGroup: null, breathGroup: null, tailGroup: null };
+    const refs: AnimRefs = { wolfGroup: null, breathGroup: null, tailGroup: null, frontLeftLeg: null, frontRightLeg: null, backLeftLeg: null, backRightLeg: null };
     const wolfGroup = buildWolf(scene, stage, refs);
 
     // Auto-fit camera to wolf size
@@ -338,6 +338,17 @@ export function Wolf3D({ stage }: Props) {
       if (refs.tailGroup) {
         refs.tailGroup.rotation.y = Math.sin(t * 3.0) * 0.52;
       }
+
+      // Walking cycle
+      const walkSpeed = 2.5;
+      const walkAmp   = 0.4;
+      if (refs.frontLeftLeg)  refs.frontLeftLeg.rotation.x  = Math.sin(t * walkSpeed) * walkAmp;
+      if (refs.frontRightLeg) refs.frontRightLeg.rotation.x = Math.sin(t * walkSpeed + Math.PI) * walkAmp;
+      if (refs.backLeftLeg)   refs.backLeftLeg.rotation.x   = Math.sin(t * walkSpeed + Math.PI) * walkAmp;
+      if (refs.backRightLeg)  refs.backRightLeg.rotation.x  = Math.sin(t * walkSpeed) * walkAmp;
+
+      // Body bob
+      wolfGroup.position.y = Math.abs(Math.sin(t * walkSpeed)) * 0.05;
 
       renderer.render(scene, camera);
     };
