@@ -260,7 +260,7 @@ export function Tree3D({ day }: Props) {
 
     // Scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(env.bgColor);
+    scene.background = null;
     scene.fog = new THREE.Fog(env.fogColor, env.fogNear, env.fogFar);
 
     // Camera
@@ -269,12 +269,16 @@ export function Tree3D({ day }: Props) {
     camera.lookAt(0, 0.5, 0);
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    el.appendChild(renderer.domElement);
+    const canvas = renderer.domElement;
+    canvas.style.borderRadius = '50%';
+    canvas.style.background = 'transparent';
+    el.appendChild(canvas);
 
     // ── Lights ──
     const ambient = new THREE.AmbientLight(0xffffff, 4.0);
@@ -315,13 +319,13 @@ export function Tree3D({ day }: Props) {
       cancelAnimationFrame(animId);
       ro.disconnect();
       renderer.dispose();
-      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+      if (el.contains(canvas)) el.removeChild(canvas);
     };
   }, [day]);
 
   return (
     <div style={{ borderRadius: '50%', boxShadow: '0 0 40px rgba(201,168,76,0.6), 0 0 80px rgba(201,168,76,0.3), 0 0 120px rgba(201,168,76,0.1)', border: '2px solid rgba(201,168,76,0.4)', width: '100%', height: '100%' }}>
-      <div ref={mountRef} style={{ borderRadius: '50%', overflow: 'hidden', width: '100%', height: '100%' }} />
+      <div ref={mountRef} style={{ borderRadius: '50%', overflow: 'hidden', background: 'transparent', width: '100%', height: '100%' }} />
     </div>
   );
 }
