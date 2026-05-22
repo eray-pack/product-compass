@@ -51,7 +51,6 @@ function buildWolf(scene: THREE.Scene, stageIdx: number, refs: AnimRefs): THREE.
   // Materials — flatShading gives low-poly faceted look
   const bodyMat  = new THREE.MeshLambertMaterial({ color: cfg.bodyColor,  flatShading: true });
   const accMat   = new THREE.MeshLambertMaterial({ color: cfg.accentColor, flatShading: true });
-  const eyeMat   = new THREE.MeshBasicMaterial({ color: cfg.eyeColor });
   const noseMat  = new THREE.MeshBasicMaterial({ color: 0x0e0604 });
 
   const wolfGroup = new THREE.Group();
@@ -116,15 +115,38 @@ function buildWolf(scene: THREE.Scene, stageIdx: number, refs: AnimRefs): THREE.
 
   // Eyes
   for (const side of [1, -1]) {
-    const eye = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.03), eyeMat);
-    eye.position.set(0.20, 0.07, side * 0.14);
-    headGroup.add(eye);
-    // Subtle glow behind eye
-    const glow = new THREE.Mesh(
-      new THREE.BoxGeometry(0.07, 0.07, 0.02),
-      new THREE.MeshBasicMaterial({ color: cfg.eyeColor, transparent: true, opacity: 0.40 })
+    const EX = 0.20, EY = 0.07, EZ = side * 0.14;
+
+    // Iris — shiny Phong sphere
+    const eye = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 16, 16),
+      new THREE.MeshPhongMaterial({ color: cfg.eyeColor, shininess: 120, specular: 0xffffff })
     );
-    glow.position.set(0.19, 0.07, side * 0.14);
+    eye.position.set(EX, EY, EZ);
+    headGroup.add(eye);
+
+    // Pupil — dark sphere sitting 0.02 in front
+    const pupil = new THREE.Mesh(
+      new THREE.SphereGeometry(0.028, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0x111111 })
+    );
+    pupil.position.set(EX + 0.02, EY, EZ);
+    headGroup.add(pupil);
+
+    // Highlight — tiny white sphere top-right, 0.025 in front
+    const highlight = new THREE.Mesh(
+      new THREE.SphereGeometry(0.012, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    highlight.position.set(EX + 0.025, EY + 0.022, EZ + side * 0.018);
+    headGroup.add(highlight);
+
+    // Glow — larger transparent sphere behind the iris
+    const glow = new THREE.Mesh(
+      new THREE.SphereGeometry(0.072, 12, 12),
+      new THREE.MeshBasicMaterial({ color: cfg.eyeColor, transparent: true, opacity: 0.30 })
+    );
+    glow.position.set(EX - 0.01, EY, EZ);
     headGroup.add(glow);
   }
 
