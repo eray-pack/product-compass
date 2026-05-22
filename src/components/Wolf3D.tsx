@@ -364,10 +364,10 @@ export function Wolf3D({ stage }: Props) {
       // Walking cycle
       const walkSpeed = 2.5;
       const walkAmp   = 0.4;
-      if (refs.frontLeftLeg)  refs.frontLeftLeg.rotation.x  = Math.sin(t * walkSpeed) * walkAmp;
-      if (refs.frontRightLeg) refs.frontRightLeg.rotation.x = Math.sin(t * walkSpeed + Math.PI) * walkAmp;
-      if (refs.backLeftLeg)   refs.backLeftLeg.rotation.x   = Math.sin(t * walkSpeed + Math.PI) * walkAmp;
-      if (refs.backRightLeg)  refs.backRightLeg.rotation.x  = Math.sin(t * walkSpeed) * walkAmp;
+      if (refs.frontLeftLeg)  refs.frontLeftLeg.rotation.z  = Math.sin(t * walkSpeed) * walkAmp;
+      if (refs.frontRightLeg) refs.frontRightLeg.rotation.z = Math.sin(t * walkSpeed + Math.PI) * walkAmp;
+      if (refs.backLeftLeg)   refs.backLeftLeg.rotation.z   = Math.sin(t * walkSpeed + Math.PI) * walkAmp;
+      if (refs.backRightLeg)  refs.backRightLeg.rotation.z  = Math.sin(t * walkSpeed) * walkAmp;
 
       // Body bob
       wolfGroup.position.y = Math.abs(Math.sin(t * walkSpeed)) * 0.05;
