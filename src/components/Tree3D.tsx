@@ -265,8 +265,8 @@ export function Tree3D({ day }: Props) {
 
     // Camera
     const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 50);
-    camera.position.set(0, 2.2, 5.5);
-    camera.lookAt(0, 1.2, 0);
+    camera.position.set(0, 2, 4);
+    camera.lookAt(0, 0.5, 0);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -277,15 +277,12 @@ export function Tree3D({ day }: Props) {
     el.appendChild(renderer.domElement);
 
     // ── Lights ──
-    scene.add(new THREE.AmbientLight(0xffffff, 2.5));
+    const ambient = new THREE.AmbientLight(0xffffff, 4.0);
+    scene.add(ambient);
 
-    const sun = new THREE.DirectionalLight(0xfff5e0, 3.0);
-    sun.position.set(5, 10, 5);
+    const sun = new THREE.DirectionalLight(0xffffff, 4.0);
+    sun.position.set(2, 5, 3);
     scene.add(sun);
-
-    const fill = new THREE.DirectionalLight(0xC9A84C, 1.0);
-    fill.position.set(-5, 5, -5);
-    scene.add(fill);
 
     // Stars (night only)
     if (env.stars) addStars(scene);
@@ -293,16 +290,6 @@ export function Tree3D({ day }: Props) {
     // Tree
     const stage = stageForDay(day);
     const treeGroup = buildTree(scene, stage, env);
-
-    // Fit camera to tree
-    const box = new THREE.Box3().setFromObject(treeGroup);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    treeGroup.position.x -= center.x;
-    treeGroup.position.z -= center.z;
-    camera.position.y = size.y * 0.55 + 1;
-    camera.position.z = size.y * 1.8 + 2;
-    camera.lookAt(0, size.y * 0.45, 0);
 
     // Animation loop
     let animId: number;
