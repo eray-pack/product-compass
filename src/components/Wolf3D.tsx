@@ -128,9 +128,9 @@ function buildWolf(scene: THREE.Scene, stageIdx: number, refs: AnimRefs): THREE.
     // Pupil — dark sphere sitting 0.02 in front
     const pupil = new THREE.Mesh(
       new THREE.SphereGeometry(0.028, 12, 12),
-      new THREE.MeshBasicMaterial({ color: 0x111111 })
+      new THREE.MeshBasicMaterial({ color: 0x000000 })
     );
-    pupil.position.set(EX + 0.02, EY, EZ);
+    pupil.position.set(EX + 0.03, EY, EZ);
     headGroup.add(pupil);
 
     // Highlight — tiny white sphere top-right, 0.025 in front
