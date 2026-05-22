@@ -2343,7 +2343,7 @@ function WolfPage({
       </header>
 
       {/* Wolf scene — full-bleed */}
-      <section className="mt-4 relative" style={{ height: 360 }}>
+      <section className="mt-4 relative" style={{ height: 360, borderRadius: 24, overflow: "hidden" }}>
         <div className="absolute inset-0 overflow-hidden">
           <WolfBackground />
         </div>
