@@ -271,20 +271,29 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
       </div>
 
       {/* ── Side labels + dynamic status ─────────────────────────── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
-        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>{t("home.moodLabel.low").split(",")[0]}</span>
-        <span style={{
-          fontSize: 11,
-          fontWeight: 600,
-          color: isLow ? "rgba(220,120,80,0.85)" : isHi ? "rgba(180,220,140,0.85)" : "rgba(255,255,255,0.50)",
-          transition: "color 0.3s ease",
-          textAlign: "center",
-          flex: 1,
-          padding: "0 8px",
-        }}>
-          {moodLabel(mood, t)}
-        </span>
-        <span style={{ fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>{t("home.moodLabel.high").split(" ")[0]}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6, gap: 8 }}>
+        <span style={{ fontSize: 11, color: "#5a5040", flexShrink: 0 }}>Rough day</span>
+        <div style={{ flex: 1, textAlign: "center" }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={mood}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+              style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#ffffff" }}
+            >
+              {([
+                "Really struggling today",
+                "Tough but pushing through",
+                "Slightly challenged, staying focused",
+                "Feeling steady and clear",
+                "Feeling strong and in control",
+              ] as const)[mood - 1]}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+        <span style={{ fontSize: 11, color: "#5a5040", flexShrink: 0 }}>Great day</span>
       </div>
 
       <AnimatePresence>
@@ -1050,19 +1059,20 @@ function Dashboard() {
         className="px-6 mt-6 mb-5"
         initial="hidden" whileInView="show" viewport={{ once: true, margin: "-16px" }} variants={fade}
       >
-        <p
-          className="text-[17px] leading-relaxed"
-          style={{ color: "rgba(255,255,255,0.36)", fontStyle: "italic" }}
-        >
-          You started this for{" "}
-          <em
-            className="not-italic font-semibold"
-            style={{ color: "rgba(255,255,255,0.6)" }}
-          >
-            {state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self"}
-          </em>
-          . That person is still watching.
-        </p>
+        <div style={{
+          background: "rgba(201,168,76,0.05)",
+          borderLeft: "2px solid #C9A84C",
+          borderRadius: "0 12px 12px 0",
+          padding: "12px 16px",
+        }}>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65 }}>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>You started this for </span>
+            <span style={{ color: "#C9A84C", fontWeight: 700 }}>
+              {state.onboarding?.costs?.[0]?.toLowerCase() ?? "your future self"}
+            </span>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>. That person is still watching.</span>
+          </p>
+        </div>
       </motion.section>
 
       {/* ── EMERGENCY — acute urges take priority ─────────────── */}
