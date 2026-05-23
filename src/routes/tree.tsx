@@ -2398,11 +2398,93 @@ function WolfPage({
               <Wolf3D stage={wolfStage.stage} />
             </div>
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-              <div className="companion-3d anim-tree-float" style={{ width: "160px", height: "192px", marginBottom: "-12px" }}>
-                <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
+            /* Cartoon: oval scene — forest night inside circle, edges fade into black */
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              {/* Single 240px anchor — rings + oval positioned relative to this */}
+              <div style={{ position: "relative", width: 240, height: 240, flexShrink: 0 }}>
+
+                {/* ── Badge-style glow ring — identical system as cartoon tree ── */}
+                {(() => {
+                  const glowBase = (
+                    healthState === "thriving"  ? "rgba(63,184,106,"  :
+                    healthState === "growing"   ? "rgba(143,190,90,"  :
+                    healthState === "fading"    ? "rgba(201,168,76,"  :
+                                                 "rgba(122,106,90,"
+                  );
+                  return (
+                    <>
+                      {/* Atmospheric halo — diffuse glow sitting outside the circle */}
+                      <motion.div
+                        aria-hidden
+                        style={{
+                          position: "absolute",
+                          top: "50%", left: "50%", marginTop: -150, marginLeft: -150,
+                          width: 300, height: 300, borderRadius: "50%",
+                          background: `radial-gradient(circle, transparent 38%, ${glowBase}0.22) 52%, ${glowBase}0.10) 66%, transparent 80%)`,
+                          pointerEvents: "none", zIndex: 3,
+                        }}
+                        animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
+                        transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+                      />
+                      {/* Primary crisp ring — outside the circle */}
+                      <motion.div
+                        aria-hidden
+                        style={{
+                          position: "absolute",
+                          top: "50%", left: "50%", marginTop: -137, marginLeft: -137,
+                          width: 274, height: 274, borderRadius: "50%",
+                          border: `2.5px solid ${glowBase}0.88)`,
+                          filter: "blur(1.5px)",
+                          boxShadow: `0 0 16px 6px ${glowBase}0.55), 0 0 36px 14px ${glowBase}0.20)`,
+                          pointerEvents: "none", zIndex: 3,
+                        }}
+                        animate={{ scale: [1, 1.012, 1], rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                      />
+                      {/* Outer softer ring */}
+                      <motion.div
+                        aria-hidden
+                        style={{
+                          position: "absolute",
+                          top: "50%", left: "50%", marginTop: -152, marginLeft: -152,
+                          width: 304, height: 304, borderRadius: "50%",
+                          border: `1px solid ${glowBase}0.30)`,
+                          filter: "blur(2px)",
+                          pointerEvents: "none", zIndex: 3,
+                        }}
+                        animate={{ scale: [1, 1.008, 1], rotate: -360 }}
+                        transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                      />
+                    </>
+                  );
+                })()}
+
+                {/* Oval — masked forest scene, fills the 240px anchor */}
+                <div style={{
+                  position: "absolute", inset: 0,
+                  maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                  WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                  zIndex: 2,
+                }}>
+                  {/* Dark forest night fills the oval */}
+                  <div style={{
+                    position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%",
+                    background: "radial-gradient(ellipse at 50% 30%, #1a2a1e, #080e0a)",
+                  }}>
+                    <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
+                  </div>
+                  {/* Wolf centered in oval */}
+                  <div className="anim-tree-float" style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
+                  }}>
+                    <div style={{ width: 160, height: 192 }}>
+                      <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
+                    </div>
+                  </div>
+                </div>
+
               </div>
-              <div style={{ width: "170px", height: "36px", borderRadius: "50%", background: "radial-gradient(ellipse at 50% 30%, #2d6a3f, #1a4028)", boxShadow: "0 0 28px 10px rgba(20,80,40,0.28)", border: "1px solid rgba(45,110,65,0.40)" }} />
             </div>
           )}
         </div>
