@@ -5,7 +5,6 @@ import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Tree3D } from "@/components/Tree3D";
 import { Wolf3D } from "@/components/Wolf3D";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
@@ -2538,16 +2537,6 @@ function LifeTreePage({
   const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);
   const health = HEALTH_CONFIG[healthState];
 
-  const [treeStyle, setTreeStyle] = useState<"3d" | "cartoon">(() => {
-    try { return (localStorage.getItem("stopamine.tree-style") as "3d" | "cartoon") ?? "cartoon"; }
-    catch { return "cartoon"; }
-  });
-
-  function toggleTreeStyle(style: "3d" | "cartoon") {
-    setTreeStyle(style);
-    try { localStorage.setItem("stopamine.tree-style", style); } catch {}
-  }
-
   const [shopFeedback, setShopFeedback] = useState<string | null>(null);
 
   // Scroll to shop section when navigated via credits chip (#grow-your-tree)
@@ -2585,31 +2574,12 @@ function LifeTreePage({
 
       {/* Tree scene — full-bleed, no card frame */}
       <section className="mt-1 relative" style={{ height: 380 }}>
-        {/* Sky fills the section only in 3D mode; cartoon mode uses its own oval */}
-        {treeStyle === "3d" && (
-          <>
-            <div className="absolute inset-0 overflow-hidden">
-              <TreeSkyBackground timeOfDay={timeOfDay} />
-            </div>
-            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
-              style={{ background: health.sceneOverlay }} />
-          </>
-        )}
-
         {/* Bottom fade — sky bleeds into page background */}
         <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
           style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
 
         {/* Tree visual */}
-        {treeStyle === "3d" ? (
-          <div className="absolute inset-0 flex items-center justify-center z-10"
-            style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
-            <div className="companion-3d anim-tree-float" style={{ width: "100%", height: "100%" }}>
-              <Tree3D day={day} />
-            </div>
-          </div>
-        ) : (
-          /* Cartoon: oval scene — sky inside circle, edges fade out into black */
+        {/* Cartoon: oval scene — sky inside circle, edges fade out into black */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
             {/* Single 300px anchor — sized for iPhone, rings + oval positioned relative to this */}
             <div style={{ position: "relative", width: 300, height: 300, flexShrink: 0 }}>
@@ -2693,28 +2663,7 @@ function LifeTreePage({
 
             </div>
           </div>
-        )}
       </section>
-
-      {/* Cartoon / 3D toggle — subtle text row below scene */}
-      <div className="flex items-center justify-center gap-1 mt-2">
-        {(["cartoon", "3d"] as const).map((opt, i) => (
-          <span key={opt} className="flex items-center gap-1">
-            {i > 0 && <span style={{ color: "rgba(255,255,255,0.15)", fontSize: 10 }}>·</span>}
-            <button
-              onClick={() => toggleTreeStyle(opt)}
-              style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                color: treeStyle === opt ? "#C9A84C" : "rgba(255,255,255,0.28)",
-                background: "none", border: "none", cursor: "pointer", padding: "2px 6px",
-                transition: "color 0.18s",
-              }}
-            >
-              {opt === "3d" ? "3D" : "Cartoon"}
-            </button>
-          </span>
-        ))}
-      </div>
 
       {/* XP + stats */}
       <section className="px-6 mt-2">
