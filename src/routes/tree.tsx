@@ -40,18 +40,17 @@ const WOLF_UPGRADES = [
   { id: "wolf-ancient",      name: "Ancient instinct", desc: "Permanent +10% XP from every challenge",        costPoints: 400, costMoney: 6.99, pro: true },
 ];
 
-const WOLF_RANK_BY_STAGE = ["Pup", "Awakening", "Building", "Shadow", "Spirit", "Transcendent"];
+const WOLF_RANK_BY_STAGE = ["Pup", "Awakening", "Building", "Spirit", "Transcendent"];
 
-// XP thresholds per wolf stage — 6 stages, 0-399 / 400-799 / 800-1199 / 1200-1599 / 1600-1999 / 2000+
-const WOLF_XP_PREV = [0, 400, 800, 1200, 1600, 2000] as const;
+// XP thresholds per wolf stage — 5 stages, 0-399 / 400-799 / 800-1199 / 1200-1999 / 2000+
+const WOLF_XP_PREV = [0, 400, 800, 1200, 2000] as const;
 
-function wolfXPStage(xp: number): { stage: 0|1|2|3|4|5; name: string; next: number } {
+function wolfXPStage(xp: number): { stage: 0|1|2|3|4; name: string; next: number } {
   if (xp < 400)  return { stage: 0, name: "Newborn Pup",        next: 400  };
   if (xp < 800)  return { stage: 1, name: "Juvenile",           next: 800  };
   if (xp < 1200) return { stage: 2, name: "Adolescent",         next: 1200 };
-  if (xp < 1600) return { stage: 3, name: "Shadow Wolf",        next: 1600 };
-  if (xp < 2000) return { stage: 4, name: "Spirit Glow",        next: 2000 };
-  return { stage: 5, name: "Transcendent Alpha", next: xp };
+  if (xp < 2000) return { stage: 3, name: "Spirit Glow",        next: 2000 };
+  return { stage: 4, name: "Transcendent Alpha", next: xp };
 }
 
 // ── Deterministic star positions (avoids jitter on re-render) ─────────────────
@@ -2301,7 +2300,7 @@ function WolfPage({
   const wolfStage = wolfXPStage(state.treeXP);
   const prevThreshold = WOLF_XP_PREV[wolfStage.stage];
   const pct =
-    wolfStage.stage >= 5
+    wolfStage.stage >= 4
       ? 100
       : Math.min(100, ((state.treeXP - prevThreshold) / (wolfStage.next - prevThreshold)) * 100);
   const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);

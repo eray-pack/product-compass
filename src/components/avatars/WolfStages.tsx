@@ -7,7 +7,6 @@
 import wolfStage1Url from "@/assets/wolf-stage1-transparent.png";
 import wolfStage2Url from "@/assets/wolf-stage2-transparent.png";
 import wolfStage3Url from "@/assets/wolf-stage3-transparent.png";
-import wolfStage4Url from "@/assets/wolf-stage4-transparent.png";
 import wolfStage5Url from "@/assets/wolf-stage5-transparent.png";
 import wolfStage6Url from "@/assets/wolf-stage6-transparent.png";
 
@@ -117,15 +116,6 @@ function Wolf3({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage3Url} alt="Adolescent Wolf" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
-    </div>
-  );
-}
-
-// Stage 4 — Shadow Wolf
-function Wolf4({ className }: P) {
-  return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage4Url} alt="Shadow Wolf" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
@@ -306,4 +296,4 @@ export function WolfSittingPreview({ className }: { className?: string }) {
 }
 
 // Stage 0 (internal index 0) = Stage 1 Newborn Pup — Wolf0 SVG replaced by Wolf1 image
-export const WOLF_STAGES = [Wolf1, Wolf2, Wolf3, Wolf4, Wolf5, Wolf6] as const;
+export const WOLF_STAGES = [Wolf1, Wolf2, Wolf3, Wolf5, Wolf6] as const;
