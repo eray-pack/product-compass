@@ -1980,6 +1980,155 @@ function WolfUpgradeOverlays({
   );
 }
 
+// ── Tree upgrade visual overlays (rendered inside the circle clip) ───────────
+const GOLDEN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
+  x: `${10 + i * 10}%`,
+  delay: i * 0.38,
+  size: i % 3 === 0 ? 4 : 3,
+}));
+const MIND_PARTICLES = Array.from({ length: 6 }, (_, i) => ({
+  x: `${18 + i * 11}%`,
+  delay: i * 0.52,
+  size: i % 2 === 0 ? 3 : 2,
+}));
+const BODY_PARTICLES = Array.from({ length: 6 }, (_, i) => ({
+  x: `${15 + i * 12}%`,
+  delay: i * 0.45,
+  size: i % 2 === 0 ? 4 : 3,
+}));
+const ROOT_PARTICLES = Array.from({ length: 5 }, (_, i) => ({
+  x: `${20 + i * 13}%`,
+  delay: i * 0.6,
+  size: i % 2 === 0 ? 4 : 3,
+}));
+
+function TreeUpgradeOverlays({
+  goldenLeaves,
+  mindBranch,
+  bodyBranch,
+  streakOrnament,
+  deepRoots,
+}: {
+  goldenLeaves: boolean;
+  mindBranch: boolean;
+  bodyBranch: boolean;
+  streakOrnament: boolean;
+  deepRoots: boolean;
+}) {
+  return (
+    <>
+      {/* Golden Leaves — warm golden shimmer at canopy + floating gold sparks */}
+      {goldenLeaves && (
+        <>
+          <motion.div
+            aria-hidden
+            style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 3,
+              background: "radial-gradient(ellipse at 50% 30%, rgba(201,168,76,0.28) 0%, rgba(201,168,76,0.10) 44%, transparent 66%)",
+            }}
+            animate={{ opacity: [0.45, 1, 0.45] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          />
+          {GOLDEN_PARTICLES.map((p, i) => (
+            <motion.div
+              key={i} aria-hidden
+              style={{
+                position: "absolute", bottom: "35%", left: p.x,
+                width: p.size, height: p.size, borderRadius: "50%",
+                background: "rgba(201,168,76,0.95)",
+                boxShadow: "0 0 5px 2px rgba(201,168,76,0.70)",
+                pointerEvents: "none", zIndex: 4,
+              }}
+              animate={{ y: [0, -80], opacity: [0, 1, 0], scale: [0.5, 1.3, 0.3] }}
+              transition={{ repeat: Infinity, duration: 3, delay: p.delay, ease: "easeOut" }}
+            />
+          ))}
+        </>
+      )}
+
+      {/* Mind Branch — soft indigo particles drifting from mid-canopy */}
+      {mindBranch && MIND_PARTICLES.map((p, i) => (
+        <motion.div
+          key={i} aria-hidden
+          style={{
+            position: "absolute", bottom: "45%", left: p.x,
+            width: p.size, height: p.size, borderRadius: "50%",
+            background: "rgba(139,92,246,0.90)",
+            boxShadow: "0 0 6px 2px rgba(139,92,246,0.55)",
+            pointerEvents: "none", zIndex: 4,
+          }}
+          animate={{ y: [0, -70], x: [0, (i % 2 === 0 ? 8 : -8)], opacity: [0, 0.85, 0], scale: [0.6, 1.1, 0.3] }}
+          transition={{ repeat: Infinity, duration: 3.8, delay: p.delay, ease: "easeOut" }}
+        />
+      ))}
+
+      {/* Body Branch — green vitality sparks rising from the base */}
+      {bodyBranch && BODY_PARTICLES.map((p, i) => (
+        <motion.div
+          key={i} aria-hidden
+          style={{
+            position: "absolute", bottom: "18%", left: p.x,
+            width: p.size, height: p.size, borderRadius: "50%",
+            background: "rgba(52,211,153,0.90)",
+            boxShadow: "0 0 5px 2px rgba(52,211,153,0.55)",
+            pointerEvents: "none", zIndex: 4,
+          }}
+          animate={{ y: [0, -60], opacity: [0, 0.90, 0], scale: [0.5, 1.2, 0.4] }}
+          transition={{ repeat: Infinity, duration: 2.8, delay: p.delay, ease: "easeOut" }}
+        />
+      ))}
+
+      {/* Streak Ornament — pulsing golden ring halo around the tree crown */}
+      {streakOrnament && (
+        <motion.div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: "18%", left: "50%",
+            width: 64, height: 64,
+            marginLeft: -32, marginTop: -32,
+            borderRadius: "50%",
+            border: "2px solid rgba(201,168,76,0.80)",
+            boxShadow: "0 0 10px 3px rgba(201,168,76,0.40)",
+            pointerEvents: "none", zIndex: 4,
+          }}
+          animate={{ scale: [1, 1.55], opacity: [0.75, 0] }}
+          transition={{ repeat: Infinity, duration: 2.2, ease: "easeOut" }}
+        />
+      )}
+
+      {/* Deep Roots — amber earth glow rising from the roots */}
+      {deepRoots && (
+        <>
+          <motion.div
+            aria-hidden
+            style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 3,
+              background: "radial-gradient(ellipse at 50% 96%, rgba(146,100,42,0.38) 0%, rgba(146,100,42,0.14) 40%, transparent 64%)",
+            }}
+            animate={{ opacity: [0.40, 0.90, 0.40] }}
+            transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+          />
+          {ROOT_PARTICLES.map((p, i) => (
+            <motion.div
+              key={i} aria-hidden
+              style={{
+                position: "absolute", bottom: "8%", left: p.x,
+                width: p.size, height: p.size, borderRadius: "50%",
+                background: "rgba(196,135,58,0.90)",
+                boxShadow: "0 0 5px 2px rgba(196,135,58,0.55)",
+                pointerEvents: "none", zIndex: 4,
+              }}
+              animate={{ y: [0, -45], opacity: [0, 0.85, 0], scale: [0.5, 1.1, 0.3] }}
+              transition={{ repeat: Infinity, duration: 3.2, delay: p.delay, ease: "easeOut" }}
+            />
+          ))}
+        </>
+      )}
+    </>
+  );
+}
+
 // ── Wolf companion page ───────────────────────────────────────────────────────
 function WolfPage({
   state,
@@ -2342,6 +2491,12 @@ function LifeTreePage({
   const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);
   const health = HEALTH_CONFIG[healthState];
 
+  const hasGoldenLeaves   = state.treeUnlocks.includes("leaves-gold");
+  const hasMindBranch     = state.treeUnlocks.includes("branch-mind");
+  const hasBodyBranch     = state.treeUnlocks.includes("branch-body");
+  const hasStreakOrnament = state.treeUnlocks.includes("ornament-streak");
+  const hasDeepRoots      = state.treeUnlocks.includes("root-deep");
+
   const [shopFeedback, setShopFeedback] = useState<string | null>(null);
 
   // ── Dev mode (triple-tap "Sacred Ground") ─────────────────────────────────
@@ -2383,11 +2538,15 @@ function LifeTreePage({
       setTimeout(() => setShopFeedback(null), 2200);
       return;
     }
-    update((s) => ({
-      points: s.points - cost,
-      treeXP: s.treeXP + Math.floor(cost / 2),
-      treeUnlocks: s.treeUnlocks.includes(id) ? s.treeUnlocks : [...s.treeUnlocks, id],
-    }));
+    update((s) => {
+      const deepRootsOwned = s.treeUnlocks.includes("root-deep");
+      const multiplier = deepRootsOwned && id !== "root-deep" ? 1.1 : 1;
+      return {
+        points: s.points - cost,
+        treeXP: s.treeXP + Math.floor((cost / 2) * multiplier),
+        treeUnlocks: s.treeUnlocks.includes(id) ? s.treeUnlocks : [...s.treeUnlocks, id],
+      };
+    });
     setShopFeedback("Unlocked!");
     setTimeout(() => setShopFeedback(null), 2000);
   };
@@ -2571,13 +2730,25 @@ function LifeTreePage({
                 <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%" }}>
                   <TreeSkyBackground timeOfDay={timeOfDay} />
                   <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
-                </div>
-                {/* Tree — bottom-anchored so it stands on the ground */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 2,
-                }}>
-                  <CartoonTree day={day} xp={state.treeXP} />
+                  {/* Tree — bottom-anchored so it stands on the ground */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 2,
+                    filter: hasGoldenLeaves
+                      ? `drop-shadow(0 0 14px rgba(201,168,76,0.80)) drop-shadow(0 0 32px rgba(201,168,76,0.38)) brightness(1.08)`
+                      : undefined,
+                    transition: "filter 1.2s ease",
+                  }}>
+                    <CartoonTree day={day} xp={state.treeXP} />
+                  </div>
+                  {/* Active upgrade overlays — layered above the tree, clipped by circle */}
+                  <TreeUpgradeOverlays
+                    goldenLeaves={hasGoldenLeaves}
+                    mindBranch={hasMindBranch}
+                    bodyBranch={hasBodyBranch}
+                    streakOrnament={hasStreakOrnament}
+                    deepRoots={hasDeepRoots}
+                  />
                 </div>
               </div>
 
