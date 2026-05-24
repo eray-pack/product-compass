@@ -1905,6 +1905,81 @@ function ShopCard({
   );
 }
 
+// ── Wolf upgrade visual overlays (rendered inside the circle clip) ───────────
+const ANCIENT_PARTICLES = Array.from({ length: 7 }, (_, i) => ({
+  x: `${14 + i * 11}%`,
+  delay: i * 0.46,
+  color: i % 2 === 0 ? "rgba(167,139,250,0.90)" : "rgba(52,211,153,0.90)",
+  size: i % 3 === 0 ? 4 : 3,
+}));
+
+function WolfUpgradeOverlays({
+  packBond,
+  furCoat,
+  ancient,
+}: {
+  packBond: boolean;
+  furCoat: boolean;
+  ancient: boolean;
+}) {
+  return (
+    <>
+      {/* Thick Fur Coat — warm amber shimmer rising from below the wolf */}
+      {furCoat && (
+        <motion.div
+          aria-hidden
+          style={{
+            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 3,
+            background: "radial-gradient(ellipse at 50% 92%, rgba(196,135,58,0.32) 0%, rgba(196,135,58,0.12) 42%, transparent 66%)",
+          }}
+          animate={{ opacity: [0.50, 1, 0.50] }}
+          transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+        />
+      )}
+
+      {/* Wolf Pack Bond — howl ripple rings emanating from wolf's head */}
+      {packBond && [0, 0.55, 1.1].map((delay, i) => (
+        <motion.div
+          key={i}
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: "20%", left: "50%",
+            width: 32 + i * 18, height: 32 + i * 18,
+            marginLeft: -(32 + i * 18) / 2,
+            marginTop: -(32 + i * 18) / 2,
+            borderRadius: "50%",
+            border: "1.5px solid rgba(186,230,253,0.72)",
+            boxShadow: "0 0 6px 2px rgba(147,197,253,0.30)",
+            pointerEvents: "none", zIndex: 4,
+          }}
+          animate={{ scale: [1, 2.8], opacity: [0.65, 0] }}
+          transition={{ repeat: Infinity, duration: 2.4, delay, ease: "easeOut" }}
+        />
+      ))}
+
+      {/* Ancient Instinct — purple/emerald mystic particles floating upward */}
+      {ancient && ANCIENT_PARTICLES.map((p, i) => (
+        <motion.div
+          key={i}
+          aria-hidden
+          style={{
+            position: "absolute",
+            bottom: "14%", left: p.x,
+            width: p.size, height: p.size,
+            borderRadius: "50%",
+            background: p.color,
+            boxShadow: `0 0 6px 2px ${p.color}`,
+            pointerEvents: "none", zIndex: 4,
+          }}
+          animate={{ y: [0, -105], opacity: [0, 0.90, 0], scale: [0.5, 1.2, 0.4] }}
+          transition={{ repeat: Infinity, duration: 3.4, delay: p.delay, ease: "easeOut" }}
+        />
+      ))}
+    </>
+  );
+}
+
 // ── Wolf companion page ───────────────────────────────────────────────────────
 function WolfPage({
   state,
@@ -1924,15 +1999,23 @@ function WolfPage({
   const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);
   const health = HEALTH_CONFIG[healthState];
   const hasAlphaMark = state.treeUnlocks.includes("wolf-alpha-mark");
+  const hasPackBond  = state.treeUnlocks.includes("wolf-pack-bond");
+  const hasFurCoat   = state.treeUnlocks.includes("wolf-thick-fur");
+  const hasAncient   = state.treeUnlocks.includes("wolf-ancient");
 
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
     if (state.points < cost) return;
-    update((s) => ({
-      points: s.points - cost,
-      treeXP: s.treeXP + Math.floor(cost / 2),
-      treeUnlocks: s.treeUnlocks.includes(id) ? s.treeUnlocks : [...s.treeUnlocks, id],
-    }));
+    update((s) => {
+      // Ancient Instinct grants +10% XP on all purchases (not on itself)
+      const ancientOwned = s.treeUnlocks.includes("wolf-ancient");
+      const multiplier = ancientOwned && id !== "wolf-ancient" ? 1.1 : 1;
+      return {
+        points: s.points - cost,
+        treeXP: s.treeXP + Math.floor((cost / 2) * multiplier),
+        treeUnlocks: s.treeUnlocks.includes(id) ? s.treeUnlocks : [...s.treeUnlocks, id],
+      };
+    });
   };
 
   // ── Dev mode (triple-tap "Your Companion") ───────────────────────────────
@@ -2135,6 +2218,8 @@ function WolfPage({
                   <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
                 </div>
               </div>
+              {/* Active upgrade overlays — layered above the wolf, clipped by circle */}
+              <WolfUpgradeOverlays packBond={hasPackBond} furCoat={hasFurCoat} ancient={hasAncient} />
             </div>
 
           </div>
