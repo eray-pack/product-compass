@@ -1,11 +1,12 @@
 // Tree companion — 6 growth stages across a 90-day recovery journey.
-// Stages 0–3 use PNG assets (seed, sprout, sapling, young); stages 4–5 are rich SVG illustrations.
+// Stages 0–4 use PNG assets (seed, sprout, sapling, young, strong); stage 5 is a rich SVG illustration.
 // viewBox 0 0 100 130 for SVG stages.
 
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
 import treeStage2SaplingUrl from "@/assets/tree-stage2-sapling.png";
 import treeStage3YoungUrl from "@/assets/tree-stage3-young.png";
+import treeStage4StrongUrl from "@/assets/tree-stage4-strong.png";
 
 type P = { className?: string };
 const V = "0 0 100 130";
@@ -46,67 +47,12 @@ export function Tree3({ className }: P) {
   );
 }
 
-/* ── Stage 4 — Large strong tree (day 60–89) ─────────────────────────────── */
+/* ── Stage 4 — Strong (day 60–89) ──────────────────────────────────────── */
 export function Tree4({ className }: P) {
   return (
-    <svg viewBox={V} fill="none" className={className}>
-      <defs>
-        <radialGradient id="t4glow" cx="50%" cy="100%" r="65%">
-          <stop offset="0%" stopColor="#FFB300" stopOpacity="0.48"/>
-          <stop offset="55%" stopColor="#FF8F00" stopOpacity="0.18"/>
-          <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
-        </radialGradient>
-        <linearGradient id="t4trunk" x1="8%" y1="0%" x2="92%" y2="0%">
-          <stop offset="0%" stopColor="#C49A6C"/>
-          <stop offset="35%" stopColor="#8B5E3C"/>
-          <stop offset="100%" stopColor="#3E2008"/>
-        </linearGradient>
-      </defs>
-      <ellipse cx="50" cy="128" rx="55" ry="12" fill="url(#t4glow)"/>
-      <ellipse cx="50" cy="126" rx="49" ry="6.5" fill="#4E342E"/>
-      <ellipse cx="50" cy="124" rx="40" ry="5.5" fill="#5D4037"/>
-      {/* Spreading roots */}
-      <path d="M35 121 C25 113 12 113 6 122" stroke="#4E342E" strokeWidth="5.5" strokeLinecap="round"/>
-      <path d="M65 121 C75 113 88 113 94 122" stroke="#4E342E" strokeWidth="5.5" strokeLinecap="round"/>
-      <path d="M40 122 C34 113 25 110 20 118" stroke="#4E342E" strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M60 122 C66 113 75 110 80 118" stroke="#4E342E" strokeWidth="4.5" strokeLinecap="round"/>
-      {/* Thick trunk */}
-      <path d="M38 125 C35 99 37 76 39 55" stroke="url(#t4trunk)" strokeWidth="21" strokeLinecap="round"/>
-      {/* Bark texture detail */}
-      <path d="M42 122 C41 100 41.5 80 42.5 60" stroke="#A67C52" strokeWidth="2" fill="none" opacity="0.55"/>
-      <path d="M46 118 C45.5 98 46 78 46.5 60" stroke="#C49A6C" strokeWidth="1.4" fill="none" opacity="0.45"/>
-      <path d="M49 118 C49 98 49 78 49.5 60" stroke="#8B6040" strokeWidth="1" fill="none" opacity="0.3"/>
-      <path d="M54 116 C54 98 54 78 54.5 62" stroke="#6D4C41" strokeWidth="0.9" fill="none" opacity="0.28"/>
-      {/* Big branches */}
-      <path d="M40 101 C25 93 9 82 1 74" stroke="#5D3A1A" strokeWidth="7" strokeLinecap="round"/>
-      <path d="M41 86 C55 78 71 65 81 56" stroke="#5D3A1A" strokeWidth="7" strokeLinecap="round"/>
-      <path d="M40 73 C29 61 17 49 9 39" stroke="#5D3A1A" strokeWidth="6" strokeLinecap="round"/>
-      <path d="M60 65 C70 55 80 43 86 33" stroke="#5D3A1A" strokeWidth="6" strokeLinecap="round"/>
-      {/* Branch highlights */}
-      <path d="M40 101 C26 94 10 83 2 75" stroke="#A67C52" strokeWidth="1.2" fill="none" opacity="0.38"/>
-      <path d="M41 86 C56 79 72 66 82 57" stroke="#A67C52" strokeWidth="1" fill="none" opacity="0.35"/>
-      {/* Enormous crown */}
-      <circle cx="50" cy="36" r="38" fill="#1B5E20"/>
-      <circle cx="7" cy="61" r="24" fill="#1B5E20"/>
-      <circle cx="93" cy="51" r="24" fill="#1B5E20"/>
-      <circle cx="50" cy="30" r="32" fill="#2E7D32"/>
-      <circle cx="11" cy="53" r="22" fill="#2E7D32"/>
-      <circle cx="89" cy="43" r="22" fill="#2E7D32"/>
-      <circle cx="50" cy="24" r="27" fill="#388E3C"/>
-      <circle cx="25" cy="36" r="22" fill="#388E3C"/>
-      <circle cx="75" cy="31" r="22" fill="#388E3C"/>
-      <circle cx="50" cy="18" r="22" fill="#43A047"/>
-      <circle cx="32" cy="24" r="17" fill="#4CAF50"/>
-      <circle cx="68" cy="22" r="17" fill="#4CAF50"/>
-      {/* Canopy highlights — warm light catching top */}
-      <circle cx="50" cy="11" r="16" fill="#66BB6A" opacity="0.8"/>
-      <circle cx="40" cy="15" r="12" fill="#81C784" opacity="0.65"/>
-      <circle cx="60" cy="13" r="12" fill="#81C784" opacity="0.6"/>
-      <circle cx="50" cy="5" r="9" fill="#A5D6A7" opacity="0.55"/>
-      {/* Warm golden shimmer leaves */}
-      <circle cx="8" cy="50" r="4" fill="#FFE082" opacity="0.35"/>
-      <circle cx="92" cy="40" r="3.5" fill="#FFE082" opacity="0.3"/>
-    </svg>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <img src={treeStage4StrongUrl} alt="Strong tree" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center bottom" }} />
+    </div>
   );
 }
 

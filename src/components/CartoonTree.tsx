@@ -3,6 +3,7 @@ import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
 import treeStage2SaplingUrl from "@/assets/tree-stage2-sapling.png";
 import treeStage3YoungUrl from "@/assets/tree-stage3-young.png";
+import treeStage4StrongUrl from "@/assets/tree-stage4-strong.png";
 
 interface Props {
   day: number;
@@ -11,7 +12,7 @@ interface Props {
 
 /**
  * Illustrated cartoon tree — 6 growth stages driven by clean-day count.
- * Stages 0–3 use PNG assets (seed → sprout → sapling → young); stages 4–5 are SVG illustrations.
+ * Stages 0–4 use PNG assets (seed → sprout → sapling → young → strong); stage 5 is SVG.
  * Thresholds: 0 days=Seed, 3 days=Sprout, 14=Sapling, 30=Young, 60=Strong, 90=Ancient.
  */
 export function CartoonTree({ day }: Props) {
@@ -61,6 +62,17 @@ export function CartoonTree({ day }: Props) {
     );
   }
 
+  if (stage === 4) {
+    return (
+      <img
+        src={treeStage4StrongUrl}
+        alt="Strong tree"
+        style={{ height: "96%", width: "auto", objectFit: "contain" }}
+        aria-hidden
+      />
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 400 300"
@@ -70,55 +82,8 @@ export function CartoonTree({ day }: Props) {
       style={{ display: "block" }}
       aria-hidden
     >
-      {stage === 4 && <StrongTree />}
       {stage >= 5 && <AncientTree />}
     </svg>
-  );
-}
-
-// ── Stage 4 — Strong Tree ─────────────────────────────────────────────────────
-function StrongTree() {
-  return (
-    <g transform="translate(200, 268) scale(1.01)">
-      {/* Ground */}
-      <ellipse cx="0" cy="0" rx="80" ry="11" fill="#285223" opacity="0.80" />
-      {/* Roots */}
-      <path d="M -11 0 Q -32 6 -46 4" stroke="#543018" strokeWidth="5.5" strokeLinecap="round" />
-      <path d="M 11 0 Q 32 6 46 4"   stroke="#543018" strokeWidth="5.5" strokeLinecap="round" />
-      <path d="M -5 0 Q -11 8 -17 10" stroke="#543018" strokeWidth="4"   strokeLinecap="round" />
-      <path d="M 5 0 Q 11 8 17 10"   stroke="#543018" strokeWidth="4"   strokeLinecap="round" />
-
-      {/* Trunk */}
-      <path d="M -16 0 Q -12 -68 -6 -138 Q 6 -68 16 0 Z" fill="#5C3A1E" />
-      <path d="M -6 0 Q -4 -68 0 -138" stroke="#7A5030" strokeWidth="1.5" opacity="0.28" strokeLinecap="round" />
-      {/* Bark lines */}
-      <path d="M -13 -22 Q 2 -24 9 -20"  stroke="#7A5030" strokeWidth="1.5" opacity="0.28" strokeLinecap="round" />
-      <path d="M -14 -50 Q 0 -53 10 -48" stroke="#7A5030" strokeWidth="1.5" opacity="0.25" strokeLinecap="round" />
-
-      {/* Branches */}
-      <path d="M -11 -88 Q -52 -99 -50 -120"  stroke="#5C3A1E" strokeWidth="11" strokeLinecap="round" />
-      <path d="M -50 -120 Q -64 -133 -58 -150" stroke="#5C3A1E" strokeWidth="7.5" strokeLinecap="round" />
-      <path d="M 11 -92  Q 50 -102 48 -122"   stroke="#5C3A1E" strokeWidth="10.5" strokeLinecap="round" />
-      <path d="M 48 -122 Q 60 -135 54 -153"   stroke="#5C3A1E" strokeWidth="7"   strokeLinecap="round" />
-      <path d="M -4 -118 Q -25 -135 -21 -152"  stroke="#5C3A1E" strokeWidth="7.5" strokeLinecap="round" />
-      <path d="M 4 -120  Q 24 -137 20 -154"   stroke="#5C3A1E" strokeWidth="7"   strokeLinecap="round" />
-
-      {/* Crown */}
-      <ellipse cx="0"   cy="-170" rx="66" ry="43" fill="#336642" />
-      <ellipse cx="-48" cy="-150" rx="40" ry="29" fill="#3D7A4E" />
-      <ellipse cx="48"  cy="-152" rx="37" ry="28" fill="#3B784C" />
-      <ellipse cx="-62" cy="-163" rx="23" ry="17" fill="#3E7E50" />
-      <ellipse cx="62"  cy="-165" rx="22" ry="16" fill="#3C7C4E" />
-      <ellipse cx="-25" cy="-196" rx="31" ry="22" fill="#44885A" />
-      <ellipse cx="25"  cy="-194" rx="29" ry="21" fill="#428656" />
-      <ellipse cx="0"   cy="-208" rx="38" ry="25" fill="#4E9662" />
-      <ellipse cx="-12" cy="-224" rx="21" ry="14" fill="#58A06C" />
-      <ellipse cx="12"  cy="-220" rx="19" ry="13" fill="#569E6A" />
-      <ellipse cx="0"   cy="-228" rx="15" ry="10" fill="#60AA72" />
-      {/* Highlights */}
-      <ellipse cx="-18" cy="-230" rx="12" ry="8"  fill="#80C892" opacity="0.38" />
-      <ellipse cx="10"  cy="-220" rx="9"  ry="6"  fill="#80C892" opacity="0.26" />
-    </g>
   );
 }
 
