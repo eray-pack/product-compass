@@ -2317,16 +2317,134 @@ function WolfPage({
     }));
   };
 
+  // ── Dev mode (triple-tap "Your Companion") ───────────────────────────────
+  const [wolfDevMode, setWolfDevMode] = useState(false);
+  const wolfDevTapCount = useRef(0);
+  const wolfDevTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function handleWolfDevTap() {
+    wolfDevTapCount.current += 1;
+    if (wolfDevTapTimer.current) clearTimeout(wolfDevTapTimer.current);
+    wolfDevTapTimer.current = setTimeout(() => { wolfDevTapCount.current = 0; }, 600);
+    if (wolfDevTapCount.current >= 3) {
+      wolfDevTapCount.current = 0;
+      setWolfDevMode((v) => !v);
+    }
+  }
+  const WOLF_XP_STAGES = [
+    { label: "🐺 Seed",       xp: 0    },
+    { label: "🐾 Pup",        xp: 400  },
+    { label: "🌑 Adolescent", xp: 800  },
+    { label: "👁 Adult",      xp: 1200 },
+    { label: "⚡ Alpha",      xp: 1600 },
+    { label: "✨ Ancient",    xp: 2000 },
+  ];
 
   return (
     <PageShell>
       <header className="px-6 pt-12">
-        <p style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 700, fontStyle: "italic", color: "#C9A84C", letterSpacing: 0, margin: 0 }}>Your Companion</p>
+        <div onClick={handleWolfDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
+          <p style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 700, fontStyle: "italic", color: "#C9A84C", letterSpacing: 0, margin: 0 }}>Your Companion</p>
+        </div>
         <h1 className="mt-2 text-3xl font-bold">Your Wolf</h1>
         <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
           This wolf is yours. Every clean day makes it stronger.
         </p>
       </header>
+
+      {/* ── Dev panel (triple-tap "Your Companion" to toggle) ────────────── */}
+      {wolfDevMode && (
+        <div style={{
+          margin: "8px 16px 0",
+          padding: "14px 16px",
+          borderRadius: 16,
+          background: "rgba(20,20,20,0.92)",
+          border: "1px solid rgba(255,80,80,0.35)",
+          backdropFilter: "blur(16px)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", color: "#ff5555", textTransform: "uppercase" }}>
+              🛠 Dev Mode
+            </span>
+            <button onClick={() => setWolfDevMode(false)} style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>✕</button>
+          </div>
+
+          {/* Stage jumper */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Jump to stage</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+            {WOLF_XP_STAGES.map((s) => {
+              const active = state.treeXP >= s.xp && (s.xp === 2000 ? state.treeXP >= 2000 : state.treeXP < s.xp + 400);
+              return (
+                <button key={s.xp} onClick={() => update(() => ({ treeXP: s.xp }))}
+                  style={{
+                    fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer",
+                    background: active ? "rgba(201,168,76,0.25)" : "rgba(255,255,255,0.06)",
+                    border: active ? "1px solid rgba(201,168,76,0.6)" : "1px solid rgba(255,255,255,0.12)",
+                    color: active ? "#C9A84C" : "rgba(255,255,255,0.7)",
+                    fontWeight: active ? 700 : 400,
+                  }}>
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Credits */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Credits</p>
+          <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+            {[25, 100, 500].map((n) => (
+              <button key={n} onClick={() => update((s) => ({ points: s.points + n }))}
+                style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#C9A84C" }}>
+                +{n}
+              </button>
+            ))}
+            <button onClick={() => update(() => ({ points: 0 }))}
+              style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
+              Reset
+            </button>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginLeft: 4 }}>{state.points} credits</span>
+          </div>
+
+          {/* Upgrades */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Upgrades</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+            {WOLF_UPGRADES.map((u) => {
+              const owned = state.treeUnlocks.includes(u.id);
+              return (
+                <button key={u.id} onClick={() => update((s) => ({
+                  treeUnlocks: owned ? s.treeUnlocks.filter((x) => x !== u.id) : [...s.treeUnlocks, u.id],
+                }))}
+                  style={{
+                    fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer",
+                    background: owned ? "rgba(63,184,106,0.18)" : "rgba(255,255,255,0.06)",
+                    border: owned ? "1px solid rgba(63,184,106,0.5)" : "1px solid rgba(255,255,255,0.12)",
+                    color: owned ? "#3fb86a" : "rgba(255,255,255,0.55)",
+                  }}>
+                  {owned ? "✓ " : ""}{u.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* PRO + Reset all */}
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => update((s) => ({ isPremium: !s.isPremium }))}
+              style={{
+                fontSize: 11, padding: "6px 14px", borderRadius: 8, cursor: "pointer",
+                background: state.isPremium ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.06)",
+                border: state.isPremium ? "1px solid rgba(201,168,76,0.5)" : "1px solid rgba(255,255,255,0.15)",
+                color: state.isPremium ? "#C9A84C" : "rgba(255,255,255,0.55)",
+                fontWeight: 600,
+              }}>
+              {state.isPremium ? "✓ PRO" : "PRO off"}
+            </button>
+            <button onClick={() => update(() => ({ treeXP: 0, points: 0, treeUnlocks: [], lastDailyClaimDate: "" }))}
+              style={{ fontSize: 11, padding: "6px 14px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.1)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff7777", fontWeight: 600 }}>
+              Reset all
+            </button>
+          </div>
+        </div>
+      )}
+
 
       {/* Wolf scene */}
       <section className="mt-4 relative" style={{ height: 380 }}>
