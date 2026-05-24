@@ -41,21 +41,18 @@ const WOLF_UPGRADES = [
   { id: "wolf-ancient",      name: "Ancient instinct", desc: "Permanent +10% XP from every challenge",        costPoints: 400, costMoney: 6.99, pro: true },
 ];
 
-const WOLF_RANK_BY_STAGE = ["Beginning", "Awakening", "Building", "Established", "Rising", "Fierce", "Dominant", "Legendary"];
-const WOLF_TOP_PCT_BY_STAGE = [82, 66, 50, 38, 25, 14, 6, 1];
+const WOLF_RANK_BY_STAGE = ["Pup", "Awakening", "Building", "Shadow", "Spirit", "Transcendent"];
 
-// XP thresholds per wolf stage — mirrors treeStage() in store.ts
-const WOLF_XP_PREV = [0, 100, 250, 500, 1000, 1750, 2750, 4000] as const;
+// XP thresholds per wolf stage — 6 stages, 0-399 / 400-799 / 800-1199 / 1200-1599 / 1600-1999 / 2000+
+const WOLF_XP_PREV = [0, 400, 800, 1200, 1600, 2000] as const;
 
-function wolfXPStage(xp: number): { stage: 0|1|2|3|4|5|6|7; name: string; next: number } {
-  if (xp < 100)  return { stage: 0, name: "Newborn",    next: 100  };
-  if (xp < 250)  return { stage: 1, name: "Pup",        next: 250  };
-  if (xp < 500)  return { stage: 2, name: "Young",      next: 500  };
-  if (xp < 1000) return { stage: 3, name: "Adolescent", next: 1000 };
-  if (xp < 1750) return { stage: 4, name: "Adult",      next: 1750 };
-  if (xp < 2750) return { stage: 5, name: "Strong",     next: 2750 };
-  if (xp < 4000) return { stage: 6, name: "Alpha",      next: 4000 };
-  return { stage: 7, name: "Legendary", next: xp };
+function wolfXPStage(xp: number): { stage: 0|1|2|3|4|5; name: string; next: number } {
+  if (xp < 400)  return { stage: 0, name: "Newborn Pup",        next: 400  };
+  if (xp < 800)  return { stage: 1, name: "Juvenile",           next: 800  };
+  if (xp < 1200) return { stage: 2, name: "Adolescent",         next: 1200 };
+  if (xp < 1600) return { stage: 3, name: "Shadow Wolf",        next: 1600 };
+  if (xp < 2000) return { stage: 4, name: "Spirit Glow",        next: 2000 };
+  return { stage: 5, name: "Transcendent Alpha", next: xp };
 }
 
 // ── Deterministic star positions (avoids jitter on re-render) ─────────────────
@@ -2305,7 +2302,7 @@ function WolfPage({
   const wolfStage = wolfXPStage(state.treeXP);
   const prevThreshold = WOLF_XP_PREV[wolfStage.stage];
   const pct =
-    wolfStage.stage >= 7
+    wolfStage.stage >= 5
       ? 100
       : Math.min(100, ((state.treeXP - prevThreshold) / (wolfStage.next - prevThreshold)) * 100);
   const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);

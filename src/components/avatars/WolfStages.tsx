@@ -7,6 +7,9 @@
 import wolfStage1Url from "@/assets/wolf-stage1-transparent.png";
 import wolfStage2Url from "@/assets/wolf-stage2-transparent.png";
 import wolfStage3Url from "@/assets/wolf-stage3-transparent.png";
+import wolfStage4Url from "@/assets/wolf-stage4-transparent.png";
+import wolfStage5Url from "@/assets/wolf-stage5-transparent.png";
+import wolfStage6Url from "@/assets/wolf-stage6-transparent.png";
 
 type P = { className?: string };
 const GOLD = "#C4873A"; // CartoonTree golden element colour
@@ -89,60 +92,65 @@ function Wolf0({ className }: P) {
   );
 }
 
-// ── Stage 1–3: Transparent PNG wolf, large, centred on dark background ──────
+// ── Stages 1–6: Transparent PNG wolves, bottom-anchored inside circle ────────
+
+// Stage 1 — Newborn Pup (baby wolf)
 function Wolf1({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage1Url} alt="Wolf stage 1" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
+      <img src={wolfStage1Url} alt="Newborn Pup" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
 
+// Stage 2 — Juvenile
 function Wolf2({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage2Url} alt="Wolf stage 2" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
+      <img src={wolfStage2Url} alt="Juvenile Wolf" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
 
+// Stage 3 — Adolescent
 function Wolf3({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage3Url} alt="Wolf stage 3" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
+      <img src={wolfStage3Url} alt="Adolescent Wolf" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
 
-// ── Stages 4–7: transparent stage-3 PNG placeholder, large, centred ─────────
+// Stage 4 — Shadow Wolf
 function Wolf4({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage3Url} alt="Wolf stage 4" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
+      <img src={wolfStage4Url} alt="Shadow Wolf" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
 
+// Stage 5 — Spirit Glow
 function Wolf5({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage3Url} alt="Wolf stage 5" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
+      <img src={wolfStage5Url} alt="Spirit Glow Wolf" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
 
+// Stage 6 — Transcendent Alpha (spirit wolf + golden aura glow)
 function Wolf6({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage3Url} alt="Wolf stage 6" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
-    </div>
-  );
-}
-
-function Wolf7({ className }: P) {
-  return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage3Url} alt="Wolf stage 7" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
+      <img
+        src={wolfStage6Url}
+        alt="Transcendent Alpha Wolf"
+        style={{
+          width: "130%", height: "130%", objectFit: "contain", objectPosition: "center bottom",
+          filter: "drop-shadow(0 0 18px rgba(196,135,58,0.85)) drop-shadow(0 0 40px rgba(196,135,58,0.45)) brightness(1.12)",
+        }}
+      />
     </div>
   );
 }
@@ -297,4 +305,5 @@ export function WolfSittingPreview({ className }: { className?: string }) {
   );
 }
 
-export const WOLF_STAGES = [Wolf0, Wolf1, Wolf2, Wolf3, Wolf4, Wolf5, Wolf6, Wolf7] as const;
+// Stage 0 (internal index 0) = Stage 1 Newborn Pup — Wolf0 SVG replaced by Wolf1 image
+export const WOLF_STAGES = [Wolf1, Wolf2, Wolf3, Wolf4, Wolf5, Wolf6] as const;

@@ -24,17 +24,15 @@ export function dayToStage(day: number): 0 | 1 | 2 | 3 | 4 | 5 {
   return 0;
 }
 
-// Wolf: 8 stages (0–7)
-export const WOLF_STAGE_DAYS = [0, 3, 7, 14, 30, 45, 60, 90] as const;
+// Wolf: 6 stages (0–5)
+export const WOLF_STAGE_DAYS = [0, 7, 14, 30, 60, 90] as const;
 
-export function wolfDayToStage(day: number): 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 {
-  if (day >= 90) return 7;
-  if (day >= 60) return 6;
-  if (day >= 45) return 5;
-  if (day >= 30) return 4;
-  if (day >= 14) return 3;
-  if (day >= 7)  return 2;
-  if (day >= 3)  return 1;
+export function wolfDayToStage(day: number): 0 | 1 | 2 | 3 | 4 | 5 {
+  if (day >= 90) return 5;
+  if (day >= 60) return 4;
+  if (day >= 30) return 3;
+  if (day >= 14) return 2;
+  if (day >= 7)  return 1;
   return 0;
 }
 
