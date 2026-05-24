@@ -85,240 +85,93 @@ function Wolf0({ className }: P) {
   );
 }
 
-// ── Stage 1: Small pup — slightly larger, more defined stride ─────────────────
+// ── Stage 1: Local wolf image inside golden circle ────────────────────────────
 function Wolf1({ className }: P) {
   return (
-    <svg viewBox="0 0 400 300" width="100%" height="100%" fill="none"
-      style={{ display: "block" }} aria-hidden className={className}>
-      <g transform="translate(200, 268) scale(2.0)">
-        {/* Ground mound */}
-        <ellipse cx="0" cy="0" rx="36" ry="5.5" fill="#2D3824" opacity="0.68" />
-        {/* Golden disc */}
-        <ellipse cx="0" cy="-1" rx="30" ry="3.5" fill={GOLD} opacity="0.14" />
-
-        {/* Tail — sway */}
-        <g>
-          {/* @ts-ignore */}
-          <animateTransform attributeName="transform" type="rotate"
-            values="-10 -20 -40; 10 -20 -40; -10 -20 -40"
-            keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite"
-            calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
-          <path d="M -20 -40 Q -38 -46 -42 -66 Q -44 -78 -36 -80"
-            stroke="#B4BBC6" strokeWidth="10" strokeLinecap="round" fill="none"/>
-          <path d="M -20 -40 Q -37 -47 -41 -66 Q -43 -76 -35 -78"
-            stroke="#D4D8E4" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.50"/>
-          {/* Tail tip puff */}
-          <ellipse cx="-35" cy="-79" rx="8" ry="6" fill="#C8CCD8"/>
-          <ellipse cx="-33" cy="-81" rx="5" ry="4" fill="#DDE1EC" opacity="0.60"/>
-        </g>
-
-        {/* Far back leg (forward) */}
-        <path d="M -11 -33 Q -5 -20 -3 -7" stroke="#A8B0BC" strokeWidth="8" strokeLinecap="round" fill="none"/>
-        <ellipse cx="-3" cy="-5" rx="8" ry="4" fill="#A4ACB8"/>
-        {/* Far front leg (backward) */}
-        <path d="M 13 -34 Q 8 -20 4 -7" stroke="#A8B0BC" strokeWidth="8" strokeLinecap="round" fill="none"/>
-        <ellipse cx="4" cy="-5" rx="8" ry="4" fill="#A4ACB8"/>
-
-        {/* Body */}
-        <ellipse cx="0" cy="-47" rx="28" ry="17" fill="#C8CDD8"/>
-        {/* Belly */}
-        <ellipse cx="5" cy="-44" rx="15" ry="10" fill="#E2E6EE" opacity="0.68"/>
-        {/* Back fur stroke */}
-        <path d="M -24 -58 Q -8 -62 10 -58 Q 22 -60 28 -55"
-          stroke="#B4BBC6" strokeWidth="1.5" fill="none" opacity="0.42"/>
-
-        {/* Near back leg (backward) */}
-        <path d="M -11 -33 Q -19 -20 -24 -7" stroke="#BCC2CC" strokeWidth="9" strokeLinecap="round" fill="none"/>
-        <ellipse cx="-24" cy="-5" rx="9" ry="4.5" fill="#B4BAC6"/>
-        {/* Near front leg (forward) */}
-        <path d="M 13 -34 Q 21 -20 26 -7" stroke="#BCC2CC" strokeWidth="9" strokeLinecap="round" fill="none"/>
-        <ellipse cx="26" cy="-5" rx="9" ry="4.5" fill="#B4BAC6"/>
-
-        {/* Neck */}
-        <ellipse cx="26" cy="-56" rx="13" ry="10" fill="#C4C9D4"/>
-
-        {/* Head */}
-        <ellipse cx="40" cy="-64" rx="22" ry="17" fill="#C8CDD8"/>
-
-        {/* Ear */}
-        <polygon points="30,-62 26,-86 42,-70" fill="#B8BEC8"/>
-        <polygon points="31,-63 28,-82 41,-71" fill="#C4A0A8" opacity="0.62"/>
-
-        {/* Snout */}
-        <ellipse cx="57" cy="-59" rx="14" ry="9" fill="#BCC2CC"/>
-        {/* Nose */}
-        <ellipse cx="68" cy="-61" rx="4" ry="3" fill="#1A1E2A"/>
-        <circle cx="66.5" cy="-63" r="1.4" fill="#FFF" opacity="0.20"/>
-
-        {/* Eye — blue */}
-        <circle cx="44" cy="-68" r="5" fill="#1A2434"/>
-        <circle cx="44" cy="-68" r="3.2" fill="#3474C0"/>
-        <circle cx="45.8" cy="-69.8" r="1.3" fill="#FFF" opacity="0.78"/>
-
-        {/* Mouth */}
-        <path d="M 66 -56 Q 63 -53 59 -54" stroke="#384450" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-      </g>
-    </svg>
+    <div
+      className={className}
+      style={{
+        position: "relative", width: "100%", height: "100%",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+    >
+      {/* Golden circle — matches CartoonTree golden disc */}
+      <div style={{
+        position: "absolute",
+        width: "78%", height: "78%", borderRadius: "50%",
+        background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`,
+        boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)`,
+      }} />
+      {/* Wolf image */}
+      <img
+        src="/wolf-stage1.jpg"
+        alt="Wolf stage 1"
+        style={{
+          position: "relative", zIndex: 1,
+          width: "92%", height: "92%", objectFit: "contain",
+        }}
+      />
+    </div>
   );
 }
 
-// ── Stage 2: Young wolf — longer body, taller ears, bolder stride ─────────────
+// ── Stage 2: Local wolf image inside golden circle ────────────────────────────
 function Wolf2({ className }: P) {
   return (
-    <svg viewBox="0 0 400 300" width="100%" height="100%" fill="none"
-      style={{ display: "block" }} aria-hidden className={className}>
-      <g transform="translate(200, 268) scale(1.60)">
-        {/* Ground mound */}
-        <ellipse cx="0" cy="0" rx="44" ry="6" fill="#2D3824" opacity="0.70" />
-        {/* Golden disc */}
-        <ellipse cx="0" cy="-1" rx="38" ry="4" fill={GOLD} opacity="0.20" />
-
-        {/* Tail — bushy, sway */}
-        <g>
-          {/* @ts-ignore */}
-          <animateTransform attributeName="transform" type="rotate"
-            values="-10 -26 -50; 10 -26 -50; -10 -26 -50"
-            keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite"
-            calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
-          <path d="M -26 -50 Q -48 -58 -54 -82 Q -56 -96 -46 -100"
-            stroke="#9BA3AF" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <path d="M -26 -50 Q -47 -59 -53 -82 Q -55 -94 -45 -98"
-            stroke="#C4CAD4" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.45"/>
-          <ellipse cx="-45" cy="-99" rx="9" ry="7" fill="#B0B8C4"/>
-          <ellipse cx="-43" cy="-101" rx="5.5" ry="4.5" fill="#CCCCD8" opacity="0.58"/>
-        </g>
-
-        {/* Far back leg (forward) */}
-        <path d="M -14 -36 Q -6 -22 -2 -7" stroke="#909AA6" strokeWidth="9" strokeLinecap="round" fill="none"/>
-        <ellipse cx="-2" cy="-5" rx="9" ry="4.5" fill="#8E98A4"/>
-        {/* Far front leg (backward) */}
-        <path d="M 16 -37 Q 9 -22 4 -7" stroke="#909AA6" strokeWidth="9" strokeLinecap="round" fill="none"/>
-        <ellipse cx="4" cy="-5" rx="9" ry="4.5" fill="#8E98A4"/>
-
-        {/* Body */}
-        <ellipse cx="0" cy="-55" rx="34" ry="20" fill="#B4BCC8"/>
-        {/* Belly */}
-        <ellipse cx="6" cy="-52" rx="18" ry="12" fill="#D4D8E4" opacity="0.65"/>
-        {/* Back fur texture */}
-        <path d="M -30 -68 Q -10 -73 12 -68 Q 26 -71 34 -65"
-          stroke="#9EA6B2" strokeWidth="1.8" fill="none" opacity="0.45"/>
-
-        {/* Near back leg (backward) */}
-        <path d="M -14 -36 Q -24 -22 -30 -7" stroke="#A8B0BC" strokeWidth="11" strokeLinecap="round" fill="none"/>
-        <ellipse cx="-30" cy="-5" rx="11" ry="5" fill="#A0A8B4"/>
-        {/* Near front leg (forward) */}
-        <path d="M 16 -37 Q 26 -22 32 -7" stroke="#A8B0BC" strokeWidth="11" strokeLinecap="round" fill="none"/>
-        <ellipse cx="32" cy="-5" rx="11" ry="5" fill="#A0A8B4"/>
-
-        {/* Chest highlight */}
-        <ellipse cx="30" cy="-58" rx="12" ry="14" fill="#C8D0DC" opacity="0.32"/>
-
-        {/* Neck */}
-        <ellipse cx="32" cy="-67" rx="15" ry="11" fill="#B0B8C4"/>
-
-        {/* Head */}
-        <ellipse cx="50" cy="-78" rx="26" ry="20" fill="#B4BCC8"/>
-
-        {/* Ear — taller, wolf-ish */}
-        <polygon points="38,-76 33,-106 54,-84" fill="#A0A8B4"/>
-        <polygon points="39,-77 35,-102 52,-85" fill="#C4A0A8" opacity="0.62"/>
-
-        {/* Snout */}
-        <ellipse cx="70" cy="-72" rx="17" ry="11" fill="#A4ACB8"/>
-        {/* Nose */}
-        <ellipse cx="83" cy="-74" rx="4.5" ry="3.5" fill="#1A1E2A"/>
-        <circle cx="81.5" cy="-76.5" r="1.6" fill="#FFF" opacity="0.20"/>
-
-        {/* Eye — clear blue */}
-        <circle cx="55" cy="-83" r="5.5" fill="#1A2434"/>
-        <circle cx="55" cy="-83" r="3.5" fill="#3474C0"/>
-        <circle cx="57" cy="-85" r="1.5" fill="#FFF" opacity="0.78"/>
-
-        {/* Mouth */}
-        <path d="M 80 -69 Q 77 -66 73 -67" stroke="#384450" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      </g>
-    </svg>
+    <div
+      className={className}
+      style={{
+        position: "relative", width: "100%", height: "100%",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+    >
+      {/* Golden circle — matches CartoonTree golden disc */}
+      <div style={{
+        position: "absolute",
+        width: "78%", height: "78%", borderRadius: "50%",
+        background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`,
+        boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)`,
+      }} />
+      {/* Wolf image */}
+      <img
+        src="/wolf-stage2.jpg"
+        alt="Wolf stage 2"
+        style={{
+          position: "relative", zIndex: 1,
+          width: "92%", height: "92%", objectFit: "contain",
+        }}
+      />
+    </div>
   );
 }
 
-// ── Stage 3: Adolescent — stronger body, raised tail, confident ───────────────
+// ── Stage 3: Local wolf image inside golden circle ────────────────────────────
 function Wolf3({ className }: P) {
   return (
-    <svg viewBox="0 0 400 300" width="100%" height="100%" fill="none"
-      style={{ display: "block" }} aria-hidden className={className}>
-      <g transform="translate(200, 268) scale(1.28)">
-        {/* Ground mound */}
-        <ellipse cx="0" cy="0" rx="52" ry="6.5" fill="#2D3824" opacity="0.72" />
-        {/* Golden disc */}
-        <ellipse cx="0" cy="-2" rx="46" ry="5" fill={GOLD} opacity="0.27" />
-
-        {/* Tail — raised, sway */}
-        <g>
-          {/* @ts-ignore */}
-          <animateTransform attributeName="transform" type="rotate"
-            values="-9 -30 -60; 9 -30 -60; -9 -30 -60"
-            keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite"
-            calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
-          <path d="M -30 -60 Q -55 -70 -62 -98 Q -65 -116 -54 -120"
-            stroke="#787F8C" strokeWidth="13" strokeLinecap="round" fill="none"/>
-          <path d="M -30 -60 Q -54 -71 -61 -98 Q -64 -114 -53 -118"
-            stroke="#B0B8C2" strokeWidth="5.5" strokeLinecap="round" fill="none" opacity="0.40"/>
-          <ellipse cx="-53" cy="-119" rx="10" ry="8" fill="#8A929E"/>
-          <ellipse cx="-51" cy="-121" rx="6" ry="5" fill="#BCC0CA" opacity="0.55"/>
-        </g>
-
-        {/* Far back leg (forward) */}
-        <path d="M -16 -39 Q -8 -24 -4 -7" stroke="#70788A" strokeWidth="10" strokeLinecap="round" fill="none"/>
-        <ellipse cx="-4" cy="-5" rx="10" ry="5" fill="#6E7888"/>
-        {/* Far front leg (backward) */}
-        <path d="M 18 -40 Q 11 -24 6 -7" stroke="#70788A" strokeWidth="10" strokeLinecap="round" fill="none"/>
-        <ellipse cx="6" cy="-5" rx="10" ry="5" fill="#6E7888"/>
-
-        {/* Body */}
-        <ellipse cx="0" cy="-63" rx="39" ry="24" fill="#909AA8"/>
-        {/* Belly */}
-        <ellipse cx="7" cy="-59" rx="21" ry="14" fill="#B8C0CC" opacity="0.45"/>
-        {/* Back fur strokes */}
-        <path d="M -35 -78 Q -12 -84 12 -80 Q 28 -82 39 -76"
-          stroke="#7A8290" strokeWidth="2" fill="none" opacity="0.48"/>
-        <path d="M -34 -70 Q -12 -76 12 -72 Q 27 -74 38 -68"
-          stroke="#7A8290" strokeWidth="1.5" fill="none" opacity="0.35"/>
-
-        {/* Near back leg (backward) */}
-        <path d="M -16 -39 Q -28 -24 -36 -7" stroke="#8A929E" strokeWidth="12" strokeLinecap="round" fill="none"/>
-        <ellipse cx="-36" cy="-5" rx="12" ry="5.5" fill="#828A96"/>
-        {/* Near front leg (forward) */}
-        <path d="M 18 -40 Q 30 -24 38 -7" stroke="#8A929E" strokeWidth="12" strokeLinecap="round" fill="none"/>
-        <ellipse cx="38" cy="-5" rx="12" ry="5.5" fill="#828A96"/>
-
-        {/* Chest highlight */}
-        <ellipse cx="36" cy="-68" rx="14" ry="18" fill="#B4BCC6" opacity="0.28"/>
-
-        {/* Neck */}
-        <ellipse cx="38" cy="-80" rx="17" ry="12" fill="#8A929E"/>
-
-        {/* Head */}
-        <ellipse cx="59" cy="-92" rx="30" ry="23" fill="#909AA8"/>
-
-        {/* Ear */}
-        <polygon points="46,-90 40,-124 62,-99" fill="#808892"/>
-        <polygon points="47,-91 43,-120 60,-100" fill="#C4A0A8" opacity="0.62"/>
-
-        {/* Snout */}
-        <ellipse cx="82" cy="-86" rx="20" ry="13" fill="#808892"/>
-        {/* Nose */}
-        <ellipse cx="98" cy="-88" rx="5.5" ry="4" fill="#181C28"/>
-        <circle cx="96" cy="-91" r="2" fill="#FFF" opacity="0.18"/>
-
-        {/* Eye — blue */}
-        <circle cx="65" cy="-99" r="6" fill="#18222E"/>
-        <circle cx="65" cy="-99" r="4" fill="#3474C0"/>
-        <circle cx="67" cy="-101" r="1.6" fill="#FFF" opacity="0.80"/>
-
-        {/* Mouth */}
-        <path d="M 96 -82 Q 92 -79 87 -80" stroke="#303C48" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      </g>
-    </svg>
+    <div
+      className={className}
+      style={{
+        position: "relative", width: "100%", height: "100%",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+    >
+      {/* Golden circle — matches CartoonTree golden disc */}
+      <div style={{
+        position: "absolute",
+        width: "78%", height: "78%", borderRadius: "50%",
+        background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`,
+        boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)`,
+      }} />
+      {/* Wolf image */}
+      <img
+        src="/wolf-stage3.jpg"
+        alt="Wolf stage 3"
+        style={{
+          position: "relative", zIndex: 1,
+          width: "92%", height: "92%", objectFit: "contain",
+        }}
+      />
+    </div>
   );
 }
 

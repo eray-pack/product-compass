@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe, Loader2 } from "lucide-react";
+import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Wolf3D } from "@/components/Wolf3D";
 import { CartoonTree } from "@/components/CartoonTree";
@@ -2321,38 +2321,15 @@ function WolfPage({
     }));
   };
 
-  const [wolfStyle, setWolfStyle] = useState<"3d" | "cartoon" | "ai">(() => {
-    try { return (localStorage.getItem("stopamine.wolf-style") as "3d" | "cartoon" | "ai") ?? "cartoon"; }
+  const [wolfStyle, setWolfStyle] = useState<"3d" | "cartoon">(() => {
+    try { return (localStorage.getItem("stopamine.wolf-style") as "3d" | "cartoon") ?? "cartoon"; }
     catch { return "cartoon"; }
   });
 
-  function toggleWolfStyle(s: "3d" | "cartoon" | "ai") {
+  function toggleWolfStyle(s: "3d" | "cartoon") {
     setWolfStyle(s);
     try { localStorage.setItem("stopamine.wolf-style", s); } catch {}
   }
-
-  const [wolfImageUrl, setWolfImageUrl] = useState<string | null>(null);
-  const [wolfImageLoading, setWolfImageLoading] = useState(false);
-  const [wolfImageError, setWolfImageError] = useState<string | null>(null);
-  const wolfImageFetched = useRef(false);
-
-  useEffect(() => {
-    if (wolfStyle !== "ai" || wolfImageFetched.current) return;
-    wolfImageFetched.current = true;
-    setWolfImageLoading(true);
-    setWolfImageError(null);
-    fetch("/api/fal-wolf", { method: "POST" })
-      .then((r) => r.json() as Promise<{ url?: string; error?: string }>)
-      .then((data) => {
-        if (data.url) {
-          setWolfImageUrl(data.url);
-        } else {
-          setWolfImageError(data.error ?? "Unknown error");
-        }
-      })
-      .catch(() => setWolfImageError("Network error"))
-      .finally(() => setWolfImageLoading(false));
-  }, [wolfStyle]);
 
   return (
     <PageShell>
@@ -2394,7 +2371,7 @@ function WolfPage({
             background: "rgba(0,0,0,0.40)", border: "1px solid rgba(255,255,255,0.09)",
             backdropFilter: "blur(10px)",
           }}>
-            {(["cartoon", "3d", "ai"] as const).map((opt) => (
+            {(["cartoon", "3d"] as const).map((opt) => (
               <button
                 key={opt}
                 onClick={() => toggleWolfStyle(opt)}
@@ -2407,7 +2384,7 @@ function WolfPage({
                   cursor: "pointer", transition: "all 0.18s",
                 }}
               >
-                {opt === "3d" ? "3D" : opt === "ai" ? "AI" : "Cartoon"}
+                {opt === "3d" ? "3D" : "Cartoon"}
               </button>
             ))}
           </div>
@@ -2421,7 +2398,7 @@ function WolfPage({
               <Wolf3D stage={wolfStage.stage} />
             </div>
           ) : (
-            /* Cartoon / AI: centered scene inside circle */
+            /* Cartoon: oval scene — forest night inside circle, edges fade into black */
             <div className="absolute inset-0 flex items-center justify-center z-10">
               {/* Single 240px anchor — rings + oval positioned relative to this */}
               <div style={{ position: "relative", width: 240, height: 240, flexShrink: 0 }}>
@@ -2429,15 +2406,14 @@ function WolfPage({
                 {/* ── Badge-style glow ring — identical system as cartoon tree ── */}
                 {(() => {
                   const glowBase = (
-                    wolfStyle === "ai"           ? "rgba(196,135,58,"  :
-                    healthState === "thriving"   ? "rgba(63,184,106,"  :
-                    healthState === "growing"    ? "rgba(143,190,90,"  :
-                    healthState === "fading"     ? "rgba(201,168,76,"  :
-                                                   "rgba(122,106,90,"
+                    healthState === "thriving"  ? "rgba(63,184,106,"  :
+                    healthState === "growing"   ? "rgba(143,190,90,"  :
+                    healthState === "fading"    ? "rgba(201,168,76,"  :
+                                                 "rgba(122,106,90,"
                   );
                   return (
                     <>
-                      {/* Atmospheric halo */}
+                      {/* Atmospheric halo — diffuse glow sitting outside the circle */}
                       <motion.div
                         aria-hidden
                         style={{
@@ -2450,7 +2426,7 @@ function WolfPage({
                         animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
                         transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
                       />
-                      {/* Primary crisp ring */}
+                      {/* Primary crisp ring — outside the circle */}
                       <motion.div
                         aria-hidden
                         style={{
@@ -2483,83 +2459,30 @@ function WolfPage({
                   );
                 })()}
 
-                {wolfStyle === "ai" ? (
-                  /* AI: golden circle backdrop + generated wolf image */
+                {/* Oval — masked forest scene, fills the 240px anchor */}
+                <div style={{
+                  position: "absolute", inset: 0,
+                  maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                  WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                  zIndex: 2,
+                }}>
+                  {/* Dark forest night fills the oval */}
                   <div style={{
-                    position: "absolute", inset: 0,
-                    maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
-                    WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
-                    zIndex: 2,
-                    display: "flex", alignItems: "center", justifyContent: "center",
+                    position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%",
+                    background: "radial-gradient(ellipse at 50% 30%, #1a2a1e, #080e0a)",
                   }}>
-                    {/* Golden circle — matches CartoonTree golden disc element */}
-                    <div style={{
-                      position: "absolute",
-                      width: 192, height: 192, borderRadius: "50%",
-                      background: "radial-gradient(circle at 42% 36%, #E8C870 0%, #C4873A 48%, #8B5A20 100%)",
-                      boxShadow: "0 0 48px 16px rgba(196,135,58,0.35), inset 0 2px 16px rgba(255,228,120,0.22)",
-                    }} />
-
-                    {/* Loading spinner — inside the golden circle while fetching */}
-                    {wolfImageLoading && (
-                      <div style={{ position: "absolute", zIndex: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Loader2 style={{ width: 38, height: 38, color: "#FFF8E8", opacity: 0.88 }} className="animate-spin" />
-                      </div>
-                    )}
-
-                    {/* Error state */}
-                    {wolfImageError && !wolfImageLoading && (
-                      <div style={{ position: "absolute", zIndex: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                        <span style={{ fontSize: 11, color: "#FFF8E8", opacity: 0.70, textAlign: "center", maxWidth: 140 }}>Generation failed</span>
-                        <button
-                          onClick={() => { wolfImageFetched.current = false; setWolfImageError(null); toggleWolfStyle("ai"); }}
-                          style={{ fontSize: 10, fontWeight: 700, color: "#C4873A", background: "rgba(0,0,0,0.50)", border: "1px solid rgba(196,135,58,0.40)", borderRadius: 999, padding: "3px 10px", cursor: "pointer" }}
-                        >
-                          Retry
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Generated wolf image */}
-                    {wolfImageUrl && !wolfImageLoading && (
-                      <img
-                        src={wolfImageUrl}
-                        alt="AI-generated wolf"
-                        style={{
-                          position: "absolute",
-                          width: 200, height: 200,
-                          objectFit: "contain",
-                          zIndex: 3,
-                        }}
-                      />
-                    )}
+                    <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
                   </div>
-                ) : (
-                  /* Cartoon: oval — masked forest scene */
-                  <div style={{
+                  {/* Wolf centered in oval */}
+                  <div className="anim-tree-float" style={{
                     position: "absolute", inset: 0,
-                    maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
-                    WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
-                    zIndex: 2,
+                    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
                   }}>
-                    {/* Dark forest night fills the oval */}
-                    <div style={{
-                      position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%",
-                      background: "radial-gradient(ellipse at 50% 30%, #1a2a1e, #080e0a)",
-                    }}>
-                      <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
-                    </div>
-                    {/* Wolf centered in oval */}
-                    <div className="anim-tree-float" style={{
-                      position: "absolute", inset: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
-                    }}>
-                      <div style={{ width: 160, height: 192 }}>
-                        <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
-                      </div>
+                    <div style={{ width: 160, height: 192 }}>
+                      <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
                     </div>
                   </div>
-                )}
+                </div>
 
               </div>
             </div>
