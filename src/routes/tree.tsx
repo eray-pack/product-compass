@@ -9,6 +9,7 @@ import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
 import wolfPackBondUrl from "@/assets/wolf-pack-bond.png";
 import wolfFurCoatUrl from "@/assets/wolf-fur-coat.png";
+import wolfAlphaMarkUrl from "@/assets/wolf-alpha-mark.png";
 
 export const Route = createFileRoute("/tree")({
   component: TreePage,
@@ -51,7 +52,7 @@ function wolfXPStage(xp: number): { stage: 0|1|2|3|4; name: string; next: number
   if (xp < 800)  return { stage: 1, name: "Juvenile",           next: 800  };
   if (xp < 1200) return { stage: 2, name: "Adolescent",         next: 1200 };
   if (xp < 2000) return { stage: 3, name: "Spirit Glow",        next: 2000 };
-  return { stage: 4, name: "Transcendent Alpha", next: xp };
+  return { stage: 4, name: "Transcendent", next: xp };
 }
 
 // ── Deterministic star positions (avoids jitter on re-render) ─────────────────
@@ -1429,56 +1430,6 @@ function ThickFurBadge({ canAfford, owned }: { canAfford: boolean; owned: boolea
   );
 }
 
-// ── Alpha Marking icon SVG ─────────────────────────────────────────────────────
-function AlphaMarkSVG() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-      <defs>
-        <linearGradient id="am-brand" x1="14" y1="2" x2="14" y2="26" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#fff7ed" />
-          <stop offset="30%"  stopColor="#fb923c" />
-          <stop offset="65%"  stopColor="#ea580c" />
-          <stop offset="100%" stopColor="#7c2d12" />
-        </linearGradient>
-        <linearGradient id="am-glow" x1="14" y1="2" x2="14" y2="26" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="rgba(251,146,60,0.55)" />
-          <stop offset="100%" stopColor="rgba(234,88,12,0)" />
-        </linearGradient>
-        <filter id="am-ember">
-          <feGaussianBlur stdDeviation="0.8" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      {/* ── Outer brand scar / char ring ── */}
-      <circle cx="14" cy="14" r="12.5" fill="none"
-        stroke="rgba(124,45,18,0.55)" strokeWidth="1.2" strokeDasharray="3 2"/>
-
-      {/* ── Alpha rune — stylised Α with tribal serifs ── */}
-      {/* Left leg */}
-      <path d="M6 24 L14 4 L22 24" stroke="url(#am-brand)" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      {/* Crossbar */}
-      <path d="M9.5 17 L18.5 17" stroke="url(#am-brand)" strokeWidth="2.4" strokeLinecap="round"/>
-
-      {/* ── Tribal serifs on feet ── */}
-      <path d="M4.5 24 L7.5 24" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round"/>
-      <path d="M20.5 24 L23.5 24" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round"/>
-      {/* Apex crown ticks */}
-      <path d="M14 4 L12.5 6.5" stroke="#fff7ed" strokeWidth="1.2" strokeLinecap="round" opacity="0.70"/>
-      <path d="M14 4 L15.5 6.5" stroke="#fff7ed" strokeWidth="1.2" strokeLinecap="round" opacity="0.70"/>
-
-      {/* ── Inner ember glow behind the rune ── */}
-      <path d="M6 24 L14 4 L22 24" stroke="rgba(251,146,60,0.28)" strokeWidth="6.0" strokeLinecap="round" strokeLinejoin="round" fill="none" filter="url(#am-ember)"/>
-
-      {/* ── Hot-spot specular on apex ── */}
-      <circle cx="14" cy="5" r="1.5" fill="rgba(255,247,237,0.75)"/>
-      {/* Char marks — irregular scorch lines */}
-      <path d="M10 20 Q11 19 12 20" stroke="rgba(124,45,18,0.65)" strokeWidth="0.8" strokeLinecap="round" fill="none"/>
-      <path d="M16 20 Q17 19 18 20" stroke="rgba(124,45,18,0.65)" strokeWidth="0.8" strokeLinecap="round" fill="none"/>
-    </svg>
-  );
-}
-
 // ── Alpha Marking badge (wolf-alpha-mark item only) ───────────────────────────
 function AlphaMarkBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
   // Lava/ember burst particles — two rings for intensity
@@ -1605,13 +1556,13 @@ function AlphaMarkBadge({ canAfford, owned }: { canAfford: boolean; owned: boole
             pointerEvents: "none", zIndex: 2,
           }}
         />
-        {/* Alpha rune icon */}
+        {/* Alpha mark icon */}
         <motion.div
           style={{ position: "relative", zIndex: 1 }}
           animate={{ scale: [1, 1.09, 1], opacity: [0.90, 1, 0.90] }}
           transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
         >
-          <AlphaMarkSVG />
+          <img src={wolfAlphaMarkUrl} alt="Alpha Marking" style={{ width: 28, height: 28, objectFit: "contain" }} />
         </motion.div>
       </motion.div>
     </div>
@@ -2036,6 +1987,7 @@ function WolfPage({
       : Math.min(100, ((state.treeXP - prevThreshold) / (wolfStage.next - prevThreshold)) * 100);
   const { state: healthState, daysThisWeek } = getCompanionHealth(state.loginHistory);
   const health = HEALTH_CONFIG[healthState];
+  const hasAlphaMark = state.treeUnlocks.includes("wolf-alpha-mark");
 
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
@@ -2238,7 +2190,10 @@ function WolfPage({
                 position: "absolute", inset: 0,
                 display: "flex", alignItems: "flex-end", justifyContent: "center",
                 zIndex: 2,
-                filter: health.companionFilter, transition: "filter 1.2s ease",
+                filter: hasAlphaMark
+                  ? `${health.companionFilter === "none" ? "" : health.companionFilter + " "}drop-shadow(0 0 18px rgba(196,135,58,0.85)) drop-shadow(0 0 40px rgba(196,135,58,0.45)) brightness(1.12)`
+                  : health.companionFilter,
+                transition: "filter 1.2s ease",
               }}>
                 <div style={{ width: 300, height: 340 }}>
                   <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
