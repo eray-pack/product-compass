@@ -2334,7 +2334,6 @@ function WolfPage({
     { label: "🐺 Seed",       xp: 0    },
     { label: "🐾 Pup",        xp: 400  },
     { label: "🌑 Adolescent", xp: 800  },
-    { label: "👁 Adult",      xp: 1200 },
     { label: "⚡ Alpha",      xp: 1600 },
     { label: "✨ Ancient",    xp: 2000 },
   ];
