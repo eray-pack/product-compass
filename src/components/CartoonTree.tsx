@@ -13,12 +13,14 @@ interface Props {
 }
 
 // Stage index → { asset URL, alt text, display height }
+// Heights are relative to the container so each stage fills progressively more
+// of the circle, with the bottom edge acting as the ground line.
 const STAGE_IMAGES = [
-  { src: treeStage0SeedUrl,   alt: "Seed",        height: "52%"  },
-  { src: treeStage1SproutUrl, alt: "Sprout",       height: "62%"  },
-  { src: treeStage2SaplingUrl,alt: "Sapling",      height: "76%"  },
-  { src: treeStage3YoungUrl,  alt: "Young tree",   height: "88%"  },
-  { src: treeStage4StrongUrl, alt: "Strong tree",  height: "96%"  },
+  { src: treeStage0SeedUrl,   alt: "Seed",        height: "38%"  },
+  { src: treeStage1SproutUrl, alt: "Sprout",       height: "52%"  },
+  { src: treeStage2SaplingUrl,alt: "Sapling",      height: "68%"  },
+  { src: treeStage3YoungUrl,  alt: "Young tree",   height: "82%"  },
+  { src: treeStage4StrongUrl, alt: "Strong tree",  height: "92%"  },
   { src: treeStage5AncientUrl,alt: "Ancient tree", height: "100%" },
 ] as const;
 
@@ -36,7 +38,7 @@ export function CartoonTree({ day, xp }: Props) {
     <img
       src={src}
       alt={alt}
-      style={{ height, width: "auto", objectFit: "contain" }}
+      style={{ height, width: "auto", objectFit: "contain", objectPosition: "center bottom" }}
       aria-hidden
     />
   );

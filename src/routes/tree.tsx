@@ -2572,10 +2572,10 @@ function LifeTreePage({
                   <TreeSkyBackground timeOfDay={timeOfDay} />
                   <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
                 </div>
-                {/* Tree centered */}
+                {/* Tree — bottom-anchored so it stands on the ground */}
                 <div className="anim-tree-float" style={{
                   position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
+                  display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 2,
                 }}>
                   <CartoonTree day={day} xp={state.treeXP} />
                 </div>
