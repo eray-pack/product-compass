@@ -33,7 +33,6 @@ const HALL_OF_LEGENDS = [
 
 // ── Wolf companion constants ───────────────────────────────────────────────────
 const WOLF_UPGRADES = [
-  { id: "wolf-raw-meat",     name: "Raw meat",         desc: "Feed the wolf — grants +20 bonus XP",          costPoints: 80,  costMoney: 1.99 },
   { id: "wolf-pack-bond",    name: "Wolf pack bond",   desc: "Unlocks pack howl animation",                   costPoints: 150, costMoney: 2.99 },
   { id: "wolf-thick-fur",    name: "Thick fur coat",   desc: "Winter coat — amber highlights on Stage 4+",    costPoints: 150, costMoney: 2.99 },
   { id: "wolf-alpha-mark",   name: "Alpha marking",    desc: "Branded alpha symbol on the wolf's shoulder",   costPoints: 250, costMoney: 4.99, pro: true },
@@ -1180,173 +1179,6 @@ function DeepRootsBadge({ canAfford, owned }: { canAfford: boolean; owned: boole
   );
 }
 
-// ── Raw Meat icon SVG ─────────────────────────────────────────────────────────
-function RawMeatSVG() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-      <defs>
-        <radialGradient id="rm-meat" cx="45%" cy="52%" r="52%" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#ff4444" />
-          <stop offset="38%"  stopColor="#cc1a1a" />
-          <stop offset="72%"  stopColor="#8b0000" />
-          <stop offset="100%" stopColor="#4a0000" />
-        </radialGradient>
-        <linearGradient id="rm-bone" x1="16" y1="3" x2="26" y2="10" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#f5f0e8" />
-          <stop offset="100%" stopColor="#c8bfaa" />
-        </linearGradient>
-      </defs>
-
-      {/* ── Steak silhouette ── */}
-      <path d="M3 18 Q2 12 5 8 Q8 4 13 4 Q19 4 22 8 Q26 10 25 16 Q24 22 20 24 Q16 27 11 25 Q5 23 3 18Z"
-        fill="url(#rm-meat)" />
-
-      {/* ── Bone cap (top-right) ── */}
-      <circle cx="19.5" cy="5.5" r="2.4" fill="url(#rm-bone)" />
-      <circle cx="23.0" cy="5.5" r="2.4" fill="#e8e2d5" />
-      <circle cx="19.5" cy="9.0" r="2.2" fill="url(#rm-bone)" />
-      <circle cx="23.0" cy="9.0" r="2.2" fill="#ddd6c8" />
-      <rect x="20.2" y="5.5" width="2.6" height="3.5" rx="0.8" fill="#ede8dc" />
-      {/* Bone specular */}
-      <circle cx="19.0" cy="5.0" r="0.8" fill="white" opacity="0.55"/>
-      <circle cx="22.5" cy="5.0" r="0.8" fill="white" opacity="0.45"/>
-
-      {/* ── Marbling / fat streaks ── */}
-      <path d="M8 15 Q11 13 14 14 Q17 15 19 13"
-        stroke="rgba(255,210,170,0.52)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-      <path d="M7 19 Q10 17 13 18"
-        stroke="rgba(255,210,170,0.38)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
-      <path d="M15 20 Q17 18.5 19.5 19.5"
-        stroke="rgba(255,210,170,0.42)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
-
-      {/* ── Surface specular ── */}
-      <ellipse cx="9" cy="11" rx="3.5" ry="2" fill="rgba(255,80,80,0.28)" transform="rotate(-20 9 11)"/>
-    </svg>
-  );
-}
-
-// ── Raw Meat badge (wolf-raw-meat item only) ──────────────────────────────────
-function RawMeatBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
-  // Smoke wisps — scattered around top of badge
-  const smokeParticles = [
-    { x: 15, baseY: 6,  driftY: -10, driftX:  2, delay: 0.0, size: 3.5 },
-    { x: 24, baseY: 4,  driftY: -12, driftX: -2, delay: 0.6, size: 2.5 },
-    { x: 32, baseY: 6,  driftY: -10, driftX:  3, delay: 1.2, size: 3.0 },
-    { x: 20, baseY: 8,  driftY: -8,  driftX: -3, delay: 1.8, size: 2.0 },
-    { x: 28, baseY: 5,  driftY: -11, driftX:  1, delay: 0.9, size: 2.5 },
-    { x: 12, baseY: 9,  driftY: -9,  driftX: -1, delay: 1.5, size: 2.0 },
-  ];
-
-  return (
-    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
-
-      {/* ── Outer blood-red power burst ── */}
-      <motion.div
-        aria-hidden
-        animate={{ scale: [1, 1.58, 1], opacity: [0.68, 0.08, 0.68] }}
-        transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
-        style={{
-          position: "absolute", inset: -16, borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(220,38,38,0.82) 0%, rgba(153,27,27,0.44) 38%, transparent 68%)`,
-          filter: "blur(10px)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* ── Secondary crimson pulse ring ── */}
-      <motion.div
-        aria-hidden
-        animate={{ scale: [0.80, 1.70, 0.80], opacity: [0.40, 0, 0.40] }}
-        transition={{ duration: 2.6, ease: "easeOut", repeat: Infinity, delay: 0.65 }}
-        style={{
-          position: "absolute", inset: -10, borderRadius: "50%",
-          border: "1.5px solid rgba(220,38,38,0.58)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* ── Floating smoke / ember wisps ── */}
-      <div aria-hidden style={{ position: "absolute", inset: -12, overflow: "visible", pointerEvents: "none" }}>
-        {smokeParticles.map((p, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              y: [0, p.driftY],
-              x: [0, p.driftX],
-              opacity: [0, i % 2 === 0 ? 0.62 : 0.45, 0],
-              scale: [0.5, 1.5, 0.6],
-            }}
-            transition={{ repeat: Infinity, duration: 2.0 + i * 0.25, ease: "easeOut", delay: p.delay }}
-            style={{
-              position: "absolute",
-              left: p.x, top: p.baseY,
-              width: p.size, height: p.size,
-              borderRadius: "50%",
-              background: i % 2 === 0 ? `rgba(220,38,38,0.80)` : `rgba(80,10,10,0.70)`,
-              filter: "blur(1.8px)",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* ── Main badge circle — dark steel with crimson core ── */}
-      <motion.div
-        animate={canAfford && !owned ? { scale: [1, 1.06, 1] } : {}}
-        transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
-        style={{
-          position: "relative", width: 48, height: 48, borderRadius: "50%",
-          display: "grid", placeItems: "center",
-          overflow: "hidden",
-          background: "radial-gradient(circle at 38% 30%, #1c0505 0%, #080101 100%)",
-          boxShadow: [
-            "inset 0 2px 0 rgba(255,255,255,0.14)",
-            "inset 0 -2px 0 rgba(0,0,0,0.95)",
-            "inset 2px 0 0 rgba(255,255,255,0.07)",
-            "inset -2px 0 0 rgba(0,0,0,0.70)",
-            `0 0 0 1.5px rgba(220,38,38,0.74)`,
-            `0 0 0 3.5px rgba(220,38,38,0.18)`,
-            "0 6px 22px rgba(0,0,0,0.92)",
-            `0 0 34px 12px rgba(220,38,38,${canAfford && !owned ? "0.56" : "0.22"})`,
-          ].join(", "),
-          opacity: owned ? 0.65 : 1,
-        }}
-      >
-        {/* Inner blood-red nebula */}
-        <motion.div
-          aria-hidden
-          animate={{ opacity: [0.28, 0.65, 0.28], scale: [0.68, 1.12, 0.68] }}
-          transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
-          style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
-            background: `radial-gradient(circle at 50% 58%, rgba(220,38,38,0.74) 0%, rgba(153,27,27,0.38) 42%, transparent 68%)`,
-            pointerEvents: "none", zIndex: 0,
-          }}
-        />
-        {/* Glint sweep */}
-        <motion.div
-          aria-hidden
-          animate={{ x: ["-52px", "52px"] }}
-          transition={{ repeat: Infinity, duration: 2.8, ease: "linear", repeatDelay: 3.0 }}
-          style={{
-            position: "absolute", top: "-8px", left: "-8px",
-            width: "22px", height: "64px",
-            background: "linear-gradient(108deg, transparent 0%, rgba(255,100,100,0.24) 50%, transparent 100%)",
-            filter: "blur(2.5px)", transform: "rotate(22deg)",
-            pointerEvents: "none", zIndex: 2,
-          }}
-        />
-        {/* Steak icon */}
-        <motion.div
-          style={{ position: "relative", zIndex: 1 }}
-          animate={{ scale: [1, 1.07, 1] }}
-          transition={{ duration: 2.6, ease: "easeInOut", repeat: Infinity }}
-        >
-          <RawMeatSVG />
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
 
 // ── Wolf Pack Bond icon SVG ───────────────────────────────────────────────────
 function WolfPackBondSVG() {
@@ -2169,8 +2001,6 @@ function ShopCard({
           <StreakOrnamentBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "root-deep" ? (
           <DeepRootsBadge canAfford={canAfford} owned={owned} />
-        ) : item.id === "wolf-raw-meat" ? (
-          <RawMeatBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "wolf-pack-bond" ? (
           <WolfPackBondBadge canAfford={canAfford} owned={owned} />
         ) : item.id === "wolf-thick-fur" ? (
