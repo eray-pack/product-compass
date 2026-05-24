@@ -13,14 +13,15 @@ interface Props {
 }
 
 // Tree: 6 stages (0–5)
-export const STAGE_DAYS = [0, 7, 14, 30, 60, 90] as const;
+// Stage 0 = Seed (days 0–2), Stage 1 = Sprout (days 3–13), then 14 / 30 / 60 / 90
+export const STAGE_DAYS = [0, 3, 14, 30, 60, 90] as const;
 
 export function dayToStage(day: number): 0 | 1 | 2 | 3 | 4 | 5 {
   if (day >= 90) return 5;
   if (day >= 60) return 4;
   if (day >= 30) return 3;
   if (day >= 14) return 2;
-  if (day >= 7)  return 1;
+  if (day >= 3)  return 1;
   return 0;
 }
 

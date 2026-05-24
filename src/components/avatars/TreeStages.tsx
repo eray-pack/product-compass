@@ -1,13 +1,14 @@
 // Tree companion — 6 growth stages across a 90-day recovery journey.
-// Stage 0 uses a PNG seed asset; stages 1–5 are rich SVG illustrations.
+// Stages 0–1 use PNG assets (seed, sprout); stages 2–5 are rich SVG illustrations.
 // viewBox 0 0 100 130 for SVG stages.
 
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
+import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
 
 type P = { className?: string };
 const V = "0 0 100 130";
 
-/* ── Stage 0 — Seed (day 0–6) ──────────────────────────────────────────── */
+/* ── Stage 0 — Seed (day 0–2) ──────────────────────────────────────────── */
 export function Tree0({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -16,47 +17,12 @@ export function Tree0({ className }: P) {
   );
 }
 
-/* ── Stage 1 — Sapling (day 7–13) ──────────────────────────────────────── */
+/* ── Stage 1 — Sprout (day 3–13) ───────────────────────────────────────── */
 export function Tree1({ className }: P) {
   return (
-    <svg viewBox={V} fill="none" className={className}>
-      <defs>
-        <radialGradient id="t1glow" cx="50%" cy="100%" r="58%">
-          <stop offset="0%" stopColor="#FFB300" stopOpacity="0.25"/>
-          <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
-        </radialGradient>
-        <linearGradient id="t1trunk" x1="15%" y1="0%" x2="85%" y2="0%">
-          <stop offset="0%" stopColor="#A67C52"/>
-          <stop offset="40%" stopColor="#8B5E3C"/>
-          <stop offset="100%" stopColor="#5D3A1A"/>
-        </linearGradient>
-      </defs>
-      <ellipse cx="50" cy="125" rx="35" ry="10" fill="url(#t1glow)"/>
-      <ellipse cx="50" cy="123" rx="28" ry="6" fill="#5D4037"/>
-      <ellipse cx="50" cy="121" rx="20" ry="4" fill="#795548"/>
-      {/* Trunk with gradient bark */}
-      <path d="M47 122 C46 107 47 92 48 78" stroke="url(#t1trunk)" strokeWidth="5.5" strokeLinecap="round"/>
-      {/* Bark texture lines */}
-      <path d="M47.5 118 C47 110 47.5 100 48 90" stroke="#6D4C41" strokeWidth="1.2" fill="none" opacity="0.5"/>
-      {/* Branches */}
-      <path d="M48 96 C41 92 35 87 30 82" stroke="#7A4F2D" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M49 87 C57 83 64 78 69 72" stroke="#7A4F2D" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M48 80 C46 74 44 68 43 62" stroke="#7A4F2D" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Branch highlight */}
-      <path d="M48 96 C42 93 36 88 31 83" stroke="#A67C52" strokeWidth="0.8" fill="none" opacity="0.4"/>
-      {/* Leaf clusters — multi-layered depth */}
-      <circle cx="49" cy="68" r="15" fill="#2E7D32"/>
-      <circle cx="29" cy="77" r="11" fill="#2E7D32"/>
-      <circle cx="69" cy="67" r="11" fill="#388E3C"/>
-      <circle cx="49" cy="63" r="11" fill="#388E3C"/>
-      <circle cx="29" cy="72" r="7" fill="#43A047"/>
-      <circle cx="69" cy="62" r="7" fill="#4CAF50"/>
-      <circle cx="42" cy="56" r="7" fill="#4CAF50"/>
-      <circle cx="56" cy="58" r="6" fill="#66BB6A"/>
-      {/* Canopy highlight (light catching top) */}
-      <circle cx="48" cy="57" r="5" fill="#81C784" opacity="0.6"/>
-      <circle cx="56" cy="54" r="4" fill="#A5D6A7" opacity="0.5"/>
-    </svg>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <img src={treeStage1SproutUrl} alt="Sprout" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center bottom" }} />
+    </div>
   );
 }
 

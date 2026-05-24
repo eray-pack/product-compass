@@ -1,5 +1,6 @@
-import { treeStage } from "@/lib/store";
+import { dayToStage } from "@/components/avatars/CompanionAvatar";
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
+import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
 
 interface Props {
   day: number;
@@ -7,12 +8,12 @@ interface Props {
 }
 
 /**
- * Illustrated cartoon tree — 6 growth stages matching treeStage().
- * Stage 0 uses the seed PNG asset; stages 1–5 are SVG illustrations.
- * Designed for the 280px-tall tree scene card on a dark sky background.
+ * Illustrated cartoon tree — 6 growth stages driven by clean-day count.
+ * Stages 0–1 use PNG assets (seed → sprout); stages 2–5 are SVG illustrations.
+ * Thresholds: 0 days=Seed, 3 days=Sprout, 14=Sapling, 30=Young, 60=Strong, 90=Ancient.
  */
-export function CartoonTree({ day, xp = 0 }: Props) {
-  const { stage } = treeStage(xp);
+export function CartoonTree({ day }: Props) {
+  const stage = dayToStage(day);
 
   if (stage === 0) {
     return (
@@ -20,6 +21,17 @@ export function CartoonTree({ day, xp = 0 }: Props) {
         src={treeStage0SeedUrl}
         alt="Seed"
         style={{ height: "52%", width: "auto", objectFit: "contain" }}
+        aria-hidden
+      />
+    );
+  }
+
+  if (stage === 1) {
+    return (
+      <img
+        src={treeStage1SproutUrl}
+        alt="Sprout"
+        style={{ height: "62%", width: "auto", objectFit: "contain" }}
         aria-hidden
       />
     );
@@ -34,39 +46,11 @@ export function CartoonTree({ day, xp = 0 }: Props) {
       style={{ display: "block" }}
       aria-hidden
     >
-      {stage === 1 && <SmallTree />}
       {stage === 2 && <Sapling />}
       {stage === 3 && <YoungTree />}
       {stage === 4 && <StrongTree />}
       {stage >= 5 && <AncientTree />}
     </svg>
-  );
-}
-
-// ── Stage 1 — Small Tree ──────────────────────────────────────────────────────
-function SmallTree() {
-  return (
-    <g transform="translate(200, 268) scale(2.26)">
-      {/* Ground */}
-      <ellipse cx="0" cy="0" rx="40" ry="7" fill="#2D5A27" opacity="0.68" />
-
-      {/* Trunk */}
-      <path d="M -6 0 Q -5 -24 -3 -55 Q 3 -24 6 0 Z" fill="#7A4E2D" />
-      <path d="M -3 0 Q -2 -28 0 -55" stroke="#9B6440" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-
-      {/* Tiny branch stubs */}
-      <path d="M -4 -38 Q -16 -44 -13 -52" stroke="#7A4E2D" strokeWidth="4" strokeLinecap="round" />
-      <path d="M 4 -40 Q 16 -45 13 -53" stroke="#7A4E2D" strokeWidth="3.5" strokeLinecap="round" />
-
-      {/* Crown */}
-      <ellipse cx="0"   cy="-76" rx="30" ry="24" fill="#3D8B54" />
-      <ellipse cx="-21" cy="-64" rx="20" ry="17" fill="#479860" />
-      <ellipse cx="21"  cy="-65" rx="19" ry="16" fill="#45965E" />
-      <ellipse cx="0"   cy="-93" rx="20" ry="16" fill="#50A668" />
-      <ellipse cx="-10" cy="-96" rx="12" ry="9"  fill="#58B270" opacity="0.85" />
-      {/* Highlight */}
-      <ellipse cx="-8"  cy="-97" rx="8"  ry="6"  fill="#74CC84" opacity="0.40" />
-    </g>
   );
 }
 
