@@ -5,7 +5,6 @@ import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Wolf3D } from "@/components/Wolf3D";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
 
@@ -2318,15 +2317,6 @@ function WolfPage({
     }));
   };
 
-  const [wolfStyle, setWolfStyle] = useState<"3d" | "cartoon">(() => {
-    try { return (localStorage.getItem("stopamine.wolf-style") as "3d" | "cartoon") ?? "cartoon"; }
-    catch { return "cartoon"; }
-  });
-
-  function toggleWolfStyle(s: "3d" | "cartoon") {
-    setWolfStyle(s);
-    try { localStorage.setItem("stopamine.wolf-style", s); } catch {}
-  }
 
   return (
     <PageShell>
@@ -2341,121 +2331,75 @@ function WolfPage({
       {/* Wolf scene */}
       <section className="mt-4 relative" style={{ height: 380 }}>
 
-        {/* 3D mode: full-bleed background */}
-        {wolfStyle === "3d" && (
-          <>
-            <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 24 }}>
-              <WolfBackground />
-            </div>
-            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
-              style={{ borderRadius: 24, background: health.sceneOverlay }} />
-            <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
-              style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
-          </>
-        )}
-
-        {/* Style toggle — top right */}
-        <div className="absolute top-4 right-5 z-20">
-          <div style={{
-            display: "inline-flex", borderRadius: 999, padding: 3,
-            background: "rgba(0,0,0,0.40)", border: "1px solid rgba(255,255,255,0.09)",
-            backdropFilter: "blur(10px)",
-          }}>
-            {(["cartoon", "3d"] as const).map((opt) => (
-              <button
-                key={opt}
-                onClick={() => toggleWolfStyle(opt)}
-                style={{
-                  padding: "3px 12px", borderRadius: 999,
-                  fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                  border: wolfStyle === opt ? "1px solid rgba(201,168,76,0.50)" : "1px solid transparent",
-                  background: wolfStyle === opt ? "rgba(201,168,76,0.18)" : "transparent",
-                  color: wolfStyle === opt ? "#C9A84C" : "rgba(255,255,255,0.35)",
-                  cursor: "pointer", transition: "all 0.18s",
-                }}
-              >
-                {opt === "3d" ? "3D" : "Cartoon"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Wolf visual */}
+        {/* Circular wolf scene — landscape + wolf fully contained */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          {wolfStyle === "3d" ? (
-            <div className="w-full h-full" style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
-              <Wolf3D stage={wolfStage.stage} />
-            </div>
-          ) : (
-            /* Cartoon: crisp circular scene — landscape + wolf fully contained */
-            <div style={{ position: "relative", width: 280, height: 280, flexShrink: 0 }}>
+          <div style={{ position: "relative", width: 280, height: 280, flexShrink: 0 }}>
 
-              {/* Atmospheric halo — diffuse gold glow behind circle */}
-              <motion.div
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  top: "50%", left: "50%", marginTop: -170, marginLeft: -170,
-                  width: 340, height: 340, borderRadius: "50%",
-                  background: "radial-gradient(circle, transparent 38%, rgba(196,135,58,0.18) 52%, rgba(196,135,58,0.08) 66%, transparent 80%)",
-                  pointerEvents: "none", zIndex: 1,
-                }}
-                animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
-                transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
-              />
-              {/* Primary crisp gold ring */}
-              <motion.div
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  top: "50%", left: "50%", marginTop: -148, marginLeft: -148,
-                  width: 296, height: 296, borderRadius: "50%",
-                  border: "2.5px solid rgba(196,135,58,0.88)",
-                  filter: "blur(1px)",
-                  boxShadow: "0 0 16px 6px rgba(196,135,58,0.45), 0 0 36px 14px rgba(196,135,58,0.18)",
-                  pointerEvents: "none", zIndex: 5,
-                }}
-                animate={{ scale: [1, 1.012, 1], rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-              />
-              {/* Outer softer gold ring */}
-              <motion.div
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  top: "50%", left: "50%", marginTop: -163, marginLeft: -163,
-                  width: 326, height: 326, borderRadius: "50%",
-                  border: "1px solid rgba(196,135,58,0.28)",
-                  filter: "blur(2px)",
-                  pointerEvents: "none", zIndex: 5,
-                }}
-                animate={{ scale: [1, 1.008, 1], rotate: -360 }}
-                transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-              />
+            {/* Atmospheric halo — diffuse gold glow behind circle */}
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: "50%", left: "50%", marginTop: -170, marginLeft: -170,
+                width: 340, height: 340, borderRadius: "50%",
+                background: "radial-gradient(circle, transparent 38%, rgba(196,135,58,0.18) 52%, rgba(196,135,58,0.08) 66%, transparent 80%)",
+                pointerEvents: "none", zIndex: 1,
+              }}
+              animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
+              transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+            />
+            {/* Primary crisp gold ring */}
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: "50%", left: "50%", marginTop: -148, marginLeft: -148,
+                width: 296, height: 296, borderRadius: "50%",
+                border: "2.5px solid rgba(196,135,58,0.88)",
+                filter: "blur(1px)",
+                boxShadow: "0 0 16px 6px rgba(196,135,58,0.45), 0 0 36px 14px rgba(196,135,58,0.18)",
+                pointerEvents: "none", zIndex: 5,
+              }}
+              animate={{ scale: [1, 1.012, 1], rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+            />
+            {/* Outer softer gold ring */}
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: "50%", left: "50%", marginTop: -163, marginLeft: -163,
+                width: 326, height: 326, borderRadius: "50%",
+                border: "1px solid rgba(196,135,58,0.28)",
+                filter: "blur(2px)",
+                pointerEvents: "none", zIndex: 5,
+              }}
+              animate={{ scale: [1, 1.008, 1], rotate: -360 }}
+              transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+            />
 
-              {/* Hard circle — WolfBackground + wolf clipped inside */}
+            {/* Hard circle — WolfBackground + wolf clipped inside */}
+            <div style={{
+              position: "absolute", inset: 0,
+              borderRadius: "50%", overflow: "hidden",
+              zIndex: 2,
+            }}>
+              <WolfBackground />
+              <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
+              {/* Wolf — bottom-anchored so it stands on the ground */}
               <div style={{
                 position: "absolute", inset: 0,
-                borderRadius: "50%", overflow: "hidden",
+                display: "flex", alignItems: "flex-end", justifyContent: "center",
                 zIndex: 2,
+                filter: health.companionFilter, transition: "filter 1.2s ease",
               }}>
-                <WolfBackground />
-                <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
-                {/* Wolf — bottom-anchored so it stands on the ground */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "flex-end", justifyContent: "center",
-                  zIndex: 2,
-                  filter: health.companionFilter, transition: "filter 1.2s ease",
-                }}>
-                  <div style={{ width: 220, height: 240 }}>
-                    <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
-                  </div>
+                <div style={{ width: 220, height: 240 }}>
+                  <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
                 </div>
               </div>
-
             </div>
-          )}
+
+          </div>
         </div>
 
       </section>
