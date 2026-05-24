@@ -98,7 +98,7 @@ function Wolf0({ className }: P) {
 function Wolf1({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage1Url} alt="Newborn Pup" style={{ width: "155%", height: "155%", objectFit: "contain", objectPosition: "center bottom" }} />
+      <img src={wolfStage1Url} alt="Newborn Pup" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
@@ -107,7 +107,7 @@ function Wolf1({ className }: P) {
 function Wolf2({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage2Url} alt="Juvenile Wolf" style={{ width: "155%", height: "155%", objectFit: "contain", objectPosition: "center bottom" }} />
+      <img src={wolfStage2Url} alt="Juvenile Wolf" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
@@ -116,7 +116,7 @@ function Wolf2({ className }: P) {
 function Wolf3({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage3Url} alt="Adolescent Wolf" style={{ width: "155%", height: "155%", objectFit: "contain", objectPosition: "center bottom" }} />
+      <img src={wolfStage3Url} alt="Adolescent Wolf" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
@@ -125,7 +125,7 @@ function Wolf3({ className }: P) {
 function Wolf4({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage4Url} alt="Shadow Wolf" style={{ width: "155%", height: "155%", objectFit: "contain", objectPosition: "center bottom" }} />
+      <img src={wolfStage4Url} alt="Shadow Wolf" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
@@ -134,7 +134,7 @@ function Wolf4({ className }: P) {
 function Wolf5({ className }: P) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <img src={wolfStage5Url} alt="Spirit Glow Wolf" style={{ width: "155%", height: "155%", objectFit: "contain", objectPosition: "center bottom" }} />
+      <img src={wolfStage5Url} alt="Spirit Glow Wolf" style={{ width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom" }} />
     </div>
   );
 }
@@ -147,7 +147,7 @@ function Wolf6({ className }: P) {
         src={wolfStage6Url}
         alt="Transcendent Alpha Wolf"
         style={{
-          width: "155%", height: "155%", objectFit: "contain", objectPosition: "center bottom",
+          width: "190%", height: "190%", objectFit: "contain", objectPosition: "center bottom",
           filter: "drop-shadow(0 0 18px rgba(196,135,58,0.85)) drop-shadow(0 0 40px rgba(196,135,58,0.45)) brightness(1.12)",
         }}
       />

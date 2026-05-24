@@ -2393,7 +2393,7 @@ function WolfPage({
                 zIndex: 2,
                 filter: health.companionFilter, transition: "filter 1.2s ease",
               }}>
-                <div style={{ width: 280, height: 310 }}>
+                <div style={{ width: 300, height: 340 }}>
                   <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
                 </div>
               </div>
