@@ -2573,7 +2573,7 @@ function LifeTreePage({
                   <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
                 </div>
                 {/* Tree — bottom-anchored so it stands on the ground */}
-                <div className="anim-tree-float" style={{
+                <div style={{
                   position: "absolute", inset: 0,
                   display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 2,
                 }}>
