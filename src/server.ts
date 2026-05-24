@@ -5,6 +5,7 @@ import { renderErrorPage } from "./lib/error-page";
 
 type Env = {
   ANTHROPIC_API_KEY?: string;
+  FAL_API_KEY?: string;
 };
 
 type ServerEntry = {
@@ -144,12 +145,90 @@ async function handleChatApi(request: Request, env: Env): Promise<Response> {
   });
 }
 
+// ── /api/generate-tree — fal.ai Flux proxy ───────────────────────────────────
+const TREE_PROMPTS: Record<number, string> = {
+  0: "a tiny magical seed glowing with golden light nestled in dark fertile soil, wisps of ethereal energy rising from it, mystical forest floor, cinematic fantasy art, deep dark background, photorealistic",
+  1: "a delicate young sprout with two bright green leaves emerging from rich dark soil, golden morning light, enchanted forest atmosphere, magical realism, cinematic lighting, photorealistic",
+  2: "a slender young sapling with vibrant green leaves in a mystical ancient forest, dappled golden sunlight filtering through a canopy, magical atmosphere, detailed fantasy illustration, cinematic",
+  3: "a young strong tree with a full green canopy standing in an enchanted forest clearing, golden light rays piercing through leaves, mystical mist at the roots, epic fantasy painting, cinematic",
+  4: "a powerful mature tree with thick gnarled bark and a lush golden-green canopy in a magical ancient forest, shafts of divine light, mystical energy swirling around the trunk, cinematic fantasy art",
+  5: "a massive ancient tree with luminous golden bark and shimmering ethereal leaves, surrounded by swirling magical energy and soft glowing particles, legendary sacred tree, epic cinematic fantasy painting, breathtaking",
+};
+
+async function handleGenerateTreeApi(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  const falKey =
+    env?.FAL_API_KEY ??
+    process.env.FAL_API_KEY ??
+    (import.meta.env as Record<string, string>).FAL_API_KEY;
+
+  if (!falKey) {
+    return new Response(JSON.stringify({ error: "FAL_API_KEY not configured" }), {
+      status: 500, headers: { "content-type": "application/json" },
+    });
+  }
+
+  let body: { stage?: number; stageName?: string };
+  try { body = await request.json(); }
+  catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+      status: 400, headers: { "content-type": "application/json" },
+    });
+  }
+
+  const stage = Math.min(5, Math.max(0, body.stage ?? 0));
+  const basePrompt = TREE_PROMPTS[stage];
+  const prompt = `${basePrompt}, no text, no watermark, square composition`;
+
+  const upstream = await fetch("https://fal.run/fal-ai/flux/schnell", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "authorization": `Key ${falKey}`,
+    },
+    body: JSON.stringify({
+      prompt,
+      image_size: "square_hd",
+      num_inference_steps: 4,
+      num_images: 1,
+      enable_safety_checker: false,
+    }),
+  });
+
+  if (!upstream.ok) {
+    const text = await upstream.text();
+    console.error(`/api/generate-tree: fal.ai error ${upstream.status}:`, text);
+    return new Response(JSON.stringify({ error: "Image generation failed" }), {
+      status: 502, headers: { "content-type": "application/json" },
+    });
+  }
+
+  const json = (await upstream.json()) as { images?: { url: string }[] };
+  const url = json.images?.[0]?.url;
+  if (!url) {
+    return new Response(JSON.stringify({ error: "No image returned" }), {
+      status: 502, headers: { "content-type": "application/json" },
+    });
+  }
+
+  return new Response(JSON.stringify({ url }), {
+    status: 200, headers: { "content-type": "application/json" },
+  });
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: unknown) {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/chat") {
       return handleChatApi(request, env);
+    }
+
+    if (url.pathname === "/api/generate-tree") {
+      return handleGenerateTreeApi(request, env);
     }
 
 
