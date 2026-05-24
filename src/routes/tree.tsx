@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
 import wolfPackBondUrl from "@/assets/wolf-pack-bond.png";
+import wolfFurCoatUrl from "@/assets/wolf-fur-coat.png";
 
 export const Route = createFileRoute("/tree")({
   component: TreePage,
@@ -1300,58 +1301,6 @@ function WolfPackBondBadge({ canAfford, owned }: { canAfford: boolean; owned: bo
 }
 
 // ── Thick Fur Coat icon SVG ───────────────────────────────────────────────────
-function ThickFurSVG() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-      <defs>
-        <linearGradient id="tf-base" x1="14" y1="28" x2="14" y2="4" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#78350f" />
-          <stop offset="45%"  stopColor="#b45309" />
-          <stop offset="100%" stopColor="#f59e0b" />
-        </linearGradient>
-        <linearGradient id="tf-tip" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#fde68a" />
-          <stop offset="100%" stopColor="#f59e0b" />
-        </linearGradient>
-        <linearGradient id="tf-mid" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#d97706" />
-          <stop offset="100%" stopColor="#92400e" />
-        </linearGradient>
-      </defs>
-
-      {/* ── Dense underfur base — broad layered arc ── */}
-      <path d="M3 26 Q4 20 7 16 Q10 12 14 11 Q18 12 21 16 Q24 20 25 26Z"
-        fill="url(#tf-base)" />
-
-      {/* ── Guard hair layer 1 — mid tufts ── */}
-      <path d="M5 22 Q5.5 17 7 14"   stroke="#c27a20" strokeWidth="2.0" strokeLinecap="round" fill="none"/>
-      <path d="M8 20 Q8.5 15 10 12"  stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M11 18 Q11.5 13 12.5 10" stroke="#d97706" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-      <path d="M14 17 Q14 12 14 9"   stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M17 18 Q17.5 13 18 10" stroke="#d97706" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-      <path d="M20 20 Q21 15 22 12"  stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M22.5 22 Q23.5 17 25 14" stroke="#c27a20" strokeWidth="2.0" strokeLinecap="round" fill="none"/>
-
-      {/* ── Fluffy tip tufts — lighter, pointed ends ── */}
-      <ellipse cx="7"    cy="13.5" rx="1.5" ry="2.2" fill="url(#tf-tip)" transform="rotate(-18 7 13.5)"/>
-      <ellipse cx="10"   cy="11.5" rx="1.4" ry="2.0" fill="url(#tf-tip)" transform="rotate(-8 10 11.5)"/>
-      <ellipse cx="12.5" cy="9.5"  rx="1.3" ry="1.9" fill="#fde68a" transform="rotate(2 12.5 9.5)"/>
-      <ellipse cx="14"   cy="8.5"  rx="1.4" ry="2.1" fill="url(#tf-tip)"/>
-      <ellipse cx="15.5" cy="9.5"  rx="1.3" ry="1.9" fill="#fde68a" transform="rotate(-2 15.5 9.5)"/>
-      <ellipse cx="18"   cy="11"   rx="1.4" ry="2.0" fill="url(#tf-tip)" transform="rotate(8 18 11)"/>
-      <ellipse cx="21"   cy="13"   rx="1.5" ry="2.2" fill="url(#tf-tip)" transform="rotate(18 21 13)"/>
-
-      {/* ── Inner mane fringe — second layer ── */}
-      <path d="M8.5 19 Q9 15.5 10.5 13"  stroke="#fbbf24" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.70"/>
-      <path d="M13 18 Q13 14 13.5 11.5"  stroke="#fbbf24" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.65"/>
-      <path d="M17 18 Q17.5 14 18 12"    stroke="#fbbf24" strokeWidth="1.0" strokeLinecap="round" fill="none" opacity="0.65"/>
-      <path d="M19.5 19 Q21 15.5 22 13"  stroke="#fbbf24" strokeWidth="1.1" strokeLinecap="round" fill="none" opacity="0.70"/>
-
-      {/* ── Specular sheen across the coat ── */}
-      <path d="M9 18 Q14 14 20 17" stroke="rgba(255,236,153,0.32)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-    </svg>
-  );
-}
 
 // ── Thick Fur Coat badge (wolf-thick-fur item only) ───────────────────────────
 function ThickFurBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
@@ -1467,13 +1416,13 @@ function ThickFurBadge({ canAfford, owned }: { canAfford: boolean; owned: boolea
             pointerEvents: "none", zIndex: 2,
           }}
         />
-        {/* Fur icon */}
+        {/* Thick Fur Coat icon */}
         <motion.div
           style={{ position: "relative", zIndex: 1 }}
           animate={{ scale: [1, 1.07, 1] }}
           transition={{ duration: 3.2, ease: "easeInOut", repeat: Infinity }}
         >
-          <ThickFurSVG />
+          <img src={wolfFurCoatUrl} alt="Thick Fur Coat" style={{ width: 28, height: 28, objectFit: "contain" }} />
         </motion.div>
       </motion.div>
     </div>
