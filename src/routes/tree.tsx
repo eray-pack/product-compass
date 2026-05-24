@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
+import wolfPackBondUrl from "@/assets/wolf-pack-bond.png";
 
 export const Route = createFileRoute("/tree")({
   component: TreePage,
@@ -1181,55 +1182,6 @@ function DeepRootsBadge({ canAfford, owned }: { canAfford: boolean; owned: boole
 
 
 // ── Wolf Pack Bond icon SVG ───────────────────────────────────────────────────
-function WolfPackBondSVG() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-      <defs>
-        <radialGradient id="wpb-moon-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="rgba(226,232,240,0.60)" />
-          <stop offset="100%" stopColor="rgba(148,163,184,0)" />
-        </radialGradient>
-        <linearGradient id="wpb-wolf" x1="6" y1="27" x2="16" y2="4" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#1e293b" />
-          <stop offset="55%"  stopColor="#334155" />
-          <stop offset="100%" stopColor="#64748b" />
-        </linearGradient>
-      </defs>
-
-      {/* ── Crescent moon (top-right) ── */}
-      {/* Outer disc */}
-      <circle cx="21.5" cy="6" r="5.2" fill="#c8d4e8" />
-      {/* Inner cutout to form crescent */}
-      <circle cx="23.8" cy="4.8" r="4.4" fill="#080b14" />
-      {/* Subtle glow around crescent */}
-      <circle cx="21.5" cy="6" r="5.2" fill="none" stroke="rgba(200,212,232,0.38)" strokeWidth="0.8"/>
-
-      {/* ── Wolf silhouette — head thrown back, howling ── */}
-      {/* Body/haunches */}
-      <path d="M5 27 Q5 22 7.5 18.5 Q9 16 11.5 15 Q13 14.2 14.5 14.5 Q17 15 18 17.5 Q19 20 19 27Z"
-        fill="url(#wpb-wolf)" />
-      {/* Neck arching back */}
-      <path d="M11 15 Q11.5 11.5 12.5 9 Q13.5 6.5 14.5 5.5 Q15.5 4.5 16.5 5 Q17.5 5.5 17.5 7.5 Q17.5 9.5 18 13"
-        fill="url(#wpb-wolf)" />
-      {/* Head angled upward */}
-      <ellipse cx="15" cy="5.8" rx="3.2" ry="2.5" fill="#334155" transform="rotate(-30 15 5.8)" />
-      {/* Muzzle / open howl snout */}
-      <path d="M16.5 4.2 Q18.5 2.5 19.5 3.2 Q19.8 3.8 18.5 4.8 Q17.5 5.5 16 5Z"
-        fill="#475569" />
-      {/* Ears */}
-      <path d="M12.5 4.5 Q12.8 2.2 14.2 3 Q14.6 4 13.5 5Z" fill="#334155"/>
-      <path d="M15.5 3.5 Q17 1.5 18 2.5 Q17.8 3.5 16.5 4.5Z" fill="#334155"/>
-      {/* Eye glint */}
-      <circle cx="14" cy="5.5" r="0.75" fill="rgba(148,163,184,0.75)" />
-      {/* Front legs */}
-      <path d="M8 21 Q7.5 24 7.5 27" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-      <path d="M11.5 21 Q11.5 24 11.5 27" stroke="#1e293b" strokeWidth="2.0" strokeLinecap="round" fill="none"/>
-      {/* Tail sweeping up */}
-      <path d="M19 21 Q22 18 23 15 Q23.5 13 22 12.5"
-        stroke="#334155" strokeWidth="2" strokeLinecap="round" fill="none"/>
-    </svg>
-  );
-}
 
 // ── Wolf Pack Bond badge (wolf-pack-bond item only) ───────────────────────────
 function WolfPackBondBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
@@ -1334,13 +1286,13 @@ function WolfPackBondBadge({ canAfford, owned }: { canAfford: boolean; owned: bo
             pointerEvents: "none", zIndex: 2,
           }}
         />
-        {/* Wolf howl icon */}
+        {/* Wolf Pack Bond icon */}
         <motion.div
           style={{ position: "relative", zIndex: 1 }}
           animate={{ scale: [1, 1.07, 1] }}
           transition={{ duration: 4.0, ease: "easeInOut", repeat: Infinity }}
         >
-          <WolfPackBondSVG />
+          <img src={wolfPackBondUrl} alt="Wolf Pack Bond" style={{ width: 28, height: 28, objectFit: "contain" }} />
         </motion.div>
       </motion.div>
     </div>
