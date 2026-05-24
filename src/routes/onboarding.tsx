@@ -6,6 +6,7 @@ import { useAppState, NotificationStyle, NotificationApp, type Addiction } from 
 import { triggerPaywall } from "@/lib/paywall";
 import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
 import wolfStage2Url from "@/assets/wolf-stage2-transparent.png";
+import treeStage3YoungUrl from "@/assets/tree-stage3-young.png";
 import { PremiumBackground } from "@/components/PremiumBackground";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
@@ -777,7 +778,9 @@ function Onboarding() {
                           display: "flex", flexDirection: "column", alignItems: "center",
                           paddingBottom: 14, position: "relative",
                           background: [
-                            "radial-gradient(ellipse at 50% 90%, rgba(10,28,12,0.95) 0%, rgba(4,14,6,0.99) 60%, rgba(2,8,3,1) 100%)",
+                            "repeating-linear-gradient(-48deg, transparent, transparent 3px, rgba(20,40,25,0.06) 3px, rgba(20,40,25,0.06) 4px)",
+                            "radial-gradient(ellipse at 30% 60%, rgba(8,28,14,0.45) 0%, transparent 65%)",
+                            "linear-gradient(160deg, rgba(4,10,5,0.98) 0%, rgba(2,6,3,1) 100%)",
                           ].join(", "),
                         }}
                       >
@@ -785,135 +788,71 @@ function Onboarding() {
                         {isSelected && (
                           <div aria-hidden style={{
                             position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-                            background: "radial-gradient(ellipse at 50% 60%, rgba(80,160,60,0.10) 0%, transparent 70%)",
-                            animation: "ob-card-halo 3.2s ease-in-out infinite",
+                            background: "radial-gradient(ellipse at 50% 45%, rgba(40,120,50,0.14) 0%, transparent 70%)",
+                            animation: "ob-card-halo 3.8s ease-in-out infinite",
                           }}/>
                         )}
 
                         {/* ── Illustration area ── */}
                         <div style={{ width: "100%", height: 160, position: "relative", overflow: "hidden" }}>
 
-                          {/* Deep forest floor gradient */}
+                          {/* Deep midnight-green nebula base — mirrors Wolf card night sky */}
                           <div style={{
                             position: "absolute", inset: 0,
                             background: [
-                              "radial-gradient(ellipse at 50% 110%, rgba(20,60,18,0.55) 0%, transparent 60%)",
-                              "radial-gradient(ellipse at 50% 0%,  rgba(5,20,6,0.80) 0%,  transparent 70%)",
+                              "radial-gradient(ellipse at 50% 55%, rgba(18,55,28,0.55) 0%, rgba(8,28,12,0.45) 38%, transparent 68%)",
+                              "radial-gradient(ellipse at 15% 20%, rgba(20,60,30,0.30) 0%, transparent 48%)",
+                              "radial-gradient(ellipse at 85% 15%, rgba(10,40,18,0.28) 0%, transparent 42%)",
+                              "linear-gradient(180deg, rgba(3,8,5,0.95) 0%, rgba(4,12,6,0.88) 50%, rgba(2,6,3,0.98) 100%)",
                             ].join(", "),
                           }}/>
 
-                          {/* Swirling root mist at the base */}
-                          <svg aria-hidden style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: 48, opacity: 0.45 }}>
-                            <defs>
-                              <radialGradient id="ob-root-mist" cx="50%" cy="100%" r="80%">
-                                <stop offset="0%" stopColor="#2a6b28" stopOpacity="0.55"/>
-                                <stop offset="100%" stopColor="#0a1e08" stopOpacity="0"/>
-                              </radialGradient>
-                            </defs>
-                            <ellipse cx="50%" cy="100%" rx="48%" ry="38%" fill="url(#ob-root-mist)"/>
-                          </svg>
+                          {/* Cosmic dust haze — green tint to match forest atmosphere */}
+                          <div style={{
+                            position: "absolute", inset: 0,
+                            background: [
+                              "radial-gradient(ellipse at 30% 40%, rgba(30,80,40,0.14) 0%, transparent 50%)",
+                              "radial-gradient(ellipse at 75% 65%, rgba(15,50,25,0.12) 0%, transparent 45%)",
+                            ].join(", "),
+                          }}/>
 
-                          {/* Gold dust particles */}
+                          {/* Twinkling star field — same positions as Wolf card */}
                           {[
-                            { x: 28, y: 42, s: 2.0, d: 0.0, dur: 6.8 },
-                            { x: 52, y: 28, s: 1.6, d: 1.4, dur: 8.2 },
-                            { x: 72, y: 50, s: 1.8, d: 0.7, dur: 7.5 },
-                            { x: 38, y: 65, s: 1.4, d: 2.2, dur: 9.0 },
-                            { x: 62, y: 38, s: 2.2, d: 3.0, dur: 7.0 },
-                            { x: 20, y: 72, s: 1.5, d: 1.8, dur: 8.5 },
-                          ].map((p, i) => (
+                            { x: 8,  y: 6,  r: 0.9, o: 0.90 }, { x: 18, y: 14, r: 0.7, o: 0.65 },
+                            { x: 30, y: 5,  r: 1.2, o: 0.85 }, { x: 48, y: 8,  r: 0.8, o: 0.70 },
+                            { x: 62, y: 4,  r: 1.1, o: 0.92 }, { x: 76, y: 10, r: 0.7, o: 0.60 },
+                            { x: 88, y: 7,  r: 1.0, o: 0.80 }, { x: 93, y: 22, r: 0.8, o: 0.72 },
+                            { x: 5,  y: 28, r: 1.0, o: 0.68 }, { x: 14, y: 42, r: 0.7, o: 0.55 },
+                            { x: 85, y: 35, r: 0.9, o: 0.75 }, { x: 94, y: 50, r: 0.7, o: 0.60 },
+                            { x: 4,  y: 58, r: 0.8, o: 0.50 }, { x: 91, y: 65, r: 1.0, o: 0.65 },
+                            { x: 22, y: 18, r: 0.6, o: 0.58 }, { x: 70, y: 20, r: 0.8, o: 0.70 },
+                            { x: 55, y: 15, r: 1.3, o: 0.88 }, { x: 38, y: 22, r: 0.7, o: 0.55 },
+                            { x: 82, y: 48, r: 0.8, o: 0.62 }, { x: 12, y: 70, r: 0.9, o: 0.48 },
+                          ].map((s, i) => (
                             <div key={i} aria-hidden style={{
-                              position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
-                              width: p.s, height: p.s, borderRadius: "50%",
-                              background: "#e8c86a",
-                              boxShadow: "0 0 4px 1.5px rgba(232,200,106,0.70)",
-                              animation: `ob-dust ${p.dur}s ease-in-out ${p.d}s infinite`,
-                              pointerEvents: "none",
+                              position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
+                              width: s.r * 2, height: s.r * 2, borderRadius: "50%",
+                              background: i % 5 === 0 ? "rgba(180,220,190,0.90)" : "rgba(210,230,215,0.85)",
+                              opacity: s.o,
+                              boxShadow: i % 4 === 0
+                                ? `0 0 ${s.r * 4}px ${s.r}px rgba(150,210,160,0.55)`
+                                : `0 0 ${s.r * 3}px ${s.r * 0.5}px rgba(190,220,200,0.40)`,
                             }}/>
                           ))}
 
-                          {/* Sacred bonsai tree SVG */}
-                          <svg width="100%" height="160" viewBox="0 0 100 160" fill="none" style={{ position: "absolute", inset: 0 }}>
-                            <defs>
-                              <linearGradient id="ob-trunk-g" x1="50" y1="155" x2="50" y2="60" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%"  stopColor="#6b3f12"/>
-                                <stop offset="50%" stopColor="#b8832c"/>
-                                <stop offset="100%" stopColor="#d4a84c"/>
-                              </linearGradient>
-                              <radialGradient id="ob-leaf-g" cx="44%" cy="40%" r="55%">
-                                <stop offset="0%"  stopColor="#a8e878"/>
-                                <stop offset="45%" stopColor="#5ab840"/>
-                                <stop offset="100%" stopColor="#2a6b20"/>
-                              </radialGradient>
-                              <radialGradient id="ob-leaf-g2" cx="44%" cy="40%" r="55%">
-                                <stop offset="0%"  stopColor="#c8f090"/>
-                                <stop offset="50%" stopColor="#78d050"/>
-                                <stop offset="100%" stopColor="#3a8828"/>
-                              </radialGradient>
-                              <filter id="ob-leaf-glow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="2.0" result="b"/>
-                                <feFlood floodColor="#60c840" floodOpacity="0.45" result="c"/>
-                                <feComposite in="c" in2="b" operator="in" result="g"/>
-                                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-                              </filter>
-                              <filter id="ob-trunk-glow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="1.2" result="b"/>
-                                <feFlood floodColor="#c8902c" floodOpacity="0.30" result="c"/>
-                                <feComposite in="c" in2="b" operator="in" result="g"/>
-                                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-                              </filter>
-                            </defs>
-
-                            {/* Swirling roots */}
-                            <path d="M50 155 Q44 148 38 152 Q32 156 28 154" stroke="url(#ob-trunk-g)" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.75"/>
-                            <path d="M50 155 Q56 148 62 152 Q68 155 72 153" stroke="url(#ob-trunk-g)" strokeWidth="2.0" strokeLinecap="round" fill="none" opacity="0.75"/>
-                            <path d="M48 155 Q42 152 36 156 Q30 158 26 157" stroke="url(#ob-trunk-g)" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.50"/>
-                            <path d="M52 155 Q58 151 66 154 Q74 156 78 155" stroke="url(#ob-trunk-g)" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.50"/>
-
-                            {/* Main trunk — gnarled S-curve */}
-                            <path d="M50 155 Q46 140 48 125 Q44 110 48 96 Q46 84 50 72"
-                              stroke="url(#ob-trunk-g)" strokeWidth="6" strokeLinecap="round" fill="none" filter="url(#ob-trunk-glow)"/>
-                            {/* Bark texture */}
-                            <path d="M48 148 Q44 147 43 148" stroke="rgba(212,168,76,0.35)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                            <path d="M49 135 Q53 134 54 135" stroke="rgba(212,168,76,0.28)" strokeWidth="1.0" strokeLinecap="round" fill="none"/>
-                            <path d="M47 120 Q43 119 42 120" stroke="rgba(212,168,76,0.25)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
-
-                            {/* Left branch */}
-                            <path d="M48 100 Q36 88 26 78 Q20 72 16 65"
-                              stroke="url(#ob-trunk-g)" strokeWidth="3.0" strokeLinecap="round" fill="none"/>
-                            <path d="M16 65 Q10 58 8 50" stroke="#b8832c" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-                            <path d="M16 65 Q20 58 22 50" stroke="#b8832c" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-
-                            {/* Right branch */}
-                            <path d="M50 92 Q64 80 74 70 Q80 64 84 57"
-                              stroke="url(#ob-trunk-g)" strokeWidth="3.0" strokeLinecap="round" fill="none"/>
-                            <path d="M84 57 Q88 50 90 44" stroke="#b8832c" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-                            <path d="M84 57 Q82 50 80 44" stroke="#b8832c" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-
-                            {/* Centre upward branch */}
-                            <path d="M50 80 Q50 68 50 56" stroke="#b8832c" strokeWidth="2.6" strokeLinecap="round" fill="none"/>
-                            <path d="M50 56 Q46 48 42 40" stroke="#b8832c" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-                            <path d="M50 56 Q54 48 58 40" stroke="#b8832c" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-
-                            {/* Leaf clusters — glowing emerald-green */}
-                            <ellipse cx="8"  cy="48"  rx="11" ry="9"  fill="url(#ob-leaf-g)"  filter="url(#ob-leaf-glow)" opacity="0.90" style={{ animation: "ob-leaf-float 5.5s ease-in-out 0s infinite" }}/>
-                            <ellipse cx="4"  cy="56"  rx="7"  ry="5.5" fill="#3a8828"         opacity="0.72"/>
-                            <ellipse cx="22" cy="47"  rx="10" ry="8"  fill="url(#ob-leaf-g)"  filter="url(#ob-leaf-glow)" opacity="0.88" style={{ animation: "ob-leaf-float 6.2s ease-in-out 0.8s infinite" }}/>
-                            <ellipse cx="42" cy="36"  rx="12" ry="9.5" fill="url(#ob-leaf-g2)" filter="url(#ob-leaf-glow)" opacity="0.95" style={{ animation: "ob-leaf-float 5.8s ease-in-out 0.4s infinite" }}/>
-                            <ellipse cx="50" cy="30"  rx="13" ry="10" fill="url(#ob-leaf-g2)" filter="url(#ob-leaf-glow)" opacity="1.00" style={{ animation: "ob-leaf-float 6.5s ease-in-out 1.1s infinite" }}/>
-                            <ellipse cx="58" cy="36"  rx="12" ry="9.5" fill="url(#ob-leaf-g2)" filter="url(#ob-leaf-glow)" opacity="0.95" style={{ animation: "ob-leaf-float 5.5s ease-in-out 1.8s infinite" }}/>
-                            <ellipse cx="78" cy="41"  rx="10" ry="8"  fill="url(#ob-leaf-g)"  filter="url(#ob-leaf-glow)" opacity="0.88" style={{ animation: "ob-leaf-float 6.0s ease-in-out 0.6s infinite" }}/>
-                            <ellipse cx="90" cy="42"  rx="9"  ry="7"  fill="url(#ob-leaf-g)"  filter="url(#ob-leaf-glow)" opacity="0.85" style={{ animation: "ob-leaf-float 7.0s ease-in-out 2.2s infinite" }}/>
-                            <ellipse cx="82" cy="50"  rx="7"  ry="5.5" fill="#3a8828"         opacity="0.65"/>
-
-                            {/* Leaf shimmer highlights */}
-                            <ellipse cx="50" cy="27"  rx="7"  ry="3.5" fill="rgba(200,250,160,0.30)"/>
-                            <ellipse cx="8"  cy="45"  rx="5"  ry="2.5" fill="rgba(200,250,160,0.22)"/>
-                            <ellipse cx="90" cy="39"  rx="4"  ry="2.0" fill="rgba(200,250,160,0.20)"/>
-
-                            {/* Ground glow at trunk base */}
-                            <ellipse cx="50" cy="156" rx="18" ry="5" fill="rgba(80,160,40,0.18)"/>
-                          </svg>
+                          {/* Tree — Young stage, bottom-anchored inside the green glow */}
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                            <img
+                              src={treeStage3YoungUrl}
+                              alt="Young Tree"
+                              style={{
+                                height: "115%",
+                                width: "auto",
+                                objectFit: "contain",
+                                objectPosition: "center bottom",
+                              }}
+                            />
+                          </div>
                         </div>
 
                         {/* Selection dot */}
