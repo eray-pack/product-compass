@@ -1,10 +1,11 @@
 // Tree companion — 6 growth stages across a 90-day recovery journey.
-// Stages 0–2 use PNG assets (seed, sprout, sapling); stages 3–5 are rich SVG illustrations.
+// Stages 0–3 use PNG assets (seed, sprout, sapling, young); stages 4–5 are rich SVG illustrations.
 // viewBox 0 0 100 130 for SVG stages.
 
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
 import treeStage2SaplingUrl from "@/assets/tree-stage2-sapling.png";
+import treeStage3YoungUrl from "@/assets/tree-stage3-young.png";
 
 type P = { className?: string };
 const V = "0 0 100 130";
@@ -36,62 +37,12 @@ export function Tree2({ className }: P) {
   );
 }
 
-/* ── Stage 3 — Medium tree (day 30–59) ──────────────────────────────────── */
+/* ── Stage 3 — Young (day 30–59) ───────────────────────────────────────── */
 export function Tree3({ className }: P) {
   return (
-    <svg viewBox={V} fill="none" className={className}>
-      <defs>
-        <radialGradient id="t3glow" cx="50%" cy="100%" r="62%">
-          <stop offset="0%" stopColor="#FFA000" stopOpacity="0.38"/>
-          <stop offset="60%" stopColor="#FF8F00" stopOpacity="0.12"/>
-          <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
-        </radialGradient>
-        <linearGradient id="t3trunk" x1="10%" y1="0%" x2="90%" y2="0%">
-          <stop offset="0%" stopColor="#A67C52"/>
-          <stop offset="40%" stopColor="#8B5E3C"/>
-          <stop offset="100%" stopColor="#4A2C0E"/>
-        </linearGradient>
-      </defs>
-      <ellipse cx="50" cy="127" rx="50" ry="12" fill="url(#t3glow)"/>
-      <ellipse cx="50" cy="125" rx="44" ry="7" fill="#4E342E"/>
-      <ellipse cx="50" cy="123" rx="34" ry="5.5" fill="#6D4C41"/>
-      {/* Roots */}
-      <path d="M38 120 C32 113 22 114 18 121" stroke="#5D3A1A" strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M62 120 C68 113 78 114 82 121" stroke="#5D3A1A" strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M44 121 C40 114 34 112 31 118" stroke="#5D3A1A" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M56 121 C60 114 66 112 69 118" stroke="#5D3A1A" strokeWidth="3.5" strokeLinecap="round"/>
-      {/* Trunk */}
-      <path d="M41 124 C39 101 40 79 42 61" stroke="url(#t3trunk)" strokeWidth="16.5" strokeLinecap="round"/>
-      {/* Bark texture */}
-      <path d="M44 120 C43 100 43.5 82 44.5 65" stroke="#A67C52" strokeWidth="1.8" fill="none" opacity="0.55"/>
-      <path d="M47 115 C46.5 97 47 80 48 64" stroke="#C49A6C" strokeWidth="1.2" fill="none" opacity="0.4"/>
-      <path d="M50 118 C50 98 50 80 50.5 63" stroke="#8B6040" strokeWidth="0.9" fill="none" opacity="0.3"/>
-      {/* Branches */}
-      <path d="M42 95 C29 89 15 79 7 72" stroke="#6D4C41" strokeWidth="6" strokeLinecap="round"/>
-      <path d="M43 81 C56 74 70 64 79 56" stroke="#6D4C41" strokeWidth="6" strokeLinecap="round"/>
-      <path d="M42 69 C34 59 23 49 17 41" stroke="#6D4C41" strokeWidth="5" strokeLinecap="round"/>
-      <path d="M58 65 C67 56 75 46 81 38" stroke="#6D4C41" strokeWidth="5" strokeLinecap="round"/>
-      {/* Branch highlights */}
-      <path d="M42 95 C30 89 16 80 8 73" stroke="#A67C52" strokeWidth="1" fill="none" opacity="0.4"/>
-      <path d="M43 81 C57 75 71 65 80 57" stroke="#A67C52" strokeWidth="1" fill="none" opacity="0.35"/>
-      {/* Massive crown */}
-      <circle cx="50" cy="43" r="34" fill="#1B5E20"/>
-      <circle cx="12" cy="62" r="22" fill="#1B5E20"/>
-      <circle cx="88" cy="53" r="22" fill="#1B5E20"/>
-      <circle cx="50" cy="37" r="28" fill="#2E7D32"/>
-      <circle cx="16" cy="54" r="20" fill="#2E7D32"/>
-      <circle cx="84" cy="45" r="20" fill="#2E7D32"/>
-      <circle cx="50" cy="31" r="23" fill="#388E3C"/>
-      <circle cx="29" cy="40" r="20" fill="#43A047"/>
-      <circle cx="71" cy="36" r="20" fill="#43A047"/>
-      <circle cx="50" cy="24" r="19" fill="#4CAF50"/>
-      <circle cx="36" cy="28" r="15" fill="#66BB6A"/>
-      <circle cx="64" cy="26" r="15" fill="#66BB6A"/>
-      {/* Canopy highlights */}
-      <circle cx="50" cy="17" r="13" fill="#81C784" opacity="0.6"/>
-      <circle cx="40" cy="20" r="9" fill="#A5D6A7" opacity="0.5"/>
-      <circle cx="60" cy="18" r="8" fill="#A5D6A7" opacity="0.45"/>
-    </svg>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <img src={treeStage3YoungUrl} alt="Young tree" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center bottom" }} />
+    </div>
   );
 }
 

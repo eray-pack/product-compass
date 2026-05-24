@@ -2,6 +2,7 @@ import { dayToStage } from "@/components/avatars/CompanionAvatar";
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
 import treeStage2SaplingUrl from "@/assets/tree-stage2-sapling.png";
+import treeStage3YoungUrl from "@/assets/tree-stage3-young.png";
 
 interface Props {
   day: number;
@@ -10,7 +11,7 @@ interface Props {
 
 /**
  * Illustrated cartoon tree — 6 growth stages driven by clean-day count.
- * Stages 0–2 use PNG assets (seed → sprout → sapling); stages 3–5 are SVG illustrations.
+ * Stages 0–3 use PNG assets (seed → sprout → sapling → young); stages 4–5 are SVG illustrations.
  * Thresholds: 0 days=Seed, 3 days=Sprout, 14=Sapling, 30=Young, 60=Strong, 90=Ancient.
  */
 export function CartoonTree({ day }: Props) {
@@ -49,6 +50,17 @@ export function CartoonTree({ day }: Props) {
     );
   }
 
+  if (stage === 3) {
+    return (
+      <img
+        src={treeStage3YoungUrl}
+        alt="Young tree"
+        style={{ height: "88%", width: "auto", objectFit: "contain" }}
+        aria-hidden
+      />
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 400 300"
@@ -58,44 +70,9 @@ export function CartoonTree({ day }: Props) {
       style={{ display: "block" }}
       aria-hidden
     >
-      {stage === 3 && <YoungTree />}
       {stage === 4 && <StrongTree />}
       {stage >= 5 && <AncientTree />}
     </svg>
-  );
-}
-
-// ── Stage 3 — Young Tree ──────────────────────────────────────────────────────
-function YoungTree() {
-  return (
-    <g transform="translate(200, 268) scale(1.28)">
-      {/* Ground */}
-      <ellipse cx="0" cy="0" rx="66" ry="10" fill="#2D5A27" opacity="0.75" />
-      {/* Root hints */}
-      <path d="M -6 0 Q -22 4 -30 2" stroke="#5E3820" strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M 6 0 Q 22 4 30 2"   stroke="#5E3820" strokeWidth="3.5" strokeLinecap="round" />
-
-      {/* Trunk */}
-      <path d="M -10 0 Q -8 -58 -4 -118 Q 4 -58 10 0 Z" fill="#6B4226" />
-      <path d="M -4 0 Q -3 -58 0 -118" stroke="#8A5A38" strokeWidth="2.5" opacity="0.40" strokeLinecap="round" />
-
-      {/* Branches */}
-      <path d="M -7 -72  Q -38 -80 -34 -96"  stroke="#6B4226" strokeWidth="7"   strokeLinecap="round" />
-      <path d="M -34 -96 Q -46 -104 -42 -114" stroke="#6B4226" strokeWidth="5"   strokeLinecap="round" />
-      <path d="M 7 -76   Q 36 -83 32 -98"    stroke="#6B4226" strokeWidth="6.5"  strokeLinecap="round" />
-      <path d="M 32 -98  Q 42 -108 38 -118"  stroke="#6B4226" strokeWidth="4.5"  strokeLinecap="round" />
-
-      {/* Crown */}
-      <ellipse cx="0"   cy="-144" rx="52" ry="36" fill="#3A7D4E" />
-      <ellipse cx="-36" cy="-127" rx="31" ry="24" fill="#449060" />
-      <ellipse cx="36"  cy="-129" rx="29" ry="23" fill="#428C5C" />
-      <ellipse cx="-16" cy="-164" rx="25" ry="19" fill="#4E9E63" />
-      <ellipse cx="16"  cy="-161" rx="23" ry="18" fill="#4C9C62" />
-      <ellipse cx="0"   cy="-174" rx="19" ry="14" fill="#58AA6E" />
-      {/* Highlights */}
-      <ellipse cx="-14" cy="-176" rx="10" ry="7"  fill="#74C285" opacity="0.42" />
-      <ellipse cx="8"   cy="-167" rx="7"  ry="5"  fill="#74C285" opacity="0.28" />
-    </g>
   );
 }
 
