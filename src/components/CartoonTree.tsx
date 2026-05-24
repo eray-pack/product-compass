@@ -1,4 +1,5 @@
 import { treeStage } from "@/lib/store";
+import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 
 interface Props {
   day: number;
@@ -6,13 +7,23 @@ interface Props {
 }
 
 /**
- * Illustrated SVG cartoon tree — 6 growth stages matching treeStage().
- * Every stage shows a recognisable tree; Stage 0 is tiny and cute,
- * Stage 5 is a massive ancient tree with golden leaves.
+ * Illustrated cartoon tree — 6 growth stages matching treeStage().
+ * Stage 0 uses the seed PNG asset; stages 1–5 are SVG illustrations.
  * Designed for the 280px-tall tree scene card on a dark sky background.
  */
 export function CartoonTree({ day, xp = 0 }: Props) {
   const { stage } = treeStage(xp);
+
+  if (stage === 0) {
+    return (
+      <img
+        src={treeStage0SeedUrl}
+        alt="Seed"
+        style={{ height: "52%", width: "auto", objectFit: "contain" }}
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <svg
@@ -23,36 +34,12 @@ export function CartoonTree({ day, xp = 0 }: Props) {
       style={{ display: "block" }}
       aria-hidden
     >
-      {stage === 0 && <TinyTree />}
       {stage === 1 && <SmallTree />}
       {stage === 2 && <Sapling />}
       {stage === 3 && <YoungTree />}
       {stage === 4 && <StrongTree />}
       {stage >= 5 && <AncientTree />}
     </svg>
-  );
-}
-
-// ── Stage 0 — Tiny Tree ───────────────────────────────────────────────────────
-function TinyTree() {
-  return (
-    <g transform="translate(200, 268) scale(3.16)">
-      {/* Ground mound */}
-      <ellipse cx="0" cy="0" rx="30" ry="6" fill="#2D5A27" opacity="0.65" />
-
-      {/* Stubby trunk */}
-      <path d="M -5 0 Q -4 -14 -3 -30 Q 3 -14 5 0 Z" fill="#7A5030" />
-      {/* Trunk highlight */}
-      <path d="M -3 0 Q -2 -14 -1 -30" stroke="#9B6840" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-
-      {/* Crown — big round blobs for that cute cartoon look */}
-      <ellipse cx="0"   cy="-50" rx="24" ry="20" fill="#3E9458" />
-      <ellipse cx="-17" cy="-42" rx="16" ry="14" fill="#48A462" />
-      <ellipse cx="17"  cy="-43" rx="15" ry="13" fill="#46A260" />
-      <ellipse cx="0"   cy="-63" rx="16" ry="13" fill="#52B06C" />
-      {/* Highlight */}
-      <ellipse cx="-6"  cy="-65" rx="8"  ry="6"  fill="#74CC86" opacity="0.42" />
-    </g>
   );
 }
 

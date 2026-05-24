@@ -1,47 +1,18 @@
 // Tree companion — 6 growth stages across a 90-day recovery journey.
-// Premium illustrated style: rich bark gradients, lush canopy layering,
-// warm golden ground glow that intensifies with each stage.
-// viewBox 0 0 100 130.
+// Stage 0 uses a PNG seed asset; stages 1–5 are rich SVG illustrations.
+// viewBox 0 0 100 130 for SVG stages.
+
+import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 
 type P = { className?: string };
 const V = "0 0 100 130";
 
-/* ── Stage 0 — Seedling (day 0–6) ──────────────────────────────────────── */
+/* ── Stage 0 — Seed (day 0–6) ──────────────────────────────────────────── */
 export function Tree0({ className }: P) {
   return (
-    <svg viewBox={V} fill="none" className={className}>
-      <defs>
-        <radialGradient id="t0glow" cx="50%" cy="100%" r="55%">
-          <stop offset="0%" stopColor="#FFB300" stopOpacity="0.18"/>
-          <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
-        </radialGradient>
-        <linearGradient id="t0stem" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#4CAF50"/>
-          <stop offset="50%" stopColor="#66BB6A"/>
-          <stop offset="100%" stopColor="#388E3C"/>
-        </linearGradient>
-      </defs>
-      {/* Warm ground glow */}
-      <ellipse cx="50" cy="125" rx="30" ry="10" fill="url(#t0glow)"/>
-      {/* Soil mound */}
-      <ellipse cx="50" cy="122" rx="22" ry="5.5" fill="#5D4037"/>
-      <ellipse cx="50" cy="120" rx="15" ry="3.5" fill="#795548"/>
-      {/* Stem */}
-      <path d="M50 119 C49.5 110 50 101 51 93" stroke="url(#t0stem)" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Bottom leaf pair */}
-      <path d="M51 111 C44 108 40 102 43 98 C46 94 51 99 51 109Z" fill="#66BB6A"/>
-      <path d="M50 107 C57 103 61 97 59 93 C57 89 51 93 51 104Z" fill="#4CAF50"/>
-      {/* Leaf vein */}
-      <path d="M51 109 Q46 103 43 98" stroke="#388E3C" strokeWidth="0.7" fill="none" opacity="0.5"/>
-      <path d="M51 104 Q56 98 59 93" stroke="#2E7D32" strokeWidth="0.7" fill="none" opacity="0.5"/>
-      {/* Top leaf pair */}
-      <path d="M51 100 C45 97 42 91 45 88 C48 85 51 90 51 98Z" fill="#81C784"/>
-      <path d="M50 97 C55 94 58 88 56 85 C54 82 50 86 50 95Z" fill="#66BB6A"/>
-      {/* Bud — translucent tip */}
-      <ellipse cx="51" cy="91" rx="3.5" ry="5" fill="#A5D6A7"/>
-      <ellipse cx="51" cy="89" rx="2" ry="3" fill="#C8E6C9"/>
-      <ellipse cx="51" cy="88" rx="1" ry="1.5" fill="#E8F5E9" opacity="0.8"/>
-    </svg>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <img src={treeStage0SeedUrl} alt="Seed" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center bottom" }} />
+    </div>
   );
 }
 
