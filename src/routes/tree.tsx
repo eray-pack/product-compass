@@ -10,6 +10,7 @@ import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
 import wolfPackBondUrl from "@/assets/wolf-pack-bond.png";
 import wolfFurCoatUrl from "@/assets/wolf-fur-coat.png";
 import wolfAlphaMarkUrl from "@/assets/wolf-alpha-mark.png";
+import wolfShadowUrl from "@/assets/wolf-shadow.png";
 
 export const Route = createFileRoute("/tree")({
   component: TreePage,
@@ -1569,71 +1570,6 @@ function AlphaMarkBadge({ canAfford, owned }: { canAfford: boolean; owned: boole
   );
 }
 
-// ── Ancient Instinct icon SVG ─────────────────────────────────────────────────
-function AncientInstinctSVG() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-      <defs>
-        <radialGradient id="ai-pad" cx="50%" cy="55%" r="52%" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#7c3aed" />
-          <stop offset="45%"  stopColor="#4c1d95" />
-          <stop offset="100%" stopColor="#1e0a3c" />
-        </radialGradient>
-        <radialGradient id="ai-toe" cx="50%" cy="45%" r="50%" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#5b21b6" />
-        </radialGradient>
-        <radialGradient id="ai-eye" cx="50%" cy="40%" r="50%" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#d1fae5" />
-          <stop offset="35%"  stopColor="#10b981" />
-          <stop offset="100%" stopColor="#064e3b" />
-        </radialGradient>
-        <filter id="ai-glow">
-          <feGaussianBlur stdDeviation="0.9" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      {/* ── Main paw pad ── */}
-      <path d="M7 16 Q6 11 9 9 Q11 7.5 14 8 Q17 7.5 19 9 Q22 11 21 16 Q20 21 17 23 Q15 24.5 11 23 Q8 21 7 16Z"
-        fill="url(#ai-pad)" />
-
-      {/* ── Runic carving lines across the pad ── */}
-      <path d="M10 13 L14 11 L18 13" stroke="rgba(167,139,250,0.55)" strokeWidth="0.9" strokeLinecap="round" fill="none"/>
-      <path d="M11 17 L14 15.5 L17 17" stroke="rgba(167,139,250,0.50)" strokeWidth="0.8" strokeLinecap="round" fill="none"/>
-      <path d="M14 11 L14 20" stroke="rgba(167,139,250,0.40)" strokeWidth="0.7" strokeLinecap="round" fill="none"/>
-
-      {/* ── Glowing primal eye at center of pad ── */}
-      {/* Eye white / sclera glow */}
-      <ellipse cx="14" cy="15.5" rx="3.8" ry="2.6" fill="rgba(16,185,129,0.18)" filter="url(#ai-glow)"/>
-      {/* Iris */}
-      <ellipse cx="14" cy="15.5" rx="2.8" ry="1.9" fill="url(#ai-eye)" />
-      {/* Vertical slit pupil */}
-      <ellipse cx="14" cy="15.5" rx="0.75" ry="1.7" fill="#030c07" />
-      {/* Eye specular */}
-      <ellipse cx="13.2" cy="14.5" rx="0.9" ry="0.55" fill="rgba(209,250,229,0.80)" transform="rotate(-20 13.2 14.5)"/>
-      {/* Runic ring around eye */}
-      <ellipse cx="14" cy="15.5" rx="2.8" ry="1.9" fill="none"
-        stroke="rgba(16,185,129,0.55)" strokeWidth="0.6" strokeDasharray="2.2 1.4"/>
-
-      {/* ── Toe pads — four surrounding the main pad ── */}
-      <ellipse cx="9"  cy="8.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(-18 9 8.5)"/>
-      <ellipse cx="12" cy="6.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(-6 12 6.5)"/>
-      <ellipse cx="16" cy="6.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(6 16 6.5)"/>
-      <ellipse cx="19" cy="8.5"  rx="2.0" ry="1.6" fill="url(#ai-toe)" transform="rotate(18 19 8.5)"/>
-
-      {/* ── Runic glyph dots on toe pads ── */}
-      <circle cx="9"  cy="8.5"  r="0.65" fill="rgba(167,139,250,0.80)"/>
-      <circle cx="12" cy="6.5"  r="0.65" fill="rgba(16,185,129,0.80)"/>
-      <circle cx="16" cy="6.5"  r="0.65" fill="rgba(167,139,250,0.80)"/>
-      <circle cx="19" cy="8.5"  r="0.65" fill="rgba(16,185,129,0.80)"/>
-
-      {/* ── Pad specular sheen ── */}
-      <ellipse cx="11" cy="13" rx="2.8" ry="1.5" fill="rgba(124,58,237,0.30)" transform="rotate(-15 11 13)"/>
-    </svg>
-  );
-}
-
 // ── Ancient Instinct badge (wolf-ancient item only) ───────────────────────────
 function AncientInstinctBadge({ canAfford, owned }: { canAfford: boolean; owned: boolean }) {
   // Mystic stardust — two rings, alternating purple / emerald
@@ -1798,13 +1734,13 @@ function AncientInstinctBadge({ canAfford, owned }: { canAfford: boolean; owned:
             pointerEvents: "none", zIndex: 2,
           }}
         />
-        {/* Paw icon */}
+        {/* Ancient instinct icon */}
         <motion.div
           style={{ position: "relative", zIndex: 1 }}
           animate={{ scale: [1, 1.07, 1], opacity: [0.88, 1, 0.88] }}
           transition={{ duration: 5.0, ease: "easeInOut", repeat: Infinity }}
         >
-          <AncientInstinctSVG />
+          <img src={wolfShadowUrl} alt="Ancient Instinct" style={{ width: 28, height: 28, objectFit: "contain" }} />
         </motion.div>
       </motion.div>
     </div>
