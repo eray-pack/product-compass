@@ -2341,28 +2341,21 @@ function WolfPage({
         </p>
       </header>
 
-      {/* Wolf scene — full-bleed */}
-      <section className="mt-4 relative" style={{ height: 360, borderRadius: 24, overflow: "hidden" }}>
-        <div className="absolute inset-0 overflow-hidden">
-          <WolfBackground />
-        </div>
-        <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
-          style={{ background: health.sceneOverlay }} />
-        <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
-          style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
+      {/* Wolf scene */}
+      <section className="mt-4 relative" style={{ height: 380 }}>
 
-        {/* Stage — top left */}
-        <div className="absolute top-4 left-5 z-20">
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
-            color: "#C9A84C", background: "rgba(0,0,0,0.40)",
-            border: "1px solid rgba(201,168,76,0.30)",
-            borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)",
-          }}>
-            Stage {wolfStage.stage} · {wolfStage.name}
-          </span>
-        </div>
+        {/* 3D mode: full-bleed background */}
+        {wolfStyle === "3d" && (
+          <>
+            <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 24 }}>
+              <WolfBackground />
+            </div>
+            <div className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000"
+              style={{ borderRadius: 24, background: health.sceneOverlay }} />
+            <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
+              style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
+          </>
+        )}
 
         {/* Style toggle — top right */}
         <div className="absolute top-4 right-5 z-20">
@@ -2391,123 +2384,90 @@ function WolfPage({
         </div>
 
         {/* Wolf visual */}
-        <div className="absolute inset-0 flex items-center justify-center z-10"
-          style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
+        <div className="absolute inset-0 flex items-center justify-center z-10">
           {wolfStyle === "3d" ? (
-            <div className="w-full h-full">
+            <div className="w-full h-full" style={{ filter: health.companionFilter, transition: "filter 1.2s ease" }}>
               <Wolf3D stage={wolfStage.stage} />
             </div>
           ) : (
-            /* Cartoon: oval scene — forest night inside circle, edges fade into black */
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-              {/* Single 240px anchor — rings + oval positioned relative to this */}
-              <div style={{ position: "relative", width: 240, height: 240, flexShrink: 0 }}>
+            /* Cartoon: crisp circular scene — landscape + wolf fully contained */
+            <div style={{ position: "relative", width: 280, height: 280, flexShrink: 0 }}>
 
-                {/* ── Badge-style glow ring — identical system as cartoon tree ── */}
-                {(() => {
-                  const glowBase = (
-                    healthState === "thriving"  ? "rgba(63,184,106,"  :
-                    healthState === "growing"   ? "rgba(143,190,90,"  :
-                    healthState === "fading"    ? "rgba(201,168,76,"  :
-                                                 "rgba(122,106,90,"
-                  );
-                  return (
-                    <>
-                      {/* Atmospheric halo — diffuse glow sitting outside the circle */}
-                      <motion.div
-                        aria-hidden
-                        style={{
-                          position: "absolute",
-                          top: "50%", left: "50%", marginTop: -150, marginLeft: -150,
-                          width: 300, height: 300, borderRadius: "50%",
-                          background: `radial-gradient(circle, transparent 38%, ${glowBase}0.22) 52%, ${glowBase}0.10) 66%, transparent 80%)`,
-                          pointerEvents: "none", zIndex: 3,
-                        }}
-                        animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
-                        transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
-                      />
-                      {/* Primary crisp ring — outside the circle */}
-                      <motion.div
-                        aria-hidden
-                        style={{
-                          position: "absolute",
-                          top: "50%", left: "50%", marginTop: -137, marginLeft: -137,
-                          width: 274, height: 274, borderRadius: "50%",
-                          border: `2.5px solid ${glowBase}0.88)`,
-                          filter: "blur(1.5px)",
-                          boxShadow: `0 0 16px 6px ${glowBase}0.55), 0 0 36px 14px ${glowBase}0.20)`,
-                          pointerEvents: "none", zIndex: 3,
-                        }}
-                        animate={{ scale: [1, 1.012, 1], rotate: 360 }}
-                        transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                      />
-                      {/* Outer softer ring */}
-                      <motion.div
-                        aria-hidden
-                        style={{
-                          position: "absolute",
-                          top: "50%", left: "50%", marginTop: -152, marginLeft: -152,
-                          width: 304, height: 304, borderRadius: "50%",
-                          border: `1px solid ${glowBase}0.30)`,
-                          filter: "blur(2px)",
-                          pointerEvents: "none", zIndex: 3,
-                        }}
-                        animate={{ scale: [1, 1.008, 1], rotate: -360 }}
-                        transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                      />
-                    </>
-                  );
-                })()}
+              {/* Atmospheric halo — diffuse gold glow behind circle */}
+              <motion.div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "50%", left: "50%", marginTop: -170, marginLeft: -170,
+                  width: 340, height: 340, borderRadius: "50%",
+                  background: "radial-gradient(circle, transparent 38%, rgba(196,135,58,0.18) 52%, rgba(196,135,58,0.08) 66%, transparent 80%)",
+                  pointerEvents: "none", zIndex: 1,
+                }}
+                animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+              />
+              {/* Primary crisp gold ring */}
+              <motion.div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "50%", left: "50%", marginTop: -148, marginLeft: -148,
+                  width: 296, height: 296, borderRadius: "50%",
+                  border: "2.5px solid rgba(196,135,58,0.88)",
+                  filter: "blur(1px)",
+                  boxShadow: "0 0 16px 6px rgba(196,135,58,0.45), 0 0 36px 14px rgba(196,135,58,0.18)",
+                  pointerEvents: "none", zIndex: 5,
+                }}
+                animate={{ scale: [1, 1.012, 1], rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+              />
+              {/* Outer softer gold ring */}
+              <motion.div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "50%", left: "50%", marginTop: -163, marginLeft: -163,
+                  width: 326, height: 326, borderRadius: "50%",
+                  border: "1px solid rgba(196,135,58,0.28)",
+                  filter: "blur(2px)",
+                  pointerEvents: "none", zIndex: 5,
+                }}
+                animate={{ scale: [1, 1.008, 1], rotate: -360 }}
+                transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+              />
 
-                {/* Oval — masked forest scene, fills the 240px anchor */}
+              {/* Hard circle — WolfBackground + wolf clipped inside */}
+              <div style={{
+                position: "absolute", inset: 0,
+                borderRadius: "50%", overflow: "hidden",
+                zIndex: 2,
+              }}>
+                <WolfBackground />
+                <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
+                {/* Wolf — bottom-anchored so it stands on the ground */}
                 <div style={{
                   position: "absolute", inset: 0,
-                  maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
-                  WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+                  display: "flex", alignItems: "flex-end", justifyContent: "center",
                   zIndex: 2,
+                  filter: health.companionFilter, transition: "filter 1.2s ease",
                 }}>
-                  {/* Dark forest night fills the oval */}
-                  <div style={{
-                    position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%",
-                    background: "radial-gradient(ellipse at 50% 30%, #1a2a1e, #080e0a)",
-                  }}>
-                    <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
-                  </div>
-                  {/* Wolf centered in oval */}
-                  <div className="anim-tree-float" style={{
-                    position: "absolute", inset: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2,
-                  }}>
-                    <div style={{ width: 160, height: 192 }}>
-                      <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
-                    </div>
+                  <div style={{ width: 220, height: 240 }}>
+                    <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
                   </div>
                 </div>
-
               </div>
+
             </div>
           )}
         </div>
 
-        {/* Bottom row */}
-        <div className="absolute bottom-5 inset-x-5 z-20 flex items-center justify-between">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A84C", background: "rgba(0,0,0,0.38)", border: "1px solid rgba(201,168,76,0.30)", borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)" }}>
-            <Crown style={{ height: 11, width: 11 }} /> {WOLF_RANK_BY_STAGE[wolfStage.stage]}
-          </span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, color: health.color, background: "rgba(0,0,0,0.38)", border: `1px solid ${health.color}40`, borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)" }}>
-            {health.emoji} {health.label} · {daysThisWeek}/7
-          </span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.55)", background: "rgba(0,0,0,0.38)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 999, padding: "4px 10px", backdropFilter: "blur(10px)" }}>
-            <Sparkles style={{ height: 11, width: 11 }} /> Day {day}
-          </span>
-        </div>
       </section>
 
       {/* XP + stats */}
       <section className="px-6 mt-2">
         <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
           <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-muted-foreground">{wolfStage.name}</span>
+            <span className="text-muted-foreground">{wolfStage.name} · {WOLF_RANK_BY_STAGE[wolfStage.stage]}</span>
             <span className="text-muted-foreground tabular-nums">{state.treeXP} / {wolfStage.next} XP</span>
           </div>
           <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
@@ -2515,10 +2475,9 @@ function WolfPage({
           </div>
           <div className="flex items-center justify-between mt-2.5">
             <p className="text-xs text-muted-foreground">
-              <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
-              Top <span className="text-success font-semibold">{WOLF_TOP_PCT_BY_STAGE[wolfStage.stage]}%</span> of all users
+              Day {day} · {state.treeXP} / {wolfStage.next} XP
             </p>
-            <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>{health.emoji} {health.desc}</p>
+            <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>{health.label} · {daysThisWeek}/7</p>
           </div>
         </div>
       </section>

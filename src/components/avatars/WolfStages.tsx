@@ -92,7 +92,7 @@ function Wolf0({ className }: P) {
 // ── Stage 1–3: Transparent PNG wolf, large, centred on dark background ──────
 function Wolf1({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage1Url} alt="Wolf stage 1" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
@@ -100,7 +100,7 @@ function Wolf1({ className }: P) {
 
 function Wolf2({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage2Url} alt="Wolf stage 2" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
@@ -108,7 +108,7 @@ function Wolf2({ className }: P) {
 
 function Wolf3({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage3Url} alt="Wolf stage 3" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
@@ -117,7 +117,7 @@ function Wolf3({ className }: P) {
 // ── Stages 4–7: transparent stage-3 PNG placeholder, large, centred ─────────
 function Wolf4({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage3Url} alt="Wolf stage 4" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
@@ -125,7 +125,7 @@ function Wolf4({ className }: P) {
 
 function Wolf5({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage3Url} alt="Wolf stage 5" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
@@ -133,7 +133,7 @@ function Wolf5({ className }: P) {
 
 function Wolf6({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage3Url} alt="Wolf stage 6" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
@@ -141,7 +141,7 @@ function Wolf6({ className }: P) {
 
 function Wolf7({ className }: P) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <img src={wolfStage3Url} alt="Wolf stage 7" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
