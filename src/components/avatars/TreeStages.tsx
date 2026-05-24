@@ -1,9 +1,10 @@
 // Tree companion — 6 growth stages across a 90-day recovery journey.
-// Stages 0–1 use PNG assets (seed, sprout); stages 2–5 are rich SVG illustrations.
+// Stages 0–2 use PNG assets (seed, sprout, sapling); stages 3–5 are rich SVG illustrations.
 // viewBox 0 0 100 130 for SVG stages.
 
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
+import treeStage2SaplingUrl from "@/assets/tree-stage2-sapling.png";
 
 type P = { className?: string };
 const V = "0 0 100 130";
@@ -26,56 +27,12 @@ export function Tree1({ className }: P) {
   );
 }
 
-/* ── Stage 2 — Young tree (day 14–29) ──────────────────────────────────── */
+/* ── Stage 2 — Sapling (day 14–29) ─────────────────────────────────────── */
 export function Tree2({ className }: P) {
   return (
-    <svg viewBox={V} fill="none" className={className}>
-      <defs>
-        <radialGradient id="t2glow" cx="50%" cy="100%" r="60%">
-          <stop offset="0%" stopColor="#FFA000" stopOpacity="0.30"/>
-          <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
-        </radialGradient>
-        <linearGradient id="t2trunk" x1="12%" y1="0%" x2="88%" y2="0%">
-          <stop offset="0%" stopColor="#A67C52"/>
-          <stop offset="45%" stopColor="#8B5E3C"/>
-          <stop offset="100%" stopColor="#4E2C0E"/>
-        </linearGradient>
-      </defs>
-      <ellipse cx="50" cy="126" rx="42" ry="10" fill="url(#t2glow)"/>
-      <ellipse cx="50" cy="124" rx="36" ry="7" fill="#5D4037"/>
-      <ellipse cx="50" cy="122" rx="26" ry="5" fill="#795548"/>
-      {/* Surface roots */}
-      <path d="M33 119 C29 114 24 115 21 120" stroke="#6D4C41" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M67 119 C71 114 76 115 79 120" stroke="#6D4C41" strokeWidth="3.5" strokeLinecap="round"/>
-      {/* Trunk */}
-      <path d="M44 123 C43 104 44 85 45 69" stroke="url(#t2trunk)" strokeWidth="10.5" strokeLinecap="round"/>
-      {/* Bark texture */}
-      <path d="M46 119 C45 100 45.5 82 46.5 68" stroke="#A67C52" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      <path d="M48.5 113 C48 96 48.5 80 49 66" stroke="#C49A6C" strokeWidth="0.8" fill="none" opacity="0.35"/>
-      {/* Branches */}
-      <path d="M45 100 C36 96 25 89 18 82" stroke="#7A4F2D" strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M46 89 C57 83 68 74 75 68" stroke="#7A4F2D" strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M45 78 C42 69 36 61 32 54" stroke="#7A4F2D" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M55 72 C62 65 68 57 72 50" stroke="#7A4F2D" strokeWidth="3.5" strokeLinecap="round"/>
-      {/* Branch highlights */}
-      <path d="M45 100 C37 96 26 90 19 83" stroke="#A67C52" strokeWidth="0.9" fill="none" opacity="0.38"/>
-      {/* Crown — rich layered foliage */}
-      <circle cx="50" cy="54" r="25" fill="#1B5E20"/>
-      <circle cx="20" cy="72" r="16" fill="#1B5E20"/>
-      <circle cx="78" cy="63" r="16" fill="#2E7D32"/>
-      <circle cx="50" cy="49" r="20" fill="#2E7D32"/>
-      <circle cx="24" cy="64" r="13" fill="#388E3C"/>
-      <circle cx="74" cy="57" r="13" fill="#388E3C"/>
-      <circle cx="50" cy="43" r="17" fill="#43A047"/>
-      <circle cx="35" cy="51" r="13" fill="#4CAF50"/>
-      <circle cx="65" cy="48" r="13" fill="#4CAF50"/>
-      <circle cx="50" cy="37" r="14" fill="#4CAF50"/>
-      <circle cx="38" cy="41" r="10" fill="#66BB6A"/>
-      <circle cx="62" cy="39" r="10" fill="#66BB6A"/>
-      {/* Canopy highlights */}
-      <circle cx="48" cy="32" r="8" fill="#81C784" opacity="0.55"/>
-      <circle cx="60" cy="36" r="6" fill="#A5D6A7" opacity="0.45"/>
-    </svg>
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <img src={treeStage2SaplingUrl} alt="Sapling" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center bottom" }} />
+    </div>
   );
 }
 

@@ -1,6 +1,7 @@
 import { dayToStage } from "@/components/avatars/CompanionAvatar";
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
+import treeStage2SaplingUrl from "@/assets/tree-stage2-sapling.png";
 
 interface Props {
   day: number;
@@ -9,7 +10,7 @@ interface Props {
 
 /**
  * Illustrated cartoon tree — 6 growth stages driven by clean-day count.
- * Stages 0–1 use PNG assets (seed → sprout); stages 2–5 are SVG illustrations.
+ * Stages 0–2 use PNG assets (seed → sprout → sapling); stages 3–5 are SVG illustrations.
  * Thresholds: 0 days=Seed, 3 days=Sprout, 14=Sapling, 30=Young, 60=Strong, 90=Ancient.
  */
 export function CartoonTree({ day }: Props) {
@@ -37,6 +38,17 @@ export function CartoonTree({ day }: Props) {
     );
   }
 
+  if (stage === 2) {
+    return (
+      <img
+        src={treeStage2SaplingUrl}
+        alt="Sapling"
+        style={{ height: "76%", width: "auto", objectFit: "contain" }}
+        aria-hidden
+      />
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 400 300"
@@ -46,39 +58,10 @@ export function CartoonTree({ day }: Props) {
       style={{ display: "block" }}
       aria-hidden
     >
-      {stage === 2 && <Sapling />}
       {stage === 3 && <YoungTree />}
       {stage === 4 && <StrongTree />}
       {stage >= 5 && <AncientTree />}
     </svg>
-  );
-}
-
-// ── Stage 2 — Sapling ─────────────────────────────────────────────────────────
-function Sapling() {
-  return (
-    <g transform="translate(200, 268) scale(1.60)">
-      {/* Ground */}
-      <ellipse cx="0" cy="0" rx="52" ry="8" fill="#2D5A27" opacity="0.70" />
-
-      {/* Trunk */}
-      <path d="M -7 0 Q -6 -40 -3 -88 Q 3 -40 7 0 Z" fill="#6B4226" />
-      <path d="M -3 0 Q -2 -44 0 -88" stroke="#8A5A38" strokeWidth="2" opacity="0.38" strokeLinecap="round" />
-
-      {/* Branches */}
-      <path d="M -5 -52 Q -24 -59 -20 -70" stroke="#6B4226" strokeWidth="5.5" strokeLinecap="round" />
-      <path d="M 5 -56 Q 22 -62 18 -73"   stroke="#6B4226" strokeWidth="5"   strokeLinecap="round" />
-
-      {/* Crown — 3 clear layers */}
-      <ellipse cx="0"   cy="-110" rx="38" ry="29" fill="#387E4E" />
-      <ellipse cx="-26" cy="-96"  rx="25" ry="20" fill="#428C58" />
-      <ellipse cx="26"  cy="-97"  rx="23" ry="19" fill="#408A56" />
-      <ellipse cx="-12" cy="-130" rx="20" ry="15" fill="#4A9860" />
-      <ellipse cx="12"  cy="-127" rx="18" ry="14" fill="#489660" />
-      <ellipse cx="0"   cy="-138" rx="16" ry="12" fill="#52A46A" />
-      {/* Highlight */}
-      <ellipse cx="-7"  cy="-140" rx="9"  ry="6"  fill="#72C284" opacity="0.42" />
-    </g>
   );
 }
 
