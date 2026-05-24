@@ -4,9 +4,9 @@
 // Color arc: light silver pup → near-black legendary wolf.
 // Golden ground disc intensifies with each stage (matching CartoonTree).
 
-import wolfStage1Url from "@/assets/wolf-stage1.jpg";
-import wolfStage2Url from "@/assets/wolf-stage2.jpg";
-import wolfStage3Url from "@/assets/wolf-stage3.jpg";
+import wolfStage1Url from "@/assets/wolf-stage1-transparent.png";
+import wolfStage2Url from "@/assets/wolf-stage2-transparent.png";
+import wolfStage3Url from "@/assets/wolf-stage3-transparent.png";
 
 type P = { className?: string };
 const GOLD = "#C4873A"; // CartoonTree golden element colour
@@ -89,129 +89,60 @@ function Wolf0({ className }: P) {
   );
 }
 
-// ── Stage 1: Local wolf image inside golden circle ────────────────────────────
+// ── Stage 1–3: Transparent PNG wolf, large, centred on dark background ──────
 function Wolf1({ className }: P) {
   return (
-    <div
-      className={className}
-      style={{
-        position: "relative", width: "100%", height: "100%",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}
-    >
-      {/* Golden circle — matches CartoonTree golden disc */}
-      <div style={{
-        position: "absolute",
-        width: "78%", height: "78%", borderRadius: "50%",
-        background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`,
-        boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)`,
-      }} />
-      {/* Wolf image */}
-      <img
-        src={wolfStage1Url}
-        alt="Wolf stage 1"
-        style={{
-          position: "relative", zIndex: 1,
-          width: "92%", height: "92%", objectFit: "contain",
-        }}
-      />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage1Url} alt="Wolf stage 1" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
 
-// ── Stage 2: Local wolf image inside golden circle ────────────────────────────
 function Wolf2({ className }: P) {
   return (
-    <div
-      className={className}
-      style={{
-        position: "relative", width: "100%", height: "100%",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}
-    >
-      {/* Golden circle — matches CartoonTree golden disc */}
-      <div style={{
-        position: "absolute",
-        width: "78%", height: "78%", borderRadius: "50%",
-        background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`,
-        boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)`,
-      }} />
-      {/* Wolf image */}
-      <img
-        src={wolfStage2Url}
-        alt="Wolf stage 2"
-        style={{
-          position: "relative", zIndex: 1,
-          width: "92%", height: "92%", objectFit: "contain",
-        }}
-      />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage2Url} alt="Wolf stage 2" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
 
-// ── Stage 3: Local wolf image inside golden circle ────────────────────────────
 function Wolf3({ className }: P) {
   return (
-    <div
-      className={className}
-      style={{
-        position: "relative", width: "100%", height: "100%",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}
-    >
-      {/* Golden circle — matches CartoonTree golden disc */}
-      <div style={{
-        position: "absolute",
-        width: "78%", height: "78%", borderRadius: "50%",
-        background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`,
-        boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)`,
-      }} />
-      {/* Wolf image */}
-      <img
-        src={wolfStage3Url}
-        alt="Wolf stage 3"
-        style={{
-          position: "relative", zIndex: 1,
-          width: "92%", height: "92%", objectFit: "contain",
-        }}
-      />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage3Url} alt="Wolf stage 3" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
 
-// ── Stages 4–7: wolf-stage3.jpg inside golden circle (placeholder until dedicated images are ready) ──
+// ── Stages 4–7: transparent stage-3 PNG placeholder, large, centred ─────────
 function Wolf4({ className }: P) {
   return (
-    <div className={className} style={{ position: "relative", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ position: "absolute", width: "78%", height: "78%", borderRadius: "50%", background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`, boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)` }} />
-      <img src={wolfStage3Url} alt="Wolf stage 4" style={{ position: "relative", zIndex: 1, width: "92%", height: "92%", objectFit: "contain" }} />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage3Url} alt="Wolf stage 4" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
 
 function Wolf5({ className }: P) {
   return (
-    <div className={className} style={{ position: "relative", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ position: "absolute", width: "78%", height: "78%", borderRadius: "50%", background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`, boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)` }} />
-      <img src={wolfStage3Url} alt="Wolf stage 5" style={{ position: "relative", zIndex: 1, width: "92%", height: "92%", objectFit: "contain" }} />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage3Url} alt="Wolf stage 5" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
 
 function Wolf6({ className }: P) {
   return (
-    <div className={className} style={{ position: "relative", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ position: "absolute", width: "78%", height: "78%", borderRadius: "50%", background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`, boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)` }} />
-      <img src={wolfStage3Url} alt="Wolf stage 6" style={{ position: "relative", zIndex: 1, width: "92%", height: "92%", objectFit: "contain" }} />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage3Url} alt="Wolf stage 6" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
 
 function Wolf7({ className }: P) {
   return (
-    <div className={className} style={{ position: "relative", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ position: "absolute", width: "78%", height: "78%", borderRadius: "50%", background: `radial-gradient(circle at 42% 36%, #E8C870 0%, ${GOLD} 48%, #8B5A20 100%)`, boxShadow: `0 0 32px 10px rgba(196,135,58,0.30), inset 0 2px 12px rgba(255,228,120,0.18)` }} />
-      <img src={wolfStage3Url} alt="Wolf stage 7" style={{ position: "relative", zIndex: 1, width: "92%", height: "92%", objectFit: "contain" }} />
+    <div className={className} style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={wolfStage3Url} alt="Wolf stage 7" style={{ width: "130%", height: "130%", objectFit: "contain", objectPosition: "center" }} />
     </div>
   );
 }
