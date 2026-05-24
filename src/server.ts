@@ -5,6 +5,7 @@ import { renderErrorPage } from "./lib/error-page";
 
 type Env = {
   ANTHROPIC_API_KEY?: string;
+  FAL_KEY?: string;
 };
 
 type ServerEntry = {
@@ -144,6 +145,67 @@ async function handleChatApi(request: Request, env: Env): Promise<Response> {
   });
 }
 
+// ── /api/fal-wolf — Fal.ai image generation proxy ───────────────────────────
+// Generates the cartoon wolf image via Fal.ai flux/schnell.
+// The FAL_KEY binding never touches the client bundle.
+const WOLF_PROMPT =
+  "A 2D cartoon wolf, side-view profile walking pose, thick powerful neck and chest, majestic fluffy grey fur, full thick tail, sharp wolf snout, distinct bright blue eyes. Isolated on a transparent background, clean vector style, flat design.";
+
+async function handleFalWolfApi(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  const falKey =
+    env?.FAL_KEY ??
+    process.env.FAL_KEY ??
+    (import.meta.env as Record<string, string>).FAL_KEY;
+  if (!falKey) {
+    console.error("/api/fal-wolf: FAL_KEY binding is not set");
+    return new Response(JSON.stringify({ error: "Server misconfiguration" }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  const upstream = await fetch("https://fal.run/fal-ai/flux/schnell", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "authorization": `Key ${falKey}`,
+    },
+    body: JSON.stringify({
+      prompt: WOLF_PROMPT,
+      image_size: "square_hd",
+      num_inference_steps: 4,
+      num_images: 1,
+      enable_safety_checker: false,
+    }),
+  });
+
+  if (!upstream.ok) {
+    const text = await upstream.text();
+    console.error(`/api/fal-wolf: Fal.ai error ${upstream.status}:`, text);
+    return new Response(JSON.stringify({ error: "Image generation failed" }), {
+      status: 502,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  const json = (await upstream.json()) as { images?: { url: string }[] };
+  const imageUrl = json.images?.[0]?.url;
+  if (!imageUrl) {
+    return new Response(JSON.stringify({ error: "No image returned" }), {
+      status: 502,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  return new Response(JSON.stringify({ url: imageUrl }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
 
 export default {
   async fetch(request: Request, env: Env, ctx: unknown) {
@@ -151,6 +213,10 @@ export default {
 
     if (url.pathname === "/api/chat") {
       return handleChatApi(request, env);
+    }
+
+    if (url.pathname === "/api/fal-wolf") {
+      return handleFalWolfApi(request, env);
     }
 
 
