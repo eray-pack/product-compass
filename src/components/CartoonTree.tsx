@@ -1,3 +1,4 @@
+import { treeStage, } from "@/lib/store";
 import { dayToStage } from "@/components/avatars/CompanionAvatar";
 import treeStage0SeedUrl from "@/assets/tree-stage0-seed.png";
 import treeStage1SproutUrl from "@/assets/tree-stage1-sprout.png";
@@ -11,74 +12,31 @@ interface Props {
   xp?: number;
 }
 
+// Stage index → { asset URL, alt text, display height }
+const STAGE_IMAGES = [
+  { src: treeStage0SeedUrl,   alt: "Seed",        height: "52%"  },
+  { src: treeStage1SproutUrl, alt: "Sprout",       height: "62%"  },
+  { src: treeStage2SaplingUrl,alt: "Sapling",      height: "76%"  },
+  { src: treeStage3YoungUrl,  alt: "Young tree",   height: "88%"  },
+  { src: treeStage4StrongUrl, alt: "Strong tree",  height: "96%"  },
+  { src: treeStage5AncientUrl,alt: "Ancient tree", height: "100%" },
+] as const;
+
 /**
- * Illustrated cartoon tree — 6 growth stages driven by clean-day count.
- * All stages use PNG assets: seed → sprout → sapling → young → strong → ancient.
- * Thresholds: 0 days=Seed, 3 days=Sprout, 14=Sapling, 30=Young, 60=Strong, 90=Ancient.
+ * Illustrated cartoon tree — 6 growth stages.
+ * When xp is provided, stage is driven by XP thresholds (matches the rest of
+ * the Tree page, including the Dev Menu stage jumper). Falls back to clean-day
+ * count when xp is omitted.
  */
-export function CartoonTree({ day }: Props) {
-  const stage = dayToStage(day);
-
-  if (stage === 0) {
-    return (
-      <img
-        src={treeStage0SeedUrl}
-        alt="Seed"
-        style={{ height: "52%", width: "auto", objectFit: "contain" }}
-        aria-hidden
-      />
-    );
-  }
-
-  if (stage === 1) {
-    return (
-      <img
-        src={treeStage1SproutUrl}
-        alt="Sprout"
-        style={{ height: "62%", width: "auto", objectFit: "contain" }}
-        aria-hidden
-      />
-    );
-  }
-
-  if (stage === 2) {
-    return (
-      <img
-        src={treeStage2SaplingUrl}
-        alt="Sapling"
-        style={{ height: "76%", width: "auto", objectFit: "contain" }}
-        aria-hidden
-      />
-    );
-  }
-
-  if (stage === 3) {
-    return (
-      <img
-        src={treeStage3YoungUrl}
-        alt="Young tree"
-        style={{ height: "88%", width: "auto", objectFit: "contain" }}
-        aria-hidden
-      />
-    );
-  }
-
-  if (stage === 4) {
-    return (
-      <img
-        src={treeStage4StrongUrl}
-        alt="Strong tree"
-        style={{ height: "96%", width: "auto", objectFit: "contain" }}
-        aria-hidden
-      />
-    );
-  }
+export function CartoonTree({ day, xp }: Props) {
+  const stage = xp !== undefined ? treeStage(xp).stage : dayToStage(day);
+  const { src, alt, height } = STAGE_IMAGES[stage];
 
   return (
     <img
-      src={treeStage5AncientUrl}
-      alt="Ancient tree"
-      style={{ height: "100%", width: "auto", objectFit: "contain" }}
+      src={src}
+      alt={alt}
+      style={{ height, width: "auto", objectFit: "contain" }}
       aria-hidden
     />
   );
