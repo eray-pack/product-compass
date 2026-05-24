@@ -746,6 +746,21 @@ function Onboarding() {
                     0%, 100% { opacity: 0.50; }
                     50%       { opacity: 0.90; }
                   }
+                  @keyframes ob-firefly {
+                    0%   { transform: translate(0px, 0px) scale(1);     opacity: 0; }
+                    20%  { opacity: 1; }
+                    50%  { transform: translate(var(--fx), var(--fy)) scale(1.3); opacity: 0.90; }
+                    80%  { opacity: 0.60; }
+                    100% { transform: translate(calc(var(--fx)*1.6), calc(var(--fy)*0.4)) scale(0.6); opacity: 0; }
+                  }
+                  @keyframes ob-moon-pulse {
+                    0%, 100% { opacity: 0.88; transform: scale(1.00); }
+                    50%       { opacity: 1.00; transform: scale(1.04); }
+                  }
+                  @keyframes ob-moonbeam {
+                    0%, 100% { opacity: 0.18; }
+                    50%       { opacity: 0.32; }
+                  }
                 `}</style>
                 <Eyebrow step={8} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
@@ -778,9 +793,9 @@ function Onboarding() {
                           display: "flex", flexDirection: "column", alignItems: "center",
                           paddingBottom: 14, position: "relative",
                           background: [
-                            "repeating-linear-gradient(-48deg, transparent, transparent 3px, rgba(20,40,25,0.06) 3px, rgba(20,40,25,0.06) 4px)",
-                            "radial-gradient(ellipse at 30% 60%, rgba(8,28,14,0.45) 0%, transparent 65%)",
-                            "linear-gradient(160deg, rgba(4,10,5,0.98) 0%, rgba(2,6,3,1) 100%)",
+                            "repeating-linear-gradient(-48deg, transparent, transparent 3px, rgba(40,15,60,0.06) 3px, rgba(40,15,60,0.06) 4px)",
+                            "radial-gradient(ellipse at 50% 20%, rgba(35,10,60,0.40) 0%, transparent 60%)",
+                            "linear-gradient(160deg, rgba(10,3,18,0.99) 0%, rgba(4,12,7,1) 100%)",
                           ].join(", "),
                         }}
                       >
@@ -796,51 +811,51 @@ function Onboarding() {
                         {/* ── Illustration area ── */}
                         <div style={{ width: "100%", height: 160, position: "relative", overflow: "hidden" }}>
 
-                          {/* Deep midnight-green nebula base — mirrors Wolf card night sky */}
+                          {/* Deep purple-to-forest-green gradient — "Rooted Stability" */}
                           <div style={{
                             position: "absolute", inset: 0,
                             background: [
-                              "radial-gradient(ellipse at 50% 55%, rgba(18,55,28,0.55) 0%, rgba(8,28,12,0.45) 38%, transparent 68%)",
-                              "radial-gradient(ellipse at 15% 20%, rgba(20,60,30,0.30) 0%, transparent 48%)",
-                              "radial-gradient(ellipse at 85% 15%, rgba(10,40,18,0.28) 0%, transparent 42%)",
-                              "linear-gradient(180deg, rgba(3,8,5,0.95) 0%, rgba(4,12,6,0.88) 50%, rgba(2,6,3,0.98) 100%)",
+                              "radial-gradient(ellipse at 50% 100%, rgba(14,50,20,0.80) 0%, rgba(8,28,14,0.55) 45%, transparent 72%)",
+                              "radial-gradient(ellipse at 50% 0%,   rgba(55,18,100,0.70) 0%, rgba(35,10,70,0.50) 40%, transparent 70%)",
+                              "linear-gradient(180deg, rgba(22,6,42,0.97) 0%, rgba(12,20,16,0.92) 55%, rgba(4,18,8,0.98) 100%)",
                             ].join(", "),
                           }}/>
 
-                          {/* Cosmic dust haze — green tint to match forest atmosphere */}
+                          {/* Purple nebula haze at top, green earth glow at base */}
                           <div style={{
                             position: "absolute", inset: 0,
                             background: [
-                              "radial-gradient(ellipse at 30% 40%, rgba(30,80,40,0.14) 0%, transparent 50%)",
-                              "radial-gradient(ellipse at 75% 65%, rgba(15,50,25,0.12) 0%, transparent 45%)",
+                              "radial-gradient(ellipse at 25% 18%, rgba(90,30,160,0.20) 0%, transparent 52%)",
+                              "radial-gradient(ellipse at 80% 12%, rgba(60,15,110,0.16) 0%, transparent 44%)",
+                              "radial-gradient(ellipse at 50% 95%, rgba(20,70,28,0.35) 0%, transparent 55%)",
                             ].join(", "),
                           }}/>
 
-                          {/* Twinkling star field — same positions as Wolf card */}
+                          {/* Firefly particles — warm yellow-green, drifting upward */}
                           {[
-                            { x: 8,  y: 6,  r: 0.9, o: 0.90 }, { x: 18, y: 14, r: 0.7, o: 0.65 },
-                            { x: 30, y: 5,  r: 1.2, o: 0.85 }, { x: 48, y: 8,  r: 0.8, o: 0.70 },
-                            { x: 62, y: 4,  r: 1.1, o: 0.92 }, { x: 76, y: 10, r: 0.7, o: 0.60 },
-                            { x: 88, y: 7,  r: 1.0, o: 0.80 }, { x: 93, y: 22, r: 0.8, o: 0.72 },
-                            { x: 5,  y: 28, r: 1.0, o: 0.68 }, { x: 14, y: 42, r: 0.7, o: 0.55 },
-                            { x: 85, y: 35, r: 0.9, o: 0.75 }, { x: 94, y: 50, r: 0.7, o: 0.60 },
-                            { x: 4,  y: 58, r: 0.8, o: 0.50 }, { x: 91, y: 65, r: 1.0, o: 0.65 },
-                            { x: 22, y: 18, r: 0.6, o: 0.58 }, { x: 70, y: 20, r: 0.8, o: 0.70 },
-                            { x: 55, y: 15, r: 1.3, o: 0.88 }, { x: 38, y: 22, r: 0.7, o: 0.55 },
-                            { x: 82, y: 48, r: 0.8, o: 0.62 }, { x: 12, y: 70, r: 0.9, o: 0.48 },
-                          ].map((s, i) => (
+                            { x: 12, y: 72, fx:  6, fy: -28, dur: 5.2, d: 0.0, s: 3.0 },
+                            { x: 28, y: 58, fx: -8, fy: -22, dur: 6.8, d: 1.1, s: 2.4 },
+                            { x: 44, y: 68, fx:  5, fy: -30, dur: 5.8, d: 2.0, s: 3.2 },
+                            { x: 60, y: 55, fx: -6, fy: -20, dur: 7.2, d: 0.6, s: 2.6 },
+                            { x: 76, y: 64, fx:  7, fy: -26, dur: 6.0, d: 1.8, s: 2.8 },
+                            { x: 20, y: 42, fx: -4, fy: -18, dur: 8.0, d: 3.2, s: 2.0 },
+                            { x: 52, y: 48, fx:  9, fy: -24, dur: 5.5, d: 2.6, s: 2.2 },
+                            { x: 86, y: 50, fx: -5, fy: -22, dur: 6.4, d: 0.9, s: 2.6 },
+                          ].map((p, i) => (
                             <div key={i} aria-hidden style={{
-                              position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
-                              width: s.r * 2, height: s.r * 2, borderRadius: "50%",
-                              background: i % 5 === 0 ? "rgba(180,220,190,0.90)" : "rgba(210,230,215,0.85)",
-                              opacity: s.o,
-                              boxShadow: i % 4 === 0
-                                ? `0 0 ${s.r * 4}px ${s.r}px rgba(150,210,160,0.55)`
-                                : `0 0 ${s.r * 3}px ${s.r * 0.5}px rgba(190,220,200,0.40)`,
+                              position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
+                              width: p.s, height: p.s, borderRadius: "50%",
+                              background: i % 3 === 0 ? "rgba(180,230,100,0.95)" : "rgba(220,200,80,0.90)",
+                              boxShadow: `0 0 ${p.s * 2}px ${p.s}px ${i % 3 === 0 ? "rgba(140,210,80,0.65)" : "rgba(200,180,60,0.60)"}`,
+                              // CSS custom properties for the keyframe travel distance
+                              ["--fx" as string]: `${p.fx}px`,
+                              ["--fy" as string]: `${p.fy}px`,
+                              animation: `ob-firefly ${p.dur}s ease-in-out ${p.d}s infinite`,
+                              pointerEvents: "none",
                             }}/>
                           ))}
 
-                          {/* Tree — Young stage, bottom-anchored inside the green glow */}
+                          {/* Tree — Young stage, bottom-anchored */}
                           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                             <img
                               src={treeStage3YoungUrl}
@@ -902,9 +917,9 @@ function Onboarding() {
                           display: "flex", flexDirection: "column", alignItems: "center",
                           paddingBottom: 14, position: "relative",
                           background: [
-                            "repeating-linear-gradient(-48deg, transparent, transparent 3px, rgba(50,40,30,0.06) 3px, rgba(50,40,30,0.06) 4px)",
-                            "radial-gradient(ellipse at 30% 60%, rgba(20,10,50,0.45) 0%, transparent 65%)",
-                            "linear-gradient(160deg, rgba(10,7,18,0.98) 0%, rgba(5,3,10,1) 100%)",
+                            "repeating-linear-gradient(-48deg, transparent, transparent 3px, rgba(20,30,60,0.06) 3px, rgba(20,30,60,0.06) 4px)",
+                            "radial-gradient(ellipse at 50% 30%, rgba(10,20,60,0.40) 0%, transparent 65%)",
+                            "linear-gradient(160deg, rgba(2,5,18,0.99) 0%, rgba(3,7,24,1) 100%)",
                           ].join(", "),
                         }}
                       >
@@ -912,60 +927,79 @@ function Onboarding() {
                         {isSelected && (
                           <div aria-hidden style={{
                             position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-                            background: "radial-gradient(ellipse at 50% 45%, rgba(60,40,160,0.14) 0%, transparent 70%)",
-                            animation: "ob-card-halo 3.8s ease-in-out infinite",
+                            background: "radial-gradient(ellipse at 50% 28%, rgba(180,170,100,0.12) 0%, rgba(20,40,100,0.10) 50%, transparent 72%)",
+                            animation: "ob-card-halo 4.5s ease-in-out infinite",
                           }}/>
                         )}
 
                         {/* ── Illustration area ── */}
                         <div style={{ width: "100%", height: 160, position: "relative", overflow: "hidden" }}>
 
-                          {/* Deep midnight-purple nebula base — bleeds to all edges */}
+                          {/* Deep midnight blue base — "Active Instinct" */}
                           <div style={{
                             position: "absolute", inset: 0,
                             background: [
-                              "radial-gradient(ellipse at 50% 55%, rgba(55,28,115,0.55) 0%, rgba(28,12,65,0.45) 38%, transparent 68%)",
-                              "radial-gradient(ellipse at 15% 20%, rgba(70,35,140,0.30) 0%, transparent 48%)",
-                              "radial-gradient(ellipse at 85% 15%, rgba(35,15,90,0.28) 0%, transparent 42%)",
-                              "linear-gradient(180deg, rgba(6,3,16,0.95) 0%, rgba(8,4,22,0.88) 50%, rgba(4,2,12,0.98) 100%)",
+                              "linear-gradient(180deg, rgba(2,6,20,0.98) 0%, rgba(4,10,32,0.94) 50%, rgba(3,7,22,0.98) 100%)",
                             ].join(", "),
                           }}/>
 
-                          {/* Cosmic dust haze bands */}
+                          {/* Subtle blue nebula depth */}
                           <div style={{
                             position: "absolute", inset: 0,
                             background: [
-                              "radial-gradient(ellipse at 30% 40%, rgba(80,40,180,0.14) 0%, transparent 50%)",
-                              "radial-gradient(ellipse at 75% 65%, rgba(40,20,100,0.12) 0%, transparent 45%)",
+                              "radial-gradient(ellipse at 20% 25%, rgba(20,40,100,0.28) 0%, transparent 52%)",
+                              "radial-gradient(ellipse at 80% 30%, rgba(10,25,70,0.22) 0%, transparent 46%)",
+                              "radial-gradient(ellipse at 50% 80%, rgba(15,30,80,0.20) 0%, transparent 50%)",
                             ].join(", "),
                           }}/>
 
-                          {/* Twinkling star field — 20 stars, varied sizes and brightness */}
+                          {/* Full moon — glowing disk behind the wolf */}
+                          <div aria-hidden style={{
+                            position: "absolute",
+                            top: "8%", left: "50%", marginLeft: -30,
+                            width: 60, height: 60, borderRadius: "50%",
+                            background: "radial-gradient(circle at 42% 38%, rgba(255,252,230,1) 0%, rgba(240,235,200,0.96) 45%, rgba(200,190,140,0.80) 100%)",
+                            boxShadow: [
+                              "0 0 12px 4px rgba(230,220,160,0.70)",
+                              "0 0 36px 14px rgba(200,190,120,0.38)",
+                              "0 0 70px 28px rgba(180,170,100,0.18)",
+                              "0 0 110px 50px rgba(160,150,80,0.08)",
+                            ].join(", "),
+                            animation: "ob-moon-pulse 4.5s ease-in-out infinite",
+                            zIndex: 1,
+                          }}/>
+
+                          {/* Moonlight cascade — shaft of light falling from moon to ground */}
+                          <div aria-hidden style={{
+                            position: "absolute",
+                            top: "20%", left: "50%", marginLeft: -40,
+                            width: 80, height: "82%",
+                            background: "linear-gradient(180deg, rgba(220,210,160,0.16) 0%, rgba(180,170,120,0.08) 40%, transparent 100%)",
+                            animation: "ob-moonbeam 4.5s ease-in-out infinite",
+                            pointerEvents: "none", zIndex: 1,
+                          }}/>
+
+                          {/* Stars — dimmer than usual, moon washes them out */}
                           {[
-                            { x: 8,  y: 6,  r: 0.9, o: 0.90 }, { x: 18, y: 14, r: 0.7, o: 0.65 },
-                            { x: 30, y: 5,  r: 1.2, o: 0.85 }, { x: 48, y: 8,  r: 0.8, o: 0.70 },
-                            { x: 62, y: 4,  r: 1.1, o: 0.92 }, { x: 76, y: 10, r: 0.7, o: 0.60 },
-                            { x: 88, y: 7,  r: 1.0, o: 0.80 }, { x: 93, y: 22, r: 0.8, o: 0.72 },
-                            { x: 5,  y: 28, r: 1.0, o: 0.68 }, { x: 14, y: 42, r: 0.7, o: 0.55 },
-                            { x: 85, y: 35, r: 0.9, o: 0.75 }, { x: 94, y: 50, r: 0.7, o: 0.60 },
-                            { x: 4,  y: 58, r: 0.8, o: 0.50 }, { x: 91, y: 65, r: 1.0, o: 0.65 },
-                            { x: 22, y: 18, r: 0.6, o: 0.58 }, { x: 70, y: 20, r: 0.8, o: 0.70 },
-                            { x: 55, y: 15, r: 1.3, o: 0.88 }, { x: 38, y: 22, r: 0.7, o: 0.55 },
-                            { x: 82, y: 48, r: 0.8, o: 0.62 }, { x: 12, y: 70, r: 0.9, o: 0.48 },
+                            { x: 8,  y: 6,  r: 0.7, o: 0.55 }, { x: 18, y: 12, r: 0.5, o: 0.40 },
+                            { x: 30, y: 5,  r: 0.9, o: 0.50 }, { x: 72, y: 6,  r: 0.6, o: 0.45 },
+                            { x: 84, y: 4,  r: 0.8, o: 0.55 }, { x: 93, y: 18, r: 0.6, o: 0.42 },
+                            { x: 6,  y: 28, r: 0.7, o: 0.38 }, { x: 88, y: 32, r: 0.7, o: 0.45 },
+                            { x: 14, y: 42, r: 0.5, o: 0.32 }, { x: 94, y: 50, r: 0.5, o: 0.35 },
+                            { x: 4,  y: 58, r: 0.6, o: 0.28 }, { x: 91, y: 64, r: 0.7, o: 0.38 },
                           ].map((s, i) => (
                             <div key={i} aria-hidden style={{
                               position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
                               width: s.r * 2, height: s.r * 2, borderRadius: "50%",
-                              background: i % 5 === 0 ? "rgba(180,200,255,0.90)" : "rgba(220,225,255,0.85)",
+                              background: "rgba(220,225,255,0.88)",
                               opacity: s.o,
-                              boxShadow: i % 4 === 0
-                                ? `0 0 ${s.r * 4}px ${s.r}px rgba(160,180,255,0.55)`
-                                : `0 0 ${s.r * 3}px ${s.r * 0.5}px rgba(200,210,255,0.40)`,
+                              boxShadow: `0 0 ${s.r * 3}px ${s.r * 0.5}px rgba(200,210,255,0.35)`,
+                              zIndex: 2,
                             }}/>
                           ))}
 
-                          {/* Wolf — Stage 2 Juvenile, bottom-anchored inside the purple glow */}
-                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                          {/* Wolf — bottom-anchored, bathed in moonlight */}
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 3 }}>
                             <img
                               src={wolfStage2Url}
                               alt="Juvenile Wolf"
@@ -974,6 +1008,7 @@ function Onboarding() {
                                 width: "auto",
                                 objectFit: "contain",
                                 objectPosition: "center bottom",
+                                filter: "drop-shadow(0 0 14px rgba(200,190,140,0.45)) drop-shadow(0 0 28px rgba(180,170,120,0.22))",
                               }}
                             />
                           </div>
