@@ -70,6 +70,7 @@ export function CompanionAvatar({ type, day, stage: stageOverride, relapseCount 
   return (
     <div
       className={`transition-transform ${animating ? "companion-relapse" : ""} ${className ?? ""}`}
+      style={{ width: "100%", height: "100%" }}
     >
       <StageComponent />
     </div>

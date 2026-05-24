@@ -3,7 +3,7 @@ import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Wolf3D } from "@/components/Wolf3D";
 import { CartoonTree } from "@/components/CartoonTree";
