@@ -17,9 +17,9 @@ import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PaywallRouteImport } from './routes/paywall'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChallengesRouteImport } from './routes/challenges'
-import { Route as GamesRouteImport } from './routes/games'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
@@ -29,6 +29,7 @@ import { Route as ToolsTapRouteImport } from './routes/tools.tap'
 import { Route as ToolsSteadyhandRouteImport } from './routes/tools.steadyhand'
 import { Route as ToolsSosRouteImport } from './routes/tools.sos'
 import { Route as ToolsNoisefilterRouteImport } from './routes/tools.noisefilter'
+import { Route as ToolsNebulaflowRouteImport } from './routes/tools.nebulaflow'
 import { Route as ToolsMemoryRouteImport } from './routes/tools.memory'
 import { Route as ToolsIdentitystackRouteImport } from './routes/tools.identitystack'
 import { Route as ToolsEchochamberRouteImport } from './routes/tools.echochamber'
@@ -38,7 +39,6 @@ import { Route as ToolsColdRouteImport } from './routes/tools.cold'
 import { Route as ToolsCoachRouteImport } from './routes/tools.coach'
 import { Route as ToolsClarityclimbRouteImport } from './routes/tools.clarityclimb'
 import { Route as ToolsBreathRouteImport } from './routes/tools.breath'
-import { Route as ToolsNebulaflowRouteImport } from './routes/tools.nebulaflow'
 
 const TreeRoute = TreeRouteImport.update({
   id: '/tree',
@@ -80,6 +80,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
@@ -88,11 +93,6 @@ const CommunityRoute = CommunityRouteImport.update({
 const ChallengesRoute = ChallengesRouteImport.update({
   id: '/challenges',
   path: '/challenges',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesRoute = GamesRouteImport.update({
-  id: '/games',
-  path: '/games',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -140,6 +140,11 @@ const ToolsNoisefilterRoute = ToolsNoisefilterRouteImport.update({
   path: '/noisefilter',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsNebulaflowRoute = ToolsNebulaflowRouteImport.update({
+  id: '/nebulaflow',
+  path: '/nebulaflow',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsMemoryRoute = ToolsMemoryRouteImport.update({
   id: '/memory',
   path: '/memory',
@@ -183,11 +188,6 @@ const ToolsClarityclimbRoute = ToolsClarityclimbRouteImport.update({
 const ToolsBreathRoute = ToolsBreathRouteImport.update({
   id: '/breath',
   path: '/breath',
-  getParentRoute: () => ToolsRoute,
-} as any)
-const ToolsNebulaflowRoute = ToolsNebulaflowRouteImport.update({
-  id: '/nebulaflow',
-  path: '/nebulaflow',
   getParentRoute: () => ToolsRoute,
 } as any)
 
@@ -459,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
@@ -471,13 +478,6 @@ declare module '@tanstack/react-router' {
       path: '/challenges'
       fullPath: '/challenges'
       preLoaderRoute: typeof ChallengesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games': {
-      id: '/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof GamesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -536,18 +536,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsSosRouteImport
       parentRoute: typeof ToolsRoute
     }
-    '/tools/nebulaflow': {
-      id: '/tools/nebulaflow'
-      path: '/nebulaflow'
-      fullPath: '/tools/nebulaflow'
-      preLoaderRoute: typeof ToolsNebulaflowRouteImport
-      parentRoute: typeof ToolsRoute
-    }
     '/tools/noisefilter': {
       id: '/tools/noisefilter'
       path: '/noisefilter'
       fullPath: '/tools/noisefilter'
       preLoaderRoute: typeof ToolsNoisefilterRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/nebulaflow': {
+      id: '/tools/nebulaflow'
+      path: '/nebulaflow'
+      fullPath: '/tools/nebulaflow'
+      preLoaderRoute: typeof ToolsNebulaflowRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/tools/memory': {
