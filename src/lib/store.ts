@@ -124,9 +124,12 @@ export function loadState(): AppState {
   }
 }
 
+const STATE_CHANGE_EVENT = "stopamine-state-changed";
+
 export function saveState(s: AppState) {
   if (typeof window === "undefined") return;
   localStorage.setItem(KEY, JSON.stringify(s));
+  window.dispatchEvent(new CustomEvent(STATE_CHANGE_EVENT, { detail: s }));
 }
 
 async function syncToSupabase(s: AppState) {
@@ -171,15 +174,24 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
 
 export function useAppState() {
   const [state, setState] = useState<AppState>(loadState);
+
   useEffect(() => {
     setState(loadState());
     loadFromSupabase(setState);
+
+    // Re-sync whenever ANY component writes state (cross-component reactivity)
+    const onStateChange = (e: Event) => {
+      setState((e as CustomEvent<AppState>).detail);
+    };
+    window.addEventListener(STATE_CHANGE_EVENT, onStateChange);
+    return () => window.removeEventListener(STATE_CHANGE_EVENT, onStateChange);
   }, []);
+
   const update = (patch: Partial<AppState> | ((s: AppState) => Partial<AppState>)) => {
     setState((prev) => {
       const p = typeof patch === "function" ? patch(prev) : patch;
       const next = { ...prev, ...p };
-      saveState(next);
+      saveState(next);   // dispatches STATE_CHANGE_EVENT → all subscribers update
       syncToSupabase(next);
       return next;
     });
