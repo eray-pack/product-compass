@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown, Trophy } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
@@ -634,8 +634,22 @@ function ArcadeBadge({
 // ── Main component ────────────────────────────────────────────────────────────
 function Tools() {
   const { t } = useTranslation();
-  const [state] = useAppState();
+  const [state, update] = useAppState();
   const [reframeIdx, setReframeIdx] = useState<number | null>(null);
+
+  // ── Dev mode (triple-tap "Tools" title or subtitle) ───────────────────────
+  const [devOpen, setDevOpen] = useState(false);
+  const devTapCount = useRef(0);
+  const devTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function handleDevTap() {
+    devTapCount.current += 1;
+    if (devTapTimer.current) clearTimeout(devTapTimer.current);
+    devTapTimer.current = setTimeout(() => { devTapCount.current = 0; }, 600);
+    if (devTapCount.current >= 3) {
+      devTapCount.current = 0;
+      setDevOpen((v) => !v);
+    }
+  }
   const [planOpen, setPlanOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [lbOpen, setLbOpen] = useState(false);
@@ -747,9 +761,119 @@ function Tools() {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2">
-        <SectionTitle>{t("nav.tools")}</SectionTitle>
-        <h1 className="mt-2 text-3xl font-bold">{t("tools.indexSubtitle")}</h1>
+        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
+          <SectionTitle>{t("nav.tools")}</SectionTitle>
+        </div>
+        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
+          <h1 className="mt-2 text-3xl font-bold">{t("tools.indexSubtitle")}</h1>
+        </div>
       </header>
+
+      {/* ── Dev Panel (triple-tap "Tools" or subtitle to toggle) ─────────── */}
+      {devOpen && (
+        <div style={{
+          margin: "8px 16px 0",
+          padding: "14px 16px",
+          borderRadius: 16,
+          background: "rgba(20,20,20,0.92)",
+          border: "1px solid rgba(255,80,80,0.35)",
+          backdropFilter: "blur(16px)",
+        }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", color: "#ff5555", textTransform: "uppercase" }}>
+              🛠 Dev Mode
+            </span>
+            <button onClick={() => setDevOpen(false)} style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>✕</button>
+          </div>
+
+          {/* ── SECTION 1: ACCESS ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Access</p>
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            {(["FREE", "PRO"] as const).map((tier) => {
+              const isActive = tier === "PRO" ? state.isPremium : !state.isPremium;
+              return (
+                <button key={tier} onClick={() => update({ isPremium: tier === "PRO" })}
+                  style={{
+                    fontSize: 11, padding: "5px 16px", borderRadius: 8, cursor: "pointer",
+                    background: isActive ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.06)",
+                    border: isActive ? "1px solid rgba(201,168,76,0.55)" : "1px solid rgba(255,255,255,0.12)",
+                    color: isActive ? "#C9A84C" : "rgba(255,255,255,0.55)",
+                    fontWeight: isActive ? 700 : 400,
+                  }}>
+                  {tier}
+                </button>
+              );
+            })}
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", alignSelf: "center", marginLeft: 4 }}>
+              {state.isPremium ? "All games unlocked" : "Pro games locked"}
+            </span>
+          </div>
+
+          {/* ── SECTION 2: SIMULATE URGE ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Simulate</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+            <button
+              onClick={() => { setDevOpen(false); window.location.href = "/tools/sos"; }}
+              style={{ fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.70)" }}>
+              Trigger SOS
+            </button>
+            <button
+              onClick={() => update((s) => ({ urgesSurvived: s.urgesSurvived + 1, points: s.points + 10 }))}
+              style={{ fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.70)" }}>
+              Complete urge <span style={{ color: "rgba(255,255,255,0.35)" }}>+1 urge · +10pts</span>
+            </button>
+          </div>
+
+          {/* ── SECTION 3: GAMES ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Games</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+            <button
+              onClick={() => update({ isPremium: true, points: (state.points || 0) + 999 })}
+              style={{ fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.70)" }}>
+              Unlock all games
+            </button>
+            <button
+              onClick={() => update({ points: 0, completedChallenges: [] })}
+              style={{ fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.06)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
+              Reset game scores
+            </button>
+          </div>
+
+          {/* ── SECTION 4: LEADERBOARD ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Leaderboard</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <button
+              onClick={() => {
+                const DUMMY = [
+                  { name: "Marcus", score: 2840, days: 61 },
+                  { name: "Jaylen", score: 2210, days: 34 },
+                  { name: "Sven",   score: 1990, days: 29 },
+                  { name: "Alex",   score: 1750, days: 22 },
+                  { name: "Ryan",   score: 1420, days: 19 },
+                  { name: "Tobias", score: 1180, days: 16 },
+                  { name: "Dante",  score:  940, days: 14 },
+                  { name: "Elias",  score:  780, days: 11 },
+                  { name: "Noah",   score:  610, days: 8  },
+                  { name: "Luka",   score:  490, days: 6  },
+                ];
+                localStorage.setItem("stopamine.lb_dummy", JSON.stringify(DUMMY));
+                window.dispatchEvent(new CustomEvent("stopamine-lb-updated"));
+              }}
+              style={{ fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.70)" }}>
+              Add dummy scores
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem("stopamine.lb_dummy");
+                window.dispatchEvent(new CustomEvent("stopamine-lb-updated"));
+              }}
+              style={{ fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.06)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
+              Clear scores
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── SOS hero — tactical distress button ─────────────────────────── */}
       <section className="flex justify-center mt-10 mb-2">
