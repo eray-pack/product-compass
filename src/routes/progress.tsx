@@ -33,8 +33,8 @@ const LG = "#E8C87A";
 const LG_DIM = "#6b4c10";
 const LG_GLOW = "rgba(232,200,122,";
 
-// ── Confetti Engine ───────────────────────────────────────────────────────────
-function Confetti({ active }: { active: boolean }) {
+// ── Confetti / Gold-Dust Engine ───────────────────────────────────────────────
+function Confetti({ active, mode = "celebration" }: { active: boolean; mode?: "celebration" | "goldDust" }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
 
@@ -47,26 +47,35 @@ function Confetti({ active }: { active: boolean }) {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const COLORS = ["#E8C87A","#f5d98a","#fff0b0","#39d98a","#ffffff","#f06450","#7ec8e3"];
-    const COUNT  = 160;
+    const isGold = mode === "goldDust";
+
+    const CELEBRATION_COLORS = ["#E8C87A","#f5d98a","#fff0b0","#39d98a","#ffffff","#f06450","#7ec8e3"];
+    const GOLD_COLORS = ["#E8C87A","#f5d98a","#fff0b0","#ffe066","#ffd700","#c9a84c","#ffffff"];
+
+    const COLORS = isGold ? GOLD_COLORS : CELEBRATION_COLORS;
+    const COUNT  = isGold ? 220 : 160;
 
     type Particle = {
       x: number; y: number; vx: number; vy: number;
       r: number; color: string; rot: number; rotV: number; alpha: number;
-      shape: "rect" | "circle";
+      alphaDecay: number;
+      shape: "rect" | "circle" | "diamond";
     };
 
     const particles: Particle[] = Array.from({ length: COUNT }, () => ({
       x: Math.random() * canvas.width,
-      y: -20 - Math.random() * 120,
-      vx: (Math.random() - 0.5) * 3.5,
-      vy: 2.5 + Math.random() * 4,
-      r: 4 + Math.random() * 6,
+      y: -20 - Math.random() * (isGold ? 300 : 120),
+      vx: (Math.random() - 0.5) * (isGold ? 1.2 : 3.5),
+      vy: isGold ? 0.6 + Math.random() * 1.4 : 2.5 + Math.random() * 4,
+      r: isGold ? 2 + Math.random() * 5 : 4 + Math.random() * 6,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       rot: Math.random() * Math.PI * 2,
-      rotV: (Math.random() - 0.5) * 0.18,
-      alpha: 1,
-      shape: Math.random() > 0.4 ? "rect" : "circle",
+      rotV: (Math.random() - 0.5) * (isGold ? 0.04 : 0.18),
+      alpha: isGold ? 0.5 + Math.random() * 0.5 : 1,
+      alphaDecay: isGold ? 0.0015 + Math.random() * 0.001 : 0,
+      shape: isGold
+        ? (["rect","circle","diamond"] as const)[Math.floor(Math.random() * 3)]
+        : (Math.random() > 0.4 ? "rect" : "circle"),
     }));
 
     let alive = true;
@@ -76,11 +85,12 @@ function Confetti({ active }: { active: boolean }) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let any = false;
       for (const p of particles) {
-        p.x   += p.vx;
+        p.x   += p.vx + (isGold ? Math.sin(p.y * 0.015) * 0.4 : 0);
         p.y   += p.vy;
-        p.vy  += 0.07;   // gravity
+        p.vy  += isGold ? 0.01 : 0.07;
         p.rot += p.rotV;
-        if (p.y < canvas.height + 40) {
+        if (isGold) p.alpha = Math.max(0, p.alpha - p.alphaDecay);
+        if (p.y < canvas.height + 40 && (!isGold || p.alpha > 0.02)) {
           any = true;
           ctx.save();
           ctx.globalAlpha = p.alpha;
@@ -88,10 +98,18 @@ function Confetti({ active }: { active: boolean }) {
           ctx.rotate(p.rot);
           ctx.fillStyle = p.color;
           if (p.shape === "rect") {
-            ctx.fillRect(-p.r / 2, -p.r * 1.4, p.r, p.r * 2.8);
+            ctx.fillRect(-p.r / 2, -p.r * 1.6, p.r, p.r * 3.2);
+          } else if (p.shape === "diamond") {
+            ctx.beginPath();
+            ctx.moveTo(0, -p.r * 1.4);
+            ctx.lineTo(p.r * 0.7, 0);
+            ctx.lineTo(0, p.r * 1.4);
+            ctx.lineTo(-p.r * 0.7, 0);
+            ctx.closePath();
+            ctx.fill();
           } else {
             ctx.beginPath();
-            ctx.arc(0, 0, p.r / 2, 0, Math.PI * 2);
+            ctx.arc(0, 0, p.r * 0.6, 0, Math.PI * 2);
             ctx.fill();
           }
           ctx.restore();
@@ -106,7 +124,7 @@ function Confetti({ active }: { active: boolean }) {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => { alive = false; cancelAnimationFrame(rafRef.current); };
-  }, []);
+  }, [mode]);
 
   useEffect(() => {
     if (!active) return;
@@ -128,146 +146,374 @@ function Confetti({ active }: { active: boolean }) {
 }
 
 // ── 90-Day Celebration Modal ──────────────────────────────────────────────────
-function Victory90Modal({ onDismiss }: { onDismiss: () => void }) {
+function Victory90Modal({ onDismiss, addiction }: { onDismiss: () => void; addiction?: string }) {
+  const canShare = typeof navigator !== "undefined" && !!navigator.share;
+
+  async function handleShare() {
+    const text = `🏆 90 days clean${addiction ? ` from ${addiction}` : ""}. Full brain reset complete. The neural pathways of my old habit have been pruned. Sovereign status achieved. #Stopamine #Day90 #Recovery`;
+    try {
+      if (canShare) {
+        await navigator.share({ title: "90-Day Sovereign — Stopamine", text });
+      } else {
+        await navigator.clipboard.writeText(text);
+      }
+    } catch {
+      /* dismissed — no-op */
+    }
+  }
+
   return (
     <motion.div
       key="v90-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.40 }}
       style={{
         position: "fixed", inset: 0, zIndex: 9998,
-        background: "rgba(0,0,0,0.88)",
-        backdropFilter: "blur(8px)",
+        background: "radial-gradient(ellipse at 50% 30%, rgba(30,18,2,0.96) 0%, rgba(0,0,0,0.97) 100%)",
+        backdropFilter: "blur(10px)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "0 24px",
+        padding: "0 20px",
+        overflowY: "auto",
       }}
       onClick={onDismiss}
     >
+      {/* Gold-dust particles inside the modal layer */}
+      <Confetti active mode="goldDust" />
+
+      <style>{`
+        @keyframes v90-swirl1  { 0%{transform:translate(0,0) rotate(0deg) scale(1)} 33%{transform:translate(24px,-18px) rotate(120deg) scale(1.12)} 66%{transform:translate(-16px,20px) rotate(240deg) scale(0.92)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
+        @keyframes v90-swirl2  { 0%{transform:translate(0,0) rotate(0deg)} 50%{transform:translate(-28px,14px) rotate(180deg) scale(1.08)} 100%{transform:translate(0,0) rotate(360deg)} }
+        @keyframes v90-halo    { 0%,100%{opacity:0.50;transform:translateX(-50%) scale(0.90)} 50%{opacity:1;transform:translateX(-50%) scale(1.12)} }
+        @keyframes v90-divine  { 0%,100%{opacity:0.30;transform:translateX(-50%) scale(0.80)} 50%{opacity:0.65;transform:translateX(-50%) scale(1.20)} }
+        @keyframes v90-float   { 0%,100%{transform:translateY(0px) rotate(-1deg)} 50%{transform:translateY(-9px) rotate(1deg)} }
+        @keyframes v90-shimmer { 0%{transform:translateX(-110%)} 100%{transform:translateX(210%)} }
+        @keyframes v90-rune    { 0%,100%{opacity:0.18} 50%{opacity:0.38} }
+        @keyframes v90-gem     { 0%,100%{opacity:0.80} 50%{opacity:1;filter:brightness(1.4)} }
+        @keyframes v90-bevel   { 0%{box-shadow:0 6px 0 #7a5418, 0 0 40px rgba(232,200,122,0.45), inset 0 1px 0 rgba(255,240,180,0.60)} 50%{box-shadow:0 6px 0 #7a5418, 0 0 60px rgba(232,200,122,0.70), inset 0 1px 0 rgba(255,240,180,0.80)} 100%{box-shadow:0 6px 0 #7a5418, 0 0 40px rgba(232,200,122,0.45), inset 0 1px 0 rgba(255,240,180,0.60)} }
+      `}</style>
+
       <motion.div
-        initial={{ scale: 0.80, opacity: 0, y: 40 }}
-        animate={{ scale: 1,    opacity: 1, y: 0 }}
-        exit={{    scale: 0.88, opacity: 0, y: 20 }}
-        transition={{ type: "spring", stiffness: 260, damping: 22, delay: 0.08 }}
+        initial={{ scale: 0.78, opacity: 0, y: 48 }}
+        animate={{ scale: 1,    opacity: 1, y: 0  }}
+        exit={{    scale: 0.88, opacity: 0, y: 24 }}
+        transition={{ type: "spring", stiffness: 240, damping: 22, delay: 0.10 }}
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "100%", maxWidth: 360,
-          background: "linear-gradient(160deg, rgba(28,20,6,0.99) 0%, rgba(14,10,2,1) 100%)",
-          border: "1px solid rgba(232,200,122,0.35)",
-          borderTop: "1px solid rgba(232,200,122,0.65)",
-          borderRadius: 24,
-          padding: "36px 28px 28px",
+          width: "100%", maxWidth: 368,
           position: "relative",
-          overflow: "hidden",
-          boxShadow: "0 0 80px rgba(232,200,122,0.22), 0 0 200px rgba(232,200,122,0.08)",
+          borderRadius: 28,
+          padding: 3,                 /* border thickness */
+          background: "linear-gradient(140deg, #fff0b0 0%, #C9A84C 28%, #6b3e0a 50%, #C9A84C 72%, #fff0b0 100%)",
+          boxShadow: "0 0 0 1px rgba(232,200,122,0.20), 0 0 120px rgba(232,200,122,0.30), 0 32px 80px rgba(0,0,0,0.80)",
         }}
       >
-        {/* Background grain */}
-        <div aria-hidden style={{
-          position: "absolute", inset: 0, borderRadius: 24, pointerEvents: "none",
-          background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(232,200,122,0.016) 8px, rgba(232,200,122,0.016) 9px)",
-        }}/>
-
-        {/* Animated halo behind the crown */}
-        <style>{`
-          @keyframes v90-halo { 0%,100%{opacity:0.45;transform:scale(0.92)} 50%{opacity:1;transform:scale(1.10)} }
-          @keyframes v90-shimmer { 0%,100%{opacity:0.70} 50%{opacity:1} }
-          @keyframes v90-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-        `}</style>
-        <div aria-hidden style={{
-          position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-          width: 200, height: 120, borderRadius: "0 0 50% 50%",
-          background: "radial-gradient(ellipse at 50% 0%, rgba(232,200,122,0.28) 0%, transparent 70%)",
-          filter: "blur(18px)", animation: "v90-halo 3s ease-in-out infinite",
-        }}/>
-
-        {/* Crown icon */}
+        {/* Inner card */}
         <div style={{
-          position: "relative", zIndex: 1,
-          display: "flex", justifyContent: "center", marginBottom: 20,
-          animation: "v90-float 4s ease-in-out infinite",
+          borderRadius: 26,
+          background: "linear-gradient(170deg, rgba(22,13,2,0.99) 0%, rgba(10,6,1,1) 60%, rgba(18,11,3,0.99) 100%)",
+          padding: "32px 24px 26px",
+          position: "relative",
+          overflow: "hidden",
         }}>
-          <svg width="56" height="44" viewBox="0 0 56 44" fill="none">
-            <defs>
-              <linearGradient id="crown-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stopColor="#fff0b0"/>
-                <stop offset="50%"  stopColor="#E8C87A"/>
-                <stop offset="100%" stopColor="#a07830"/>
-              </linearGradient>
-              <filter id="crown-glow" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur stdDeviation="3" result="b"/>
-                <feFlood floodColor="#E8C87A" floodOpacity="0.70" result="c"/>
-                <feComposite in="c" in2="b" operator="in" result="g"/>
-                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            {/* Crown body */}
-            <path d="M4 38 L4 28 L14 12 L28 22 L42 12 L52 28 L52 38 Z"
-              fill="url(#crown-grad)" filter="url(#crown-glow)" strokeLinejoin="round"/>
-            {/* Base band */}
-            <rect x="4" y="34" width="48" height="6" rx="2" fill="#a07830" opacity="0.70"/>
-            {/* Gems */}
-            <circle cx="28" cy="14" r="3.5" fill="#fff" opacity="0.90" filter="url(#crown-glow)"/>
-            <circle cx="9"  cy="22" r="2.2" fill="#fff" opacity="0.70"/>
-            <circle cx="47" cy="22" r="2.2" fill="#fff" opacity="0.70"/>
-          </svg>
-        </div>
 
-        {/* Text content */}
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-          <p style={{
-            margin: "0 0 6px",
-            fontSize: 10, fontWeight: 800, letterSpacing: "0.28em", textTransform: "uppercase",
-            color: "rgba(232,200,122,0.70)", fontFamily: "DM Sans, sans-serif",
-          }}>
-            Day 90 · Sovereign
-          </p>
-          <h1 style={{
-            margin: "0 0 16px",
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: 28, fontStyle: "italic", fontWeight: 700,
-            color: LG, lineHeight: 1.2,
-            textShadow: `0 0 32px ${LG_GLOW}0.60)`,
-          }}>
-            Full Brain Reset<br/>Complete
-          </h1>
-
-          <div style={{
-            background: "rgba(232,200,122,0.06)", border: "1px solid rgba(232,200,122,0.18)",
-            borderRadius: 14, padding: "14px 16px", marginBottom: 20, textAlign: "left",
-          }}>
-            {[
-              { icon: "🧠", text: "Your dopamine receptors have substantially regenerated — cravings are no longer your default state." },
-              { icon: "⚡", text: "Prefrontal cortex activity is measurably stronger. You are in control." },
-              { icon: "🔒", text: "The neural pathways of your old habit have begun to prune. Keep going." },
-            ].map(({ icon, text }) => (
-              <div key={icon} style={{ display: "flex", gap: 12, marginBottom: 10, alignItems: "flex-start" }}>
-                <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.5 }}>{icon}</span>
-                <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: "DM Sans, sans-serif" }}>
-                  {text}
-                </p>
-              </div>
-            ))}
+          {/* ── Swirling energy background ── */}
+          <div aria-hidden style={{ position:"absolute", inset:0, borderRadius:26, pointerEvents:"none", overflow:"hidden" }}>
+            <div style={{
+              position:"absolute", top:"-30%", left:"-20%", width:"80%", height:"80%", borderRadius:"50%",
+              background:"radial-gradient(circle, rgba(232,200,122,0.12) 0%, transparent 65%)",
+              filter:"blur(40px)", animation:"v90-swirl1 12s ease-in-out infinite",
+            }}/>
+            <div style={{
+              position:"absolute", bottom:"-20%", right:"-15%", width:"70%", height:"70%", borderRadius:"50%",
+              background:"radial-gradient(circle, rgba(180,120,30,0.10) 0%, transparent 65%)",
+              filter:"blur(36px)", animation:"v90-swirl2 16s ease-in-out infinite",
+            }}/>
+            {/* Stone-grain etchings */}
+            <div style={{
+              position:"absolute", inset:0,
+              background:"repeating-linear-gradient(-18deg, transparent, transparent 11px, rgba(232,200,122,0.025) 11px, rgba(232,200,122,0.025) 12px)",
+            }}/>
+            <div style={{
+              position:"absolute", inset:0,
+              background:"repeating-linear-gradient(72deg, transparent, transparent 18px, rgba(255,255,255,0.008) 18px, rgba(255,255,255,0.008) 19px)",
+            }}/>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-            onClick={onDismiss}
-            style={{
-              width: "100%", padding: "14px 0",
-              background: `linear-gradient(135deg, #a07830 0%, ${LG} 50%, #fff0b0 100%)`,
-              border: "none", borderRadius: 14, cursor: "pointer",
-              fontSize: 14, fontWeight: 800, letterSpacing: "0.06em",
-              color: "#0a0600", fontFamily: "DM Sans, sans-serif",
-              boxShadow: `0 0 32px ${LG_GLOW}0.35)`,
-            }}
+          {/* ── Corner rune etchings ── */}
+          {([
+            { style: { top:14, left:14 },  d:"M2 2 L2 18 M2 2 L18 2 M2 10 L8 10 M10 2 L10 8",       c:"M5 5 L5 14 M5 5 L14 5" },
+            { style: { top:14, right:14 }, d:"M18 2 L18 18 M18 2 L2 2 M18 10 L12 10 M10 2 L10 8",    c:"M15 5 L15 14 M15 5 L6 5" },
+            { style: { bottom:14, left:14 }, d:"M2 18 L2 2 M2 18 L18 18 M2 10 L8 10 M10 18 L10 12",  c:"M5 15 L5 6 M5 15 L14 15" },
+            { style: { bottom:14, right:14 }, d:"M18 18 L18 2 M18 18 L2 18 M18 10 L12 10 M10 18 L10 12", c:"M15 15 L15 6 M15 15 L6 15" },
+          ]).map((r, i) => (
+            <svg key={i} aria-hidden width="20" height="20" viewBox="0 0 20 20" fill="none"
+              style={{ position:"absolute", ...r.style, animation:"v90-rune 5s ease-in-out infinite", animationDelay:`${i*1.2}s`, pointerEvents:"none" }}>
+              <path d={r.d} stroke="rgba(232,200,122,0.55)" strokeWidth="1" strokeLinecap="round"/>
+              <path d={r.c} stroke="rgba(232,200,122,0.22)" strokeWidth="0.7" strokeLinecap="round"/>
+            </svg>
+          ))}
+
+          {/* ── Divine light shaft behind crown ── */}
+          <div aria-hidden style={{
+            position:"absolute", top:0, left:"50%",
+            width:260, height:200,
+            background:"conic-gradient(from 270deg at 50% 0%, transparent 30%, rgba(232,200,122,0.14) 40%, rgba(255,240,160,0.22) 50%, rgba(232,200,122,0.14) 60%, transparent 70%)",
+            filter:"blur(20px)",
+            animation:"v90-divine 4s ease-in-out infinite",
+          }}/>
+          <div aria-hidden style={{
+            position:"absolute", top:0, left:"50%",
+            width:140, height:110, borderRadius:"0 0 50% 50%",
+            background:"radial-gradient(ellipse at 50% 0%, rgba(255,248,200,0.35) 0%, transparent 70%)",
+            filter:"blur(14px)",
+            animation:"v90-halo 3s ease-in-out infinite",
+          }}/>
+
+          {/* ── Epic Crown ── */}
+          <motion.div
+            initial={{ y:-20, opacity:0, scale:0.6 }}
+            animate={{ y:0, opacity:1, scale:1 }}
+            transition={{ type:"spring", stiffness:200, damping:14, delay:0.22 }}
+            style={{ position:"relative", zIndex:2, display:"flex", justifyContent:"center", marginBottom:22, animation:"v90-float 5s ease-in-out infinite" }}
           >
-            Claim Your Sovereignty
-          </motion.button>
-          <p style={{ margin: "12px 0 0", fontSize: 10, color: "rgba(255,255,255,0.20)", fontFamily: "DM Sans, sans-serif" }}>
-            Tap anywhere to dismiss
-          </p>
+            <svg width="110" height="88" viewBox="0 0 110 88" fill="none" overflow="visible">
+              <defs>
+                <linearGradient id="m-crown-body" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stopColor="#fff8d0"/>
+                  <stop offset="20%"  stopColor="#f5d98a"/>
+                  <stop offset="50%"  stopColor="#C9A84C"/>
+                  <stop offset="80%"  stopColor="#8a6420"/>
+                  <stop offset="100%" stopColor="#5a3e08"/>
+                </linearGradient>
+                <linearGradient id="m-crown-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%"   stopColor="rgba(255,255,220,0.55)"/>
+                  <stop offset="100%" stopColor="rgba(255,255,220,0)"/>
+                </linearGradient>
+                <linearGradient id="m-crown-band" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%"   stopColor="#C9A84C"/>
+                  <stop offset="40%"  stopColor="#8a6420"/>
+                  <stop offset="100%" stopColor="#4a2e04"/>
+                </linearGradient>
+                <linearGradient id="m-ruby" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"  stopColor="#ff9090"/>
+                  <stop offset="50%" stopColor="#cc2233"/>
+                  <stop offset="100%" stopColor="#7a0011"/>
+                </linearGradient>
+                <linearGradient id="m-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"  stopColor="#80ffb0"/>
+                  <stop offset="50%" stopColor="#1aaa55"/>
+                  <stop offset="100%" stopColor="#0a5528"/>
+                </linearGradient>
+                <filter id="m-glow" x="-35%" y="-35%" width="170%" height="170%">
+                  <feGaussianBlur stdDeviation="5" result="b"/>
+                  <feFlood floodColor="#E8C87A" floodOpacity="0.75" result="c"/>
+                  <feComposite in="c" in2="b" operator="in" result="g"/>
+                  <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="m-gem-glow" x="-80%" y="-80%" width="260%" height="260%">
+                  <feGaussianBlur stdDeviation="3" result="b"/>
+                  <feFlood floodColor="#ff4466" floodOpacity="0.80" result="c"/>
+                  <feComposite in="c" in2="b" operator="in" result="g"/>
+                  <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="m-em-glow" x="-80%" y="-80%" width="260%" height="260%">
+                  <feGaussianBlur stdDeviation="2.5" result="b"/>
+                  <feFlood floodColor="#33ff88" floodOpacity="0.70" result="c"/>
+                  <feComposite in="c" in2="b" operator="in" result="g"/>
+                  <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+
+              {/* Drop shadow */}
+              <ellipse cx="55" cy="85" rx="36" ry="4" fill="rgba(0,0,0,0.55)" filter="url(#m-glow)" opacity="0.5"/>
+
+              {/* Crown body */}
+              <path d="M8 74 L8 50 L26 22 L55 42 L84 22 L102 50 L102 74 Z"
+                fill="url(#m-crown-body)" filter="url(#m-glow)"/>
+
+              {/* Engraved vertical lines on body */}
+              {[22, 36, 55, 74, 88].map((x, i) => (
+                <line key={i} x1={x} y1="52" x2={x} y2="72"
+                  stroke="rgba(90,60,8,0.35)" strokeWidth="0.8" strokeLinecap="round"/>
+              ))}
+
+              {/* Highlight facet on crown front */}
+              <path d="M8 74 L8 50 L26 22 L55 42 L84 22 L102 50 L102 74 Z"
+                fill="url(#m-crown-highlight)" opacity="0.35"/>
+
+              {/* Base band */}
+              <rect x="8" y="66" width="94" height="12" rx="3" fill="url(#m-crown-band)"/>
+              {/* Band engraving */}
+              <rect x="8" y="70" width="94" height="1" fill="rgba(255,240,160,0.20)"/>
+              {/* Band rivet dots */}
+              {[18, 36, 55, 74, 92].map((x) => (
+                <circle key={x} cx={x} cy="72" r="2.2" fill="#C9A84C" stroke="rgba(255,240,140,0.50)" strokeWidth="0.8"/>
+              ))}
+
+              {/* Spike tip details */}
+              {/* Top spike line details */}
+              <line x1="55" y1="42" x2="55" y2="22" stroke="rgba(255,240,160,0.18)" strokeWidth="1.2"/>
+              <line x1="26" y1="22" x2="8" y2="50" stroke="rgba(255,240,160,0.12)" strokeWidth="1"/>
+              <line x1="84" y1="22" x2="102" y2="50" stroke="rgba(255,240,160,0.12)" strokeWidth="1"/>
+
+              {/* ── Central Ruby — top spike ── */}
+              <polygon points="55,12 61,22 55,28 49,22"
+                fill="url(#m-ruby)" filter="url(#m-gem-glow)"
+                style={{ animation:"v90-gem 3s ease-in-out infinite" }}/>
+              {/* Ruby facet highlight */}
+              <polygon points="55,13 59,20 55,16" fill="rgba(255,200,200,0.60)"/>
+              <polygon points="55,13 51,20 55,16" fill="rgba(255,120,120,0.25)"/>
+
+              {/* ── Left Emerald — left spike ── */}
+              <polygon points="26,14 31,22 26,27 21,22"
+                fill="url(#m-emerald)" filter="url(#m-em-glow)"
+                style={{ animation:"v90-gem 3s ease-in-out infinite", animationDelay:"1s" }}/>
+              <polygon points="26,15 29,21 26,18" fill="rgba(180,255,220,0.55)"/>
+
+              {/* ── Right Emerald — right spike ── */}
+              <polygon points="84,14 89,22 84,27 79,22"
+                fill="url(#m-emerald)" filter="url(#m-em-glow)"
+                style={{ animation:"v90-gem 3s ease-in-out infinite", animationDelay:"2s" }}/>
+              <polygon points="84,15 87,21 84,18" fill="rgba(180,255,220,0.55)"/>
+
+              {/* Band gem — small ruby center */}
+              <circle cx="55" cy="72" r="4" fill="url(#m-ruby)" filter="url(#m-gem-glow)"/>
+              <circle cx="55" cy="70" r="1.5" fill="rgba(255,200,200,0.70)"/>
+            </svg>
+          </motion.div>
+
+          {/* ── Text ── */}
+          <div style={{ position:"relative", zIndex:2, textAlign:"center" }}>
+            <motion.p
+              initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.35, duration:0.4 }}
+              style={{
+                margin:"0 0 6px",
+                fontSize:9, fontWeight:800, letterSpacing:"0.32em", textTransform:"uppercase",
+                color:`${LG_GLOW}0.65)`, fontFamily:"DM Sans, sans-serif",
+              }}
+            >
+              ✦ Day 90 · Sovereign ✦
+            </motion.p>
+            <motion.h1
+              initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.42, duration:0.5 }}
+              style={{
+                margin:"0 0 20px",
+                fontFamily:"'Cormorant Garamond', Georgia, serif",
+                fontSize:32, fontStyle:"italic", fontWeight:700,
+                color:LG, lineHeight:1.18,
+                textShadow:`0 0 40px ${LG_GLOW}0.70), 0 2px 0 rgba(0,0,0,0.80)`,
+              }}
+            >
+              Full Brain Reset<br/>Complete
+            </motion.h1>
+
+            {/* Science bullets */}
+            <motion.div
+              initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.52, duration:0.45 }}
+              style={{
+                background:"linear-gradient(135deg, rgba(232,200,122,0.06) 0%, rgba(232,200,122,0.03) 100%)",
+                border:"1px solid rgba(232,200,122,0.20)",
+                borderTop:"1px solid rgba(232,200,122,0.38)",
+                borderRadius:16, padding:"14px 16px", marginBottom:22, textAlign:"left",
+              }}
+            >
+              {[
+                { icon:"🧠", text:"Your dopamine receptors have substantially regenerated. Cravings are no longer your default state." },
+                { icon:"⚡", text:"Prefrontal cortex activity is measurably stronger. You are in full control." },
+                { icon:"🔒", text:"The neural pathways of your old habit have begun to prune. What you built here is permanent." },
+              ].map(({ icon, text }, i) => (
+                <motion.div key={icon}
+                  initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }}
+                  transition={{ delay:0.58 + i * 0.10 }}
+                  style={{ display:"flex", gap:12, marginBottom: i < 2 ? 10 : 0, alignItems:"flex-start" }}
+                >
+                  <span style={{ fontSize:15, flexShrink:0, lineHeight:1.55 }}>{icon}</span>
+                  <p style={{ margin:0, fontSize:11.5, color:"rgba(255,255,255,0.58)", lineHeight:1.60, fontFamily:"DM Sans, sans-serif" }}>
+                    {text}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* ── Embossed gold bar CTA ── */}
+            <motion.div
+              initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.72, type:"spring", stiffness:260, damping:22 }}
+            >
+              <motion.button
+                whileHover={{ scale:1.025, y:-2 }}
+                whileTap={{ scale:0.970, y:2 }}
+                onClick={onDismiss}
+                style={{
+                  position:"relative", overflow:"hidden",
+                  width:"100%", padding:"16px 0",
+                  background:"linear-gradient(180deg, #fff0b0 0%, #E8C87A 18%, #C9A84C 50%, #9a7428 82%, #6b4c10 100%)",
+                  border:"none",
+                  borderRadius:14,
+                  cursor:"pointer",
+                  fontSize:14, fontWeight:900, letterSpacing:"0.10em",
+                  color:"#1a0d00", fontFamily:"DM Sans, sans-serif",
+                  boxShadow:"0 6px 0 #7a5418, 0 0 40px rgba(232,200,122,0.45), inset 0 1px 0 rgba(255,240,180,0.60)",
+                  animation:"v90-bevel 3s ease-in-out infinite",
+                  textShadow:"0 1px 0 rgba(255,255,200,0.50)",
+                }}
+              >
+                {/* Shimmer sweep */}
+                <span aria-hidden style={{
+                  position:"absolute", inset:0, pointerEvents:"none",
+                  background:"linear-gradient(108deg, transparent 25%, rgba(255,255,255,0.38) 42%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0.38) 58%, transparent 75%)",
+                  animation:"v90-shimmer 2.6s ease-in-out infinite",
+                  borderRadius:14,
+                }}/>
+                {/* Bevel top line */}
+                <span aria-hidden style={{
+                  position:"absolute", top:0, left:"8%", right:"8%", height:1,
+                  background:"linear-gradient(90deg, transparent, rgba(255,255,255,0.60) 30%, rgba(255,255,255,0.60) 70%, transparent)",
+                  borderRadius:1,
+                }}/>
+                <span style={{ position:"relative", zIndex:1 }}>
+                  ✦ Claim Your Sovereignty ✦
+                </span>
+              </motion.button>
+            </motion.div>
+
+            {/* ── Share Your Path ── */}
+            <motion.button
+              initial={{ opacity:0 }} animate={{ opacity:1 }}
+              transition={{ delay:0.85 }}
+              whileHover={{ scale:1.03 }}
+              whileTap={{ scale:0.96 }}
+              onClick={handleShare}
+              style={{
+                marginTop:12, width:"100%", padding:"12px 0",
+                background:"rgba(232,200,122,0.06)",
+                border:"1px solid rgba(232,200,122,0.22)",
+                borderRadius:13, cursor:"pointer",
+                display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+                fontSize:12, fontWeight:700, letterSpacing:"0.06em",
+                color:`${LG_GLOW}0.80)`, fontFamily:"DM Sans, sans-serif",
+              }}
+            >
+              {/* Share icon */}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="11" cy="2.5" r="1.8" stroke="currentColor" strokeWidth="1.2"/>
+                <circle cx="2.5" cy="7"  r="1.8" stroke="currentColor" strokeWidth="1.2"/>
+                <circle cx="11" cy="11.5" r="1.8" stroke="currentColor" strokeWidth="1.2"/>
+                <line x1="4.2" y1="6.1"  x2="9.4" y2="3.4"  stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+                <line x1="4.2" y1="7.9"  x2="9.4" y2="10.6" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+              </svg>
+              Share Your Path
+            </motion.button>
+
+            <p style={{ margin:"10px 0 0", fontSize:10, color:"rgba(255,255,255,0.18)", fontFamily:"DM Sans, sans-serif" }}>
+              Tap backdrop to dismiss
+            </p>
+          </div>
         </div>
       </motion.div>
     </motion.div>
@@ -879,7 +1125,7 @@ function ProgressScreen() {
       {/* ── 90-day celebration overlays ─────────────────────── */}
       <Confetti active={showVictory || devConfetti} />
       <AnimatePresence>
-        {showVictory && <Victory90Modal onDismiss={handleDismissVictory} />}
+        {showVictory && <Victory90Modal onDismiss={handleDismissVictory} addiction={active?.name} />}
       </AnimatePresence>
 
       {/* ── Header ──────────────────────────────────────────── */}
