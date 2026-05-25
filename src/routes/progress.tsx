@@ -917,6 +917,237 @@ const STONE_CARD: React.CSSProperties = {
   overflow: "hidden",
 };
 
+// ── Bio-scanner helpers ───────────────────────────────────────────────────────
+const MONO = '"DM Mono", "JetBrains Mono", "Courier New", monospace';
+
+function generatePruningData(day: number): number[] {
+  const PTS = 34;
+  return Array.from({ length: PTS }, (_, i) => {
+    const isFuture = i / (PTS - 1) > Math.min(day / 90, 0.96);
+    const rawSpike = Math.abs(Math.sin(i * 2.17) * 0.55 + Math.sin(i * 0.83 + 1.2) * 0.35 + 0.12);
+    const pruned = isFuture ? 0.82 : Math.max(0.04, 1 - (day / 90) * 0.91);
+    return Math.min(1, rawSpike * pruned);
+  });
+}
+
+function toSvgPath(pts: { x: number; y: number }[]): string {
+  return pts.reduce((acc, p, i) => {
+    if (i === 0) return `M ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+    const prev = pts[i - 1];
+    const cx = ((prev.x + p.x) / 2).toFixed(1);
+    return `${acc} C ${cx} ${prev.y.toFixed(1)}, ${cx} ${p.y.toFixed(1)}, ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+  }, "");
+}
+
+// ── Circular dopamine gauge ───────────────────────────────────────────────────
+function DopamineGauge({ pct, day }: { pct: number; day: number }) {
+  const R = 66, CIRC = 2 * Math.PI * R;
+  const targetOffset = CIRC * (1 - pct / 100);
+  const isStabilizing = pct >= 50;
+
+  return (
+    <div style={{ ...STONE_CARD, padding: "18px 16px 16px", marginBottom: 10 }}>
+      {/* grain overlay */}
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+        background: "repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.013) 8px,rgba(57,217,138,0.013) 9px)",
+      }} />
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {/* top label row */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.17em", color: "rgba(57,217,138,0.65)", textTransform: "uppercase", fontFamily: MONO }}>
+            DOPAMINE SENSITIVITY
+          </span>
+          <span style={{ fontSize: 9, color: "rgba(57,217,138,0.38)", fontFamily: MONO, letterSpacing: "0.10em" }}>
+            BIOFEED_v2.1
+          </span>
+        </div>
+
+        {/* gauge + readouts row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          {/* SVG gauge */}
+          <div style={{ flexShrink: 0, position: "relative" }}>
+            <svg width="148" height="148" viewBox="0 0 148 148" style={{ overflow: "visible" }}>
+              <defs>
+                <linearGradient id="dg-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%"   stopColor="#4A9ECC" />
+                  <stop offset="100%" stopColor={NG} />
+                </linearGradient>
+                <filter id="dg-glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3" result="b" />
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              {/* track */}
+              <circle cx="74" cy="74" r={R} fill="none" stroke="rgba(255,255,255,0.055)" strokeWidth="9" />
+              {/* pulse ring */}
+              <motion.circle
+                cx="74" cy="74" r={R} fill="none"
+                stroke={`rgba(57,217,138,0.12)`} strokeWidth="18"
+                animate={{ opacity: [0.12, 0, 0.12], scale: [1, 1.05, 1] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformOrigin: "74px 74px" }}
+              />
+              {/* sweep arc — initialises from 0 to target */}
+              <motion.circle
+                cx="74" cy="74" r={R}
+                fill="none"
+                stroke="url(#dg-grad)"
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeDasharray={CIRC}
+                initial={{ strokeDashoffset: CIRC }}
+                animate={{ strokeDashoffset: targetOffset }}
+                transition={{ duration: 1.9, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+                transform="rotate(-90 74 74)"
+                filter="url(#dg-glow)"
+              />
+              {/* center readout */}
+              <text x="74" y="68" textAnchor="middle"
+                fill={NG} fontSize="26" fontWeight="800" fontFamily={MONO}>
+                {pct}%
+              </text>
+              <text x="74" y="86" textAnchor="middle"
+                fill="rgba(255,255,255,0.28)" fontSize="7.5" fontFamily={MONO} letterSpacing="2">
+                SENSITIVITY
+              </text>
+            </svg>
+          </div>
+
+          {/* right-side digital readouts */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+            {/* day counter */}
+            <div style={{ padding: "9px 11px", borderRadius: 11, background: "rgba(57,217,138,0.055)", border: "1px solid rgba(57,217,138,0.16)" }}>
+              <p style={{ fontSize: 8, color: "rgba(57,217,138,0.50)", letterSpacing: "0.14em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: MONO }}>
+                DAY_COUNT
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: "#f5ede0", fontFamily: MONO, letterSpacing: "-0.01em" }}>
+                  {String(day).padStart(3, "0")}
+                </span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                  <svg width="9" height="9" viewBox="0 0 9 9"><path d="M4.5 0 L9 9 L0 9 Z" fill={NG}/></svg>
+                  <span style={{ fontSize: 6.5, color: NG, fontWeight: 800, letterSpacing: "0.10em", fontFamily: MONO }}>RISING</span>
+                </div>
+              </div>
+            </div>
+
+            {/* status rows */}
+            {([
+              { label: "DOPAMINE",  value: isStabilizing ? "STABILIZING" : "RECOVERING", color: isStabilizing ? NG : "#4A9ECC" },
+              { label: "PRUNING",   value: day > 7 ? "ACTIVE" : "INITIATING",            color: NG },
+              { label: "BASELINE",  value: day >= 30 ? "RESETTING" : "ADAPTING",         color: day >= 30 ? NG : "#4A9ECC" },
+            ] as const).map((s) => (
+              <div key={s.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 7.5, color: "rgba(255,255,255,0.28)", letterSpacing: "0.12em", fontFamily: MONO }}>{s.label}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <motion.span
+                    animate={{ opacity: [1, 0.25, 1] }}
+                    transition={{ duration: 1.7, repeat: Infinity, delay: Math.random() * 0.8 }}
+                    style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, display: "block", flexShrink: 0, boxShadow: `0 0 6px ${s.color}` }}
+                  />
+                  <span style={{ fontSize: 7.5, color: s.color, fontWeight: 700, letterSpacing: "0.10em", fontFamily: MONO }}>{s.value}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Neural pruning line chart ─────────────────────────────────────────────────
+function NeuralPruningGraph({ day }: { day: number }) {
+  const W = 300, H = 70;
+  const data   = generatePruningData(day);
+  const points = data.map((y, i) => ({ x: (i / (data.length - 1)) * W, y: H - y * H * 0.80 - 4 }));
+  const path   = toSvgPath(points);
+  const prunedPct = Math.min(100, Math.round((day / 90) * 100));
+  const nowIdx = Math.min(points.length - 1, Math.floor((day / 90) * (points.length - 1)));
+
+  return (
+    <div style={{ ...STONE_CARD, padding: "16px 16px 14px", marginTop: 10 }}>
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+        background: "repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.013) 8px,rgba(57,217,138,0.013) 9px)",
+      }} />
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {/* label row */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.17em", color: "rgba(57,217,138,0.65)", textTransform: "uppercase", fontFamily: MONO }}>
+            NEURAL PRUNING
+          </span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(57,217,138,0.50)", fontFamily: MONO, letterSpacing: "0.08em" }}>
+            {prunedPct}%_PRUNED
+          </span>
+        </div>
+
+        <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }}>
+          <defs>
+            <filter id="np-glow" x="-20%" y="-60%" width="140%" height="220%">
+              <feGaussianBlur stdDeviation="2.5" result="b" />
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            {/* line fades from dim (old habits) to bright (now) */}
+            <linearGradient id="np-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"                           stopColor="rgba(255,255,255,0.08)" />
+              <stop offset={`${Math.max(5,prunedPct-15)}%`} stopColor="rgba(255,255,255,0.08)" />
+              <stop offset={`${prunedPct}%`}             stopColor={NG} />
+              <stop offset="100%"                         stopColor={NG} />
+            </linearGradient>
+          </defs>
+
+          {/* subtle grid */}
+          {[0.25, 0.5, 0.75].map((t) => (
+            <line key={t} x1="0" y1={H*t} x2={W} y2={H*t} stroke="rgba(255,255,255,0.045)" strokeWidth="0.5"/>
+          ))}
+
+          {/* area fill */}
+          <motion.path
+            d={`${path} L ${W} ${H} L 0 ${H} Z`}
+            fill={`rgba(57,217,138,0.04)`}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+          />
+
+          {/* the pruning line — draws in on mount */}
+          <motion.path
+            d={path}
+            fill="none"
+            stroke="url(#np-grad)"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#np-glow)"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 2.2, ease: "easeInOut", delay: 0.15 }}
+          />
+
+          {/* current position pulse dot */}
+          <motion.circle
+            cx={points[nowIdx].x} cy={points[nowIdx].y}
+            r="3.8" fill={NG}
+            filter="url(#np-glow)"
+            animate={{ r: [3.8, 5.5, 3.8], opacity: [1, 0.5, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity }}
+          />
+        </svg>
+
+        {/* axis labels */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+          <span style={{ fontSize: 7.5, color: "rgba(255,255,255,0.20)", fontFamily: MONO }}>DAY_01</span>
+          <span style={{ fontSize: 7.5, color: "rgba(57,217,138,0.45)", fontFamily: MONO }}>
+            ▶ DAY_{String(Math.max(day, 1)).padStart(2, "0")}
+          </span>
+          <span style={{ fontSize: 7.5, color: "rgba(255,255,255,0.20)", fontFamily: MONO }}>DAY_90</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Pattern Detector — "Learn how it works" disclosure ───────────────────────
 function PdLearnMore() {
   const [open, setOpen] = useState(false);
@@ -1392,106 +1623,116 @@ function ProgressScreen() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-           DOPAMINE DASHBOARD GRID
+           DOPAMINE DASHBOARD — BIO-SCANNER
          ══════════════════════════════════════════════════════ */}
       <section className="px-6 mt-5 fade-up-3">
+        <style>{`
+          @keyframes scan-sweep {
+            0%   { transform: translateY(-100%); opacity: 0.55; }
+            80%  { opacity: 0.55; }
+            100% { transform: translateY(700%); opacity: 0; }
+          }
+          .scan-line::after {
+            content: "";
+            position: absolute;
+            inset-inline: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(57,217,138,0.55), transparent);
+            animation: scan-sweep 2.6s ease-in 0.1s 1 forwards;
+            pointer-events: none;
+          }
+        `}</style>
+
         <div className="flex items-center justify-between mb-3">
           <SectionTitle>Dopamine Dashboard</SectionTitle>
+          <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.16em", color: "rgba(57,217,138,0.45)", fontFamily: MONO }}>
+            SYS_ONLINE
+          </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+
+        {/* ① Circular bio-gauge — full width */}
+        <DopamineGauge pct={recoveryPct} day={day} />
+
+        {/* ② 2×2 digital readout grid */}
+        <div className="scan-line" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, position: "relative", overflow: "hidden" }}>
 
           {/* Card 1 — Avg Relapse Frequency */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
-            <div aria-hidden style={{
-              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
-            }}/>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)",
-                display: "grid", placeItems: "center", marginBottom: 10,
-              }}>
-                <Hourglass size={14} color="#C9A84C" strokeWidth={1.8}/>
+          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
+            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+            <div style={{ position:"relative", zIndex:1 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(201,168,76,0.10)",border:"1px solid rgba(201,168,76,0.28)",display:"grid",placeItems:"center",marginBottom:9 }}>
+                <Hourglass size={13} color="#C9A84C" strokeWidth={1.8}/>
               </div>
-              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+              <p style={{ margin:0, fontSize:20, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {avgRelapseDays !== null ? `${avgRelapseDays}d` : "—"}
               </p>
-              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
-                Avg relapse<br/>frequency
+              <p style={{ margin:"4px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
+                AVG_RELAPSE<br/>FREQUENCY
               </p>
             </div>
           </div>
 
-          {/* Card 2 — Total App Sessions */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
-            <div aria-hidden style={{
-              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
-            }}/>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: "rgba(126,200,227,0.10)", border: "1px solid rgba(126,200,227,0.22)",
-                display: "grid", placeItems: "center", marginBottom: 10,
-              }}>
-                <Smartphone size={14} color="#7ec8e3" strokeWidth={1.8}/>
+          {/* Card 2 — Total App Sessions (with STABILIZING indicator) */}
+          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
+            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+            <div style={{ position:"relative", zIndex:1 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(57,217,138,0.10)",border:"1px solid rgba(57,217,138,0.22)",display:"grid",placeItems:"center",marginBottom:9 }}>
+                <Smartphone size={13} color={NG} strokeWidth={1.8}/>
               </div>
-              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
-                {totalLogins}
+              <p style={{ margin:0, fontSize:20, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
+                {String(totalLogins).padStart(2,"0")}
               </p>
-              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
-                Total logged<br/>app sessions
+              <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:4 }}>
+                <motion.span
+                  animate={{ opacity:[1,0.2,1] }}
+                  transition={{ duration:1.5, repeat:Infinity }}
+                  style={{ width:5,height:5,borderRadius:"50%",background:NG,flexShrink:0,boxShadow:`0 0 5px ${NG}` }}
+                />
+                <p style={{ margin:0, fontSize:9, color:NG, lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em", fontWeight:700 }}>
+                  STABILIZING
+                </p>
+              </div>
+              <p style={{ margin:"2px 0 0", fontSize:9, color:"rgba(255,255,255,0.30)", fontFamily:MONO, letterSpacing:"0.06em" }}>
+                TOTAL_SESSIONS
               </p>
             </div>
           </div>
 
           {/* Card 3 — Most Challenging Weekday */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
-            <div aria-hidden style={{
-              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
-            }}/>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: "rgba(240,100,80,0.10)", border: "1px solid rgba(240,100,80,0.22)",
-                display: "grid", placeItems: "center", marginBottom: 10,
-              }}>
-                <CalendarDays size={14} color="#f06450" strokeWidth={1.8}/>
+          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
+            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+            <div style={{ position:"relative", zIndex:1 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(240,100,80,0.10)",border:"1px solid rgba(240,100,80,0.22)",display:"grid",placeItems:"center",marginBottom:9 }}>
+                <CalendarDays size={13} color="#f06450" strokeWidth={1.8}/>
               </div>
-              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+              <p style={{ margin:0, fontSize:20, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {peakDow ?? "—"}
               </p>
-              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
-                Most challenging<br/>weekday
+              <p style={{ margin:"4px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
+                PEAK_RISK<br/>WEEKDAY
               </p>
             </div>
           </div>
 
           {/* Card 4 — Level Multiplier */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
-            <div aria-hidden style={{
-              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
-            }}/>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: "rgba(168,200,124,0.10)", border: "1px solid rgba(168,200,124,0.22)",
-                display: "grid", placeItems: "center", marginBottom: 10,
-              }}>
-                <Zap size={14} color="#a8c87c" strokeWidth={1.8}/>
+          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
+            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+            <div style={{ position:"relative", zIndex:1 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(168,200,124,0.10)",border:"1px solid rgba(168,200,124,0.22)",display:"grid",placeItems:"center",marginBottom:9 }}>
+                <Zap size={13} color="#a8c87c" strokeWidth={1.8}/>
               </div>
-              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: hasDeepRoots ? "#a8c87c" : "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+              <p style={{ margin:0, fontSize:20, fontWeight:900, color:hasDeepRoots?"#a8c87c":"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {hasDeepRoots ? "×1.1" : "×1.0"}
               </p>
-              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
-                XP / credit<br/>multiplier
+              <p style={{ margin:"4px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
+                XP_CREDIT<br/>MULTIPLIER
               </p>
             </div>
           </div>
         </div>
+
+        {/* ③ Neural Pruning graph — full width */}
+        <NeuralPruningGraph day={day} />
       </section>
 
       {/* ══════════════════════════════════════════════════════
