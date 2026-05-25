@@ -65,6 +65,8 @@ export type AppState = {
   profilePhoto: string | null;
   // Companion avatar
   companion: "tree" | "wolf";
+  // Dev-only: unlock companion switcher independently of isPremium
+  companionSwitcherUnlocked: boolean;
   // Login & activity tracking
   lastLoginAt: number;
   loginHistory: number[];
@@ -93,6 +95,7 @@ const defaultState = (): AppState => ({
   relapses: [],
   profilePhoto: null,
   companion: "tree",
+  companionSwitcherUnlocked: false,
   notificationStyles: [],
   notificationApps: [],
   lastIdentityShown: 0,

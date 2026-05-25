@@ -4,7 +4,7 @@ import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
 import wolfPackBondUrl from "@/assets/wolf-pack-bond.png";
@@ -2536,7 +2536,7 @@ function WolfPage({
 
       {/* ── Companion Switcher ── */}
       <CompanionSwitcher
-        isPremium={state.isPremium}
+        isPremium={state.isPremium || !!state.companionSwitcherUnlocked}
         currentCompanion="wolf"
         onSwitchToTree={() => update({ companion: "tree" })}
         onSwitchToWolf={() => {}}
@@ -3039,11 +3039,11 @@ function LifeTreePage({
 
       {/* ── Companion Switcher ── */}
       <CompanionSwitcher
-        isPremium={state.isPremium}
+        isPremium={state.isPremium || !!state.companionSwitcherUnlocked}
         currentCompanion="tree"
         onSwitchToTree={() => {}}
         onSwitchToWolf={() => {
-          if (!state.isPremium) { triggerPaywall(); return; }
+          if (!state.isPremium && !state.companionSwitcherUnlocked) { triggerPaywall(); return; }
           update({ companion: "wolf" });
         }}
       />
@@ -3081,6 +3081,17 @@ function CompanionSwitcher({
 }) {
   const treeActive = currentCompanion === "tree";
   const wolfActive = currentCompanion === "wolf";
+  const wolfLocked = !isPremium && !wolfActive;
+  const [lockedTapped, setLockedTapped] = useState(false);
+
+  function handleWolfTap() {
+    if (wolfActive) return;
+    if (wolfLocked) {
+      setLockedTapped(true);
+      setTimeout(() => setLockedTapped(false), 2200);
+    }
+    onSwitchToWolf();
+  }
 
   return (
     <>
@@ -3334,7 +3345,7 @@ function CompanionSwitcher({
 
                 {/* ════ Wolf Companion card ════ */}
                 <motion.button
-                  onClick={wolfActive ? undefined : onSwitchToWolf}
+                  onClick={handleWolfTap}
                   whileTap={wolfActive ? {} : { scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 500, damping: 22 }}
                   style={{
@@ -3343,34 +3354,31 @@ function CompanionSwitcher({
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
                     cursor: wolfActive ? "default" : "pointer",
                     textAlign: "center" as const,
-                    /* wolf-fur texture: diagonal strands + nebula glow */
                     background: wolfActive
                       ? [
                           "repeating-linear-gradient(-50deg, transparent, transparent 4px, rgba(60,50,35,0.07) 4px, rgba(60,50,35,0.07) 5px)",
                           "radial-gradient(ellipse at 30% 65%, rgba(30,20,70,0.35) 0%, transparent 60%)",
                           "linear-gradient(155deg, rgba(12,8,18,0.97) 0%, rgba(6,4,12,0.99) 100%)",
                         ].join(", ")
-                      : isPremium
-                        ? [
-                            "repeating-linear-gradient(-50deg, transparent, transparent 4px, rgba(50,40,28,0.05) 4px, rgba(50,40,28,0.05) 5px)",
-                            "linear-gradient(155deg, rgba(10,6,16,0.95) 0%, rgba(5,3,10,0.97) 100%)",
-                          ].join(", ")
-                        : "rgba(8,5,14,0.95)",
+                      : [
+                          "repeating-linear-gradient(-50deg, transparent, transparent 4px, rgba(50,40,28,0.05) 4px, rgba(50,40,28,0.05) 5px)",
+                          "linear-gradient(155deg, rgba(10,6,16,0.95) 0%, rgba(5,3,10,0.97) 100%)",
+                        ].join(", "),
                     outline: wolfActive
                       ? "1.5px solid rgba(212,175,55,0.60)"
-                      : isPremium
-                        ? "1.5px solid rgba(196,135,58,0.32)"
-                        : "1.5px solid rgba(255,255,255,0.10)",
+                      : wolfLocked
+                        ? "1.5px solid rgba(255,255,255,0.08)"
+                        : "1.5px solid rgba(196,135,58,0.32)",
                     boxShadow: wolfActive
                       ? "0 0 0 0.5px rgba(232,200,100,0.24), 0 0 22px rgba(201,168,76,0.18), inset 0 0 30px rgba(30,20,60,0.25)"
                       : "none",
-                    opacity: !isPremium && !wolfActive ? 0.72 : 1,
                     animation: wolfActive ? "cs-glimmer 4.2s ease-in-out 0.6s infinite" : "none",
+                    overflow: "hidden",
                   }}
                 >
                   {/* ACTIVE badge + ripple (wolf active) */}
                   {wolfActive && (
-                    <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)" }}>
+                    <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", zIndex: 2 }}>
                       <div aria-hidden style={{
                         position: "absolute", top: "50%", left: "50%",
                         width: 28, height: 18, borderRadius: 999,
@@ -3397,19 +3405,53 @@ function CompanionSwitcher({
                     </div>
                   )}
 
-                  {/* 🔒 PRO badge (non-premium only) */}
-                  {!isPremium && !wolfActive && (
+                  {/* ── Full lock overlay ── */}
+                  {wolfLocked && (
                     <div style={{
-                      position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
-                      display: "flex", alignItems: "center", gap: 3,
-                      fontSize: 8, fontWeight: 800, letterSpacing: "0.14em",
-                      color: "rgba(255,255,255,0.65)",
-                      background: "rgba(15,10,25,0.92)",
-                      border: "1px solid rgba(255,255,255,0.16)",
-                      borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap",
+                      position: "absolute", inset: 0, borderRadius: 16,
+                      background: "rgba(0,0,0,0.72)",
+                      backdropFilter: "blur(3px)",
+                      WebkitBackdropFilter: "blur(3px)",
+                      display: "flex", flexDirection: "column",
+                      alignItems: "center", justifyContent: "center",
+                      gap: 8, zIndex: 10,
                     }}>
-                      <Lock style={{ width: 7, height: 7 }} />
-                      PRO
+                      <motion.div
+                        animate={{ scale: [1, 1.08, 1] }}
+                        transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
+                        style={{
+                          width: 38, height: 38, borderRadius: "50%",
+                          background: "rgba(201,168,76,0.12)",
+                          border: "1.5px solid rgba(201,168,76,0.40)",
+                          display: "grid", placeItems: "center",
+                          boxShadow: "0 0 18px rgba(201,168,76,0.28)",
+                        }}
+                      >
+                        <Lock style={{ width: 16, height: 16, color: "#C9A84C" }} strokeWidth={2.2} />
+                      </motion.div>
+                      <p style={{
+                        margin: 0, fontSize: 9, fontWeight: 800,
+                        letterSpacing: "0.16em", textTransform: "uppercase",
+                        color: "#C9A84C",
+                      }}>
+                        Pro Exclusive
+                      </p>
+                      <AnimatePresence>
+                        {lockedTapped && (
+                          <motion.p
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.22 }}
+                            style={{
+                              margin: 0, fontSize: 10, fontWeight: 600,
+                              color: "rgba(255,255,255,0.70)", lineHeight: 1.4,
+                            }}
+                          >
+                            Upgrade to unlock →
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
                     </div>
                   )}
 
@@ -3418,15 +3460,12 @@ function CompanionSwitcher({
                     width: 54, height: 54, borderRadius: 14,
                     background: wolfActive
                       ? "radial-gradient(circle at 42% 38%, rgba(20,14,4,0.96) 0%, rgba(10,7,2,0.99) 100%)"
-                      : isPremium
-                        ? "rgba(10,7,2,0.90)"
-                        : "rgba(8,5,2,0.85)",
-                    border: `1px solid ${wolfActive ? "rgba(212,175,55,0.40)" : isPremium ? "rgba(196,135,58,0.20)" : "rgba(255,255,255,0.07)"}`,
+                      : "rgba(10,7,2,0.90)",
+                    border: `1px solid ${wolfActive ? "rgba(212,175,55,0.40)" : wolfLocked ? "rgba(255,255,255,0.08)" : "rgba(196,135,58,0.20)"}`,
                     boxShadow: wolfActive
                       ? "inset 0 0 18px rgba(212,175,55,0.10), 0 0 14px rgba(212,175,55,0.18)"
                       : "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    opacity: !isPremium && !wolfActive ? 0.50 : 1,
                   }}>
                     {/* Fierce forward-facing wolf head — clean gold stroke line-art */}
                     <svg width="34" height="34" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3505,18 +3544,15 @@ function CompanionSwitcher({
                   <div style={{ textAlign: "center" }}>
                     <p style={{
                       fontSize: 12, fontWeight: 700, marginBottom: 2, fontFamily: "DM Sans, sans-serif",
-                      color: wolfActive ? "#C9A84C" : isPremium ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.38)",
+                      color: wolfActive ? "#C9A84C" : wolfLocked ? "rgba(255,255,255,0.38)" : "rgba(255,255,255,0.88)",
                     }}>
                       Wolf Companion
                     </p>
                     <p style={{
                       fontSize: 10, fontFamily: "DM Sans, sans-serif",
-                      color: wolfActive
-                        ? "rgba(201,168,76,0.55)"
-                        : isPremium ? "rgba(201,168,76,0.55)"
-                        : "rgba(255,255,255,0.28)",
+                      color: wolfActive ? "rgba(201,168,76,0.55)" : wolfLocked ? "rgba(255,255,255,0.28)" : "rgba(201,168,76,0.55)",
                     }}>
-                      {wolfActive ? "Your wolf" : isPremium ? "Tap to switch" : "Unlock with Pro"}
+                      {wolfActive ? "Your wolf" : wolfLocked ? "Unlock with Pro" : "Tap to switch"}
                     </p>
                   </div>
                 </motion.button>

@@ -269,14 +269,13 @@ export function BottomNav() {
             <div style={{ height: 1, background: "rgba(52,211,153,0.10)", marginBottom: 14 }} />
 
             {/* Pro toggle */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <div>
                 <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#3fd399", letterSpacing: "0.06em" }}>Pro Mode</p>
                 <p style={{ margin: "2px 0 0", fontSize: 10, color: "rgba(52,211,153,0.40)" }}>
                   {state.isPremium ? "9 pro games unlocked" : "Simulating free tier — 9 games locked"}
                 </p>
               </div>
-              {/* Toggle switch */}
               <button
                 onClick={() => update((s) => ({ isPremium: !s.isPremium }))}
                 style={{
@@ -293,6 +292,36 @@ export function BottomNav() {
                   left: state.isPremium ? 26 : 3,
                   transition: "all 0.22s",
                   boxShadow: state.isPremium ? "0 0 6px rgba(52,211,153,0.80)" : "none",
+                }}/>
+              </button>
+            </div>
+
+            {/* Companion Switcher unlock toggle */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, padding: "8px 10px", borderRadius: 10, background: "rgba(52,211,153,0.03)", border: "1px solid rgba(52,211,153,0.08)" }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: state.companionSwitcherUnlocked ? "#3fd399" : "rgba(52,211,153,0.55)", letterSpacing: "0.04em" }}>
+                  Unlock Companion Switcher
+                </p>
+                <p style={{ margin: "2px 0 0", fontSize: 9, color: "rgba(52,211,153,0.32)" }}>
+                  {state.companionSwitcherUnlocked ? "Wolf card unlocked (dev override)" : "Wolf locked — tap to test unlock"}
+                </p>
+              </div>
+              <button
+                onClick={() => update((s) => ({ companionSwitcherUnlocked: !s.companionSwitcherUnlocked }))}
+                style={{
+                  position: "relative", width: 40, height: 22, borderRadius: 11, flexShrink: 0,
+                  background: state.companionSwitcherUnlocked ? "rgba(52,211,153,0.22)" : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${state.companionSwitcherUnlocked ? "rgba(52,211,153,0.50)" : "rgba(255,255,255,0.10)"}`,
+                  cursor: "pointer", transition: "all 0.22s",
+                  boxShadow: state.companionSwitcherUnlocked ? "0 0 8px rgba(52,211,153,0.25)" : "none",
+                }}
+              >
+                <div style={{
+                  position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%",
+                  background: state.companionSwitcherUnlocked ? "#3fd399" : "rgba(255,255,255,0.22)",
+                  left: state.companionSwitcherUnlocked ? 20 : 2,
+                  transition: "all 0.22s",
+                  boxShadow: state.companionSwitcherUnlocked ? "0 0 5px rgba(52,211,153,0.70)" : "none",
                 }}/>
               </button>
             </div>
