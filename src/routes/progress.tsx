@@ -23,20 +23,23 @@ export const Route = createFileRoute("/progress")({
   component: ProgressScreen,
 });
 
+// ── Neural Green palette ──────────────────────────────────────────────────────
+const NG = "#39d98a";          // primary neural green
+const NG_DIM = "#1a6640";      // dim track green
+const NG_GLOW = "rgba(57,217,138,";  // rgba prefix
+
 // ── Neural Core ───────────────────────────────────────────────────────────────
 function NeuralCore({ pct, day }: { pct: number; day: number }) {
   const R = 76;
   const C = 2 * Math.PI * R;
   const offset = C * (1 - pct / 100);
 
-  // Energy pulse speed: faster with longer streaks (1.6s–4.5s)
+  // Pulse speed: faster with longer streaks (1.6–4.5s)
   const pulseDur  = Math.max(1.6, 4.5 - day * 0.028);
-  // Glow opacity: brighter with longer streaks (0.18–0.65)
-  const glowAlpha = Math.min(0.65, 0.18 + day * 0.007);
-  // Core colour: dim amber → bright gold → electric at 90+
-  const coreHex   = day >= 90 ? "#d4f0ff" : day >= 30 ? "#E8C87A" : day >= 7 ? "#C4873A" : "#8B5E20";
+  // Glow intensity: 0.20 → 0.70
+  const glowAlpha = Math.min(0.70, 0.20 + day * 0.008);
 
-  // 12 neural node positions at r=92, every 30°
+  // 12 neural nodes at r=92
   const nodes = Array.from({ length: 12 }, (_, i) => {
     const a = (i * 30 - 90) * (Math.PI / 180);
     const active = i / 12 <= pct / 100;
@@ -46,72 +49,93 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
   return (
     <div className="relative flex items-center justify-center">
       <style>{`
-        @keyframes nc-scan { 0%{transform:rotate(-90deg)}100%{transform:rotate(270deg)} }
-        @keyframes nc-node { 0%,100%{opacity:0.6;r:2.8}50%{opacity:1;r:3.8} }
+        @keyframes nc-node    { 0%,100%{opacity:0.6} 50%{opacity:1} }
+        @keyframes nc-nebula1 { 0%{transform:translate(0,0) scale(1)} 33%{transform:translate(18px,-12px) scale(1.08)} 66%{transform:translate(-10px,14px) scale(0.95)} 100%{transform:translate(0,0) scale(1)} }
+        @keyframes nc-nebula2 { 0%{transform:translate(0,0) scale(1)} 40%{transform:translate(-20px,10px) scale(1.10)} 70%{transform:translate(14px,-8px) scale(0.94)} 100%{transform:translate(0,0) scale(1)} }
+        @keyframes nc-nebula3 { 0%{transform:translate(0,0)} 50%{transform:translate(8px,16px) scale(1.06)} 100%{transform:translate(0,0)} }
       `}</style>
 
-      {/* Outer atmospheric pulse */}
+      {/* ── Nebula energy field — three slow-drifting blobs ── */}
+      <div aria-hidden style={{ position:"absolute", inset:-60, pointerEvents:"none", overflow:"visible" }}>
+        <div style={{
+          position:"absolute", top:"10%", left:"5%", width:180, height:180, borderRadius:"50%",
+          background:`radial-gradient(circle, ${NG_GLOW}${(glowAlpha*0.32).toFixed(2)}) 0%, transparent 70%)`,
+          filter:"blur(36px)", animation:`nc-nebula1 ${pulseDur * 3.5}s ease-in-out infinite`,
+        }}/>
+        <div style={{
+          position:"absolute", top:"30%", right:"8%", width:140, height:140, borderRadius:"50%",
+          background:`radial-gradient(circle, ${NG_GLOW}${(glowAlpha*0.22).toFixed(2)}) 0%, transparent 65%)`,
+          filter:"blur(28px)", animation:`nc-nebula2 ${pulseDur * 4.2}s ease-in-out infinite`,
+        }}/>
+        <div style={{
+          position:"absolute", bottom:"5%", left:"20%", width:120, height:120, borderRadius:"50%",
+          background:`radial-gradient(circle, rgba(16,185,129,${(glowAlpha*0.18).toFixed(2)}) 0%, transparent 70%)`,
+          filter:"blur(24px)", animation:`nc-nebula3 ${pulseDur * 5}s ease-in-out infinite`,
+        }}/>
+      </div>
+
+      {/* Primary pulse halo */}
       <motion.div aria-hidden
-        animate={{ opacity:[glowAlpha*0.7, glowAlpha, glowAlpha*0.7], scale:[0.92,1.08,0.92] }}
+        animate={{ opacity:[glowAlpha*0.55, glowAlpha, glowAlpha*0.55], scale:[0.90,1.10,0.90] }}
         transition={{ repeat:Infinity, duration:pulseDur, ease:"easeInOut" }}
         className="absolute inset-0 rounded-full pointer-events-none"
-        style={{ background:`radial-gradient(circle, rgba(196,135,58,${glowAlpha}) 0%, transparent 64%)`, filter:"blur(30px)" }}
+        style={{ background:`radial-gradient(circle, ${NG_GLOW}${glowAlpha}) 0%, transparent 62%)`, filter:"blur(32px)" }}
       />
-      {/* Second halo — offset phase */}
+      {/* Secondary halo — wider, offset */}
       <motion.div aria-hidden
-        animate={{ opacity:[0.06,0.16,0.06], scale:[1,1.18,1] }}
-        transition={{ repeat:Infinity, duration:pulseDur*1.55, ease:"easeInOut", delay:pulseDur*0.55 }}
+        animate={{ opacity:[0.05,0.14,0.05], scale:[1,1.22,1] }}
+        transition={{ repeat:Infinity, duration:pulseDur*1.6, ease:"easeInOut", delay:pulseDur*0.5 }}
         className="absolute rounded-full pointer-events-none"
-        style={{ inset:-24, background:`radial-gradient(circle, rgba(196,135,58,0.14) 0%, transparent 58%)`, filter:"blur(20px)" }}
+        style={{ inset:-28, background:`radial-gradient(circle, ${NG_GLOW}0.12) 0%, transparent 55%)`, filter:"blur(22px)" }}
       />
 
-      <svg width="212" height="212" viewBox="0 0 196 196" overflow="visible">
+      <svg width="216" height="216" viewBox="0 0 196 196" overflow="visible">
         <defs>
-          <linearGradient id="nc-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={day >= 7 ? "#8B5E20" : "#5a3e14"} />
-            <stop offset="100%" stopColor={coreHex} />
+          <linearGradient id="nc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#1a6640"/>
+            <stop offset="50%"  stopColor="#39d98a"/>
+            <stop offset="100%" stopColor="#6effc5"/>
           </linearGradient>
           <filter id="nc-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="2.8" result="b"/>
-            <feFlood floodColor={coreHex} floodOpacity="0.55" result="c"/>
+            <feGaussianBlur stdDeviation="3.2" result="b"/>
+            <feFlood floodColor={NG} floodOpacity="0.60" result="c"/>
             <feComposite in="c" in2="b" operator="in" result="g"/>
             <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
           <filter id="nc-node-glow" x="-120%" y="-120%" width="340%" height="340%">
-            <feGaussianBlur stdDeviation="2.2" result="b"/>
-            <feFlood floodColor={coreHex} floodOpacity="0.85" result="c"/>
+            <feGaussianBlur stdDeviation="2.5" result="b"/>
+            <feFlood floodColor={NG} floodOpacity="0.90" result="c"/>
             <feComposite in="c" in2="b" operator="in" result="g"/>
             <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
 
-        {/* Outer tick dial — 24 marks every 15° */}
+        {/* Tick dial — 24 marks */}
         {Array.from({ length: 24 }, (_, i) => {
           const a = (i * 15 - 90) * (Math.PI / 180);
           const isMain = i % 6 === 0;
-          const r1 = 91, r2 = isMain ? 97 : 94;
           return (
             <line key={i}
-              x1={98 + r1 * Math.cos(a)} y1={98 + r1 * Math.sin(a)}
-              x2={98 + r2 * Math.cos(a)} y2={98 + r2 * Math.sin(a)}
-              stroke={`rgba(201,168,76,${isMain ? 0.50 : 0.18})`}
+              x1={98 + 91 * Math.cos(a)} y1={98 + 91 * Math.sin(a)}
+              x2={98 + (isMain ? 97 : 94) * Math.cos(a)} y2={98 + (isMain ? 97 : 94) * Math.sin(a)}
+              stroke={`rgba(57,217,138,${isMain ? 0.55 : 0.18})`}
               strokeWidth={isMain ? 1.4 : 0.7} strokeLinecap="round"
             />
           );
         })}
 
         {/* Track */}
-        <circle cx="98" cy="98" r={R} fill="none" stroke="#1c1408" strokeWidth="12"/>
+        <circle cx="98" cy="98" r={R} fill="none" stroke="rgba(57,217,138,0.08)" strokeWidth="12"/>
 
-        {/* Broad glow spread behind arc */}
+        {/* Broad spread glow behind arc */}
         <circle cx="98" cy="98" r={R} fill="none"
-          stroke={coreHex} strokeWidth="26"
+          stroke={NG} strokeWidth="28"
           strokeDasharray={C} strokeDashoffset={offset}
           strokeLinecap="round" transform="rotate(-90 98 98)"
-          opacity={glowAlpha * 0.18}
+          opacity={glowAlpha * 0.15}
         />
 
-        {/* Progress arc */}
+        {/* Progress arc — rounded cap, green gradient */}
         <circle cx="98" cy="98" r={R} fill="none"
           stroke="url(#nc-grad)" strokeWidth="11"
           strokeDasharray={C} strokeDashoffset={offset}
@@ -120,46 +144,46 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
           style={{ transition:"stroke-dashoffset 1.4s cubic-bezier(0.22,1,0.36,1)" }}
         />
 
-        {/* Neural node dots */}
+        {/* Neural nodes */}
         {nodes.map((n, i) => (
           <circle key={i} cx={n.x} cy={n.y}
-            r={n.active ? 3.2 : 1.8}
-            fill={n.active ? coreHex : "#2a2010"}
-            stroke={n.active ? coreHex : "#3a2e18"} strokeWidth="0.8"
+            r={n.active ? 3.2 : 1.6}
+            fill={n.active ? NG : "rgba(57,217,138,0.12)"}
+            stroke={n.active ? NG : "rgba(57,217,138,0.20)"} strokeWidth="0.8"
             filter={n.active ? "url(#nc-node-glow)" : "none"}
-            opacity={n.active ? 1 : 0.35}
-            style={n.active ? { animation:`nc-node ${pulseDur}s ease-in-out ${i*0.12}s infinite` } : {}}
+            opacity={n.active ? 1 : 0.30}
+            style={n.active ? { animation:`nc-node ${pulseDur}s ease-in-out ${i*0.13}s infinite` } : {}}
           />
         ))}
 
         {/* Connector lines: active nodes → center */}
         {nodes.filter(n => n.active).map((n, i) => (
           <line key={i} x1={n.x} y1={n.y} x2="98" y2="98"
-            stroke={coreHex} strokeWidth="0.5" opacity="0.08"/>
+            stroke={NG} strokeWidth="0.5" opacity="0.07"/>
         ))}
 
-        {/* Center: day count */}
-        <text x="98" y="90" textAnchor="middle" fontSize="34" fontWeight="800"
-          fill={coreHex} fontFamily="'DM Sans', sans-serif" letterSpacing="-1"
+        {/* Center — day count */}
+        <text x="98" y="89" textAnchor="middle" fontSize="36" fontWeight="900"
+          fill="#ffffff" fontFamily="'DM Sans', sans-serif" letterSpacing="-1.5"
           filter="url(#nc-glow)">
           {day}
         </text>
-        <text x="98" y="108" textAnchor="middle" fontSize="10" fontWeight="700"
-          fill="rgba(255,255,255,0.55)" fontFamily="'DM Sans', sans-serif" letterSpacing="0.12em">
+        <text x="98" y="107" textAnchor="middle" fontSize="10" fontWeight="700"
+          fill="rgba(255,255,255,0.60)" fontFamily="'DM Sans', sans-serif" letterSpacing="0.14em">
           DAYS CLEAN
         </text>
-        <text x="98" y="122" textAnchor="middle" fontSize="9"
-          fill="rgba(255,255,255,0.26)" fontFamily="'DM Sans', sans-serif" letterSpacing="0.08em">
+        <text x="98" y="121" textAnchor="middle" fontSize="9"
+          fill={`${NG_GLOW}0.60)`} fontFamily="'DM Sans', sans-serif" letterSpacing="0.08em">
           {pct}% TO 90d
         </text>
       </svg>
 
-      {/* NEURAL CORE label badge */}
+      {/* NEURAL CORE label — pure white, bold */}
       <div style={{
-        position:"absolute", bottom:-2,
-        fontSize:8, fontWeight:800, letterSpacing:"0.22em", textTransform:"uppercase",
-        color:`rgba(201,168,76,${Math.min(0.80, 0.30 + day*0.005)})`,
-        fontFamily:"DM Sans, sans-serif",
+        position:"absolute", bottom:-4,
+        fontSize:9, fontWeight:800, letterSpacing:"0.28em", textTransform:"uppercase",
+        color:"#ffffff", fontFamily:"DM Sans, sans-serif",
+        textShadow:`0 0 12px ${NG_GLOW}0.70)`,
       }}>
         ◆ NEURAL CORE ◆
       </div>
@@ -694,12 +718,12 @@ function ProgressScreen() {
         </p>
 
         <div style={{ position: "relative", paddingLeft: 36 }}>
-          {/* Glowing vertical path */}
+          {/* Glowing vertical energy path — Neural Green */}
           <div aria-hidden style={{
             position: "absolute", left: 11, top: 8, bottom: 8, width: 2,
-            background: "linear-gradient(180deg, rgba(201,168,76,0.60) 0%, rgba(201,168,76,0.20) 60%, rgba(201,168,76,0.05) 100%)",
+            background: `linear-gradient(180deg, ${NG_GLOW}0.70) 0%, ${NG_GLOW}0.28) 60%, ${NG_GLOW}0.06) 100%)`,
             borderRadius: 2,
-            boxShadow: "0 0 8px rgba(201,168,76,0.30)",
+            boxShadow: `0 0 10px ${NG_GLOW}0.35)`,
           }}/>
 
           {([
@@ -719,15 +743,15 @@ function ProgressScreen() {
                 marginBottom: i < arr.length - 1 ? 20 : 0,
               }}
             >
-              {/* Node dot */}
+              {/* Node dot — Neural Green when earned */}
               <div style={{
                 position: "absolute", left: -28,
                 width: 22, height: 22, borderRadius: "50%",
                 background: m.earned
-                  ? "radial-gradient(circle at 38% 35%, rgba(255,240,160,0.28) 0%, rgba(10,7,2,0.98) 65%)"
+                  ? `radial-gradient(circle at 38% 35%, ${NG_GLOW}0.22) 0%, rgba(10,7,2,0.98) 65%)`
                   : "rgba(12,9,3,0.98)",
-                border: `1.5px solid ${m.earned ? "rgba(201,168,76,0.65)" : "rgba(255,255,255,0.10)"}`,
-                boxShadow: m.earned ? "0 0 12px rgba(201,168,76,0.45)" : "none",
+                border: `1.5px solid ${m.earned ? `${NG_GLOW}0.65)` : "rgba(255,255,255,0.10)"}`,
+                boxShadow: m.earned ? `0 0 14px ${NG_GLOW}0.50)` : "none",
                 display: "grid", placeItems: "center",
                 animation: m.earned ? "tl-pulse 3s ease-in-out infinite" : "none",
                 zIndex: 1,
@@ -741,10 +765,16 @@ function ProgressScreen() {
                 ...STONE_CARD,
                 padding: "12px 14px",
                 opacity: m.earned ? 1 : 0.45,
+                ...(m.earned ? {
+                  borderTop: `1px solid ${NG_GLOW}0.30)`,
+                  border: `1px solid ${NG_GLOW}0.14)`,
+                } : {}),
               }}>
                 <div aria-hidden style={{
                   position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-                  background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.012) 8px, rgba(201,168,76,0.012) 9px)",
+                  background: m.earned
+                    ? `repeating-linear-gradient(-22deg, transparent, transparent 8px, ${NG_GLOW}0.014) 8px, ${NG_GLOW}0.014) 9px)`
+                    : "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.012) 8px, rgba(201,168,76,0.012) 9px)",
                 }}/>
                 <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
@@ -758,10 +788,11 @@ function ProgressScreen() {
                   {m.earned && (
                     <span style={{
                       fontSize: 9, fontWeight: 800, letterSpacing: "0.12em",
-                      color: "#C9A84C", background: "rgba(201,168,76,0.12)",
-                      border: "1px solid rgba(201,168,76,0.30)",
+                      color: NG, background: `${NG_GLOW}0.10)`,
+                      border: `1px solid ${NG_GLOW}0.30)`,
                       borderRadius: 999, padding: "3px 9px", flexShrink: 0,
                       fontFamily: "DM Sans, sans-serif",
+                      textShadow: `0 0 8px ${NG_GLOW}0.60)`,
                     }}>
                       UNLOCKED
                     </span>
