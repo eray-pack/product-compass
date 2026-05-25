@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
+import { Lock, Hourglass, Smartphone, CalendarDays, Zap } from "lucide-react";
 import { useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
@@ -282,6 +282,28 @@ function CoinCard({
   );
 }
 
+// ── Legacy rank tiers (driven by total clean days ever) ──────────────────────
+const RANK_TIERS = [
+  { min: 90, name: "Sovereign",  roman: "IV", color: "#E8C87A", glow: "rgba(232,200,122,0.38)", desc: "You have mastered the battle within." },
+  { min: 30, name: "Sentinel",   roman: "III", color: "#7ec8e3", glow: "rgba(126,200,227,0.28)", desc: "A month of discipline forged your will." },
+  { min: 7,  name: "Guardian",   roman: "II",  color: "#a8c87c", glow: "rgba(168,200,124,0.26)", desc: "You have survived the first test." },
+  { min: 0,  name: "Initiate",   roman: "I",   color: "rgba(255,255,255,0.55)", glow: "rgba(255,255,255,0.08)", desc: "The path begins here. Keep going." },
+] as const;
+
+function getRank(totalDays: number) {
+  return RANK_TIERS.find((r) => totalDays >= r.min) ?? RANK_TIERS[RANK_TIERS.length - 1];
+}
+
+// ── Sacred card shell (stone-textured) ───────────────────────────────────────
+const STONE_CARD: React.CSSProperties = {
+  background: "linear-gradient(160deg, rgba(22,16,7,0.97) 0%, rgba(12,9,3,0.99) 100%)",
+  border: "1px solid rgba(201,168,76,0.16)",
+  borderTop: "1px solid rgba(201,168,76,0.30)",
+  borderRadius: 18,
+  position: "relative",
+  overflow: "hidden",
+};
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 function ProgressScreen() {
   const { t } = useTranslation();
@@ -315,6 +337,22 @@ function ProgressScreen() {
     }
     return count; // 0–7
   });
+
+  // ── Legacy rank ──────────────────────────────────────────────────────────────
+  const rank = getRank(state.totalCleanDays);
+  const nextRankTier = RANK_TIERS.slice().reverse().find((r) => state.totalCleanDays < r.min && r.min > 0);
+  const daysToNextRank = nextRankTier ? nextRankTier.min - state.totalCleanDays : 0;
+
+  // ── Dopamine dashboard data ───────────────────────────────────────────────
+  const relapses = state.relapses ?? [];
+  const avgRelapseDays = relapses.length > 1
+    ? Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / ((relapses.length - 1) * 86400000))
+    : null;
+  const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dowCounts = Array(7).fill(0);
+  relapses.forEach((r) => { dowCounts[new Date(r.ts).getDay()]++; });
+  const peakDow = dowCounts.every((c) => c === 0) ? null : DOW_NAMES[dowCounts.indexOf(Math.max(...dowCounts))];
+  const hasDeepRoots = state.treeUnlocks?.includes("root-deep");
 
   const urgesSurvived = state.urgesSurvived ?? 0;
   const rem7 = Math.max(0, 7 - day);
@@ -381,6 +419,288 @@ function ProgressScreen() {
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.total")}</p>
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════════════════
+           LEGACY RANK CARD
+         ══════════════════════════════════════════════════════ */}
+      <section className="px-6 mt-6 fade-up-2">
+        <style>{`
+          @keyframes rank-halo { 0%,100%{opacity:0.55;transform:scale(0.96)} 50%{opacity:1;transform:scale(1.06)} }
+          @keyframes rank-rune  { 0%,100%{opacity:0.12} 50%{opacity:0.22} }
+        `}</style>
+        <div style={{ ...STONE_CARD, padding: "20px 20px 18px" }}>
+          {/* Stone grain overlay */}
+          <div aria-hidden style={{
+            position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+            background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.018) 8px, rgba(201,168,76,0.018) 9px)",
+          }}/>
+          {/* Corner runes */}
+          {["top-left","top-right"].map((pos) => (
+            <svg key={pos} aria-hidden width="22" height="22" viewBox="0 0 22 22" fill="none" style={{
+              position: "absolute",
+              top: pos.includes("top") ? 10 : undefined, bottom: pos.includes("bottom") ? 10 : undefined,
+              left: pos.includes("left") ? 10 : undefined, right: pos.includes("right") ? 10 : undefined,
+              animation: "rank-rune 4s ease-in-out infinite",
+            }}>
+              <path d="M2 2 L2 10 M2 2 L10 2" stroke="#C9A84C" strokeWidth="1.2" strokeLinecap="round"/>
+              <circle cx="2" cy="2" r="1.5" fill="#C9A84C" opacity="0.6"/>
+            </svg>
+          ))}
+
+          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Rank badge circle */}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <div aria-hidden style={{
+                position: "absolute", inset: -10, borderRadius: "50%",
+                background: `radial-gradient(circle, ${rank.glow} 0%, transparent 70%)`,
+                filter: "blur(10px)", animation: "rank-halo 3.5s ease-in-out infinite",
+              }}/>
+              <div style={{
+                width: 62, height: 62, borderRadius: "50%",
+                background: `radial-gradient(circle at 38% 35%, rgba(255,240,180,0.12) 0%, rgba(10,7,2,0.98) 60%)`,
+                border: `1.5px solid ${rank.color}55`,
+                boxShadow: `0 0 20px ${rank.glow}, inset 0 0 12px rgba(0,0,0,0.8)`,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1,
+              }}>
+                <span style={{ fontSize: 9, fontWeight: 900, color: rank.color, letterSpacing: "0.18em", fontFamily: "DM Sans, sans-serif" }}>
+                  {rank.roman}
+                </span>
+                <div style={{ width: 20, height: 1, background: `${rank.color}55` }}/>
+              </div>
+            </div>
+
+            {/* Text block */}
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: `${rank.color}99`, fontFamily: "DM Sans, sans-serif" }}>
+                Legacy Rank
+              </p>
+              <h2 style={{
+                margin: "3px 0 2px",
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: 24, fontStyle: "italic", fontWeight: 600,
+                color: rank.color, lineHeight: 1.1,
+                textShadow: `0 0 24px ${rank.glow}`,
+              }}>
+                {rank.name}
+              </h2>
+              <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.35)", lineHeight: 1.45, fontFamily: "DM Sans, sans-serif" }}>
+                {rank.desc}
+              </p>
+            </div>
+
+            {/* Total clean days */}
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <p style={{ margin: 0, fontSize: 28, fontWeight: 900, color: rank.color, lineHeight: 1, fontFamily: "DM Sans, sans-serif", letterSpacing: "-0.02em" }}>
+                {state.totalCleanDays}
+              </p>
+              <p style={{ margin: 0, fontSize: 9, color: "rgba(255,255,255,0.30)", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "DM Sans, sans-serif" }}>
+                total days
+              </p>
+              {daysToNextRank > 0 && (
+                <p style={{ margin: "4px 0 0", fontSize: 9, color: `${rank.color}80`, fontFamily: "DM Sans, sans-serif" }}>
+                  +{daysToNextRank}d → {nextRankTier?.name}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+           DOPAMINE DASHBOARD GRID
+         ══════════════════════════════════════════════════════ */}
+      <section className="px-6 mt-5 fade-up-3">
+        <div className="flex items-center justify-between mb-3">
+          <SectionTitle>Dopamine Dashboard</SectionTitle>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+
+          {/* Card 1 — Avg Relapse Frequency */}
+          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
+            <div aria-hidden style={{
+              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
+            }}/>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)",
+                display: "grid", placeItems: "center", marginBottom: 10,
+              }}>
+                <Hourglass size={14} color="#C9A84C" strokeWidth={1.8}/>
+              </div>
+              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+                {avgRelapseDays !== null ? `${avgRelapseDays}d` : "—"}
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
+                Avg relapse<br/>frequency
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2 — Total App Sessions */}
+          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
+            <div aria-hidden style={{
+              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
+            }}/>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: "rgba(126,200,227,0.10)", border: "1px solid rgba(126,200,227,0.22)",
+                display: "grid", placeItems: "center", marginBottom: 10,
+              }}>
+                <Smartphone size={14} color="#7ec8e3" strokeWidth={1.8}/>
+              </div>
+              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+                {totalLogins}
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
+                Total logged<br/>app sessions
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3 — Most Challenging Weekday */}
+          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
+            <div aria-hidden style={{
+              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
+            }}/>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: "rgba(240,100,80,0.10)", border: "1px solid rgba(240,100,80,0.22)",
+                display: "grid", placeItems: "center", marginBottom: 10,
+              }}>
+                <CalendarDays size={14} color="#f06450" strokeWidth={1.8}/>
+              </div>
+              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+                {peakDow ?? "—"}
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
+                Most challenging<br/>weekday
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4 — Level Multiplier */}
+          <div style={{ ...STONE_CARD, padding: "16px 14px" }}>
+            <div aria-hidden style={{
+              position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+              background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.014) 8px, rgba(201,168,76,0.014) 9px)",
+            }}/>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: "rgba(168,200,124,0.10)", border: "1px solid rgba(168,200,124,0.22)",
+                display: "grid", placeItems: "center", marginBottom: 10,
+              }}>
+                <Zap size={14} color="#a8c87c" strokeWidth={1.8}/>
+              </div>
+              <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color: hasDeepRoots ? "#a8c87c" : "#f5ede0", letterSpacing: "-0.02em", fontFamily: "DM Sans, sans-serif" }}>
+                {hasDeepRoots ? "×1.1" : "×1.0"}
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.4, fontFamily: "DM Sans, sans-serif" }}>
+                XP / credit<br/>multiplier
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+           VERTICAL MILESTONE TIMELINE
+         ══════════════════════════════════════════════════════ */}
+      <section className="px-6 mt-6 fade-up-3">
+        <style>{`
+          @keyframes tl-pulse { 0%,100%{opacity:0.55;transform:scale(1)} 50%{opacity:1;transform:scale(1.18)} }
+          @keyframes tl-flow  { 0%{background-position:0% 0%} 100%{background-position:0% 100%} }
+        `}</style>
+        <SectionTitle>Milestones</SectionTitle>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", margin: "4px 0 18px", fontFamily: "DM Sans, sans-serif" }}>
+          Your journey, carved in stone
+        </p>
+
+        <div style={{ position: "relative", paddingLeft: 36 }}>
+          {/* Glowing vertical path */}
+          <div aria-hidden style={{
+            position: "absolute", left: 11, top: 8, bottom: 8, width: 2,
+            background: "linear-gradient(180deg, rgba(201,168,76,0.60) 0%, rgba(201,168,76,0.20) 60%, rgba(201,168,76,0.05) 100%)",
+            borderRadius: 2,
+            boxShadow: "0 0 8px rgba(201,168,76,0.30)",
+          }}/>
+
+          {([
+            { label: "First step taken",    sub: "Day 1 — the hardest",            earned: true,                  icon: "🌱" },
+            { label: "First Week",          sub: "7 days of resolve",              earned: day >= 7,              icon: "🛡️" },
+            { label: "10 Urges Survived",   sub: `${urgesSurvived}/10 resisted`,   earned: urgesSurvived >= 10,   icon: "🔥" },
+            { label: "One Month",           sub: "30 days of momentum",            earned: day >= 30,             icon: "🎖️" },
+            { label: "Sovereign — 90 Days", sub: "The highest honour",             earned: day >= 90,             icon: "👑" },
+          ]).map((m, i, arr) => (
+            <motion.div
+              key={m.label}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 280, damping: 26 }}
+              style={{
+                position: "relative", display: "flex", alignItems: "center", gap: 14,
+                marginBottom: i < arr.length - 1 ? 20 : 0,
+              }}
+            >
+              {/* Node dot */}
+              <div style={{
+                position: "absolute", left: -28,
+                width: 22, height: 22, borderRadius: "50%",
+                background: m.earned
+                  ? "radial-gradient(circle at 38% 35%, rgba(255,240,160,0.28) 0%, rgba(10,7,2,0.98) 65%)"
+                  : "rgba(12,9,3,0.98)",
+                border: `1.5px solid ${m.earned ? "rgba(201,168,76,0.65)" : "rgba(255,255,255,0.10)"}`,
+                boxShadow: m.earned ? "0 0 12px rgba(201,168,76,0.45)" : "none",
+                display: "grid", placeItems: "center",
+                animation: m.earned ? "tl-pulse 3s ease-in-out infinite" : "none",
+                zIndex: 1,
+              }}>
+                <span style={{ fontSize: 11 }}>{m.icon}</span>
+              </div>
+
+              {/* Card */}
+              <div style={{
+                flex: 1,
+                ...STONE_CARD,
+                padding: "12px 14px",
+                opacity: m.earned ? 1 : 0.45,
+              }}>
+                <div aria-hidden style={{
+                  position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
+                  background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.012) 8px, rgba(201,168,76,0.012) 9px)",
+                }}/>
+                <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: m.earned ? "#f5ede0" : "rgba(255,255,255,0.35)", fontFamily: "DM Sans, sans-serif" }}>
+                      {m.label}
+                    </p>
+                    <p style={{ margin: "2px 0 0", fontSize: 10, color: "rgba(255,255,255,0.28)", fontFamily: "DM Sans, sans-serif" }}>
+                      {m.sub}
+                    </p>
+                  </div>
+                  {m.earned && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 800, letterSpacing: "0.12em",
+                      color: "#C9A84C", background: "rgba(201,168,76,0.12)",
+                      border: "1px solid rgba(201,168,76,0.30)",
+                      borderRadius: 999, padding: "3px 9px", flexShrink: 0,
+                      fontFamily: "DM Sans, sans-serif",
+                    }}>
+                      UNLOCKED
+                    </span>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
       {/* ── Consistency ─────────────────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
@@ -607,33 +927,6 @@ function ProgressScreen() {
         </div>
       </section>
 
-      {/* ── Your story ──────────────────────────────────────── */}
-      <section className="px-6 mt-8 pt-7 fade-up-4" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        <SectionTitle>{t("progress.story.title")}</SectionTitle>
-        <p className="text-xs text-muted-foreground/60 mb-5">{t("progress.story.subtitle")}</p>
-        <div className="space-y-0">
-          {[
-            { label: t("progress.story.daysSince"),  value: `${daysSinceStart}` },
-            { label: t("progress.story.totalClean"), value: `${state.totalCleanDays}` },
-            { label: t("progress.story.longest"),    value: t("progress.story.longestValue", { count: longest }) },
-            { label: t("progress.story.timesBack"),  value: `${state.totalReturns}` },
-            { label: t("progress.story.relapses"),   value: `${state.relapses?.length ?? 0}` },
-            { label: t("progress.story.sessions"),   value: `${totalLogins}` },
-          ].map(({ label, value }, i, arr) => (
-            <div
-              key={label}
-              className="flex justify-between items-center py-3.5"
-              style={{ borderBottom: i < arr.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.7)" : "none" }}
-            >
-              <span className="text-sm text-muted-foreground">{label}</span>
-              <span className="text-sm font-bold tabular-nums">{value}</span>
-            </div>
-          ))}
-        </div>
-        <p className="mt-5 text-[12px] italic leading-relaxed" style={{ color: "oklch(0.52 0.015 265 / 0.65)" }}>
-          "{t("progress.story.quote")}"
-        </p>
-      </section>
 
       {/* ── Relapse Insights (PRO) ──────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
@@ -704,36 +997,7 @@ function ProgressScreen() {
         </div>
       </section>
 
-      {/* ── Milestones ──────────────────────────────────────── */}
-      <section className="px-6 mt-8 pt-7 pb-8 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
-        {/* Section header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <SectionTitle>{t("progress.milestonesTitle")}</SectionTitle>
-          <p style={{ fontSize: 11, color: "#5a4a30", margin: 0, fontFamily: "DM Sans, sans-serif" }}>
-            {t("progress.milestonesUnlocked", { count: unlockedCount, total: milestones.length })}
-          </p>
-        </div>
-
-        {/* Coin cards grid */}
-        <motion.div
-          className="grid grid-cols-2 gap-3"
-          variants={msContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          {milestones.map(({ name, icon, earned, hint }, i) => (
-            <CoinCard
-              key={name}
-              name={name}
-              icon={icon}
-              earned={earned}
-              hint={hint}
-              index={i}
-              t={t}
-            />
-          ))}
-        </motion.div>
-      </section>
+      <div className="pb-8" />
     </PageShell>
   );
 }
