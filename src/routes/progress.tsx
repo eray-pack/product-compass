@@ -23,86 +23,146 @@ export const Route = createFileRoute("/progress")({
   component: ProgressScreen,
 });
 
-// ── Recovery ring SVG ─────────────────────────────────────────────────────────
-function RecoveryRing({ pct, day, t }: { pct: number; day: number; t: TFunction }) {
+// ── Neural Core ───────────────────────────────────────────────────────────────
+function NeuralCore({ pct, day }: { pct: number; day: number }) {
   const R = 76;
   const C = 2 * Math.PI * R;
   const offset = C * (1 - pct / 100);
 
+  // Energy pulse speed: faster with longer streaks (1.6s–4.5s)
+  const pulseDur  = Math.max(1.6, 4.5 - day * 0.028);
+  // Glow opacity: brighter with longer streaks (0.18–0.65)
+  const glowAlpha = Math.min(0.65, 0.18 + day * 0.007);
+  // Core colour: dim amber → bright gold → electric at 90+
+  const coreHex   = day >= 90 ? "#d4f0ff" : day >= 30 ? "#E8C87A" : day >= 7 ? "#C4873A" : "#8B5E20";
+
+  // 12 neural node positions at r=92, every 30°
+  const nodes = Array.from({ length: 12 }, (_, i) => {
+    const a = (i * 30 - 90) * (Math.PI / 180);
+    const active = i / 12 <= pct / 100;
+    return { x: 98 + 92 * Math.cos(a), y: 98 + 92 * Math.sin(a), active };
+  });
+
   return (
     <div className="relative flex items-center justify-center">
-      {/* Ambient glow behind ring */}
-      <div
+      <style>{`
+        @keyframes nc-scan { 0%{transform:rotate(-90deg)}100%{transform:rotate(270deg)} }
+        @keyframes nc-node { 0%,100%{opacity:0.6;r:2.8}50%{opacity:1;r:3.8} }
+      `}</style>
+
+      {/* Outer atmospheric pulse */}
+      <motion.div aria-hidden
+        animate={{ opacity:[glowAlpha*0.7, glowAlpha, glowAlpha*0.7], scale:[0.92,1.08,0.92] }}
+        transition={{ repeat:Infinity, duration:pulseDur, ease:"easeInOut" }}
         className="absolute inset-0 rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(196,135,58,0.18) 0%, transparent 65%)",
-          filter: "blur(24px)",
-        }}
+        style={{ background:`radial-gradient(circle, rgba(196,135,58,${glowAlpha}) 0%, transparent 64%)`, filter:"blur(30px)" }}
       />
-      <svg width="196" height="196" viewBox="0 0 196 196" className="ring-glow">
+      {/* Second halo — offset phase */}
+      <motion.div aria-hidden
+        animate={{ opacity:[0.06,0.16,0.06], scale:[1,1.18,1] }}
+        transition={{ repeat:Infinity, duration:pulseDur*1.55, ease:"easeInOut", delay:pulseDur*0.55 }}
+        className="absolute rounded-full pointer-events-none"
+        style={{ inset:-24, background:`radial-gradient(circle, rgba(196,135,58,0.14) 0%, transparent 58%)`, filter:"blur(20px)" }}
+      />
+
+      <svg width="212" height="212" viewBox="0 0 196 196" overflow="visible">
         <defs>
-          <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8B5E20" />
-            <stop offset="100%" stopColor="#C4873A" />
+          <linearGradient id="nc-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={day >= 7 ? "#8B5E20" : "#5a3e14"} />
+            <stop offset="100%" stopColor={coreHex} />
           </linearGradient>
-          <filter id="amber-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
-            <feFlood floodColor="#C4873A" floodOpacity="0.45" result="color" />
-            <feComposite in="color" in2="blur" operator="in" result="glow" />
-            <feMerge>
-              <feMergeNode in="glow" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
+          <filter id="nc-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="2.8" result="b"/>
+            <feFlood floodColor={coreHex} floodOpacity="0.55" result="c"/>
+            <feComposite in="c" in2="b" operator="in" result="g"/>
+            <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="nc-node-glow" x="-120%" y="-120%" width="340%" height="340%">
+            <feGaussianBlur stdDeviation="2.2" result="b"/>
+            <feFlood floodColor={coreHex} floodOpacity="0.85" result="c"/>
+            <feComposite in="c" in2="b" operator="in" result="g"/>
+            <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
+
+        {/* Outer tick dial — 24 marks every 15° */}
+        {Array.from({ length: 24 }, (_, i) => {
+          const a = (i * 15 - 90) * (Math.PI / 180);
+          const isMain = i % 6 === 0;
+          const r1 = 91, r2 = isMain ? 97 : 94;
+          return (
+            <line key={i}
+              x1={98 + r1 * Math.cos(a)} y1={98 + r1 * Math.sin(a)}
+              x2={98 + r2 * Math.cos(a)} y2={98 + r2 * Math.sin(a)}
+              stroke={`rgba(201,168,76,${isMain ? 0.50 : 0.18})`}
+              strokeWidth={isMain ? 1.4 : 0.7} strokeLinecap="round"
+            />
+          );
+        })}
+
         {/* Track */}
-        <circle cx="98" cy="98" r={R} fill="none" stroke="#261F15" strokeWidth="11" />
-        {/* Glow layer */}
-        <circle
-          cx="98" cy="98" r={R} fill="none"
-          stroke="#C4873A" strokeWidth="22"
+        <circle cx="98" cy="98" r={R} fill="none" stroke="#1c1408" strokeWidth="12"/>
+
+        {/* Broad glow spread behind arc */}
+        <circle cx="98" cy="98" r={R} fill="none"
+          stroke={coreHex} strokeWidth="26"
           strokeDasharray={C} strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform="rotate(-90 98 98)"
-          opacity="0.07"
+          strokeLinecap="round" transform="rotate(-90 98 98)"
+          opacity={glowAlpha * 0.18}
         />
+
         {/* Progress arc */}
-        <circle
-          cx="98" cy="98" r={R} fill="none"
-          stroke="url(#ring-grad)" strokeWidth="11"
+        <circle cx="98" cy="98" r={R} fill="none"
+          stroke="url(#nc-grad)" strokeWidth="11"
           strokeDasharray={C} strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform="rotate(-90 98 98)"
-          style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)" }}
+          strokeLinecap="round" transform="rotate(-90 98 98)"
+          filter="url(#nc-glow)"
+          style={{ transition:"stroke-dashoffset 1.4s cubic-bezier(0.22,1,0.36,1)" }}
         />
-        {/* Center: percent */}
-        <text
-          x="98" y="86"
-          textAnchor="middle" fontSize="30" fontWeight="700"
-          className="ring-text-primary"
-          fontFamily="'Space Grotesk', sans-serif"
-          filter="url(#amber-glow)"
-        >
-          {pct}%
+
+        {/* Neural node dots */}
+        {nodes.map((n, i) => (
+          <circle key={i} cx={n.x} cy={n.y}
+            r={n.active ? 3.2 : 1.8}
+            fill={n.active ? coreHex : "#2a2010"}
+            stroke={n.active ? coreHex : "#3a2e18"} strokeWidth="0.8"
+            filter={n.active ? "url(#nc-node-glow)" : "none"}
+            opacity={n.active ? 1 : 0.35}
+            style={n.active ? { animation:`nc-node ${pulseDur}s ease-in-out ${i*0.12}s infinite` } : {}}
+          />
+        ))}
+
+        {/* Connector lines: active nodes → center */}
+        {nodes.filter(n => n.active).map((n, i) => (
+          <line key={i} x1={n.x} y1={n.y} x2="98" y2="98"
+            stroke={coreHex} strokeWidth="0.5" opacity="0.08"/>
+        ))}
+
+        {/* Center: day count */}
+        <text x="98" y="90" textAnchor="middle" fontSize="34" fontWeight="800"
+          fill={coreHex} fontFamily="'DM Sans', sans-serif" letterSpacing="-1"
+          filter="url(#nc-glow)">
+          {day}
         </text>
-        {/* Center: day label */}
-        <text
-          x="98" y="108"
-          textAnchor="middle" fontSize="13" fontWeight="500"
-          className="ring-text-secondary"
-          fontFamily="'Space Grotesk', sans-serif"
-        >
-          {t("progress.ring.day")} {day}
+        <text x="98" y="108" textAnchor="middle" fontSize="10" fontWeight="700"
+          fill="rgba(255,255,255,0.55)" fontFamily="'DM Sans', sans-serif" letterSpacing="0.12em">
+          DAYS CLEAN
         </text>
-        <text
-          x="98" y="124"
-          textAnchor="middle" fontSize="10"
-          className="ring-text-tertiary"
-          fontFamily="'Space Grotesk', sans-serif"
-        >
-          {t("progress.ring.toReset")}
+        <text x="98" y="122" textAnchor="middle" fontSize="9"
+          fill="rgba(255,255,255,0.26)" fontFamily="'DM Sans', sans-serif" letterSpacing="0.08em">
+          {pct}% TO 90d
         </text>
       </svg>
+
+      {/* NEURAL CORE label badge */}
+      <div style={{
+        position:"absolute", bottom:-2,
+        fontSize:8, fontWeight:800, letterSpacing:"0.22em", textTransform:"uppercase",
+        color:`rgba(201,168,76,${Math.min(0.80, 0.30 + day*0.005)})`,
+        fontFamily:"DM Sans, sans-serif",
+      }}>
+        ◆ NEURAL CORE ◆
+      </div>
     </div>
   );
 }
@@ -349,9 +409,20 @@ function ProgressScreen() {
     ? Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / ((relapses.length - 1) * 86400000))
     : null;
   const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const DOW_FULL  = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const dowCounts = Array(7).fill(0);
-  relapses.forEach((r) => { dowCounts[new Date(r.ts).getDay()]++; });
-  const peakDow = dowCounts.every((c) => c === 0) ? null : DOW_NAMES[dowCounts.indexOf(Math.max(...dowCounts))];
+  const hourCounts = Array(4).fill(0); // morning/afternoon/evening/night
+  relapses.forEach((r) => {
+    const d = new Date(r.ts);
+    dowCounts[d.getDay()]++;
+    const h = d.getHours();
+    if (h < 6) hourCounts[3]++; else if (h < 12) hourCounts[0]++; else if (h < 18) hourCounts[1]++; else hourCounts[2]++;
+  });
+  const peakDow      = dowCounts.every((c) => c === 0) ? null : DOW_NAMES[dowCounts.indexOf(Math.max(...dowCounts))];
+  const peakDowIndex = dowCounts.every((c) => c === 0) ? -1   : dowCounts.indexOf(Math.max(...dowCounts));
+  const peakDowFull  = peakDowIndex >= 0 ? DOW_FULL[peakDowIndex] : null;
+  const peakTimeName = ["morning","afternoon","evening","late night"][hourCounts.indexOf(Math.max(...hourCounts))];
+  const recentRelapse = relapses.some((r) => Date.now() - r.ts < 48 * 3600_000);
   const hasDeepRoots = state.treeUnlocks?.includes("root-deep");
 
   const urgesSurvived = state.urgesSurvived ?? 0;
@@ -394,10 +465,10 @@ function ProgressScreen() {
         </p>
       </header>
 
-      {/* ── Recovery ring hero ──────────────────────────────── */}
+      {/* ── Neural Core hero ──────────────────────────────── */}
       <section className="flex flex-col items-center pt-6 pb-4 px-6 fade-up-1">
-        <RecoveryRing pct={recoveryPct} day={day} t={t} />
-        <p className="mt-5 text-sm text-muted-foreground text-center max-w-[220px]">
+        <NeuralCore pct={recoveryPct} day={day} />
+        <p className="mt-6 text-sm text-muted-foreground text-center max-w-[220px]">
           {recoveryPct < 100
             ? t("progress.ring.daysRemaining", { count: 90 - day })
             : t("progress.ring.achieved")}
@@ -807,24 +878,49 @@ function ProgressScreen() {
             {/* ── GRID view ── */}
             {progressView === "grid" && (
               <div>
-                <p className="text-[11px] mb-3" style={{ color: "rgba(255,255,255,0.30)" }}>
-                  Each square = one day you opened Stopamine · last 12 weeks
-                </p>
-                <div className="grid grid-flow-col grid-rows-7 gap-1">
-                  {cells.map((v, i) => (
-                    <div
-                      key={i}
-                      className="h-3 w-3 rounded-[3px]"
-                      style={{ backgroundColor: v === 0 ? "rgba(255,255,255,0.06)" : "#3fb86a" }}
-                    />
-                  ))}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.30)" }}>
+                    Each square = one day · last 12 weeks
+                  </p>
+                  {peakDowFull && (
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.10em", color: "#f06450", background: "rgba(240,100,80,0.12)", border: "1px solid rgba(240,100,80,0.30)", borderRadius: 999, padding: "2px 8px" }}>
+                      ⚠ {peakDowFull}s highlighted
+                    </span>
+                  )}
                 </div>
-                <div className="mt-3 flex items-center gap-1.5 text-[10px]" style={{ color: "rgba(255,255,255,0.30)" }}>
-                  Less
-                  {["rgba(255,255,255,0.06)", "#3fb86a"].map((bg) => (
-                    <span key={bg} className="h-2.5 w-2.5 rounded-sm" style={{ background: bg }} />
-                  ))}
-                  More
+                <div className="grid grid-flow-col grid-rows-7 gap-1">
+                  {cells.map((v, i) => {
+                    const dayOffset = 83 - i;
+                    const cellDow = new Date(Date.now() - dayOffset * 86400000).getDay();
+                    const isPeak = peakDowIndex >= 0 && cellDow === peakDowIndex;
+                    let bg: string;
+                    if (v > 0 && isPeak)  bg = "#e06040"; // logged + peak DOW → warning amber-red
+                    else if (v > 0)       bg = "#3fb86a"; // logged clean day → green
+                    else if (isPeak)      bg = "rgba(240,100,80,0.22)"; // empty peak DOW → subtle red tint
+                    else                  bg = "rgba(255,255,255,0.06)"; // empty normal
+                    return (
+                      <div key={i} className="h-3 w-3 rounded-[3px]"
+                        style={{ backgroundColor: bg, boxShadow: isPeak && v > 0 ? "0 0 4px rgba(224,96,64,0.60)" : "none" }}
+                        title={isPeak ? `${peakDowFull} — watch this day` : undefined}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-[10px] flex-wrap" style={{ color: "rgba(255,255,255,0.30)" }}>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2.5 w-2.5 rounded-sm inline-block" style={{ background: "rgba(255,255,255,0.06)" }}/>
+                    Empty
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2.5 w-2.5 rounded-sm inline-block" style={{ background: "#3fb86a" }}/>
+                    Clean day
+                  </span>
+                  {peakDowFull && (
+                    <span className="flex items-center gap-1" style={{ color: "rgba(240,100,80,0.80)" }}>
+                      <span className="h-2.5 w-2.5 rounded-sm inline-block" style={{ background: "#e06040" }}/>
+                      Risk day ({peakDowFull})
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -928,12 +1024,52 @@ function ProgressScreen() {
       </section>
 
 
-      {/* ── Relapse Insights (PRO) ──────────────────────────── */}
+      {/* ── Pattern Detector (PRO) ──────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
+        <style>{`
+          @keyframes pd-spin  { to { transform: rotate(360deg); } }
+          @keyframes pd-scan  { 0%{opacity:0.55} 50%{opacity:1} 100%{opacity:0.55} }
+          @keyframes pd-glitch {
+            0%,93%,100% { transform:none; textShadow:"none" }
+            94%  { transform:translateX(-2px) skewX(-4deg); filter:hue-rotate(30deg) brightness(1.3); }
+            95%  { transform:translateX(2px)  skewX(3deg);  filter:hue-rotate(-20deg); }
+            96%  { transform:translateX(-1px); filter:none; }
+            97%  { transform:translateX(1px)  skewX(-2deg); filter:hue-rotate(15deg); }
+          }
+          @keyframes pd-shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+        `}</style>
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">{t("progress.insights.title")}</p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">{t("progress.insights.subtitle")}</p>
+            <div className="flex items-center gap-2">
+              {/* Radar pulse icon */}
+              <div style={{ position:"relative", width:16, height:16, flexShrink:0 }}>
+                <div style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1.5px solid rgba(240,100,80,0.55)", animation:"pd-scan 2s ease-in-out infinite" }}/>
+                <div style={{ position:"absolute", inset:3, borderRadius:"50%", background:"rgba(240,100,80,0.55)" }}/>
+              </div>
+              <p style={{
+                fontSize:14, fontWeight:800, color:"#f5ede0", fontFamily:"DM Sans, sans-serif",
+                letterSpacing:"-0.01em",
+                animation: recentRelapse ? "pd-glitch 4s ease-in-out infinite" : "none",
+                backgroundImage: recentRelapse
+                  ? "linear-gradient(90deg, #f5ede0 0%, #f06450 40%, #E8C87A 60%, #f5ede0 100%)"
+                  : "none",
+                backgroundSize: recentRelapse ? "200% auto" : "auto",
+                WebkitBackgroundClip: recentRelapse ? "text" : "unset",
+                WebkitTextFillColor: recentRelapse ? "transparent" : "unset",
+                backgroundClip: recentRelapse ? "text" : "unset",
+                animation2: recentRelapse ? "pd-shimmer 2.5s linear infinite" : "none",
+              } as React.CSSProperties}>
+                Pattern Detector
+              </p>
+            </div>
+            <p style={{ fontSize:11, color:"rgba(255,255,255,0.35)", marginTop:2, fontFamily:"DM Sans, sans-serif" }}>
+              {relapses.length === 0 ? "Scanning your behaviour..." : `${relapses.length} event${relapses.length !== 1 ? "s" : ""} analysed`}
+            </p>
           </div>
           {!state.isPremium && (
             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
@@ -942,54 +1078,103 @@ function ProgressScreen() {
             </span>
           )}
         </div>
+
         <div className="relative">
           <div className={state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}>
-            {(() => {
-              const relapses = state.relapses ?? [];
-              const dowKeys = [0,1,2,3,4,5,6].map(i => t(`progress.insights.dow.${i}`));
-              const dayCounts = Array(7).fill(0);
-              const hourCounts = Array(4).fill(0); // morning/afternoon/evening/night
-              relapses.forEach(r => {
-                const d = new Date(r.ts);
-                dayCounts[d.getDay()]++;
-                const h = d.getHours();
-                if (h < 6) hourCounts[3]++;
-                else if (h < 12) hourCounts[0]++;
-                else if (h < 18) hourCounts[1]++;
-                else hourCounts[2]++;
-              });
-              const peakDay = dowKeys[dayCounts.indexOf(Math.max(...dayCounts))];
-              const peakTime = [
-                t("progress.insights.morning"),
-                t("progress.insights.afternoon"),
-                t("progress.insights.evening"),
-                t("progress.insights.night"),
-              ][hourCounts.indexOf(Math.max(...hourCounts))];
-              const total = relapses.length;
-              return (
-                <div className="space-y-3">
-                  {[
-                    { label: t("progress.insights.total"),     value: total > 0 ? `${total}` : t("progress.insights.none") },
-                    { label: t("progress.insights.peakDay"),   value: total > 0 ? peakDay : t("progress.insights.na") },
-                    { label: t("progress.insights.peakTime"),  value: total > 0 ? peakTime : t("progress.insights.na") },
-                    { label: t("progress.insights.avgBetween"), value: total > 1
-                      ? t("progress.insights.avgValue", { count: Math.round((relapses[relapses.length - 1].ts - relapses[0].ts) / (1000 * 60 * 60 * 24 * (total - 1))) })
-                      : t("progress.insights.na") },
-                  ].map(({ label, value }, i, arr) => (
-                    <div key={label} className="flex justify-between items-center py-3"
-                      style={{ borderBottom: i < arr.length - 1 ? "1px solid oklch(0.20 0.025 265 / 0.7)" : "none" }}>
-                      <span className="text-sm text-muted-foreground">{label}</span>
-                      <span className="text-sm font-bold">{value}</span>
-                    </div>
-                  ))}
+            {relapses.length === 0 ? (
+              /* ── Empty state: learning ── */
+              <div style={{ ...STONE_CARD, padding:"28px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
+                <div aria-hidden style={{ position:"absolute", inset:0, borderRadius:18, pointerEvents:"none",
+                  background:"repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.012) 8px, rgba(201,168,76,0.012) 9px)" }}/>
+                {/* Spinning gear */}
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ animation:"pd-spin 8s linear infinite", position:"relative", zIndex:1 }}>
+                  <circle cx="22" cy="22" r="8" stroke="rgba(201,168,76,0.55)" strokeWidth="2" fill="none"/>
+                  <circle cx="22" cy="22" r="3" fill="rgba(201,168,76,0.45)"/>
+                  {Array.from({length:8},(_,i)=>{
+                    const a=(i*45)*Math.PI/180;
+                    return <rect key={i} x={22+12*Math.cos(a)-2} y={22+12*Math.sin(a)-4} width="4" height="8"
+                      rx="2" fill="rgba(201,168,76,0.40)" transform={`rotate(${i*45} ${22+12*Math.cos(a)} ${22+12*Math.sin(a)})`}/>;
+                  })}
+                </svg>
+                <div style={{ position:"relative", zIndex:1, textAlign:"center" }}>
+                  <p style={{ margin:0, fontSize:13, fontWeight:700, color:"rgba(255,255,255,0.55)", fontFamily:"DM Sans, sans-serif" }}>
+                    Learning patterns…
+                  </p>
+                  <p style={{ margin:"6px 0 0", fontSize:11, color:"rgba(255,255,255,0.28)", lineHeight:1.55, fontFamily:"DM Sans, sans-serif" }}>
+                    Log your first relapse to unlock<br/>battle reports and trigger analysis.
+                  </p>
                 </div>
-              );
-            })()}
+              </div>
+            ) : (
+              /* ── Data state: battle reports ── */
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {[
+                  peakDowFull && {
+                    severity: "HIGH" as const,
+                    icon: "⚠️",
+                    title: `Danger zone: ${peakDowFull}s`,
+                    body: `Your relapses spike on ${peakDowFull}s. Plan an override activity for this day.`,
+                  },
+                  {
+                    severity: "MED" as const,
+                    icon: "🕐",
+                    title: `Peak window: ${peakTimeName}`,
+                    body: `Most events happen in the ${peakTimeName}. Schedule a high-engagement task then.`,
+                  },
+                  avgRelapseDays !== null && relapses.length > 1 && {
+                    severity: "INFO" as const,
+                    icon: "📡",
+                    title: `Cycle detected: ~${avgRelapseDays}d`,
+                    body: `Relapses recur roughly every ${avgRelapseDays} days. Activate shield mode before this window.`,
+                  },
+                  recentRelapse && {
+                    severity: "ALERT" as const,
+                    icon: "🔴",
+                    title: "Recent event logged",
+                    body: "A relapse was recorded in the last 48h. Your neural pathways are rebuilding — stay close to the app.",
+                  },
+                ].filter(Boolean).map((report, i) => {
+                  if (!report) return null;
+                  const SEV = {
+                    HIGH:  { border:"rgba(240,100,80,0.35)",  bg:"rgba(240,100,80,0.07)",  label:"HIGH RISK",  labelColor:"#f06450" },
+                    MED:   { border:"rgba(201,168,76,0.30)",  bg:"rgba(201,168,76,0.06)",  label:"PATTERN",    labelColor:"#C9A84C" },
+                    INFO:  { border:"rgba(126,200,227,0.25)", bg:"rgba(126,200,227,0.05)", label:"INSIGHT",    labelColor:"#7ec8e3" },
+                    ALERT: { border:"rgba(240,100,80,0.50)",  bg:"rgba(240,100,80,0.10)",  label:"ALERT",      labelColor:"#f06450" },
+                  }[report.severity];
+                  return (
+                    <motion.div key={i}
+                      initial={{ opacity:0, y:8 }}
+                      animate={{ opacity:1, y:0 }}
+                      transition={{ delay:i*0.08, type:"spring", stiffness:300, damping:28 }}
+                      style={{ ...STONE_CARD, padding:"14px 14px 12px", border:`1px solid ${SEV.border}`, borderTop:`1px solid ${SEV.border}`, background: SEV.bg }}
+                    >
+                      <div aria-hidden style={{ position:"absolute", inset:0, borderRadius:18, pointerEvents:"none",
+                        background:"repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.010) 8px, rgba(201,168,76,0.010) 9px)" }}/>
+                      <div style={{ position:"relative", zIndex:1 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+                          <span style={{ fontSize:14 }}>{report.icon}</span>
+                          <span style={{ fontSize:9, fontWeight:800, letterSpacing:"0.18em", color:SEV.labelColor, fontFamily:"DM Sans, sans-serif" }}>
+                            {SEV.label}
+                          </span>
+                          <div style={{ flex:1, height:1, background:`${SEV.border}` }}/>
+                        </div>
+                        <p style={{ margin:0, fontSize:13, fontWeight:700, color:"#f5ede0", fontFamily:"DM Sans, sans-serif", marginBottom:3 }}>
+                          {report.title}
+                        </p>
+                        <p style={{ margin:0, fontSize:11, color:"rgba(255,255,255,0.42)", lineHeight:1.5, fontFamily:"DM Sans, sans-serif" }}>
+                          {report.body}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           {!state.isPremium && (
             <button onClick={() => triggerPaywall()} className="absolute inset-0 flex items-center justify-center">
               <span className="text-xs font-semibold border px-3 py-1.5 rounded-full"
-                style={{ color: "var(--primary)", background: "oklch(0.13 0.022 265 / 0.90)", borderColor: "oklch(0.62 0.22 255 / 0.30)" }}>
+                style={{ color:"var(--primary)", background:"oklch(0.13 0.022 265 / 0.90)", borderColor:"oklch(0.62 0.22 255 / 0.30)" }}>
                 {t("progress.insights.paywallCta")}
               </span>
             </button>
