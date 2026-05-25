@@ -1129,84 +1129,178 @@ function CommunityPage() {
       </section>
 
       {/* ── Actions ──────────────────────────────────────────── */}
-      <section className="px-6 mt-6 pb-6 fade-up-3 space-y-0"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 16 }}>
+      <style>{`
+        @keyframes si-silver-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(148,180,220,0); }
+          50%       { box-shadow: 0 0 0 4px rgba(148,180,220,0.18); }
+        }
+        .si-silver-pulse { animation: si-silver-pulse 2.8s ease-in-out infinite; }
+        .si-badge-hover  { transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+        .si-badge-hover:hover { transform: scale(1.06); }
+        .si-badge-hover:active { transform: scale(0.97); }
+      `}</style>
+      <section className="px-6 mt-6 pb-6 fade-up-3"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 20 }}>
 
-        {/* ① Invite to Global — open to all users */}
-        <button
-          onClick={() => {
-            const link = `${window.location.origin}/community`;
-            if (navigator.share) {
-              navigator.share({ title: "Join me on Stopamine", text: "Come join the Global recovery community.", url: link });
-            } else {
-              navigator.clipboard.writeText(link);
-            }
-          }}
-          className="flex items-center gap-3 text-left w-full py-4 transition-opacity active:opacity-70"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-        >
-          <div className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
-            <Globe className="h-4 w-4" style={{ color: "rgba(255,255,255,0.60)" }} />
-          </div>
-          <div>
-            <p className="text-sm font-semibold">Invite to Global</p>
-            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.60)" }}>Share a link to the community — open to everyone</p>
-          </div>
-        </button>
-
-        {/* ② Sovereign Invite — PRO only, branded Founding Invite */}
-        <button
-          onClick={() => state.isPremium ? setShowInviteModal(true) : setShowProModal(true)}
-          className="flex items-center gap-3 text-left w-full py-4 transition-opacity active:opacity-70"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-        >
-          <div className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-            style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.26)" }}>
-            <Crown className="h-4 w-4" style={{ color: "#C9A84C" }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">Sovereign Invite</p>
-              <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
-                style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)", color: "#C9A84C", letterSpacing: "0.04em" }}
-              >
-                PRO
-              </span>
-            </div>
-            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.60)" }}>Send a Founding Invite — both sides earn a badge + 50 XP</p>
-          </div>
-        </button>
-
-        {/* ③ Create Private Community — PRO only */}
+        {/* ① Create Community — full-width anchor row */}
         <button
           onClick={() => state.isPremium ? setShowCreate(true) : setShowProModal(true)}
-          className="flex items-center gap-3 text-left w-full py-4 transition-opacity active:opacity-70"
+          className="flex items-center gap-3 text-left w-full transition-all active:opacity-70"
+          style={{
+            padding: "14px 16px",
+            borderRadius: 18,
+            marginBottom: 12,
+            background: state.isPremium
+              ? "rgba(255,255,255,0.04)"
+              : "rgba(201,168,76,0.05)",
+            border: state.isPremium
+              ? "1px solid rgba(255,255,255,0.09)"
+              : "1px solid rgba(201,168,76,0.18)",
+          }}
         >
-          <div className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
+          <div
+            className="h-10 w-10 rounded-xl grid place-items-center shrink-0"
             style={state.isPremium
-              ? { background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }
-              : { background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.20)" }}>
+              ? { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)" }
+              : { background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.24)" }}
+          >
             {state.isPremium
-              ? <Plus className="h-4 w-4" />
-              : <Lock className="h-4 w-4" style={{ color: "#C9A84C" }} />}
+              ? <Plus className="h-5 w-5" />
+              : <Lock className="h-5 w-5" style={{ color: "#C9A84C" }} />}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">Create Private Community</p>
+              <p className="text-sm font-semibold">Create Community</p>
               {!state.isPremium && (
                 <span
                   className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
-                  style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)", color: "#C9A84C", letterSpacing: "0.04em" }}
+                  style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.30)", color: "#C9A84C", letterSpacing: "0.05em" }}
                 >
                   PRO
                 </span>
               )}
             </div>
-            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.60)" }}>Set custom rules, invite-only access, full moderation</p>
+            <p className="text-[11px] mt-0.5" style={{ color: "oklch(0.52 0.015 265 / 0.55)" }}>
+              {state.isPremium ? "Set custom rules, invite-only access, full moderation" : "Unlock private communities with custom rules"}
+            </p>
           </div>
+          {state.isPremium && (
+            <div style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          )}
         </button>
+
+        {/* ② + ③ — 2-column badge grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+
+          {/* Sovereign Invite — Royal Gold badge */}
+          <button
+            onClick={() => state.isPremium ? setShowInviteModal(true) : setShowProModal(true)}
+            className="si-badge-hover text-left"
+            style={{
+              padding: "14px 14px 12px",
+              borderRadius: 18,
+              background: "linear-gradient(145deg, rgba(201,168,76,0.13) 0%, rgba(120,80,20,0.18) 100%)",
+              border: "1px solid rgba(201,168,76,0.32)",
+              boxShadow: "0 0 0 0 rgba(201,168,76,0)",
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Shimmer line */}
+            <div style={{
+              position: "absolute", top: 0, left: "-60%", width: "40%", height: "100%",
+              background: "linear-gradient(90deg, transparent, rgba(255,220,120,0.06), transparent)",
+              transform: "skewX(-15deg)",
+              pointerEvents: "none",
+            }} />
+            {/* Crown + PRO badge row */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 11,
+                background: "linear-gradient(135deg, rgba(201,168,76,0.22), rgba(120,80,20,0.30))",
+                border: "1px solid rgba(201,168,76,0.40)",
+                display: "grid", placeItems: "center",
+                boxShadow: "0 0 12px rgba(201,168,76,0.20)",
+              }}>
+                <Crown style={{ width: 15, height: 15, color: "#C9A84C" }} />
+              </div>
+              <span style={{
+                fontSize: 8, fontWeight: 800, letterSpacing: "0.10em",
+                padding: "3px 7px", borderRadius: 999,
+                background: "linear-gradient(90deg, #C9A84C, #E8C870)",
+                color: "#1a0f00",
+              }}>
+                PRO
+              </span>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", margin: "0 0 3px", lineHeight: 1.3 }}>
+              Sovereign Invite
+            </p>
+            <p style={{ fontSize: 10, color: "rgba(201,168,76,0.55)", margin: 0, lineHeight: 1.4 }}>
+              Founding Invite · Badge + 50 XP
+            </p>
+          </button>
+
+          {/* Invite to Global — Mystical Silver badge */}
+          <button
+            onClick={() => {
+              const link = `${window.location.origin}/community`;
+              if (navigator.share) {
+                navigator.share({ title: "Join me on Stopamine", text: "Come join the Global recovery community.", url: link });
+              } else {
+                navigator.clipboard.writeText(link);
+              }
+            }}
+            className="si-badge-hover si-silver-pulse text-left"
+            style={{
+              padding: "14px 14px 12px",
+              borderRadius: 18,
+              background: "linear-gradient(145deg, rgba(148,180,220,0.09) 0%, rgba(80,110,160,0.12) 100%)",
+              border: "1px solid rgba(148,180,220,0.22)",
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Brushed-metal sheen */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "repeating-linear-gradient(92deg, transparent, transparent 3px, rgba(180,210,255,0.018) 3px, rgba(180,210,255,0.018) 4px)",
+              pointerEvents: "none",
+            }} />
+            {/* Globe icon row */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 11,
+                background: "linear-gradient(135deg, rgba(148,180,220,0.18), rgba(80,110,160,0.22))",
+                border: "1px solid rgba(148,180,220,0.30)",
+                display: "grid", placeItems: "center",
+                boxShadow: "0 0 12px rgba(148,180,220,0.15)",
+              }}>
+                <Globe style={{ width: 15, height: 15, color: "rgba(180,210,255,0.85)" }} />
+              </div>
+              <span style={{
+                fontSize: 8, fontWeight: 700, letterSpacing: "0.08em",
+                padding: "3px 7px", borderRadius: 999,
+                background: "rgba(148,180,220,0.14)",
+                border: "1px solid rgba(148,180,220,0.28)",
+                color: "rgba(180,210,255,0.80)",
+              }}>
+                FREE
+              </span>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(200,220,255,0.90)", margin: "0 0 3px", lineHeight: 1.3 }}>
+              Invite to Global
+            </p>
+            <p style={{ fontSize: 10, color: "rgba(148,180,220,0.55)", margin: 0, lineHeight: 1.4 }}>
+              Open to all · Share community link
+            </p>
+          </button>
+
+        </div>
       </section>
 
       {/* ── Modals & toasts ──────────────────────────────────── */}
