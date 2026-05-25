@@ -344,6 +344,79 @@ export function BottomNav() {
                 </div>
               )}
             </div>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: "rgba(52,211,153,0.10)", margin: "14px 0" }} />
+
+            {/* ── SIMULATE URGE SOS ── */}
+            <p style={{ margin: "0 0 8px", fontSize: 10, color: "rgba(52,211,153,0.40)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Simulate</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+              <button
+                onClick={() => { setDebugOpen(false); window.location.href = "/tools/sos"; }}
+                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
+              >
+                Trigger SOS mode
+              </button>
+              <button
+                onClick={() => update((s) => ({ urgesSurvived: s.urgesSurvived + 1, points: s.points + 10 }))}
+                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
+              >
+                Complete urge <span style={{ color: "rgba(52,211,153,0.45)" }}>+1 urge survived · +10 pts</span>
+              </button>
+            </div>
+
+            {/* ── GAME STATE ── */}
+            <p style={{ margin: "0 0 8px", fontSize: 10, color: "rgba(52,211,153,0.40)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Game State</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+              <button
+                onClick={() => update({ isPremium: true, points: (state.points || 0) + 999 })}
+                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
+              >
+                Unlock all games <span style={{ color: "rgba(52,211,153,0.45)" }}>sets isPremium + +999 pts</span>
+              </button>
+              <button
+                onClick={() => update({ points: 0, completedChallenges: [] })}
+                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.06)", border: "1px solid rgba(255,80,80,0.20)", color: "#ff7777", textAlign: "left" }}
+              >
+                Reset game scores
+              </button>
+            </div>
+
+            {/* ── LEADERBOARD ── */}
+            <p style={{ margin: "0 0 8px", fontSize: 10, color: "rgba(52,211,153,0.40)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Leaderboard</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <button
+                onClick={() => {
+                  const DUMMY = [
+                    { name: "Marcus", score: 2840, days: 61 },
+                    { name: "Jaylen", score: 2210, days: 34 },
+                    { name: "Sven",   score: 1990, days: 29 },
+                    { name: "Alex",   score: 1750, days: 22 },
+                    { name: "Ryan",   score: 1420, days: 19 },
+                    { name: "Tobias", score: 1180, days: 16 },
+                    { name: "Dante",  score:  940, days: 14 },
+                    { name: "Elias",  score:  780, days: 11 },
+                    { name: "Noah",   score:  610, days: 8  },
+                    { name: "Luka",   score:  490, days: 6  },
+                  ];
+                  localStorage.setItem("stopamine.lb_dummy", JSON.stringify(DUMMY));
+                  window.dispatchEvent(new CustomEvent("stopamine-lb-updated"));
+                }}
+                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
+              >
+                Add dummy scores <span style={{ color: "rgba(52,211,153,0.45)" }}>10 fake players</span>
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.removeItem("stopamine.lb_dummy");
+                  window.dispatchEvent(new CustomEvent("stopamine-lb-updated"));
+                }}
+                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.06)", border: "1px solid rgba(255,80,80,0.20)", color: "#ff7777", textAlign: "left" }}
+              >
+                Clear scores
+              </button>
+            </div>
+
           </div>
         </div>
       </>
