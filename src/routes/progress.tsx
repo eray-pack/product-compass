@@ -734,6 +734,43 @@ function ProgressScreen() {
   const [progressView, setProgressView] = useState<"grid" | "bars" | "streak">("grid");
   const [showVictory, setShowVictory] = useState(false);
 
+  // ── Dev mode ──────────────────────────────────────────────────────────────
+  const [devOpen, setDevOpen] = useState(false);
+  const devTapCount = useRef(0);
+  const devTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Local dev overrides — don't write to real store unless intentional
+  const [devDay, setDevDay] = useState<number | null>(null);
+  const [devConfetti, setDevConfetti] = useState(false);
+
+  function handleDevTap() {
+    devTapCount.current += 1;
+    if (devTapTimer.current) clearTimeout(devTapTimer.current);
+    devTapTimer.current = setTimeout(() => { devTapCount.current = 0; }, 600);
+    if (devTapCount.current >= 3) {
+      devTapCount.current = 0;
+      setDevOpen((v) => !v);
+    }
+  }
+
+  function devSimulateDay(d: number) {
+    const msSinceStart = (d - 1) * 86400000;
+    const fakeStart = Date.now() - msSinceStart;
+    if (state.addictions.length > 0) {
+      const updated = state.addictions.map((a, i) =>
+        i === 0 ? { ...a, startDate: fakeStart } : a
+      );
+      update({ addictions: updated, startDate: fakeStart });
+    } else {
+      update({ startDate: fakeStart });
+    }
+    setDevDay(d);
+    if (d >= 90) {
+      setDevConfetti(true);
+      setTimeout(() => setDevConfetti(false), 4000);
+      update({ hasCelebrated90: false }); // re-arm celebration
+    }
+  }
+
   const active = activeAddiction(state);
 
   const day = active ? dayCount(active.startDate) : 0;
@@ -840,18 +877,161 @@ function ProgressScreen() {
   return (
     <PageShell>
       {/* ── 90-day celebration overlays ─────────────────────── */}
-      <Confetti active={showVictory} />
+      <Confetti active={showVictory || devConfetti} />
       <AnimatePresence>
         {showVictory && <Victory90Modal onDismiss={handleDismissVictory} />}
       </AnimatePresence>
 
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <SectionTitle>{t("nav.progress")}</SectionTitle>
+        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
+          <SectionTitle>{t("nav.progress")}</SectionTitle>
+        </div>
         <p style={{ fontSize: 13, color: "#ffffff", opacity: 0.45, marginTop: 4, fontFamily: "DM Sans, sans-serif", fontWeight: 400 }}>
           {t("progress.header")}
         </p>
       </header>
+
+      {/* ── Dev Panel (triple-tap "Progress" to toggle) ──────── */}
+      {devOpen && (
+        <div style={{
+          margin: "8px 16px 0",
+          padding: "14px 16px",
+          borderRadius: 16,
+          background: "rgba(20,20,20,0.92)",
+          border: "1px solid rgba(255,80,80,0.35)",
+          backdropFilter: "blur(16px)",
+        }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", color: "#ff5555", textTransform: "uppercase" }}>
+              🛠 Dev Mode
+            </span>
+            <button onClick={() => setDevOpen(false)} style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>✕</button>
+          </div>
+
+          {/* ── SECTION 1: SIMULATE DAY ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Simulate Day</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+            {([
+              { label: "Day 1",   d: 1  },
+              { label: "Day 7",   d: 7  },
+              { label: "Day 30",  d: 30 },
+              { label: "Day 60",  d: 60 },
+              { label: "Day 90+", d: 90 },
+            ] as const).map(({ label, d }) => {
+              const isActive = devDay === d;
+              const isGold = d >= 90;
+              return (
+                <button key={d} onClick={() => devSimulateDay(d)}
+                  style={{
+                    fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer",
+                    background: isActive
+                      ? (isGold ? "rgba(201,168,76,0.22)" : "rgba(201,168,76,0.14)")
+                      : "rgba(255,255,255,0.06)",
+                    border: isActive
+                      ? "1px solid rgba(201,168,76,0.60)"
+                      : "1px solid rgba(255,255,255,0.12)",
+                    color: isActive ? "#C9A84C" : "rgba(255,255,255,0.70)",
+                    fontWeight: isActive ? 700 : 400,
+                  }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Day 90+ celebration banner */}
+          {devDay !== null && devDay >= 90 && (
+            <div style={{
+              marginBottom: 14, padding: "10px 14px", borderRadius: 10,
+              background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.35)",
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              <span style={{ fontSize: 16 }}>🎉</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#C9A84C", fontFamily: "DM Sans, sans-serif" }}>
+                90 Day Reset Achieved!
+              </span>
+            </div>
+          )}
+
+          {/* ── SECTION 2: PRO / FREE ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Access</p>
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            {(["FREE", "PRO"] as const).map((tier) => {
+              const isActive = tier === "PRO" ? state.isPremium : !state.isPremium;
+              return (
+                <button key={tier} onClick={() => update({ isPremium: tier === "PRO" })}
+                  style={{
+                    fontSize: 11, padding: "5px 16px", borderRadius: 8, cursor: "pointer",
+                    background: isActive ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.06)",
+                    border: isActive ? "1px solid rgba(201,168,76,0.55)" : "1px solid rgba(255,255,255,0.12)",
+                    color: isActive ? "#C9A84C" : "rgba(255,255,255,0.55)",
+                    fontWeight: isActive ? 700 : 400,
+                  }}>
+                  {tier}
+                </button>
+              );
+            })}
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", alignSelf: "center", marginLeft: 4 }}>
+              {state.isPremium ? "All features unlocked" : "Premium locked"}
+            </span>
+          </div>
+
+          {/* ── SECTION 3: STREAK SIMULATION ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Streak</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+            {([
+              { label: "0 days",  d: 1  },
+              { label: "7 days",  d: 7  },
+              { label: "30 days", d: 30 },
+              { label: "90 days", d: 90 },
+            ] as const).map(({ label, d }) => {
+              const isActive = devDay === d;
+              return (
+                <button key={d} onClick={() => devSimulateDay(d)}
+                  style={{
+                    fontSize: 11, padding: "5px 11px", borderRadius: 8, cursor: "pointer",
+                    background: isActive ? "rgba(201,168,76,0.14)" : "rgba(255,255,255,0.06)",
+                    border: isActive ? "1px solid rgba(201,168,76,0.55)" : "1px solid rgba(255,255,255,0.12)",
+                    color: isActive ? "#C9A84C" : "rgba(255,255,255,0.70)",
+                    fontWeight: isActive ? 700 : 400,
+                  }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ── SECTION 4: RESET ── */}
+          <button
+            onClick={() => {
+              const freshStart = Date.now() - 0; // Day 1
+              const updated = state.addictions.map((a, i) =>
+                i === 0 ? { ...a, startDate: freshStart } : a
+              );
+              update({
+                addictions: updated.length ? updated : state.addictions,
+                startDate: freshStart,
+                isPremium: false,
+                hasCelebrated90: false,
+                relapses: [],
+                totalCleanDays: 0,
+                urgesSurvived: 0,
+              });
+              setDevDay(null);
+            }}
+            style={{
+              width: "100%", padding: "8px 0", borderRadius: 10, cursor: "pointer",
+              background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.28)",
+              color: "#ff6666", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
+              fontFamily: "DM Sans, sans-serif",
+            }}
+          >
+            Reset All → Day 1
+          </button>
+        </div>
+      )}
 
       {/* ── Neural Core hero ──────────────────────────────── */}
       <section className="flex flex-col items-center pt-6 pb-4 px-6 fade-up-1">
