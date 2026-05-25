@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
-import { loadState, useAppState } from "@/lib/store";
+import { loadState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
@@ -101,22 +101,6 @@ export function BottomNav() {
   const companion    = loadState().companion ?? "tree";
   const CompanionIcon  = COMPANION_ICONS[companion];
   const companionLabelKey = companion === "wolf" ? "nav.companion" : "nav.tree";
-  const [state, update] = useAppState();
-
-  // ── Subscription Debugger (triple-tap Tools tab) ──────────────────────────
-  const [debugOpen, setDebugOpen] = useState(false);
-  const toolsTapCount = useRef(0);
-  const toolsTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  function handleToolsTap() {
-    toolsTapCount.current += 1;
-    if (toolsTapTimer.current) clearTimeout(toolsTapTimer.current);
-    toolsTapTimer.current = setTimeout(() => { toolsTapCount.current = 0; }, 1500);
-    if (toolsTapCount.current >= 3) {
-      toolsTapCount.current = 0;
-      setDebugOpen(true);
-    }
-  }
-
   const navItems = [
     { ...BASE_NAV_KEYS[0], label: t(BASE_NAV_KEYS[0].labelKey) },
     { to: "/tree" as const, label: t(companionLabelKey), Icon: null as unknown as typeof Home },
@@ -142,13 +126,11 @@ export function BottomNav() {
         {navItems.map(({ to, label, Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           const sw = active ? 2.3 : 1.7;
-          const isTools = to === "/tools";
 
           return (
             <Link
               key={to}
               to={to}
-              onClick={isTools ? handleToolsTap : undefined}
               className="relative flex flex-col items-center transition-all"
               style={{
                 color: active ? "#C4873A" : "rgba(255,255,255,0.45)",
@@ -198,230 +180,7 @@ export function BottomNav() {
       </div>
     </nav>
 
-    {/* ── Subscription Debugger modal (triple-tap Tools tab) ───────────────── */}
-    {debugOpen && (
-      <>
-        {/* Backdrop */}
-        <div
-          onClick={() => setDebugOpen(false)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 200, backdropFilter: "blur(4px)" }}
-        />
-
-        {/* Console panel */}
-        <div style={{
-          position: "fixed", bottom: "calc(80px + env(safe-area-inset-bottom))", left: 12, right: 12,
-          zIndex: 201,
-          background: "rgba(4,8,6,0.97)",
-          border: "1px solid rgba(52,211,153,0.35)",
-          borderRadius: 18,
-          boxShadow: "0 0 40px rgba(52,211,153,0.12), 0 0 80px rgba(52,211,153,0.05)",
-          overflow: "hidden",
-          fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
-        }}>
-          <style>{`
-            @keyframes db-cursor { 0%,49%{opacity:1}50%,100%{opacity:0} }
-            @keyframes db-scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100%)} }
-          `}</style>
-
-          {/* Scanline overlay */}
-          <div aria-hidden style={{
-            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1, overflow: "hidden",
-            background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(52,211,153,0.015) 3px, rgba(52,211,153,0.015) 4px)",
-          }}/>
-
-          {/* Header bar */}
-          <div style={{
-            position: "relative", zIndex: 2,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "10px 14px",
-            borderBottom: "1px solid rgba(52,211,153,0.15)",
-            background: "rgba(52,211,153,0.04)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 10, color: "rgba(52,211,153,0.50)" }}>●</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#3fd399", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                Dev Debugger
-              </span>
-              <span style={{ fontSize: 10, color: "rgba(52,211,153,0.40)", animation: "db-cursor 1.1s step-end infinite" }}>█</span>
-            </div>
-            <button onClick={() => setDebugOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(52,211,153,0.40)", fontSize: 16, lineHeight: 1, padding: "0 2px" }}>✕</button>
-          </div>
-
-          {/* Body */}
-          <div style={{ position: "relative", zIndex: 2, padding: "16px 14px 18px" }}>
-
-            {/* Console log lines */}
-            <div style={{ marginBottom: 14 }}>
-              {[
-                ["SYS", "Subscription Debugger v1.0"],
-                ["ENV", `companion: ${companion} | xp: ${state.treeXP}`],
-                ["STATE", `isPremium: ${state.isPremium ? "TRUE" : "FALSE"}`],
-                ["GAMES", `pro_unlocked: ${state.isPremium ? "9/9" : "0/9"} | free: 3/3`],
-              ].map(([tag, msg], i) => (
-                <div key={i} style={{ display: "flex", gap: 8, fontSize: 10, lineHeight: 1.6, color: "rgba(52,211,153,0.55)" }}>
-                  <span style={{ color: tag === "STATE" ? "#E8C87A" : "rgba(52,211,153,0.35)", minWidth: 36 }}>[{tag}]</span>
-                  <span style={{ color: tag === "STATE" ? "rgba(232,200,122,0.80)" : "rgba(52,211,153,0.55)" }}>{msg}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: 1, background: "rgba(52,211,153,0.10)", marginBottom: 14 }} />
-
-            {/* Pro toggle */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <div>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#3fd399", letterSpacing: "0.06em" }}>Pro Mode</p>
-                <p style={{ margin: "2px 0 0", fontSize: 10, color: "rgba(52,211,153,0.40)" }}>
-                  {state.isPremium ? "9 pro games unlocked" : "Simulating free tier — 9 games locked"}
-                </p>
-              </div>
-              <button
-                onClick={() => update((s) => ({ isPremium: !s.isPremium }))}
-                style={{
-                  position: "relative", width: 48, height: 26, borderRadius: 13,
-                  background: state.isPremium ? "rgba(52,211,153,0.25)" : "rgba(255,255,255,0.06)",
-                  border: `1px solid ${state.isPremium ? "rgba(52,211,153,0.60)" : "rgba(255,255,255,0.12)"}`,
-                  cursor: "pointer", transition: "all 0.22s", flexShrink: 0,
-                  boxShadow: state.isPremium ? "0 0 10px rgba(52,211,153,0.30)" : "none",
-                }}
-              >
-                <div style={{
-                  position: "absolute", top: 3, width: 18, height: 18, borderRadius: "50%",
-                  background: state.isPremium ? "#3fd399" : "rgba(255,255,255,0.25)",
-                  left: state.isPremium ? 26 : 3,
-                  transition: "all 0.22s",
-                  boxShadow: state.isPremium ? "0 0 6px rgba(52,211,153,0.80)" : "none",
-                }}/>
-              </button>
-            </div>
-
-            {/* Companion Switcher unlock toggle */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, padding: "8px 10px", borderRadius: 10, background: "rgba(52,211,153,0.03)", border: "1px solid rgba(52,211,153,0.08)" }}>
-              <div>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: state.companionSwitcherUnlocked ? "#3fd399" : "rgba(52,211,153,0.55)", letterSpacing: "0.04em" }}>
-                  Unlock Companion Switcher
-                </p>
-                <p style={{ margin: "2px 0 0", fontSize: 9, color: "rgba(52,211,153,0.32)" }}>
-                  {state.companionSwitcherUnlocked ? "Wolf card unlocked (dev override)" : "Wolf locked — tap to test unlock"}
-                </p>
-              </div>
-              <button
-                onClick={() => update((s) => ({ companionSwitcherUnlocked: !s.companionSwitcherUnlocked }))}
-                style={{
-                  position: "relative", width: 40, height: 22, borderRadius: 11, flexShrink: 0,
-                  background: state.companionSwitcherUnlocked ? "rgba(52,211,153,0.22)" : "rgba(255,255,255,0.05)",
-                  border: `1px solid ${state.companionSwitcherUnlocked ? "rgba(52,211,153,0.50)" : "rgba(255,255,255,0.10)"}`,
-                  cursor: "pointer", transition: "all 0.22s",
-                  boxShadow: state.companionSwitcherUnlocked ? "0 0 8px rgba(52,211,153,0.25)" : "none",
-                }}
-              >
-                <div style={{
-                  position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%",
-                  background: state.companionSwitcherUnlocked ? "#3fd399" : "rgba(255,255,255,0.22)",
-                  left: state.companionSwitcherUnlocked ? 20 : 2,
-                  transition: "all 0.22s",
-                  boxShadow: state.companionSwitcherUnlocked ? "0 0 5px rgba(52,211,153,0.70)" : "none",
-                }}/>
-              </button>
-            </div>
-
-            {/* Status rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: 8, background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.10)" }}>
-                <span style={{ fontSize: 11, color: "rgba(52,211,153,0.70)" }}>Free games (3)</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#3fd399" }}>✓ ACCESSIBLE</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: 8, background: state.isPremium ? "rgba(52,211,153,0.05)" : "rgba(255,80,80,0.05)", border: `1px solid ${state.isPremium ? "rgba(52,211,153,0.10)" : "rgba(255,80,80,0.15)"}` }}>
-                <span style={{ fontSize: 11, color: state.isPremium ? "rgba(52,211,153,0.70)" : "rgba(255,120,120,0.70)" }}>Pro games (9)</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: state.isPremium ? "#3fd399" : "#ff7777" }}>
-                  {state.isPremium ? "✓ UNLOCKED" : "⊘ LOCKED"}
-                </span>
-              </div>
-              {!state.isPremium && (
-                <div style={{ padding: "8px 10px", borderRadius: 8, background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.20)", fontSize: 10, color: "rgba(201,168,76,0.70)", lineHeight: 1.5 }}>
-                  ▲ Upgrade to Pro CTA banner is visible on Tools page
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: 1, background: "rgba(52,211,153,0.10)", margin: "14px 0" }} />
-
-            {/* ── SIMULATE URGE SOS ── */}
-            <p style={{ margin: "0 0 8px", fontSize: 10, color: "rgba(52,211,153,0.40)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Simulate</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
-              <button
-                onClick={() => { setDebugOpen(false); window.location.href = "/tools/sos"; }}
-                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
-              >
-                Trigger SOS mode
-              </button>
-              <button
-                onClick={() => update((s) => ({ urgesSurvived: s.urgesSurvived + 1, points: s.points + 10 }))}
-                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
-              >
-                Complete urge <span style={{ color: "rgba(52,211,153,0.45)" }}>+1 urge survived · +10 pts</span>
-              </button>
-            </div>
-
-            {/* ── GAME STATE ── */}
-            <p style={{ margin: "0 0 8px", fontSize: 10, color: "rgba(52,211,153,0.40)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Game State</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
-              <button
-                onClick={() => update({ isPremium: true, points: (state.points || 0) + 999 })}
-                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
-              >
-                Unlock all games <span style={{ color: "rgba(52,211,153,0.45)" }}>sets isPremium + +999 pts</span>
-              </button>
-              <button
-                onClick={() => update({ points: 0, completedChallenges: [] })}
-                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.06)", border: "1px solid rgba(255,80,80,0.20)", color: "#ff7777", textAlign: "left" }}
-              >
-                Reset game scores
-              </button>
-            </div>
-
-            {/* ── LEADERBOARD ── */}
-            <p style={{ margin: "0 0 8px", fontSize: 10, color: "rgba(52,211,153,0.40)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Leaderboard</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <button
-                onClick={() => {
-                  const DUMMY = [
-                    { name: "Marcus", score: 2840, days: 61 },
-                    { name: "Jaylen", score: 2210, days: 34 },
-                    { name: "Sven",   score: 1990, days: 29 },
-                    { name: "Alex",   score: 1750, days: 22 },
-                    { name: "Ryan",   score: 1420, days: 19 },
-                    { name: "Tobias", score: 1180, days: 16 },
-                    { name: "Dante",  score:  940, days: 14 },
-                    { name: "Elias",  score:  780, days: 11 },
-                    { name: "Noah",   score:  610, days: 8  },
-                    { name: "Luka",   score:  490, days: 6  },
-                  ];
-                  localStorage.setItem("stopamine.lb_dummy", JSON.stringify(DUMMY));
-                  window.dispatchEvent(new CustomEvent("stopamine-lb-updated"));
-                }}
-                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", color: "#3fd399", textAlign: "left" }}
-              >
-                Add dummy scores <span style={{ color: "rgba(52,211,153,0.45)" }}>10 fake players</span>
-              </button>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("stopamine.lb_dummy");
-                  window.dispatchEvent(new CustomEvent("stopamine-lb-updated"));
-                }}
-                style={{ fontSize: 11, padding: "7px 12px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.06)", border: "1px solid rgba(255,80,80,0.20)", color: "#ff7777", textAlign: "left" }}
-              >
-                Clear scores
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </>
-    )}
-    </>
+</>
   );
 }
 
