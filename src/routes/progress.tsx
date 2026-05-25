@@ -396,34 +396,88 @@ function ProgressScreen() {
           )}
         </div>
 
-        {/* View toggle */}
-        <div className="flex gap-2 mb-4">
+        {/* View toggle — segmented control */}
+        <style>{`
+          .cs-tab:hover { background: rgba(201,168,76,0.07) !important; color: rgba(201,168,76,0.70) !important; border-color: rgba(201,168,76,0.28) !important; }
+          .cs-tab:hover svg { opacity: 0.85 !important; }
+        `}</style>
+        <div
+          className="flex mb-4"
+          style={{
+            background: "rgba(255,255,255,0.035)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 12,
+            padding: 3,
+            gap: 2,
+          }}
+        >
           {([
-            { key: "grid", label: "Heatmap", desc: "Days you opened the app" },
-            { key: "bars", label: "Weekly", desc: "Check-ins per week" },
-            { key: "streak", label: "Streak", desc: "Your clean day run" },
-          ] as const).map(({ key, label, desc }) => (
-            <button
-              key={key}
-              onClick={() => setProgressView(key)}
-              style={{
-                flex: 1,
-                padding: "7px 0",
-                borderRadius: 10,
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.03em",
-                border: progressView === key ? "1px solid rgba(201,168,76,0.45)" : "1px solid rgba(255,255,255,0.07)",
-                background: progressView === key ? "rgba(201,168,76,0.10)" : "rgba(255,255,255,0.03)",
-                color: progressView === key ? "#C9A84C" : "rgba(255,255,255,0.35)",
-                cursor: "pointer",
-                transition: "all 0.18s ease",
-              }}
-              title={desc}
-            >
-              {label}
-            </button>
-          ))}
+            {
+              key: "grid", label: "Heatmap", desc: "Days you opened the app",
+              icon: (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  {[0,1,2,3].map(col => [0,1,2].map(row => (
+                    <rect key={`${col}-${row}`} x={col * 3.2} y={row * 3.2} width="2.4" height="2.4" rx="0.5"
+                      fill="currentColor" opacity={col === 0 && row === 0 ? 0.3 : col === 3 || row === 2 ? 0.9 : 0.6} />
+                  )))}
+                </svg>
+              ),
+            },
+            {
+              key: "bars", label: "Weekly", desc: "Check-ins per week",
+              icon: (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <rect x="0"   y="7"  width="2.2" height="5"   rx="0.6" fill="currentColor" opacity="0.45"/>
+                  <rect x="3.2" y="4"  width="2.2" height="8"   rx="0.6" fill="currentColor" opacity="0.70"/>
+                  <rect x="6.4" y="2"  width="2.2" height="10"  rx="0.6" fill="currentColor" opacity="0.90"/>
+                  <rect x="9.6" y="5"  width="2.2" height="7"   rx="0.6" fill="currentColor" opacity="0.60"/>
+                </svg>
+              ),
+            },
+            {
+              key: "streak", label: "Streak", desc: "Your clean day run",
+              icon: (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M6.5 1 C6.5 1 9 4 8.5 6.5 C8 9 6 10.5 6 10.5 C6 10.5 7 8.5 5.5 7 C5.5 7 5.5 9 4 10 C4 10 2 8 3 6 C4 4 6.5 1 6.5 1Z"
+                    fill="currentColor" opacity="0.9"/>
+                </svg>
+              ),
+            },
+          ] as const).map(({ key, label, desc, icon }) => {
+            const active = progressView === key;
+            return (
+              <button
+                key={key}
+                className="cs-tab"
+                onClick={() => setProgressView(key)}
+                title={desc}
+                style={{
+                  flex: 1,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                  padding: "7px 4px",
+                  borderRadius: 9,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.03em",
+                  border: active
+                    ? "1px solid rgba(201,168,76,0.45)"
+                    : "1px solid rgba(255,215,0,0.12)",
+                  background: active
+                    ? "rgba(201,168,76,0.14)"
+                    : "rgba(255,255,255,0.04)",
+                  color: active ? "#C9A84C" : "rgba(255,255,255,0.50)",
+                  cursor: "pointer",
+                  transition: "all 0.18s ease",
+                  boxShadow: active ? "0 0 12px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,215,0,0.10)" : "none",
+                }}
+              >
+                <span style={{ display: "flex", color: active ? "#C9A84C" : "rgba(255,255,255,0.40)", transition: "all 0.18s ease" }}>
+                  {icon}
+                </span>
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {/* View content */}
