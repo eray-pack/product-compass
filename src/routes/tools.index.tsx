@@ -590,10 +590,10 @@ function ArcadeBadge({
         {locked && (
           <div style={{
             position: "absolute", inset: 0, borderRadius: "50%",
-            background: "rgba(0,0,0,0.55)",
+            background: "rgba(0,0,0,0.68)",
             display: "grid", placeItems: "center", zIndex: 3,
           }}>
-            <Lock style={{ height: 14, width: 14, color: "#C9A84C" }} />
+            <Lock style={{ height: 20, width: 20, color: "#C9A84C" }} strokeWidth={2.2} />
           </div>
         )}
       </motion.div>
@@ -1017,28 +1017,28 @@ function Tools() {
                     ))}
                   </motion.div>
 
-                  {/* PRO section */}
-                  {state.isPremium === true ? (
-                    <>
-                      <div style={{ margin: "22px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.32) 20%, rgba(201,168,76,0.32) 80%, transparent)" }} />
-                      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.72, textAlign: "center", marginBottom: 18 }}>
-                        {t("tools.gamesProTitle")}
-                      </p>
-                      <div className="grid grid-cols-3" style={{ gap: "24px 8px" }}>
-                        {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
-                          <ArcadeBadge
-                            key={to}
-                            to={to}
-                            glow={glow}
-                            label={t(labelKey)}
-                            icon={icon}
-                            ambient={ambient}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    /* ── Locked PRO row ── */
+                  {/* PRO section — always rendered; locked state driven by isPremium */}
+                  <div style={{ margin: "22px 0 18px", height: 1, background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.32) 20%, rgba(201,168,76,0.32) 80%, transparent)" }} />
+                  <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.72, textAlign: "center", marginBottom: 18 }}>
+                    {t("tools.gamesProTitle")}
+                  </p>
+                  <div className="grid grid-cols-3" style={{ gap: "24px 8px" }}>
+                    {PRO_GAMES.map(({ to, glow, labelKey, icon, ambient }) => (
+                      <ArcadeBadge
+                        key={to}
+                        to={to}
+                        glow={glow}
+                        label={t(labelKey)}
+                        icon={icon}
+                        ambient={ambient}
+                        locked={!state.isPremium}
+                        onLockedTap={() => triggerPaywall()}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Upgrade CTA — only shown when not premium */}
+                  {!state.isPremium && (
                     <motion.button
                       onClick={() => triggerPaywall()}
                       whileHover={{ borderColor: "rgba(201,168,76,0.44)", scale: 1.01 }}
@@ -1060,7 +1060,6 @@ function Tools() {
                         WebkitBackdropFilter: "blur(12px)",
                       }}
                     >
-                      {/* Sleek golden padlock badge */}
                       <div style={{
                         width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
                         display: "grid", placeItems: "center",
