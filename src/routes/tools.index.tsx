@@ -764,7 +764,7 @@ function Tools() {
         <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
           <SectionTitle>{t("nav.tools")}</SectionTitle>
         </div>
-        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
+        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "block" }}>
           <h1 className="mt-2 text-3xl font-bold">{t("tools.indexSubtitle")}</h1>
         </div>
       </header>
