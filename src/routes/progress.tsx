@@ -388,6 +388,62 @@ const STONE_CARD: React.CSSProperties = {
   overflow: "hidden",
 };
 
+// ── Pattern Detector — "Learn how it works" disclosure ───────────────────────
+function PdLearnMore() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth:280 }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+          width:"100%", padding:"8px 0", background:"none", border:"none", cursor:"pointer",
+          color:"rgba(255,255,255,0.32)", fontSize:11, fontFamily:"DM Sans, sans-serif", fontWeight:600,
+          letterSpacing:"0.04em",
+        }}
+      >
+        {/* Info circle icon */}
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" strokeWidth="1.2" fill="none"/>
+          <path d="M6.5 5.8v3.5M6.5 4.2v.1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+        {open ? "Hide" : "Learn how it works"}
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
+          style={{ transform: open ? "rotate(180deg)" : "none", transition:"transform 0.2s ease" }}>
+          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:"auto" }} exit={{ opacity:0, height:0 }}
+            transition={{ duration:0.22, ease:"easeOut" }}
+            style={{ overflow:"hidden" }}
+          >
+            <div style={{
+              background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.08)",
+              borderRadius:12, padding:"12px 14px", display:"flex", flexDirection:"column", gap:8,
+            }}>
+              {[
+                { icon:"🧠", text:"Each relapse you log teaches the detector your personal trigger patterns." },
+                { icon:"📅", text:"It identifies your riskiest days of the week and times of day." },
+                { icon:"⚡", text:"Battle Reports give you actionable plans — not just data." },
+              ].map(({ icon, text }) => (
+                <div key={icon} style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+                  <span style={{ fontSize:14, flexShrink:0, lineHeight:1.4 }}>{icon}</span>
+                  <p style={{ margin:0, fontSize:11, color:"rgba(255,255,255,0.40)", lineHeight:1.55, fontFamily:"DM Sans, sans-serif" }}>
+                    {text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 function ProgressScreen() {
   const { t } = useTranslation();
@@ -1058,7 +1114,6 @@ function ProgressScreen() {
       {/* ── Pattern Detector (PRO) ──────────────────────────── */}
       <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <style>{`
-          @keyframes pd-spin  { to { transform: rotate(360deg); } }
           @keyframes pd-scan  { 0%{opacity:0.55} 50%{opacity:1} 100%{opacity:0.55} }
           @keyframes pd-glitch {
             0%,93%,100% { transform:none; textShadow:"none" }
@@ -1099,7 +1154,7 @@ function ProgressScreen() {
               </p>
             </div>
             <p style={{ fontSize:11, color:"rgba(255,255,255,0.35)", marginTop:2, fontFamily:"DM Sans, sans-serif" }}>
-              {relapses.length === 0 ? "Scanning your behaviour..." : `${relapses.length} event${relapses.length !== 1 ? "s" : ""} analysed`}
+              {relapses.length === 0 ? "No events logged yet" : `${relapses.length} event${relapses.length !== 1 ? "s" : ""} analysed`}
             </p>
           </div>
           {!state.isPremium && (
@@ -1112,33 +1167,50 @@ function ProgressScreen() {
 
         <div className="relative">
           <div className={state.isPremium ? "" : "blur-[6px] select-none pointer-events-none"}>
+            <AnimatePresence mode="wait">
             {relapses.length === 0 ? (
-              /* ── Empty state: learning ── */
-              <div style={{ ...STONE_CARD, padding:"28px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
+              /* ── Empty state: no history yet ── */
+              <motion.div key="pd-empty"
+                initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-4 }}
+                transition={{ duration:0.28, ease:"easeOut" }}
+                style={{ ...STONE_CARD, padding:"28px 20px 22px", display:"flex", flexDirection:"column", alignItems:"center", gap:12 }}
+              >
                 <div aria-hidden style={{ position:"absolute", inset:0, borderRadius:18, pointerEvents:"none",
-                  background:"repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.012) 8px, rgba(201,168,76,0.012) 9px)" }}/>
-                {/* Spinning gear */}
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ animation:"pd-spin 8s linear infinite", position:"relative", zIndex:1 }}>
-                  <circle cx="22" cy="22" r="8" stroke="rgba(201,168,76,0.55)" strokeWidth="2" fill="none"/>
-                  <circle cx="22" cy="22" r="3" fill="rgba(201,168,76,0.45)"/>
-                  {Array.from({length:8},(_,i)=>{
-                    const a=(i*45)*Math.PI/180;
-                    return <rect key={i} x={22+12*Math.cos(a)-2} y={22+12*Math.sin(a)-4} width="4" height="8"
-                      rx="2" fill="rgba(201,168,76,0.40)" transform={`rotate(${i*45} ${22+12*Math.cos(a)} ${22+12*Math.sin(a)})`}/>;
-                  })}
-                </svg>
+                  background:"repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(255,255,255,0.012) 8px, rgba(255,255,255,0.012) 9px)" }}/>
+
+                {/* Static radar icon — NOT spinning */}
+                <div style={{ position:"relative", zIndex:1, width:48, height:48, display:"grid", placeItems:"center" }}>
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5"/>
+                    <circle cx="24" cy="24" r="12" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5"/>
+                    <circle cx="24" cy="24" r="5" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" fill="none"/>
+                    <circle cx="24" cy="24" r="2" fill="rgba(255,255,255,0.20)"/>
+                    {/* Crosshairs */}
+                    <line x1="24" y1="4" x2="24" y2="44" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
+                    <line x1="4" y1="24" x2="44" y2="24" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
+                  </svg>
+                </div>
+
+                {/* Copy */}
                 <div style={{ position:"relative", zIndex:1, textAlign:"center" }}>
-                  <p style={{ margin:0, fontSize:13, fontWeight:700, color:"rgba(255,255,255,0.55)", fontFamily:"DM Sans, sans-serif" }}>
-                    Learning patterns…
+                  <p style={{ margin:0, fontSize:14, fontWeight:700, color:"rgba(255,255,255,0.70)", fontFamily:"DM Sans, sans-serif", lineHeight:1.4 }}>
+                    No battle history yet
                   </p>
-                  <p style={{ margin:"6px 0 0", fontSize:11, color:"rgba(255,255,255,0.28)", lineHeight:1.55, fontFamily:"DM Sans, sans-serif" }}>
-                    Log your first relapse to unlock<br/>battle reports and trigger analysis.
+                  <p style={{ margin:"8px 0 0", fontSize:12, color:"rgba(255,255,255,0.32)", lineHeight:1.6, fontFamily:"DM Sans, sans-serif", maxWidth:240 }}>
+                    Keep going. Your data will appear here once you log your first milestone or relapse.
                   </p>
                 </div>
-              </div>
+
+                {/* Learn how it works — expandable disclosure */}
+                <PdLearnMore />
+              </motion.div>
             ) : (
               /* ── Data state: battle reports ── */
-              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+              <motion.div key="pd-reports"
+                initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-4 }}
+                transition={{ duration:0.28, ease:"easeOut" }}
+                style={{ display:"flex", flexDirection:"column", gap:8 }}
+              >
                 {[
                   peakDowFull && {
                     severity: "HIGH" as const,
@@ -1199,8 +1271,9 @@ function ProgressScreen() {
                     </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
           </div>
           {!state.isPremium && (
             <button onClick={() => triggerPaywall()} className="absolute inset-0 flex items-center justify-center">
