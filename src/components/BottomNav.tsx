@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Wrench, Users, BarChart2 } from "lucide-react";
+import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
 import { loadState, useAppState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
