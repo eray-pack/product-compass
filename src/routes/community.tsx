@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
@@ -104,6 +105,136 @@ const BADGE_COLORS: Record<string, { color: string; glow: string }> = {
 
 const COOLDOWN_SECS = 10;
 
+// ─── Social stickiness ────────────────────────────────────────────────────────
+const TICKER_STATS = [
+  "2.3M clean days logged community-wide",
+  "1,847 people succeeding today",
+  "312 urges survived this hour",
+  "46,847 members fighting alongside you",
+  "94% who reach day 7 make it to day 30",
+];
+
+const ROOM_GOALS: Record<string, { current: number; goal: number; label: string }> = {
+  global:        { current: 2341850, goal: 2500000, label: "community clean days" },
+  bible:         { current: 89240,   goal: 100000,  label: "days of faith" },
+  fitness:       { current: 147600,  goal: 200000,  label: "workouts logged" },
+  relationships: { current: 41200,   goal: 75000,   label: "days rebuilding trust" },
+  mental:        { current: 98450,   goal: 150000,  label: "days of clarity" },
+};
+
+function formatGoal(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${Math.round(n / 1000)}k`;
+  return `${n}`;
+}
+
+function ImpactTicker() {
+  const [idx, setIdx] = useState(0);
+  const [show, setShow] = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setShow(false);
+      setTimeout(() => { setIdx((i) => (i + 1) % TICKER_STATS.length); setShow(true); }, 380);
+    }, 3600);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="mt-3 flex items-center gap-2">
+      <span
+        className="h-1.5 w-1.5 rounded-full shrink-0 animate-pulse"
+        style={{ background: "#C4873A", boxShadow: "0 0 6px #C4873A" }}
+      />
+      <motion.span
+        key={idx}
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: show ? 1 : 0, y: show ? 0 : -5 }}
+        transition={{ duration: 0.32 }}
+        className="text-[11px] font-medium"
+        style={{ color: "rgba(201,168,76,0.75)" }}
+      >
+        {TICKER_STATS[idx]}
+      </motion.span>
+    </div>
+  );
+}
+
+function CollectiveGoalBar({ roomId, color }: { roomId: string; color: string }) {
+  const goal = ROOM_GOALS[roomId];
+  if (!goal) return null;
+  const pct = Math.min(100, Math.round((goal.current / goal.goal) * 100));
+
+  return (
+    <div className="mt-2.5">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.28)" }}>
+          Collective Goal
+        </span>
+        <span className="text-[9px] font-bold tabular-nums" style={{ color }}>
+          {formatGoal(goal.current)} / {formatGoal(goal.goal)} {goal.label}
+        </span>
+      </div>
+      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <motion.div
+          className="h-full rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+          style={{ background: `linear-gradient(90deg, ${color}70, ${color})` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function GlobalCheckInBar({ checkedIn, onCheckIn }: { checkedIn: boolean; onCheckIn: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.15 }}
+      className="mx-4 mt-3 px-4 py-3 rounded-2xl flex items-center justify-between gap-3"
+      style={{
+        background: checkedIn ? "rgba(196,135,58,0.07)" : "rgba(255,255,255,0.03)",
+        border: checkedIn ? "1px solid rgba(196,135,58,0.22)" : "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
+      <div className="flex items-center gap-2.5 min-w-0">
+        <span
+          className={`h-2 w-2 rounded-full shrink-0 ${checkedIn ? "animate-pulse" : ""}`}
+          style={{
+            background: checkedIn ? "#C4873A" : "rgba(255,255,255,0.18)",
+            boxShadow: checkedIn ? "0 0 8px rgba(196,135,58,0.7)" : "none",
+          }}
+        />
+        <span
+          className="text-[11px] font-medium truncate"
+          style={{ color: checkedIn ? "#C4873A" : "rgba(255,255,255,0.38)" }}
+        >
+          {checkedIn ? "You're present · Glowing on the map for 24h" : "Mark your presence on the global map"}
+        </span>
+      </div>
+      {checkedIn ? (
+        <Check className="h-3.5 w-3.5 shrink-0" style={{ color: "#C4873A" }} />
+      ) : (
+        <button
+          onClick={onCheckIn}
+          className="text-[11px] font-bold px-3.5 py-1.5 rounded-full transition-all active:scale-95 shrink-0"
+          style={{
+            background: "rgba(196,135,58,0.10)",
+            border: "1px solid rgba(196,135,58,0.32)",
+            color: "#C4873A",
+            letterSpacing: "0.03em",
+          }}
+        >
+          Check In
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
   if (diff < 60) return `${diff}s`;
@@ -133,7 +264,9 @@ const ACTIVITY_DOTS: { name: string; coords: [number, number] }[] = [
   { name: "Sydney",     coords: [151.2, -33.9  ] },
 ];
 
-function WorldMapHero() {
+const USER_CHECKIN_COORDS: [number, number] = [-74, 41]; // New York placeholder
+
+function WorldMapHero({ userCheckedIn }: { userCheckedIn: boolean }) {
   const [liveCount, setLiveCount] = useState(248);
 
   useEffect(() => {
@@ -172,6 +305,15 @@ function WorldMapHero() {
             transform-box: fill-box;
             transform-origin: center;
             animation: rsm-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+          }
+          @keyframes rsm-user-glow {
+            0%, 100% { opacity: 0.3; }
+            50%       { opacity: 0.8; }
+          }
+          .rsm-user-ring {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: rsm-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
           }
           @keyframes border-beam-rotate {
             from { transform: rotate(0deg); }
@@ -250,6 +392,23 @@ function WorldMapHero() {
               />
             </Marker>
           ))}
+
+          {/* User check-in glow marker */}
+          {userCheckedIn && (
+            <Marker coordinates={USER_CHECKIN_COORDS}>
+              <circle r={7} fill="#E8C060" fillOpacity={0.12} className="rsm-user-ring" style={{ animationDelay: "0s" }} />
+              <circle r={7} fill="#E8C060" fillOpacity={0.12} className="rsm-user-ring" style={{ animationDelay: "0.55s" }} />
+              <circle
+                r={3.8}
+                fill="#FFDF80"
+                fillOpacity={1}
+                style={{ filter: "drop-shadow(0 0 5px #FFDF80) drop-shadow(0 0 12px rgba(255,220,80,0.7))" }}
+              />
+              <text y={-8} textAnchor="middle" fill="#FFDF80" fontSize={4.5} fontWeight="800" fontFamily="system-ui, sans-serif" letterSpacing="0.4">
+                YOU
+              </text>
+            </Marker>
+          )}
         </ComposableMap>
         </div>
       </div>
@@ -311,6 +470,15 @@ function CommunityPage() {
   const [joinedRooms, setJoinedRooms] = useState<string[]>(["global"]);
   const [showCreate, setShowCreate] = useState(false);
   const [userRooms, setUserRooms] = useState<Room[]>([]);
+  const [checkedIn, setCheckedIn] = useState(() => {
+    const ts = parseInt(localStorage.getItem("stopamine.community.checkin") ?? "0", 10);
+    return ts > 0 && Date.now() - ts < 86400000;
+  });
+
+  const handleCheckIn = () => {
+    localStorage.setItem("stopamine.community.checkin", String(Date.now()));
+    setCheckedIn(true);
+  };
 
   useEffect(() => {
     supabase
@@ -358,12 +526,16 @@ function CommunityPage() {
         <p className="mt-2 text-sm leading-relaxed" style={{ color: "oklch(0.60 0.018 265 / 0.75)" }}>
           Real people, doing the same work, right now.
         </p>
+        <ImpactTicker />
       </header>
 
       {/* ── World map hero ───────────────────────────────────── */}
       <div className="fade-up-1">
-        <WorldMapHero />
+        <WorldMapHero userCheckedIn={checkedIn} />
       </div>
+
+      {/* ── Global check-in bar ──────────────────────────────── */}
+      <GlobalCheckInBar checkedIn={checkedIn} onCheckIn={handleCheckIn} />
 
       {/* ── Room list ────────────────────────────────────────── */}
       <section className="px-6 mt-2 fade-up-2">
@@ -426,6 +598,8 @@ function CommunityPage() {
 
                   {/* Avatar stack + live/member count */}
                   <AvatarStack roomId={room.id} memberCount={room.memberCount} isGlobal={room.isGlobal} />
+                  {/* Collective goal progress bar */}
+                  <CollectiveGoalBar roomId={room.id} color={room.color} />
                 </div>
               </button>
             );
