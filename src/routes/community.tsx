@@ -508,7 +508,7 @@ function FounderBadgeToast({ onDone }: { onDone: () => void }) {
 }
 
 // ─── Sovereign Invite Modal ───────────────────────────────────────────────────
-function SovereignInviteModal({ onClose, onGrantBadge }: { onClose: () => void; onGrantBadge: () => void }) {
+function SovereignInviteModal({ onClose, onGrantBadge, isPro }: { onClose: () => void; onGrantBadge: () => void; isPro: boolean }) {
   const [copied, setCopied] = useState(false);
   const [badgeGranted] = useState(() => !!localStorage.getItem("stopamine.founder_badge_sender"));
 
@@ -523,13 +523,16 @@ function SovereignInviteModal({ onClose, onGrantBadge }: { onClose: () => void; 
 
   const inviteLink = `${window.location.origin}/community?fi=${inviteCode}`;
 
+  // Guard: if PRO status drops while modal is open (e.g. dev panel), close immediately
   useEffect(() => {
+    if (!isPro) { onClose(); return; }
+    // Grant sender badge one-time — only runs when isPro is confirmed
     if (!localStorage.getItem("stopamine.founder_badge_sender")) {
       localStorage.setItem("stopamine.founder_badge_sender", "1");
       onGrantBadge();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isPro]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteLink).then(() => {
@@ -839,6 +842,15 @@ function CommunityPage() {
   const handleCheckIn = () => {
     localStorage.setItem("stopamine.community.checkin", String(Date.now()));
     setCheckedIn(true);
+  };
+
+  // ── Sovereign Invite access guard ────────────────────────────────────────────
+  const handleSovereignInvite = () => {
+    if (!state.isPremium) {
+      setShowProModal(true);
+      return;
+    }
+    setShowInviteModal(true);
   };
 
   // ── Founder badge ────────────────────────────────────────────────────────────
@@ -1196,7 +1208,7 @@ function CommunityPage() {
 
           {/* Sovereign Invite — Royal Gold badge */}
           <button
-            onClick={() => state.isPremium ? setShowInviteModal(true) : setShowProModal(true)}
+            onClick={handleSovereignInvite}
             className="si-badge-hover text-left"
             style={{
               padding: "14px 14px 12px",
@@ -1307,6 +1319,7 @@ function CommunityPage() {
       {showProModal && <CommunityProModal onClose={() => setShowProModal(false)} />}
       {showInviteModal && (
         <SovereignInviteModal
+          isPro={state.isPremium}
           onClose={() => setShowInviteModal(false)}
           onGrantBadge={grantFounderBadge}
         />
