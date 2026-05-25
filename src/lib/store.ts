@@ -80,6 +80,8 @@ export type AppState = {
   totalCleanDays: number;
   badges: string[];
   urgesSurvived: number;
+  // Milestone celebrations — prevents re-triggering on every load
+  hasCelebrated90: boolean;
 };
 
 const defaultState = (): AppState => ({
@@ -109,6 +111,7 @@ const defaultState = (): AppState => ({
   totalCleanDays: 0,
   badges: [],
   urgesSurvived: 0,
+  hasCelebrated90: false,
 });
 
 const VALID_COMPANIONS = new Set<string>(["tree", "wolf"]);

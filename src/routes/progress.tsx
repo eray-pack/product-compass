@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Lock, Hourglass, Smartphone, CalendarDays, Zap } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
@@ -24,12 +24,263 @@ export const Route = createFileRoute("/progress")({
 });
 
 // ── Neural Green palette ──────────────────────────────────────────────────────
-const NG = "#39d98a";          // primary neural green
-const NG_DIM = "#1a6640";      // dim track green
-const NG_GLOW = "rgba(57,217,138,";  // rgba prefix
+const NG = "#39d98a";
+const NG_DIM = "#1a6640";
+const NG_GLOW = "rgba(57,217,138,";
+
+// ── Legendary Gold palette (90-day) ──────────────────────────────────────────
+const LG = "#E8C87A";
+const LG_DIM = "#6b4c10";
+const LG_GLOW = "rgba(232,200,122,";
+
+// ── Confetti Engine ───────────────────────────────────────────────────────────
+function Confetti({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef    = useRef<number>(0);
+
+  const launch = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const COLORS = ["#E8C87A","#f5d98a","#fff0b0","#39d98a","#ffffff","#f06450","#7ec8e3"];
+    const COUNT  = 160;
+
+    type Particle = {
+      x: number; y: number; vx: number; vy: number;
+      r: number; color: string; rot: number; rotV: number; alpha: number;
+      shape: "rect" | "circle";
+    };
+
+    const particles: Particle[] = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 120,
+      vx: (Math.random() - 0.5) * 3.5,
+      vy: 2.5 + Math.random() * 4,
+      r: 4 + Math.random() * 6,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.18,
+      alpha: 1,
+      shape: Math.random() > 0.4 ? "rect" : "circle",
+    }));
+
+    let alive = true;
+
+    function tick() {
+      if (!alive || !ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let any = false;
+      for (const p of particles) {
+        p.x   += p.vx;
+        p.y   += p.vy;
+        p.vy  += 0.07;   // gravity
+        p.rot += p.rotV;
+        if (p.y < canvas.height + 40) {
+          any = true;
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          if (p.shape === "rect") {
+            ctx.fillRect(-p.r / 2, -p.r * 1.4, p.r, p.r * 2.8);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.r / 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+      if (any) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { alive = false; cancelAnimationFrame(rafRef.current); };
+  }, []);
+
+  useEffect(() => {
+    if (!active) return;
+    const cleanup = launch();
+    return () => { cleanup?.(); cancelAnimationFrame(rafRef.current); };
+  }, [active, launch]);
+
+  if (!active) return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        pointerEvents: "none", width: "100%", height: "100%",
+      }}
+    />
+  );
+}
+
+// ── 90-Day Celebration Modal ──────────────────────────────────────────────────
+function Victory90Modal({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <motion.div
+      key="v90-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.35 }}
+      style={{
+        position: "fixed", inset: 0, zIndex: 9998,
+        background: "rgba(0,0,0,0.88)",
+        backdropFilter: "blur(8px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 24px",
+      }}
+      onClick={onDismiss}
+    >
+      <motion.div
+        initial={{ scale: 0.80, opacity: 0, y: 40 }}
+        animate={{ scale: 1,    opacity: 1, y: 0 }}
+        exit={{    scale: 0.88, opacity: 0, y: 20 }}
+        transition={{ type: "spring", stiffness: 260, damping: 22, delay: 0.08 }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 360,
+          background: "linear-gradient(160deg, rgba(28,20,6,0.99) 0%, rgba(14,10,2,1) 100%)",
+          border: "1px solid rgba(232,200,122,0.35)",
+          borderTop: "1px solid rgba(232,200,122,0.65)",
+          borderRadius: 24,
+          padding: "36px 28px 28px",
+          position: "relative",
+          overflow: "hidden",
+          boxShadow: "0 0 80px rgba(232,200,122,0.22), 0 0 200px rgba(232,200,122,0.08)",
+        }}
+      >
+        {/* Background grain */}
+        <div aria-hidden style={{
+          position: "absolute", inset: 0, borderRadius: 24, pointerEvents: "none",
+          background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(232,200,122,0.016) 8px, rgba(232,200,122,0.016) 9px)",
+        }}/>
+
+        {/* Animated halo behind the crown */}
+        <style>{`
+          @keyframes v90-halo { 0%,100%{opacity:0.45;transform:scale(0.92)} 50%{opacity:1;transform:scale(1.10)} }
+          @keyframes v90-shimmer { 0%,100%{opacity:0.70} 50%{opacity:1} }
+          @keyframes v90-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        `}</style>
+        <div aria-hidden style={{
+          position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+          width: 200, height: 120, borderRadius: "0 0 50% 50%",
+          background: "radial-gradient(ellipse at 50% 0%, rgba(232,200,122,0.28) 0%, transparent 70%)",
+          filter: "blur(18px)", animation: "v90-halo 3s ease-in-out infinite",
+        }}/>
+
+        {/* Crown icon */}
+        <div style={{
+          position: "relative", zIndex: 1,
+          display: "flex", justifyContent: "center", marginBottom: 20,
+          animation: "v90-float 4s ease-in-out infinite",
+        }}>
+          <svg width="56" height="44" viewBox="0 0 56 44" fill="none">
+            <defs>
+              <linearGradient id="crown-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stopColor="#fff0b0"/>
+                <stop offset="50%"  stopColor="#E8C87A"/>
+                <stop offset="100%" stopColor="#a07830"/>
+              </linearGradient>
+              <filter id="crown-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feFlood floodColor="#E8C87A" floodOpacity="0.70" result="c"/>
+                <feComposite in="c" in2="b" operator="in" result="g"/>
+                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            {/* Crown body */}
+            <path d="M4 38 L4 28 L14 12 L28 22 L42 12 L52 28 L52 38 Z"
+              fill="url(#crown-grad)" filter="url(#crown-glow)" strokeLinejoin="round"/>
+            {/* Base band */}
+            <rect x="4" y="34" width="48" height="6" rx="2" fill="#a07830" opacity="0.70"/>
+            {/* Gems */}
+            <circle cx="28" cy="14" r="3.5" fill="#fff" opacity="0.90" filter="url(#crown-glow)"/>
+            <circle cx="9"  cy="22" r="2.2" fill="#fff" opacity="0.70"/>
+            <circle cx="47" cy="22" r="2.2" fill="#fff" opacity="0.70"/>
+          </svg>
+        </div>
+
+        {/* Text content */}
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+          <p style={{
+            margin: "0 0 6px",
+            fontSize: 10, fontWeight: 800, letterSpacing: "0.28em", textTransform: "uppercase",
+            color: "rgba(232,200,122,0.70)", fontFamily: "DM Sans, sans-serif",
+          }}>
+            Day 90 · Sovereign
+          </p>
+          <h1 style={{
+            margin: "0 0 16px",
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: 28, fontStyle: "italic", fontWeight: 700,
+            color: LG, lineHeight: 1.2,
+            textShadow: `0 0 32px ${LG_GLOW}0.60)`,
+          }}>
+            Full Brain Reset<br/>Complete
+          </h1>
+
+          <div style={{
+            background: "rgba(232,200,122,0.06)", border: "1px solid rgba(232,200,122,0.18)",
+            borderRadius: 14, padding: "14px 16px", marginBottom: 20, textAlign: "left",
+          }}>
+            {[
+              { icon: "🧠", text: "Your dopamine receptors have substantially regenerated — cravings are no longer your default state." },
+              { icon: "⚡", text: "Prefrontal cortex activity is measurably stronger. You are in control." },
+              { icon: "🔒", text: "The neural pathways of your old habit have begun to prune. Keep going." },
+            ].map(({ icon, text }) => (
+              <div key={icon} style={{ display: "flex", gap: 12, marginBottom: 10, alignItems: "flex-start" }}>
+                <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.5 }}>{icon}</span>
+                <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: "DM Sans, sans-serif" }}>
+                  {text}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={onDismiss}
+            style={{
+              width: "100%", padding: "14px 0",
+              background: `linear-gradient(135deg, #a07830 0%, ${LG} 50%, #fff0b0 100%)`,
+              border: "none", borderRadius: 14, cursor: "pointer",
+              fontSize: 14, fontWeight: 800, letterSpacing: "0.06em",
+              color: "#0a0600", fontFamily: "DM Sans, sans-serif",
+              boxShadow: `0 0 32px ${LG_GLOW}0.35)`,
+            }}
+          >
+            Claim Your Sovereignty
+          </motion.button>
+          <p style={{ margin: "12px 0 0", fontSize: 10, color: "rgba(255,255,255,0.20)", fontFamily: "DM Sans, sans-serif" }}>
+            Tap anywhere to dismiss
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 // ── Neural Core ───────────────────────────────────────────────────────────────
-function NeuralCore({ pct, day }: { pct: number; day: number }) {
+function NeuralCore({ pct, day, legendary = false }: { pct: number; day: number; legendary?: boolean }) {
+  // Switch palette based on legendary mode
+  const P     = legendary ? LG      : NG;
+  const P_DIM = legendary ? LG_DIM  : NG_DIM;
+  const P_GLW = legendary ? LG_GLOW : NG_GLOW;
+
   const R = 76;
   const C = 2 * Math.PI * R;
   const offset = C * (1 - pct / 100);
@@ -59,17 +310,17 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
       <div aria-hidden style={{ position:"absolute", inset:-60, pointerEvents:"none", overflow:"visible" }}>
         <div style={{
           position:"absolute", top:"10%", left:"5%", width:180, height:180, borderRadius:"50%",
-          background:`radial-gradient(circle, ${NG_GLOW}${(glowAlpha*0.32).toFixed(2)}) 0%, transparent 70%)`,
+          background:`radial-gradient(circle, ${P_GLW}${(glowAlpha*0.32).toFixed(2)}) 0%, transparent 70%)`,
           filter:"blur(36px)", animation:`nc-nebula1 ${pulseDur * 3.5}s ease-in-out infinite`,
         }}/>
         <div style={{
           position:"absolute", top:"30%", right:"8%", width:140, height:140, borderRadius:"50%",
-          background:`radial-gradient(circle, ${NG_GLOW}${(glowAlpha*0.22).toFixed(2)}) 0%, transparent 65%)`,
+          background:`radial-gradient(circle, ${P_GLW}${(glowAlpha*0.22).toFixed(2)}) 0%, transparent 65%)`,
           filter:"blur(28px)", animation:`nc-nebula2 ${pulseDur * 4.2}s ease-in-out infinite`,
         }}/>
         <div style={{
           position:"absolute", bottom:"5%", left:"20%", width:120, height:120, borderRadius:"50%",
-          background:`radial-gradient(circle, rgba(16,185,129,${(glowAlpha*0.18).toFixed(2)}) 0%, transparent 70%)`,
+          background:`radial-gradient(circle, ${P_GLW}${(glowAlpha*0.18).toFixed(2)}) 0%, transparent 70%)`,
           filter:"blur(24px)", animation:`nc-nebula3 ${pulseDur * 5}s ease-in-out infinite`,
         }}/>
       </div>
@@ -79,32 +330,64 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
         animate={{ opacity:[glowAlpha*0.55, glowAlpha, glowAlpha*0.55], scale:[0.90,1.10,0.90] }}
         transition={{ repeat:Infinity, duration:pulseDur, ease:"easeInOut" }}
         className="absolute inset-0 rounded-full pointer-events-none"
-        style={{ background:`radial-gradient(circle, ${NG_GLOW}${glowAlpha}) 0%, transparent 62%)`, filter:"blur(32px)" }}
+        style={{ background:`radial-gradient(circle, ${P_GLW}${glowAlpha}) 0%, transparent 62%)`, filter:"blur(32px)" }}
       />
       {/* Secondary halo — wider, offset */}
       <motion.div aria-hidden
         animate={{ opacity:[0.05,0.14,0.05], scale:[1,1.22,1] }}
         transition={{ repeat:Infinity, duration:pulseDur*1.6, ease:"easeInOut", delay:pulseDur*0.5 }}
         className="absolute rounded-full pointer-events-none"
-        style={{ inset:-28, background:`radial-gradient(circle, ${NG_GLOW}0.12) 0%, transparent 55%)`, filter:"blur(22px)" }}
+        style={{ inset:-28, background:`radial-gradient(circle, ${P_GLW}0.12) 0%, transparent 55%)`, filter:"blur(22px)" }}
       />
+
+      {/* Crown above ring — legendary mode only */}
+      {legendary && (
+        <motion.div aria-hidden
+          initial={{ opacity:0, y:8, scale:0.7 }}
+          animate={{ opacity:1, y:0, scale:1 }}
+          transition={{ type:"spring", stiffness:240, damping:18, delay:0.3 }}
+          style={{ position:"absolute", top:-42, left:"50%", transform:"translateX(-50%)", zIndex:2 }}
+        >
+          <svg width="36" height="28" viewBox="0 0 36 28" fill="none">
+            <defs>
+              <linearGradient id="nc-crown" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"  stopColor="#fff0b0"/>
+                <stop offset="60%" stopColor="#E8C87A"/>
+                <stop offset="100%" stopColor="#a07830"/>
+              </linearGradient>
+              <filter id="nc-crown-glow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="2.5" result="b"/>
+                <feFlood floodColor="#E8C87A" floodOpacity="0.80" result="c"/>
+                <feComposite in="c" in2="b" operator="in" result="g"/>
+                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path d="M2 26 L2 18 L9 7 L18 14 L27 7 L34 18 L34 26 Z"
+              fill="url(#nc-crown)" filter="url(#nc-crown-glow)"/>
+            <rect x="2" y="22" width="32" height="4" rx="1.5" fill="#a07830" opacity="0.65"/>
+            <circle cx="18" cy="8"  r="2.2" fill="#fff" opacity="0.95" filter="url(#nc-crown-glow)"/>
+            <circle cx="5"  cy="14" r="1.4" fill="#fff" opacity="0.75"/>
+            <circle cx="31" cy="14" r="1.4" fill="#fff" opacity="0.75"/>
+          </svg>
+        </motion.div>
+      )}
 
       <svg width="216" height="216" viewBox="0 0 196 196" overflow="visible">
         <defs>
           <linearGradient id="nc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor="#1a6640"/>
-            <stop offset="50%"  stopColor="#39d98a"/>
-            <stop offset="100%" stopColor="#6effc5"/>
+            <stop offset="0%"   stopColor={P_DIM}/>
+            <stop offset="50%"  stopColor={P}/>
+            <stop offset="100%" stopColor={legendary ? "#fff0b0" : "#6effc5"}/>
           </linearGradient>
           <filter id="nc-glow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="3.2" result="b"/>
-            <feFlood floodColor={NG} floodOpacity="0.60" result="c"/>
+            <feFlood floodColor={P} floodOpacity="0.60" result="c"/>
             <feComposite in="c" in2="b" operator="in" result="g"/>
             <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
           <filter id="nc-node-glow" x="-120%" y="-120%" width="340%" height="340%">
             <feGaussianBlur stdDeviation="2.5" result="b"/>
-            <feFlood floodColor={NG} floodOpacity="0.90" result="c"/>
+            <feFlood floodColor={P} floodOpacity="0.90" result="c"/>
             <feComposite in="c" in2="b" operator="in" result="g"/>
             <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
@@ -118,24 +401,24 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
             <line key={i}
               x1={98 + 91 * Math.cos(a)} y1={98 + 91 * Math.sin(a)}
               x2={98 + (isMain ? 97 : 94) * Math.cos(a)} y2={98 + (isMain ? 97 : 94) * Math.sin(a)}
-              stroke={`rgba(57,217,138,${isMain ? 0.55 : 0.18})`}
+              stroke={`${P_GLW}${isMain ? 0.55 : 0.18})`}
               strokeWidth={isMain ? 1.4 : 0.7} strokeLinecap="round"
             />
           );
         })}
 
         {/* Track */}
-        <circle cx="98" cy="98" r={R} fill="none" stroke="rgba(57,217,138,0.08)" strokeWidth="12"/>
+        <circle cx="98" cy="98" r={R} fill="none" stroke={`${P_GLW}0.08)`} strokeWidth="12"/>
 
         {/* Broad spread glow behind arc */}
         <circle cx="98" cy="98" r={R} fill="none"
-          stroke={NG} strokeWidth="28"
+          stroke={P} strokeWidth="28"
           strokeDasharray={C} strokeDashoffset={offset}
           strokeLinecap="round" transform="rotate(-90 98 98)"
           opacity={glowAlpha * 0.15}
         />
 
-        {/* Progress arc — rounded cap, green gradient */}
+        {/* Progress arc — rounded cap */}
         <circle cx="98" cy="98" r={R} fill="none"
           stroke="url(#nc-grad)" strokeWidth="11"
           strokeDasharray={C} strokeDashoffset={offset}
@@ -148,8 +431,8 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
         {nodes.map((n, i) => (
           <circle key={i} cx={n.x} cy={n.y}
             r={n.active ? 3.2 : 1.6}
-            fill={n.active ? NG : "rgba(57,217,138,0.12)"}
-            stroke={n.active ? NG : "rgba(57,217,138,0.20)"} strokeWidth="0.8"
+            fill={n.active ? P : `${P_GLW}0.12)`}
+            stroke={n.active ? P : `${P_GLW}0.20)`} strokeWidth="0.8"
             filter={n.active ? "url(#nc-node-glow)" : "none"}
             opacity={n.active ? 1 : 0.30}
             style={n.active ? { animation:`nc-node ${pulseDur}s ease-in-out ${i*0.13}s infinite` } : {}}
@@ -159,7 +442,7 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
         {/* Connector lines: active nodes → center */}
         {nodes.filter(n => n.active).map((n, i) => (
           <line key={i} x1={n.x} y1={n.y} x2="98" y2="98"
-            stroke={NG} strokeWidth="0.5" opacity="0.07"/>
+            stroke={P} strokeWidth="0.5" opacity="0.07"/>
         ))}
 
         {/* Center — day count */}
@@ -173,19 +456,19 @@ function NeuralCore({ pct, day }: { pct: number; day: number }) {
           DAYS CLEAN
         </text>
         <text x="98" y="121" textAnchor="middle" fontSize="9"
-          fill={`${NG_GLOW}0.60)`} fontFamily="'DM Sans', sans-serif" letterSpacing="0.08em">
-          {pct}% TO 90d
+          fill={`${P_GLW}0.60)`} fontFamily="'DM Sans', sans-serif" letterSpacing="0.08em">
+          {legendary ? "SOVEREIGN" : `${pct}% TO 90d`}
         </text>
       </svg>
 
-      {/* NEURAL CORE label — pure white, bold */}
+      {/* NEURAL CORE / SOVEREIGN label */}
       <div style={{
         position:"absolute", bottom:-4,
         fontSize:9, fontWeight:800, letterSpacing:"0.28em", textTransform:"uppercase",
         color:"#ffffff", fontFamily:"DM Sans, sans-serif",
-        textShadow:`0 0 12px ${NG_GLOW}0.70)`,
+        textShadow:`0 0 12px ${P_GLW}0.70)`,
       }}>
-        ◆ NEURAL CORE ◆
+        {legendary ? "◆ SOVEREIGN ◆" : "◆ NEURAL CORE ◆"}
       </div>
     </div>
   );
@@ -447,16 +730,35 @@ function PdLearnMore() {
 // ── Main screen ───────────────────────────────────────────────────────────────
 function ProgressScreen() {
   const { t } = useTranslation();
-  const [state] = useAppState();
+  const [state, update] = useAppState();
   const [progressView, setProgressView] = useState<"grid" | "bars" | "streak">("grid");
+  const [showVictory, setShowVictory] = useState(false);
+
   const active = activeAddiction(state);
+
+  const day = active ? dayCount(active.startDate) : 0;
+  const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
+  const legendary = day >= 90;
+
+  // 90-day celebration — trigger once, persist to localStorage via store
+  useEffect(() => {
+    if (day >= 90 && !state.hasCelebrated90) {
+      // Small delay so the page renders before the modal fires
+      const t = setTimeout(() => setShowVictory(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, [day, state.hasCelebrated90]);
+
+  const handleDismissVictory = () => {
+    setShowVictory(false);
+    update({ hasCelebrated90: true });
+  };
+
   if (!active) return null;
 
-  const day = dayCount(active.startDate);
   const longest = longestCleanPeriod(state);
   const daysSinceStart = Math.floor((Date.now() - active.startDate) / 86400000);
   const totalLogins = state.loginHistory?.length ?? 0;
-  const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
 
   // Real login heatmap — 84 days (12 weeks), 1 cell per day
   const loginDaySet = new Set(
@@ -537,6 +839,12 @@ function ProgressScreen() {
 
   return (
     <PageShell>
+      {/* ── 90-day celebration overlays ─────────────────────── */}
+      <Confetti active={showVictory} />
+      <AnimatePresence>
+        {showVictory && <Victory90Modal onDismiss={handleDismissVictory} />}
+      </AnimatePresence>
+
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
         <SectionTitle>{t("nav.progress")}</SectionTitle>
@@ -547,7 +855,7 @@ function ProgressScreen() {
 
       {/* ── Neural Core hero ──────────────────────────────── */}
       <section className="flex flex-col items-center pt-6 pb-4 px-6 fade-up-1">
-        <NeuralCore pct={recoveryPct} day={day} />
+        <NeuralCore pct={recoveryPct} day={day} legendary={legendary} />
         <p className="mt-6 text-sm text-muted-foreground text-center max-w-[220px]">
           {recoveryPct < 100
             ? t("progress.ring.daysRemaining", { count: 90 - day })
