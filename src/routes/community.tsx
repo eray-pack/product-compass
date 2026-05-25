@@ -266,7 +266,7 @@ const ACTIVITY_DOTS: { name: string; coords: [number, number] }[] = [
 
 const USER_CHECKIN_COORDS: [number, number] = [-74, 41]; // New York placeholder
 
-function WorldMapHero({ userCheckedIn }: { userCheckedIn: boolean }) {
+function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: boolean; extraMembers?: number }) {
   const [liveCount, setLiveCount] = useState(248);
 
   useEffect(() => {
@@ -288,7 +288,7 @@ function WorldMapHero({ userCheckedIn }: { userCheckedIn: boolean }) {
           className="text-[11px] font-bold tracking-wider tabular-nums"
           style={{ color: "#C4873A" }}
         >
-          {liveCount} active now
+          {liveCount + extraMembers} active now
         </span>
       </div>
 
@@ -465,7 +465,7 @@ function AvatarStack({ roomId, memberCount, isGlobal }: { roomId: string; member
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 function CommunityPage() {
-  const [state] = useAppState();
+  const [state, update] = useAppState();
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [joinedRooms, setJoinedRooms] = useState<string[]>(["global"]);
   const [showCreate, setShowCreate] = useState(false);
@@ -479,6 +479,25 @@ function CommunityPage() {
     localStorage.setItem("stopamine.community.checkin", String(Date.now()));
     setCheckedIn(true);
   };
+
+  // ── Dev panel ────────────────────────────────────────────────────────────────
+  const [devOpen, setDevOpen] = useState(false);
+  const [devExtraMembers, setDevExtraMembers] = useState(0);
+  const [devRooms, setDevRooms] = useState<Room[]>([]);
+  const devTapCount = useRef(0);
+  const devTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleDevTap() {
+    devTapCount.current += 1;
+    if (devTapTimer.current) clearTimeout(devTapTimer.current);
+    devTapTimer.current = setTimeout(() => { devTapCount.current = 0; }, 600);
+    if (devTapCount.current >= 3) {
+      devTapCount.current = 0;
+      setDevOpen((v) => !v);
+    }
+  }
+
+  let devDummyCount = useRef(0);
 
   useEffect(() => {
     supabase
@@ -521,17 +540,131 @@ function CommunityPage() {
     <PageShell>
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="px-6 pt-12 pb-2 fade-up">
-        <SectionTitle>Community</SectionTitle>
-        <h1 className="mt-2 text-3xl font-bold">You're not alone.</h1>
+        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
+          <SectionTitle>Community</SectionTitle>
+        </div>
+        <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "block" }}>
+          <h1 className="mt-2 text-3xl font-bold">You're not alone.</h1>
+        </div>
         <p className="mt-2 text-sm leading-relaxed" style={{ color: "oklch(0.60 0.018 265 / 0.75)" }}>
           Real people, doing the same work, right now.
         </p>
         <ImpactTicker />
       </header>
 
+      {/* ── Dev Panel (triple-tap "Community" or "You're not alone." to toggle) ── */}
+      {devOpen && (
+        <div style={{
+          margin: "8px 16px 0",
+          padding: "14px 16px",
+          borderRadius: 16,
+          background: "rgba(20,20,20,0.92)",
+          border: "1px solid rgba(255,80,80,0.35)",
+          backdropFilter: "blur(16px)",
+        }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", color: "#ff5555", textTransform: "uppercase" }}>
+              🛠 Dev Mode
+            </span>
+            <button onClick={() => setDevOpen(false)} style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>✕</button>
+          </div>
+
+          {/* ── SECTION 1: ACCESS ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Access</p>
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            {(["FREE", "PRO"] as const).map((tier) => {
+              const isActive = tier === "PRO" ? state.isPremium : !state.isPremium;
+              return (
+                <button key={tier} onClick={() => update({ isPremium: tier === "PRO" })}
+                  style={{
+                    fontSize: 11, padding: "5px 16px", borderRadius: 8, cursor: "pointer",
+                    background: isActive ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.06)",
+                    border: isActive ? "1px solid rgba(201,168,76,0.55)" : "1px solid rgba(255,255,255,0.12)",
+                    color: isActive ? "#C9A84C" : "rgba(255,255,255,0.55)",
+                    fontWeight: isActive ? 700 : 400,
+                  }}>
+                  {tier}
+                </button>
+              );
+            })}
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", alignSelf: "center", marginLeft: 4 }}>
+              {state.isPremium ? "Full access" : "Create locked"}
+            </span>
+          </div>
+
+          {/* ── SECTION 2: MEMBERS ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Members</p>
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            <button
+              onClick={() => setDevExtraMembers((n) => n + 100)}
+              style={{
+                fontSize: 11, padding: "5px 14px", borderRadius: 8, cursor: "pointer",
+                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.30)",
+                color: "#C9A84C", fontWeight: 600,
+              }}>
+              + 100 members
+            </button>
+            <button
+              onClick={() => setDevExtraMembers(0)}
+              style={{
+                fontSize: 11, padding: "5px 14px", borderRadius: 8, cursor: "pointer",
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.55)", fontWeight: 400,
+              }}>
+              Reset
+            </button>
+            {devExtraMembers > 0 && (
+              <span style={{ fontSize: 11, color: "#C9A84C", alignSelf: "center", marginLeft: 4 }}>
+                +{devExtraMembers} added
+              </span>
+            )}
+          </div>
+
+          {/* ── SECTION 3: COMMUNITIES ── */}
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Communities</p>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={() => {
+                devDummyCount.current += 1;
+                const n = devDummyCount.current;
+                setDevRooms((prev) => [...prev, {
+                  id: `dev-${n}`,
+                  name: `Test Room ${n}`,
+                  description: `Dev dummy community #${n} for testing.`,
+                  icon: Users,
+                  color: "oklch(0.55 0.15 220)",
+                  memberCount: Math.floor(Math.random() * 500) + 50,
+                }]);
+              }}
+              style={{
+                fontSize: 11, padding: "5px 14px", borderRadius: 8, cursor: "pointer",
+                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.30)",
+                color: "#C9A84C", fontWeight: 600,
+              }}>
+              Add dummy
+            </button>
+            <button
+              onClick={() => { setDevRooms([]); devDummyCount.current = 0; }}
+              style={{
+                fontSize: 11, padding: "5px 14px", borderRadius: 8, cursor: "pointer",
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.55)", fontWeight: 400,
+              }}>
+              Clear added
+            </button>
+            {devRooms.length > 0 && (
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", alignSelf: "center", marginLeft: 4 }}>
+                {devRooms.length} added
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── World map hero ───────────────────────────────────── */}
       <div className="fade-up-1">
-        <WorldMapHero userCheckedIn={checkedIn} />
+        <WorldMapHero userCheckedIn={checkedIn} extraMembers={devExtraMembers} />
       </div>
 
       {/* ── Global check-in bar ──────────────────────────────── */}
@@ -540,7 +673,7 @@ function CommunityPage() {
       {/* ── Room list ────────────────────────────────────────── */}
       <section className="px-6 mt-2 fade-up-2">
         <div className="space-y-0">
-          {[...ROOMS, ...userRooms].map((room, i, all) => {
+          {[...ROOMS, ...userRooms, ...devRooms].map((room, i, all) => {
             const joined = joinedRooms.includes(room.id);
             const Icon = room.icon;
             return (
@@ -609,21 +742,47 @@ function CommunityPage() {
 
       {/* ── Create community ─────────────────────────────────── */}
       <section className="px-6 mt-8 pb-6 fade-up-3">
-        <button
-          onClick={() => state.isPremium ? setShowCreate(true) : triggerPaywall()}
-          className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
-        >
-          <div
-            className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-            style={{ background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }}
+        {state.isPremium ? (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
           >
-            <Plus className="h-4 w-4" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold">Create a community</p>
-            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.65)" }}>Invite friends, set your own rules</p>
-          </div>
-        </button>
+            <div
+              className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
+              style={{ background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }}
+            >
+              <Plus className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Create a community</p>
+              <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.65)" }}>Invite friends, set your own rules</p>
+            </div>
+          </button>
+        ) : (
+          <button
+            onClick={() => triggerPaywall()}
+            className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
+          >
+            <div
+              className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
+              style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.20)" }}
+            >
+              <Lock className="h-4 w-4" style={{ color: "#C9A84C" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>Create a community</p>
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                  style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)", color: "#C9A84C", letterSpacing: "0.04em" }}
+                >
+                  🔒 PRO Only
+                </span>
+              </div>
+              <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.45)" }}>PRO required to create a community</p>
+            </div>
+          </button>
+        )}
       </section>
     </PageShell>
   );
