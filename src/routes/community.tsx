@@ -9,7 +9,7 @@ import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Send, Lock, Plus, Users, Globe, Book, Dumbbell,
-  Heart, MessageCircle, Crown, Shield, Check, X, Link2, Copy,
+  Heart, MessageCircle, Crown, Shield, Check, X, Link2, Copy, Key,
 } from "lucide-react";
 // @ts-ignore — react-simple-maps v3 ships no bundled types
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
@@ -564,135 +564,155 @@ function SovereignInviteModal({ onClose, onGrantBadge, isPro }: { onClose: () =>
         onClick={onClose}
         style={{
           position: "fixed", inset: 0, zIndex: 60,
-          background: "rgba(0,0,0,0.75)",
-          backdropFilter: "blur(8px)",
+          background: "rgba(0,0,0,0.78)",
+          backdropFilter: "blur(10px)",
           display: "flex", alignItems: "flex-end", justifyContent: "center",
         }}
       >
         <motion.div
           key="si-sheet"
-          initial={{ y: 60, opacity: 0 }}
+          initial={{ y: 64, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 60, opacity: 0 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ y: 64, opacity: 0 }}
+          transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%", maxWidth: 448,
-            background: "oklch(0.12 0.020 265 / 0.98)",
-            borderTop: "1px solid rgba(201,168,76,0.30)",
-            borderLeft: "1px solid rgba(255,255,255,0.06)",
-            borderRight: "1px solid rgba(255,255,255,0.06)",
+            /* Brushed Steel & Gold sheet */
+            background: "linear-gradient(170deg, rgba(32,26,14,0.99) 0%, rgba(20,18,12,0.99) 60%, rgba(28,22,10,0.99) 100%)",
+            borderTop: "1.5px solid rgba(201,168,76,0.42)",
+            borderLeft: "1px solid rgba(180,155,90,0.18)",
+            borderRight: "1px solid rgba(180,155,90,0.18)",
             borderRadius: "28px 28px 0 0",
-            padding: "28px 24px calc(36px + env(safe-area-inset-bottom))",
+            padding: "0 0 calc(36px + env(safe-area-inset-bottom))",
+            overflow: "hidden",
+            position: "relative",
           }}
         >
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", margin: "0 auto 24px" }} />
+          {/* Brushed-steel texture overlay */}
+          <div aria-hidden style={{
+            position: "absolute", inset: 0, pointerEvents: "none",
+            background: "repeating-linear-gradient(94deg, transparent, transparent 4px, rgba(201,168,76,0.018) 4px, rgba(201,168,76,0.018) 5px)",
+          }} />
+          {/* Warm gold rim glow along the top edge */}
+          <div aria-hidden style={{
+            position: "absolute", top: 0, left: "10%", right: "10%", height: 1,
+            background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.70), transparent)",
+            pointerEvents: "none",
+          }} />
 
-          {/* Crown + title */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+          <div style={{ position: "relative", zIndex: 1, padding: "26px 24px 0" }}>
+            {/* Drag handle + corner X */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22, position: "relative" }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.22)" }} />
+              <button
+                onClick={onClose}
+                style={{
+                  position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)",
+                  width: 30, height: 30, borderRadius: 10, border: "none", cursor: "pointer",
+                  background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.40)",
+                  display: "grid", placeItems: "center",
+                }}
+              >
+                <X style={{ width: 14, height: 14 }} />
+              </button>
+            </div>
+
+            {/* Key icon — Architect symbol */}
             <div style={{
-              width: 44, height: 44, borderRadius: 15, flexShrink: 0,
-              background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.30)",
+              width: 60, height: 60, borderRadius: 20, margin: "0 auto 18px",
+              background: "linear-gradient(145deg, rgba(201,168,76,0.16), rgba(120,85,20,0.22))",
+              border: "1px solid rgba(201,168,76,0.38)",
               display: "grid", placeItems: "center",
-              boxShadow: "0 0 20px rgba(201,168,76,0.18)",
+              boxShadow: "0 0 28px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,220,100,0.12)",
             }}>
-              <Crown style={{ width: 20, height: 20, color: "#C9A84C" }} />
+              <Key style={{ width: 26, height: 26, color: "#C9A84C" }} />
             </div>
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(201,168,76,0.60)", letterSpacing: "0.14em", textTransform: "uppercase", margin: "0 0 2px" }}>
-                Sovereign Invite
-              </p>
-              <h2 style={{
-                fontFamily: "Cormorant Garamond, Georgia, serif",
-                fontSize: 22, fontWeight: 700, fontStyle: "italic",
-                color: "#C9A84C", margin: 0,
-              }}>
-                Founding Invite
-              </h2>
-            </div>
-          </div>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.55, margin: "0 0 22px" }}>
-            Anyone who joins via your link earns an exclusive Founder's Badge and 50 XP — so do you.
-          </p>
 
-          {/* Reward row */}
-          <div style={{
-            display: "flex", gap: 8, marginBottom: 20,
-          }}>
-            {[
-              { label: "You receive", value: "Founder's Badge + 50 XP" },
-              { label: "They receive", value: "Founder's Badge + 50 XP" },
-            ].map((item) => (
-              <div key={item.label} style={{
-                flex: 1, padding: "10px 12px", borderRadius: 12,
-                background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.18)",
+            {/* Eyebrow + title */}
+            <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(201,168,76,0.55)", letterSpacing: "0.18em", textTransform: "uppercase", textAlign: "center", margin: "0 0 6px" }}>
+              Architect Path
+            </p>
+            <h2 style={{
+              fontFamily: "Cormorant Garamond, Georgia, serif",
+              fontSize: 26, fontWeight: 700, fontStyle: "italic",
+              color: "#C9A84C", textAlign: "center", margin: "0 0 10px",
+              textShadow: "0 0 28px rgba(201,168,76,0.30)",
+            }}>
+              Sovereign Invites
+            </h2>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.52)", textAlign: "center", lineHeight: 1.6, margin: "0 0 24px" }}>
+              Build your legacy by bringing others into the fold. Pro members get exclusive referral tracking and Founder status rewards.
+            </p>
+
+            {/* Reward cards */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+              {[
+                { label: "You receive", value: "Founder's Badge + 50 XP" },
+                { label: "They receive", value: "Founder's Badge + 50 XP" },
+              ].map((item) => (
+                <div key={item.label} style={{
+                  flex: 1, padding: "10px 12px", borderRadius: 12,
+                  background: "rgba(201,168,76,0.06)",
+                  border: "1px solid rgba(201,168,76,0.18)",
+                }}>
+                  <p style={{ fontSize: 9, color: "rgba(201,168,76,0.50)", letterSpacing: "0.10em", textTransform: "uppercase", margin: "0 0 4px" }}>{item.label}</p>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "#C9A84C", margin: 0 }}>{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Invite link */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 10, marginBottom: badgeGranted ? 10 : 20,
+              padding: "10px 14px", borderRadius: 12,
+              background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.09)",
+            }}>
+              <Link2 style={{ width: 14, height: 14, color: "rgba(201,168,76,0.45)", flexShrink: 0 }} />
+              <span style={{ flex: 1, fontSize: 11, color: "rgba(255,255,255,0.45)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "monospace", letterSpacing: "0.04em" }}>
+                {inviteLink}
+              </span>
+              <button
+                onClick={handleCopy}
+                style={{
+                  display: "flex", alignItems: "center", gap: 4,
+                  background: "none", border: "none", cursor: "pointer",
+                  padding: "4px 8px", borderRadius: 6,
+                  color: copied ? "#C9A84C" : "rgba(255,255,255,0.32)",
+                  fontSize: 11, fontWeight: 600, flexShrink: 0, transition: "color 0.2s",
+                }}
+              >
+                {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+
+            {badgeGranted && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8, marginBottom: 16,
+                padding: "8px 12px", borderRadius: 10,
+                background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.20)",
               }}>
-                <p style={{ fontSize: 9, color: "rgba(201,168,76,0.55)", letterSpacing: "0.10em", textTransform: "uppercase", margin: "0 0 4px" }}>{item.label}</p>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#C9A84C", margin: 0 }}>{item.value}</p>
+                <Check style={{ width: 11, height: 11, color: "#C9A84C", flexShrink: 0 }} />
+                <span style={{ fontSize: 11, color: "#C9A84C" }}>Founder's Badge already granted to your account</span>
               </div>
-            ))}
-          </div>
+            )}
 
-          {/* Invite link box */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10, marginBottom: 12,
-            padding: "10px 14px", borderRadius: 12,
-            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)",
-          }}>
-            <Link2 style={{ width: 14, height: 14, color: "rgba(201,168,76,0.50)", flexShrink: 0 }} />
-            <span style={{
-              flex: 1, fontSize: 11, color: "rgba(255,255,255,0.50)",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              fontFamily: "monospace", letterSpacing: "0.04em",
-            }}>
-              {inviteLink}
-            </span>
+            {/* CTA */}
             <button
-              onClick={handleCopy}
+              onClick={handleShare}
               style={{
-                display: "flex", alignItems: "center", gap: 4,
-                background: "none", border: "none", cursor: "pointer",
-                padding: "4px 8px", borderRadius: 6,
-                color: copied ? "#C9A84C" : "rgba(255,255,255,0.35)",
-                fontSize: 11, fontWeight: 600, flexShrink: 0, transition: "color 0.2s",
+                width: "100%", height: 52, borderRadius: 16, marginBottom: 24,
+                background: "linear-gradient(135deg, #9A7830 0%, #C9A84C 30%, #E8C870 55%, #C9A84C 80%, #9A7830 100%)",
+                border: "none", cursor: "pointer",
+                fontSize: 14, fontWeight: 700, color: "#1a0f00",
+                letterSpacing: "0.05em",
+                boxShadow: "0 2px 0 rgba(80,50,10,0.8), 0 6px 28px rgba(201,168,76,0.28)",
               }}
             >
-              {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
-              {copied ? "Copied" : "Copy"}
+              Send Founding Invite
             </button>
           </div>
-
-          {badgeGranted && (
-            <div style={{
-              display: "flex", alignItems: "center", gap: 8, marginBottom: 14,
-              padding: "8px 12px", borderRadius: 10,
-              background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.22)",
-            }}>
-              <Check style={{ width: 12, height: 12, color: "#C9A84C", flexShrink: 0 }} />
-              <span style={{ fontSize: 11, color: "#C9A84C" }}>Your Founder's Badge has already been granted</span>
-            </div>
-          )}
-
-          {/* Share CTA */}
-          <button
-            onClick={handleShare}
-            style={{
-              width: "100%", height: 50, borderRadius: 14,
-              background: "linear-gradient(135deg, #C9A84C 0%, #E8C870 50%, #C9A84C 100%)",
-              border: "none", cursor: "pointer",
-              fontSize: 14, fontWeight: 700, color: "#1a0f00",
-              letterSpacing: "0.04em",
-              boxShadow: "0 4px 20px rgba(201,168,76,0.30)",
-            }}
-          >
-            Send Founding Invite
-          </button>
-          <button
-            onClick={onClose}
-            style={{ width: "100%", marginTop: 10, padding: "10px 0", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "rgba(255,255,255,0.30)" }}
-          >
-            Close
-          </button>
         </motion.div>
       </motion.div>
     </AnimatePresence>
@@ -719,105 +739,137 @@ function CommunityProModal({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         style={{
           position: "fixed", inset: 0, zIndex: 60,
-          background: "rgba(0,0,0,0.72)",
-          backdropFilter: "blur(8px)",
+          background: "rgba(0,0,0,0.80)",
+          backdropFilter: "blur(10px)",
           display: "flex", alignItems: "flex-end", justifyContent: "center",
         }}
       >
         <motion.div
           key="pro-sheet"
-          initial={{ y: 60, opacity: 0 }}
+          initial={{ y: 64, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 60, opacity: 0 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ y: 64, opacity: 0 }}
+          transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
-          style={{
-            width: "100%", maxWidth: 448,
-            background: "oklch(0.12 0.020 265 / 0.98)",
-            borderTop: "1px solid rgba(201,168,76,0.25)",
-            borderLeft: "1px solid rgba(255,255,255,0.07)",
-            borderRight: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: "28px 28px 0 0",
-            padding: "28px 24px calc(32px + env(safe-area-inset-bottom))",
-          }}
+          style={{ width: "100%", maxWidth: 448, position: "relative" }}
         >
-          {/* Drag handle */}
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", margin: "0 auto 24px" }} />
-
-          {/* Lock icon */}
+          {/* Gold-leaf border wrapper — 1.5px gradient border */}
           <div style={{
-            width: 56, height: 56, borderRadius: 18,
-            background: "rgba(201,168,76,0.10)",
-            border: "1px solid rgba(201,168,76,0.28)",
-            display: "grid", placeItems: "center",
-            margin: "0 auto 20px",
-            boxShadow: "0 0 24px rgba(201,168,76,0.15)",
+            background: "linear-gradient(160deg, #C9A84C 0%, #6B4410 18%, #E8C870 36%, #7A5018 54%, #C9A84C 72%, #E8C870 100%)",
+            padding: "1.5px 1.5px 0",
+            borderRadius: "28px 28px 0 0",
           }}>
-            <Lock style={{ width: 24, height: 24, color: "#C9A84C" }} />
-          </div>
+            <div style={{
+              background: "linear-gradient(170deg, rgba(18,12,4,0.99) 0%, rgba(10,8,2,0.99) 100%)",
+              borderRadius: "27px 27px 0 0",
+              padding: "26px 24px calc(36px + env(safe-area-inset-bottom))",
+              position: "relative", overflow: "hidden",
+            }}>
+              {/* Subtle stone-grain overlay */}
+              <div aria-hidden style={{
+                position: "absolute", inset: 0, pointerEvents: "none",
+                background: "repeating-linear-gradient(-28deg, transparent, transparent 10px, rgba(201,168,76,0.012) 10px, rgba(201,168,76,0.012) 11px)",
+              }} />
+              {/* Gold top-glow */}
+              <div aria-hidden style={{
+                position: "absolute", top: 0, left: "15%", right: "15%", height: 1,
+                background: "linear-gradient(90deg, transparent, rgba(232,200,112,0.65), transparent)",
+                pointerEvents: "none",
+              }} />
 
-          {/* Headline */}
-          <h2 style={{
-            fontFamily: "Cormorant Garamond, Georgia, serif",
-            fontSize: 26, fontWeight: 700, fontStyle: "italic",
-            color: "#C9A84C", textAlign: "center", margin: "0 0 8px",
-            textShadow: "0 0 24px rgba(201,168,76,0.35)",
-          }}>
-            Community Creator
-          </h2>
-          <p style={{
-            fontSize: 13, color: "rgba(255,255,255,0.55)",
-            textAlign: "center", lineHeight: 1.55,
-            margin: "0 0 24px",
-          }}>
-            Build your own space. Set the rules.<br />Lead the recovery.
-          </p>
-
-          {/* Benefits */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
-            {PRO_BENEFITS.map((b) => (
-              <div key={b.text} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 22, height: 22, borderRadius: 7, flexShrink: 0,
-                  background: "rgba(201,168,76,0.12)",
-                  border: "1px solid rgba(201,168,76,0.32)",
-                  display: "grid", placeItems: "center",
-                }}>
-                  <Check style={{ width: 12, height: 12, color: "#C9A84C" }} />
+              <div style={{ position: "relative", zIndex: 1 }}>
+                {/* Drag handle + corner X */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24, position: "relative" }}>
+                  <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.25)" }} />
+                  <button
+                    onClick={onClose}
+                    style={{
+                      position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)",
+                      width: 30, height: 30, borderRadius: 10, border: "none", cursor: "pointer",
+                      background: "rgba(201,168,76,0.08)", color: "rgba(201,168,76,0.45)",
+                      display: "grid", placeItems: "center",
+                    }}
+                  >
+                    <X style={{ width: 14, height: 14 }} />
+                  </button>
                 </div>
-                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", lineHeight: 1.4 }}>
-                  {b.text}
-                </span>
+
+                {/* Digital Crest / Throne icon */}
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                  <svg width="72" height="78" viewBox="0 0 72 78" fill="none" aria-hidden>
+                    {/* Shield */}
+                    <path d="M36 4 L66 16 L66 44 Q66 66 36 76 Q6 66 6 44 L6 16 Z"
+                      fill="rgba(201,168,76,0.07)" stroke="rgba(201,168,76,0.38)" strokeWidth="1.4"/>
+                    {/* Inner shield bevel */}
+                    <path d="M36 12 L58 22 L58 43 Q58 60 36 68 Q14 60 14 43 L14 22 Z"
+                      fill="none" stroke="rgba(201,168,76,0.15)" strokeWidth="0.8"/>
+                    {/* Crown base bar */}
+                    <rect x="22" y="39" width="28" height="5" rx="2" fill="rgba(201,168,76,0.60)"/>
+                    {/* Crown points */}
+                    <path d="M22 39 L22 28 L28 34 L36 26 L44 34 L50 28 L50 39 Z"
+                      fill="rgba(201,168,76,0.70)" stroke="rgba(201,168,76,0.90)" strokeWidth="0.8"/>
+                    {/* Gem dots on crown tips */}
+                    <circle cx="22" cy="27" r="2.8" fill="#C9A84C"/>
+                    <circle cx="36" cy="24" r="2.8" fill="#E8C870"/>
+                    <circle cx="50" cy="27" r="2.8" fill="#C9A84C"/>
+                    {/* Shield dividers */}
+                    <line x1="36" y1="46" x2="36" y2="66" stroke="rgba(201,168,76,0.20)" strokeWidth="1"/>
+                    <line x1="9"  y1="54" x2="63" y2="54" stroke="rgba(201,168,76,0.20)" strokeWidth="1"/>
+                    {/* Heraldic diamonds */}
+                    <path d="M24 50 L28 54 L24 58 L20 54 Z" fill="rgba(201,168,76,0.28)"/>
+                    <path d="M48 50 L52 54 L48 58 L44 54 Z" fill="rgba(201,168,76,0.28)"/>
+                  </svg>
+                </div>
+
+                {/* Eyebrow + headline */}
+                <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(201,168,76,0.55)", letterSpacing: "0.18em", textTransform: "uppercase", textAlign: "center", margin: "0 0 6px" }}>
+                  Leader Path
+                </p>
+                <h2 style={{
+                  fontFamily: "Cormorant Garamond, Georgia, serif",
+                  fontSize: 28, fontWeight: 700, fontStyle: "italic",
+                  color: "#C9A84C", textAlign: "center", margin: "0 0 8px",
+                  textShadow: "0 0 32px rgba(201,168,76,0.40)",
+                }}>
+                  Community Creator
+                </h2>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", textAlign: "center", lineHeight: 1.6, margin: "0 0 24px" }}>
+                  Build your own space. Set the rules.<br />Lead the recovery.
+                </p>
+
+                {/* Benefits */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 11, marginBottom: 28 }}>
+                  {PRO_BENEFITS.map((b) => (
+                    <div key={b.text} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{
+                        width: 22, height: 22, borderRadius: 7, flexShrink: 0,
+                        background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.30)",
+                        display: "grid", placeItems: "center",
+                      }}>
+                        <Check style={{ width: 11, height: 11, color: "#C9A84C" }} />
+                      </div>
+                      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.78)", lineHeight: 1.4 }}>{b.text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA — embossed gold bar */}
+                <button
+                  onClick={() => { onClose(); triggerPaywall(); }}
+                  style={{
+                    width: "100%", height: 54, borderRadius: 16,
+                    background: "linear-gradient(135deg, #9A7830 0%, #C9A84C 25%, #E8C870 50%, #C9A84C 75%, #9A7830 100%)",
+                    border: "none", cursor: "pointer",
+                    fontSize: 15, fontWeight: 700, color: "#1a0f00",
+                    letterSpacing: "0.05em",
+                    boxShadow: "0 2px 0 rgba(60,35,5,0.9), 0 6px 32px rgba(201,168,76,0.30)",
+                  }}
+                >
+                  Upgrade to PRO
+                </button>
               </div>
-            ))}
+            </div>
           </div>
-
-          {/* CTA */}
-          <button
-            onClick={() => { onClose(); triggerPaywall(); }}
-            style={{
-              width: "100%", height: 52, borderRadius: 16,
-              background: "linear-gradient(135deg, #C9A84C 0%, #E8C870 50%, #C9A84C 100%)",
-              border: "none", cursor: "pointer",
-              fontSize: 14, fontWeight: 700, color: "#1a0f00",
-              letterSpacing: "0.04em",
-              boxShadow: "0 4px 20px rgba(201,168,76,0.35)",
-            }}
-          >
-            Upgrade to PRO
-          </button>
-
-          {/* Dismiss */}
-          <button
-            onClick={onClose}
-            style={{
-              width: "100%", marginTop: 12, padding: "10px 0",
-              background: "none", border: "none", cursor: "pointer",
-              fontSize: 13, color: "rgba(255,255,255,0.35)",
-            }}
-          >
-            Maybe later
-          </button>
         </motion.div>
       </motion.div>
     </AnimatePresence>
@@ -1206,16 +1258,19 @@ function CommunityPage() {
         {/* ② + ③ — 2-column badge grid */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 
-          {/* Sovereign Invite — Royal Gold badge */}
+          {/* Sovereign Invite — Royal Gold badge (PRO badge hidden when already PRO) */}
           <button
             onClick={handleSovereignInvite}
             className="si-badge-hover text-left"
             style={{
               padding: "14px 14px 12px",
               borderRadius: 18,
-              background: "linear-gradient(145deg, rgba(201,168,76,0.13) 0%, rgba(120,80,20,0.18) 100%)",
-              border: "1px solid rgba(201,168,76,0.32)",
-              boxShadow: "0 0 0 0 rgba(201,168,76,0)",
+              background: state.isPremium
+                ? "linear-gradient(145deg, rgba(201,168,76,0.17) 0%, rgba(120,80,20,0.24) 100%)"
+                : "linear-gradient(145deg, rgba(201,168,76,0.09) 0%, rgba(120,80,20,0.13) 100%)",
+              border: state.isPremium
+                ? "1px solid rgba(201,168,76,0.42)"
+                : "1px solid rgba(201,168,76,0.24)",
               cursor: "pointer",
               position: "relative",
               overflow: "hidden",
@@ -1225,34 +1280,50 @@ function CommunityPage() {
             <div style={{
               position: "absolute", top: 0, left: "-60%", width: "40%", height: "100%",
               background: "linear-gradient(90deg, transparent, rgba(255,220,120,0.06), transparent)",
-              transform: "skewX(-15deg)",
-              pointerEvents: "none",
+              transform: "skewX(-15deg)", pointerEvents: "none",
             }} />
-            {/* Crown + PRO badge row */}
+
+            {/* Icon row — Crown always; PRO badge only when FREE */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <div style={{
                 width: 34, height: 34, borderRadius: 11,
                 background: "linear-gradient(135deg, rgba(201,168,76,0.22), rgba(120,80,20,0.30))",
                 border: "1px solid rgba(201,168,76,0.40)",
                 display: "grid", placeItems: "center",
-                boxShadow: "0 0 12px rgba(201,168,76,0.20)",
+                boxShadow: state.isPremium ? "0 0 16px rgba(201,168,76,0.28)" : "0 0 10px rgba(201,168,76,0.15)",
               }}>
                 <Crown style={{ width: 15, height: 15, color: "#C9A84C" }} />
               </div>
-              <span style={{
-                fontSize: 8, fontWeight: 800, letterSpacing: "0.10em",
-                padding: "3px 7px", borderRadius: 999,
-                background: "linear-gradient(90deg, #C9A84C, #E8C870)",
-                color: "#1a0f00",
-              }}>
-                PRO
-              </span>
+              {/* Badge only visible to FREE users */}
+              {!state.isPremium && (
+                <span style={{
+                  fontSize: 8, fontWeight: 800, letterSpacing: "0.10em",
+                  padding: "3px 7px", borderRadius: 999,
+                  background: "linear-gradient(90deg, #C9A84C, #E8C870)",
+                  color: "#1a0f00",
+                }}>
+                  PRO
+                </span>
+              )}
+              {/* Active indicator for PRO users */}
+              {state.isPremium && (
+                <span style={{
+                  width: 7, height: 7, borderRadius: "50%",
+                  background: "#C9A84C",
+                  boxShadow: "0 0 8px rgba(201,168,76,0.80)",
+                  display: "block",
+                }} />
+              )}
             </div>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "#C9A84C", margin: "0 0 3px", lineHeight: 1.3 }}>
+
+            <p style={{
+              fontSize: 12, fontWeight: 700, margin: "0 0 3px", lineHeight: 1.3,
+              color: state.isPremium ? "#C9A84C" : "rgba(201,168,76,0.75)",
+            }}>
               Sovereign Invite
             </p>
-            <p style={{ fontSize: 10, color: "rgba(201,168,76,0.55)", margin: 0, lineHeight: 1.4 }}>
-              Founding Invite · Badge + 50 XP
+            <p style={{ fontSize: 10, margin: 0, lineHeight: 1.4, color: state.isPremium ? "rgba(201,168,76,0.65)" : "rgba(201,168,76,0.42)" }}>
+              {state.isPremium ? "Founding Invite · Badge + 50 XP" : "PRO — Tap to unlock"}
             </p>
           </button>
 
