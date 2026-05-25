@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
@@ -9,7 +9,7 @@ import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Send, Lock, Plus, Users, Globe, Book, Dumbbell,
-  Heart, MessageCircle, Crown, Shield, Check, X
+  Heart, MessageCircle, Crown, Shield, Check, X, Link2, Copy,
 } from "lucide-react";
 // @ts-ignore — react-simple-maps v3 ships no bundled types
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
@@ -463,12 +463,373 @@ function AvatarStack({ roomId, memberCount, isGlobal }: { roomId: string; member
   );
 }
 
+// ─── Founder's Badge toast ───────────────────────────────────────────────────
+function FounderBadgeToast({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 4000);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <motion.div
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -80, opacity: 0 }}
+      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: "fixed", top: "calc(16px + env(safe-area-inset-top)", left: 16, right: 16,
+        zIndex: 80, maxWidth: 416, margin: "0 auto",
+        background: "oklch(0.13 0.020 265 / 0.96)",
+        border: "1px solid rgba(201,168,76,0.40)",
+        borderRadius: 16, padding: "14px 18px",
+        display: "flex", alignItems: "center", gap: 14,
+        backdropFilter: "blur(20px)",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.08)",
+      }}
+    >
+      <div style={{
+        width: 40, height: 40, borderRadius: 13, flexShrink: 0,
+        background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.30)",
+        display: "grid", placeItems: "center",
+      }}>
+        <Crown style={{ width: 18, height: 18, color: "#C9A84C" }} />
+      </div>
+      <div style={{ flex: 1 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color: "#C9A84C", margin: "0 0 2px" }}>
+          Founder's Badge earned
+        </p>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.50)", margin: 0 }}>
+          +50 XP added to your tree
+        </p>
+      </div>
+      <button onClick={onDone} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: "rgba(255,255,255,0.30)", fontSize: 14 }}>✕</button>
+    </motion.div>
+  );
+}
+
+// ─── Sovereign Invite Modal ───────────────────────────────────────────────────
+function SovereignInviteModal({ onClose, onGrantBadge }: { onClose: () => void; onGrantBadge: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const [badgeGranted] = useState(() => !!localStorage.getItem("stopamine.founder_badge_sender"));
+
+  const inviteCode = useState(() => {
+    const existing = localStorage.getItem("stopamine.founder_code");
+    if (existing) return existing;
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    localStorage.setItem("stopamine.founder_code", code);
+    return code;
+  })[0];
+
+  const inviteLink = `${window.location.origin}/community?fi=${inviteCode}`;
+
+  useEffect(() => {
+    if (!localStorage.getItem("stopamine.founder_badge_sender")) {
+      localStorage.setItem("stopamine.founder_badge_sender", "1");
+      onGrantBadge();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(inviteLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    });
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: "Founding Invite — Stopamine",
+        text: "I'm inviting you to join my recovery community with a Founding Invite. You'll earn an exclusive Founder's Badge.",
+        url: inviteLink,
+      });
+    } else {
+      handleCopy();
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="si-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.22 }}
+        onClick={onClose}
+        style={{
+          position: "fixed", inset: 0, zIndex: 60,
+          background: "rgba(0,0,0,0.75)",
+          backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center",
+        }}
+      >
+        <motion.div
+          key="si-sheet"
+          initial={{ y: 60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 60, opacity: 0 }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: "100%", maxWidth: 448,
+            background: "oklch(0.12 0.020 265 / 0.98)",
+            borderTop: "1px solid rgba(201,168,76,0.30)",
+            borderLeft: "1px solid rgba(255,255,255,0.06)",
+            borderRight: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "28px 28px 0 0",
+            padding: "28px 24px calc(36px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", margin: "0 auto 24px" }} />
+
+          {/* Crown + title */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 15, flexShrink: 0,
+              background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.30)",
+              display: "grid", placeItems: "center",
+              boxShadow: "0 0 20px rgba(201,168,76,0.18)",
+            }}>
+              <Crown style={{ width: 20, height: 20, color: "#C9A84C" }} />
+            </div>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(201,168,76,0.60)", letterSpacing: "0.14em", textTransform: "uppercase", margin: "0 0 2px" }}>
+                Sovereign Invite
+              </p>
+              <h2 style={{
+                fontFamily: "Cormorant Garamond, Georgia, serif",
+                fontSize: 22, fontWeight: 700, fontStyle: "italic",
+                color: "#C9A84C", margin: 0,
+              }}>
+                Founding Invite
+              </h2>
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.55, margin: "0 0 22px" }}>
+            Anyone who joins via your link earns an exclusive Founder's Badge and 50 XP — so do you.
+          </p>
+
+          {/* Reward row */}
+          <div style={{
+            display: "flex", gap: 8, marginBottom: 20,
+          }}>
+            {[
+              { label: "You receive", value: "Founder's Badge + 50 XP" },
+              { label: "They receive", value: "Founder's Badge + 50 XP" },
+            ].map((item) => (
+              <div key={item.label} style={{
+                flex: 1, padding: "10px 12px", borderRadius: 12,
+                background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.18)",
+              }}>
+                <p style={{ fontSize: 9, color: "rgba(201,168,76,0.55)", letterSpacing: "0.10em", textTransform: "uppercase", margin: "0 0 4px" }}>{item.label}</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#C9A84C", margin: 0 }}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Invite link box */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10, marginBottom: 12,
+            padding: "10px 14px", borderRadius: 12,
+            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)",
+          }}>
+            <Link2 style={{ width: 14, height: 14, color: "rgba(201,168,76,0.50)", flexShrink: 0 }} />
+            <span style={{
+              flex: 1, fontSize: 11, color: "rgba(255,255,255,0.50)",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              fontFamily: "monospace", letterSpacing: "0.04em",
+            }}>
+              {inviteLink}
+            </span>
+            <button
+              onClick={handleCopy}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                background: "none", border: "none", cursor: "pointer",
+                padding: "4px 8px", borderRadius: 6,
+                color: copied ? "#C9A84C" : "rgba(255,255,255,0.35)",
+                fontSize: 11, fontWeight: 600, flexShrink: 0, transition: "color 0.2s",
+              }}
+            >
+              {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+
+          {badgeGranted && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 14,
+              padding: "8px 12px", borderRadius: 10,
+              background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.22)",
+            }}>
+              <Check style={{ width: 12, height: 12, color: "#C9A84C", flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: "#C9A84C" }}>Your Founder's Badge has already been granted</span>
+            </div>
+          )}
+
+          {/* Share CTA */}
+          <button
+            onClick={handleShare}
+            style={{
+              width: "100%", height: 50, borderRadius: 14,
+              background: "linear-gradient(135deg, #C9A84C 0%, #E8C870 50%, #C9A84C 100%)",
+              border: "none", cursor: "pointer",
+              fontSize: 14, fontWeight: 700, color: "#1a0f00",
+              letterSpacing: "0.04em",
+              boxShadow: "0 4px 20px rgba(201,168,76,0.30)",
+            }}
+          >
+            Send Founding Invite
+          </button>
+          <button
+            onClick={onClose}
+            style={{ width: "100%", marginTop: 10, padding: "10px 0", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "rgba(255,255,255,0.30)" }}
+          >
+            Close
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ─── Community Pro Modal ──────────────────────────────────────────────────────
+const PRO_BENEFITS = [
+  { text: "Create unlimited private communities" },
+  { text: "Set custom rules and invite-only access" },
+  { text: "Full moderation and admin controls" },
+  { text: "Exclusive PRO-only streams and events" },
+];
+
+function CommunityProModal({ onClose }: { onClose: () => void }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="pro-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.22 }}
+        onClick={onClose}
+        style={{
+          position: "fixed", inset: 0, zIndex: 60,
+          background: "rgba(0,0,0,0.72)",
+          backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center",
+        }}
+      >
+        <motion.div
+          key="pro-sheet"
+          initial={{ y: 60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 60, opacity: 0 }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: "100%", maxWidth: 448,
+            background: "oklch(0.12 0.020 265 / 0.98)",
+            borderTop: "1px solid rgba(201,168,76,0.25)",
+            borderLeft: "1px solid rgba(255,255,255,0.07)",
+            borderRight: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "28px 28px 0 0",
+            padding: "28px 24px calc(32px + env(safe-area-inset-bottom))",
+          }}
+        >
+          {/* Drag handle */}
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", margin: "0 auto 24px" }} />
+
+          {/* Lock icon */}
+          <div style={{
+            width: 56, height: 56, borderRadius: 18,
+            background: "rgba(201,168,76,0.10)",
+            border: "1px solid rgba(201,168,76,0.28)",
+            display: "grid", placeItems: "center",
+            margin: "0 auto 20px",
+            boxShadow: "0 0 24px rgba(201,168,76,0.15)",
+          }}>
+            <Lock style={{ width: 24, height: 24, color: "#C9A84C" }} />
+          </div>
+
+          {/* Headline */}
+          <h2 style={{
+            fontFamily: "Cormorant Garamond, Georgia, serif",
+            fontSize: 26, fontWeight: 700, fontStyle: "italic",
+            color: "#C9A84C", textAlign: "center", margin: "0 0 8px",
+            textShadow: "0 0 24px rgba(201,168,76,0.35)",
+          }}>
+            Community Creator
+          </h2>
+          <p style={{
+            fontSize: 13, color: "rgba(255,255,255,0.55)",
+            textAlign: "center", lineHeight: 1.55,
+            margin: "0 0 24px",
+          }}>
+            Build your own space. Set the rules.<br />Lead the recovery.
+          </p>
+
+          {/* Benefits */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+            {PRO_BENEFITS.map((b) => (
+              <div key={b.text} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: 7, flexShrink: 0,
+                  background: "rgba(201,168,76,0.12)",
+                  border: "1px solid rgba(201,168,76,0.32)",
+                  display: "grid", placeItems: "center",
+                }}>
+                  <Check style={{ width: 12, height: 12, color: "#C9A84C" }} />
+                </div>
+                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", lineHeight: 1.4 }}>
+                  {b.text}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => { onClose(); triggerPaywall(); }}
+            style={{
+              width: "100%", height: 52, borderRadius: 16,
+              background: "linear-gradient(135deg, #C9A84C 0%, #E8C870 50%, #C9A84C 100%)",
+              border: "none", cursor: "pointer",
+              fontSize: 14, fontWeight: 700, color: "#1a0f00",
+              letterSpacing: "0.04em",
+              boxShadow: "0 4px 20px rgba(201,168,76,0.35)",
+            }}
+          >
+            Upgrade to PRO
+          </button>
+
+          {/* Dismiss */}
+          <button
+            onClick={onClose}
+            style={{
+              width: "100%", marginTop: 12, padding: "10px 0",
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: 13, color: "rgba(255,255,255,0.35)",
+            }}
+          >
+            Maybe later
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 function CommunityPage() {
   const [state, update] = useAppState();
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [joinedRooms, setJoinedRooms] = useState<string[]>(["global"]);
   const [showCreate, setShowCreate] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showFounderToast, setShowFounderToast] = useState(false);
   const [userRooms, setUserRooms] = useState<Room[]>([]);
   const [checkedIn, setCheckedIn] = useState(() => {
     const ts = parseInt(localStorage.getItem("stopamine.community.checkin") ?? "0", 10);
@@ -479,6 +840,27 @@ function CommunityPage() {
     localStorage.setItem("stopamine.community.checkin", String(Date.now()));
     setCheckedIn(true);
   };
+
+  // ── Founder badge ────────────────────────────────────────────────────────────
+  const grantFounderBadge = () => {
+    update((s) => ({
+      badges: s.badges.includes("founder") ? s.badges : [...s.badges, "founder"],
+      treeXP: s.treeXP + 50,
+    }));
+    setShowFounderToast(true);
+  };
+
+  // Detect ?fi= invite code on mount (receiver flow)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fi = params.get("fi");
+    if (fi && !localStorage.getItem("stopamine.founder_claimed")) {
+      localStorage.setItem("stopamine.founder_claimed", "1");
+      grantFounderBadge();
+      window.history.replaceState({}, "", "/community");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Dev panel ────────────────────────────────────────────────────────────────
   const [devOpen, setDevOpen] = useState(false);
@@ -705,6 +1087,12 @@ function CommunityPage() {
                             Live
                           </span>
                         )}
+                        {room.locked && !room.isGlobal && (
+                          <span className="flex items-center gap-1 shrink-0">
+                            <Lock style={{ width: 9, height: 9, color: "rgba(201,168,76,0.55)" }} />
+                            <span className="text-[9px]" style={{ color: "rgba(201,168,76,0.55)", letterSpacing: "0.04em" }}>Private</span>
+                          </span>
+                        )}
                       </div>
                       <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "oklch(0.55 0.015 265 / 0.75)" }}>
                         {room.description}
@@ -740,50 +1128,100 @@ function CommunityPage() {
         </div>
       </section>
 
-      {/* ── Create community ─────────────────────────────────── */}
-      <section className="px-6 mt-8 pb-6 fade-up-3">
-        {state.isPremium ? (
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
-          >
-            <div
-              className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-              style={{ background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }}
-            >
-              <Plus className="h-4 w-4" />
+      {/* ── Actions ──────────────────────────────────────────── */}
+      <section className="px-6 mt-6 pb-6 fade-up-3 space-y-0"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 16 }}>
+
+        {/* ① Invite to Global — open to all users */}
+        <button
+          onClick={() => {
+            const link = `${window.location.origin}/community`;
+            if (navigator.share) {
+              navigator.share({ title: "Join me on Stopamine", text: "Come join the Global recovery community.", url: link });
+            } else {
+              navigator.clipboard.writeText(link);
+            }
+          }}
+          className="flex items-center gap-3 text-left w-full py-4 transition-opacity active:opacity-70"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+        >
+          <div className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
+            <Globe className="h-4 w-4" style={{ color: "rgba(255,255,255,0.60)" }} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Invite to Global</p>
+            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.60)" }}>Share a link to the community — open to everyone</p>
+          </div>
+        </button>
+
+        {/* ② Sovereign Invite — PRO only, branded Founding Invite */}
+        <button
+          onClick={() => state.isPremium ? setShowInviteModal(true) : setShowProModal(true)}
+          className="flex items-center gap-3 text-left w-full py-4 transition-opacity active:opacity-70"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+        >
+          <div className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
+            style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.26)" }}>
+            <Crown className="h-4 w-4" style={{ color: "#C9A84C" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold">Sovereign Invite</p>
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)", color: "#C9A84C", letterSpacing: "0.04em" }}
+              >
+                PRO
+              </span>
             </div>
-            <div>
-              <p className="text-sm font-semibold">Create a community</p>
-              <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.65)" }}>Invite friends, set your own rules</p>
-            </div>
-          </button>
-        ) : (
-          <button
-            onClick={() => triggerPaywall()}
-            className="flex items-center gap-3 text-left w-full transition-opacity active:opacity-70"
-          >
-            <div
-              className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
-              style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.20)" }}
-            >
-              <Lock className="h-4 w-4" style={{ color: "#C9A84C" }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>Create a community</p>
+            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.60)" }}>Send a Founding Invite — both sides earn a badge + 50 XP</p>
+          </div>
+        </button>
+
+        {/* ③ Create Private Community — PRO only */}
+        <button
+          onClick={() => state.isPremium ? setShowCreate(true) : setShowProModal(true)}
+          className="flex items-center gap-3 text-left w-full py-4 transition-opacity active:opacity-70"
+        >
+          <div className="h-9 w-9 rounded-xl grid place-items-center shrink-0"
+            style={state.isPremium
+              ? { background: "oklch(0.62 0.22 255 / 0.08)", color: "var(--primary)" }
+              : { background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.20)" }}>
+            {state.isPremium
+              ? <Plus className="h-4 w-4" />
+              : <Lock className="h-4 w-4" style={{ color: "#C9A84C" }} />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold">Create Private Community</p>
+              {!state.isPremium && (
                 <span
                   className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                   style={{ background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.28)", color: "#C9A84C", letterSpacing: "0.04em" }}
                 >
-                  🔒 PRO Only
+                  PRO
                 </span>
-              </div>
-              <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.45)" }}>PRO required to create a community</p>
+              )}
             </div>
-          </button>
-        )}
+            <p className="text-[11px]" style={{ color: "oklch(0.52 0.015 265 / 0.60)" }}>Set custom rules, invite-only access, full moderation</p>
+          </div>
+        </button>
       </section>
+
+      {/* ── Modals & toasts ──────────────────────────────────── */}
+      {showProModal && <CommunityProModal onClose={() => setShowProModal(false)} />}
+      {showInviteModal && (
+        <SovereignInviteModal
+          onClose={() => setShowInviteModal(false)}
+          onGrantBadge={grantFounderBadge}
+        />
+      )}
+      <AnimatePresence>
+        {showFounderToast && (
+          <FounderBadgeToast onDone={() => setShowFounderToast(false)} />
+        )}
+      </AnimatePresence>
     </PageShell>
   );
 }
