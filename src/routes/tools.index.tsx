@@ -1301,7 +1301,7 @@ function Tools() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.22 }}
               onClick={() => setLbOpen(false)}
-              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", zIndex: 50 }}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 50, backdropFilter: "blur(3px)" }}
             />
 
             {/* Sheet */}
@@ -1313,177 +1313,219 @@ function Tools() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               style={{
                 position: "fixed", bottom: 0, left: 0, right: 0,
-                height: "80vh", zIndex: 51,
-                background: "#090705",
+                height: "88vh", zIndex: 51,
+                background: "linear-gradient(180deg, #0a0705 0%, #06050a 50%, #04060a 100%)",
                 borderRadius: "24px 24px 0 0",
-                borderTop: "1px solid #1e1a10",
+                borderTop: "1px solid rgba(201,168,76,0.25)",
+                boxShadow: "0 -4px 60px rgba(201,168,76,0.08)",
                 display: "flex", flexDirection: "column",
                 overflow: "hidden",
               }}
             >
-              {/* Cormorant Garamond font */}
-              <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&display=swap');`}</style>
+              <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&display=swap');
+                @keyframes lb-shimmer {
+                  0%,100% { opacity:0.70; transform:scale(1); }
+                  50%      { opacity:1.00; transform:scale(1.018); }
+                }
+                @keyframes lb-pulse-gold {
+                  0%,100% { box-shadow: 0 0 10px 2px rgba(201,168,76,0.35), inset 0 0 8px rgba(201,168,76,0.08); }
+                  50%      { box-shadow: 0 0 22px 6px rgba(201,168,76,0.65), inset 0 0 16px rgba(201,168,76,0.14); }
+                }
+                @keyframes lb-pulse-silver {
+                  0%,100% { box-shadow: 0 0 8px 2px rgba(160,180,220,0.30); }
+                  50%      { box-shadow: 0 0 18px 5px rgba(160,180,220,0.55); }
+                }
+                @keyframes lb-pulse-bronze {
+                  0%,100% { box-shadow: 0 0 8px 2px rgba(205,127,50,0.30); }
+                  50%      { box-shadow: 0 0 18px 5px rgba(205,127,50,0.55); }
+                }
+              `}</style>
 
               {/* Drag handle */}
-              <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 8, flexShrink: 0 }}>
-                <div style={{ width: 36, height: 4, borderRadius: 2, background: "#2a2010" }} />
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 6, flexShrink: 0 }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.20)" }} />
               </div>
 
-              {/* Inner container */}
-              <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "0 16px 32px" }}>
-                <div style={{
-                  background: "#0f0c06",
-                  border: "1px solid #1e1a10",
-                  borderRadius: 20,
-                  padding: 20,
-                }}>
+              {/* Scrollable content */}
+              <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "0 14px 40px" }}>
 
-                  {/* Header */}
-                  <h2 style={{
-                    margin: 0,
-                    fontFamily: "'Cormorant Garamond', Georgia, serif",
-                    fontSize: 22,
-                    fontStyle: "italic",
-                    fontWeight: 600,
-                    color: "#C9A84C",
-                    lineHeight: 1.2,
-                  }}>
-                    Leaderboard
+                {/* ── Header ── */}
+                <div style={{ padding: "8px 2px 16px", borderBottom: "1px solid rgba(201,168,76,0.10)", marginBottom: 16 }}>
+                  <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,168,76,0.50)", fontFamily: "DM Sans, sans-serif" }}>Sacred Ground</p>
+                  <h2 style={{ margin: "4px 0 2px", fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontStyle: "italic", fontWeight: 600, color: "#E8C87A", lineHeight: 1.1 }}>
+                    Hall of Champions
                   </h2>
-                  <p style={{
-                    margin: "4px 0 16px",
-                    fontSize: 12,
-                    color: "rgba(255,255,255,0.40)",
-                    fontFamily: "DM Sans, sans-serif",
-                  }}>
-                    Top players this week
+                  <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.32)", fontFamily: "DM Sans, sans-serif" }}>
+                    The strongest survivors this week
                   </p>
+                </div>
 
-                  {/* Filter pills */}
-                  <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 16, scrollbarWidth: "none" }}>
-                    {["All", "Steady Hand", "Clarity Climb", "Cold Switch", "Mind Pulse"].map(f => (
-                      <button
-                        key={f}
-                        onClick={() => setLbFilter(f)}
+                {/* ── Filter pills ── */}
+                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 16, scrollbarWidth: "none" }}>
+                  {["All", "Steady Hand", "Clarity Climb", "Cold Switch", "Mind Pulse"].map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setLbFilter(f)}
+                      style={{
+                        flexShrink: 0, padding: "6px 14px", borderRadius: 20,
+                        fontSize: 11, fontWeight: lbFilter === f ? 700 : 500,
+                        fontFamily: "DM Sans, sans-serif", cursor: "pointer",
+                        border: lbFilter === f ? "1px solid rgba(201,168,76,0.60)" : "1px solid rgba(255,255,255,0.08)",
+                        background: lbFilter === f ? "rgba(201,168,76,0.14)" : "rgba(255,255,255,0.03)",
+                        color: lbFilter === f ? "#E8C87A" : "rgba(255,255,255,0.38)",
+                        transition: "all 0.18s",
+                      }}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+
+                {/* ── Player cards ── */}
+                {([
+                  { rank: 1,  username: "Marcus", score: 2840, game: "Steady Hand",   companion: "🌲", days: 61 },
+                  { rank: 2,  username: "Jaylen", score: 2210, game: "Clarity Climb", companion: "🐺", days: 34 },
+                  { rank: 3,  username: "Sven",   score: 1990, game: "Cold Switch",   companion: "🌲", days: 29 },
+                  { rank: 4,  username: "Alex",   score: 1750, game: "Mind Pulse",    companion: "🐺", days: 22 },
+                  { rank: 5,  username: "Ryan",   score: 1420, game: "Steady Hand",   companion: "🌲", days: 19 },
+                  { rank: 6,  username: "Tobias", score: 1180, game: "Clarity Climb", companion: "🐺", days: 16 },
+                  { rank: 7,  username: "Dante",  score:  940, game: "Mind Pulse",    companion: "🌲", days: 14 },
+                  { rank: 8,  username: "Elias",  score:  780, game: "Cold Switch",   companion: "🐺", days: 11 },
+                  { rank: 9,  username: "Noah",   score:  610, game: "Steady Hand",   companion: "🌲", days: 8  },
+                  { rank: 10, username: "Luka",   score:  490, game: "Clarity Climb", companion: "🐺", days: 6  },
+                ] as { rank: number; username: string; score: number; game: string; companion: string; days: number }[])
+                  .filter(r => lbFilter === "All" || r.game === lbFilter)
+                  .map((row, i) => {
+                    const RANK_META: Record<number, {
+                      borderColor: string; glowAnim: string; badgeBg: string;
+                      badge: string; labelColor: string; cardBg: string;
+                    }> = {
+                      1: {
+                        borderColor: "#C9A84C",
+                        glowAnim: "lb-pulse-gold 2.8s ease-in-out infinite",
+                        badgeBg: "linear-gradient(135deg, #C9A84C, #E8C87A)",
+                        badge: "I", labelColor: "#E8C87A", cardBg: "rgba(201,168,76,0.07)",
+                      },
+                      2: {
+                        borderColor: "#a0b4d0",
+                        glowAnim: "lb-pulse-silver 3.2s ease-in-out infinite",
+                        badgeBg: "linear-gradient(135deg, #8090a8, #b8cce0)",
+                        badge: "II", labelColor: "#b8cce0", cardBg: "rgba(160,180,220,0.05)",
+                      },
+                      3: {
+                        borderColor: "#c87830",
+                        glowAnim: "lb-pulse-bronze 3.6s ease-in-out infinite",
+                        badgeBg: "linear-gradient(135deg, #a06028, #d89850)",
+                        badge: "III", labelColor: "#d89850", cardBg: "rgba(200,120,48,0.05)",
+                      },
+                    };
+                    const meta = RANK_META[row.rank];
+                    const isTop3 = !!meta;
+                    // "You" = rank 7 for demo (could be wired to real state)
+                    const isMe = row.rank === 7;
+
+                    return (
+                      <motion.div
+                        key={row.username}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.055, type: "spring", stiffness: 340, damping: 28 }}
                         style={{
-                          flexShrink: 0,
-                          padding: "6px 16px",
-                          borderRadius: 20,
-                          fontSize: 12,
-                          fontWeight: lbFilter === f ? 700 : 500,
+                          position: "relative",
+                          marginBottom: 8,
+                          borderRadius: 14,
+                          padding: "12px 14px",
+                          display: "flex", alignItems: "center", gap: 12,
+                          background: isMe
+                            ? "rgba(52,211,153,0.07)"
+                            : (meta?.cardBg ?? "rgba(255,255,255,0.025)"),
+                          border: isMe
+                            ? "1px solid rgba(52,211,153,0.45)"
+                            : `1px solid ${isTop3 ? meta.borderColor + "45" : "rgba(255,255,255,0.07)"}`,
+                          animation: isTop3 ? `${meta.glowAnim}` : isMe ? "lb-pulse-silver 2.8s ease-in-out infinite" : "none",
                           fontFamily: "DM Sans, sans-serif",
-                          cursor: "pointer",
-                          border: lbFilter === f ? "none" : "1px solid #1e1a10",
-                          background: lbFilter === f ? "#C9A84C" : "#0f0c06",
-                          color: lbFilter === f ? "#090705" : "#5a5040",
-                          transition: "background 0.18s, color 0.18s",
                         }}
                       >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
+                        {/* Top-3 shimmer layer */}
+                        {isTop3 && (
+                          <div aria-hidden style={{
+                            position: "absolute", inset: 0, borderRadius: 14, pointerEvents: "none",
+                            background: `radial-gradient(ellipse at 30% 50%, ${meta.borderColor}12 0%, transparent 65%)`,
+                            animation: "lb-shimmer 3s ease-in-out infinite",
+                          }}/>
+                        )}
 
-                  {/* Column labels */}
-                  <div style={{
-                    display: "flex", justifyContent: "space-between",
-                    paddingBottom: 8,
-                    borderBottom: "1px solid #1e1a10",
-                    marginBottom: 4,
-                  }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", fontFamily: "DM Sans, sans-serif" }}>
-                      Player
-                    </span>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", fontFamily: "DM Sans, sans-serif" }}>
-                      Score
-                    </span>
-                  </div>
+                        {/* Rank badge */}
+                        <div style={{
+                          flexShrink: 0,
+                          width: 36, height: 36, borderRadius: 10,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: isTop3 ? meta.badgeBg : isMe ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.05)",
+                          boxShadow: isTop3 ? `0 2px 8px ${meta.borderColor}50` : "none",
+                        }}>
+                          {isTop3
+                            ? <span style={{ fontSize: 11, fontWeight: 900, color: "#08060a", letterSpacing: "0.04em", fontFamily: "DM Sans, sans-serif" }}>{meta.badge}</span>
+                            : <span style={{ fontSize: 12, fontWeight: 700, color: isMe ? "#3fd399" : "rgba(255,255,255,0.28)", fontFamily: "DM Sans, sans-serif" }}>{row.rank}</span>
+                          }
+                        </div>
 
-                  {/* Rows */}
-                  {([
-                    { rank: 1,  username: "Marcus", score: 2840, game: "Steady Hand"   },
-                    { rank: 2,  username: "Jaylen", score: 2210, game: "Clarity Climb" },
-                    { rank: 3,  username: "Sven",   score: 1990, game: "Cold Switch"   },
-                    { rank: 4,  username: "Alex",   score: 1750, game: "Mind Pulse"    },
-                    { rank: 5,  username: "Ryan",   score: 1420, game: "Steady Hand"   },
-                    { rank: 6,  username: "Tobias", score: 1180, game: "Clarity Climb" },
-                    { rank: 7,  username: "Dante",  score:  940, game: "Mind Pulse"    },
-                    { rank: 8,  username: "Elias",  score:  780, game: "Cold Switch"   },
-                    { rank: 9,  username: "Noah",   score:  610, game: "Steady Hand"   },
-                    { rank: 10, username: "Luka",   score:  490, game: "Clarity Climb" },
-                  ] as { rank: number; username: string; score: number; game: string }[])
-                    .filter(r => lbFilter === "All" || r.game === lbFilter)
-                    .map((row, i) => {
-                      const TOP3: Record<number, { icon: string; borderColor: string; bg?: string }> = {
-                        1: { icon: "👑", borderColor: "#C9A84C", bg: "rgba(201,168,76,0.06)" },
-                        2: { icon: "🥈", borderColor: "#a0a0b0" },
-                        3: { icon: "🥉", borderColor: "#cd7f32" },
-                      };
-                      const top3 = TOP3[row.rank];
-                      const isTop3 = !!top3;
+                        {/* Avatar circle */}
+                        <div style={{
+                          flexShrink: 0,
+                          width: 38, height: 38, borderRadius: "50%",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: isTop3 ? `${meta.borderColor}14` : isMe ? "rgba(52,211,153,0.10)" : "rgba(255,255,255,0.04)",
+                          border: `1px solid ${isTop3 ? meta.borderColor + "35" : isMe ? "rgba(52,211,153,0.30)" : "rgba(255,255,255,0.08)"}`,
+                          fontSize: 18,
+                        }}>
+                          {row.companion}
+                        </div>
 
-                      return (
-                        <motion.div
-                          key={row.username}
-                          initial={{ opacity: 0, x: -16 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.05, type: "spring", stiffness: 380, damping: 26 }}
-                          style={{
-                            minHeight: 56,
-                            padding: "0 0 0 12px",
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                        {/* Name + game + days */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: isTop3 ? meta.labelColor : isMe ? "#3fd399" : "rgba(255,255,255,0.82)", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {row.username}
+                            </p>
+                            {isMe && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", color: "#3fd399", background: "rgba(52,211,153,0.14)", padding: "1px 5px", borderRadius: 4, textTransform: "uppercase" }}>YOU</span>}
+                          </div>
+                          <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.28)", lineHeight: 1.3 }}>
+                            {lbFilter === "All" ? row.game : `Day ${row.days}`} · Day {row.days}
+                          </p>
+                        </div>
+
+                        {/* Score */}
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{
+                            fontSize: 18, fontWeight: 800, lineHeight: 1,
+                            color: isTop3 ? meta.labelColor : isMe ? "#3fd399" : "rgba(255,255,255,0.70)",
                             fontFamily: "DM Sans, sans-serif",
-                            borderBottom: "1px solid #1e1a10",
-                            borderLeft: isTop3 ? `2px solid ${top3.borderColor}` : "2px solid transparent",
-                            background: top3?.bg ?? "transparent",
-                            marginLeft: -4,
-                            paddingRight: 0,
-                          }}
-                        >
-                          {/* Left: badge + name */}
-                          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-                            {/* Rank badge */}
-                            <div style={{
-                              width: 30, height: 30,
-                              borderRadius: "50%",
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                              flexShrink: 0,
-                              background: isTop3 ? `${top3.borderColor}18` : "rgba(255,255,255,0.04)",
-                              border: `1px solid ${isTop3 ? `${top3.borderColor}40` : "rgba(255,255,255,0.08)"}`,
-                            }}>
-                              {isTop3
-                                ? <span style={{ fontSize: 14, lineHeight: 1 }}>{top3.icon}</span>
-                                : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.30)" }}>{row.rank}</span>
-                              }
-                            </div>
-
-                            {/* Name + game */}
-                            <div style={{ padding: "14px 0" }}>
-                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isTop3 ? "#f0e8d0" : "rgba(255,255,255,0.75)", lineHeight: 1.25 }}>
-                                {row.username}
-                              </p>
-                              {lbFilter === "All" && (
-                                <p style={{ margin: 0, fontSize: 11, color: "#5a5040", lineHeight: 1.2 }}>
-                                  {row.game}
-                                </p>
-                              )}
-                            </div>
+                            letterSpacing: "-0.02em",
+                          }}>
+                            {row.score.toLocaleString()}
                           </div>
-
-                          {/* Right: score */}
-                          <div style={{ textAlign: "right", paddingRight: 4 }}>
-                            <div style={{ fontSize: 16, fontWeight: 700, color: "#C9A84C" }}>
-                              {row.score.toLocaleString()}
-                            </div>
-                            <div style={{ fontSize: 10, color: "#3a3020", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                              pts
-                            </div>
+                          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 1 }}>
+                            pts
                           </div>
-                        </motion.div>
-                      );
-                    })
-                  }
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                }
+
+                {/* ── Your rank summary ── */}
+                <div style={{ marginTop: 20, padding: "14px 16px", borderRadius: 14, background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.22)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 10, color: "rgba(52,211,153,0.65)", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "DM Sans, sans-serif" }}>Your rank</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 800, color: "#3fd399", fontFamily: "DM Sans, sans-serif" }}>#7 · Dante</p>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.28)", fontFamily: "DM Sans, sans-serif" }}>940 pts · Day 14</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 10, color: "rgba(52,211,153,0.55)", fontFamily: "DM Sans, sans-serif" }}>260 pts to #6</p>
+                  </div>
                 </div>
+
               </div>
             </motion.div>
           </>
