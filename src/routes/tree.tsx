@@ -46,14 +46,37 @@ const WOLF_UPGRADES = [
 const WOLF_RANK_BY_STAGE = ["Pup", "Awakening", "Building", "Spirit", "Transcendent"];
 
 // XP thresholds per wolf stage — 5 stages, 0-399 / 400-799 / 800-1199 / 1200-1999 / 2000+
+// ── XP configuration objects — single source of truth for both companions ─────
+export const TREE_XP_CONFIG = [
+  { stage: 0, name: "Seed",         threshold: 0,    next: 100,  emoji: "🌱" },
+  { stage: 1, name: "Sprout",       threshold: 100,  next: 300,  emoji: "🌿" },
+  { stage: 2, name: "Sapling",      threshold: 300,  next: 700,  emoji: "🌳" },
+  { stage: 3, name: "Young tree",   threshold: 700,  next: 1500, emoji: "🌲" },
+  { stage: 4, name: "Strong tree",  threshold: 1500, next: 3000, emoji: "💪" },
+  { stage: 5, name: "Ancient tree", threshold: 3000, next: null, emoji: "⚡" },
+] as const;
+
+export const WOLF_XP_CONFIG = [
+  { stage: 0, name: "Newborn Pup",  threshold: 0,    next: 400,  emoji: "🐺" },
+  { stage: 1, name: "Juvenile",     threshold: 400,  next: 800,  emoji: "🐾" },
+  { stage: 2, name: "Adolescent",   threshold: 800,  next: 1200, emoji: "🌑" },
+  { stage: 3, name: "Spirit Glow",  threshold: 1200, next: 2000, emoji: "✨" },
+  { stage: 4, name: "Transcendent", threshold: 2000, next: null, emoji: "⚡" },
+] as const;
+
 const WOLF_XP_PREV = [0, 400, 800, 1200, 2000] as const;
 
 function wolfXPStage(xp: number): { stage: 0|1|2|3|4; name: string; next: number } {
-  if (xp < 400)  return { stage: 0, name: "Newborn Pup",        next: 400  };
-  if (xp < 800)  return { stage: 1, name: "Juvenile",           next: 800  };
-  if (xp < 1200) return { stage: 2, name: "Adolescent",         next: 1200 };
-  if (xp < 2000) return { stage: 3, name: "Spirit Glow",        next: 2000 };
+  if (xp < 400)  return { stage: 0, name: "Newborn Pup",  next: 400  };
+  if (xp < 800)  return { stage: 1, name: "Juvenile",     next: 800  };
+  if (xp < 1200) return { stage: 2, name: "Adolescent",   next: 1200 };
+  if (xp < 2000) return { stage: 3, name: "Spirit Glow",  next: 2000 };
   return { stage: 4, name: "Transcendent", next: xp };
+}
+
+/** Next stage entry from a config array, or null if already at max. */
+function nextStage<T extends { next: number | null }>(config: readonly T[], currentIdx: number): T | null {
+  return currentIdx + 1 < config.length ? config[currentIdx + 1] : null;
 }
 
 // ── Deterministic star positions (avoids jitter on re-render) ─────────────────
@@ -2274,6 +2297,39 @@ function WolfPage({
             })}
           </div>
 
+          {/* ── Level Debugger ── */}
+          {(() => {
+            const ws = wolfXPStage(state.treeXP);
+            const wPrev = WOLF_XP_PREV[ws.stage];
+            const wPct = ws.stage >= 4 ? 100 : Math.round(((state.treeXP - wPrev) / (ws.next - wPrev)) * 100);
+            const wNext = nextStage(WOLF_XP_CONFIG, ws.stage);
+            return (
+              <div style={{ marginBottom: 12 }}>
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Level Debugger</p>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginBottom: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", lineHeight: 1.7 }}>
+                  <span style={{ color: "#C9A84C", fontWeight: 700 }}>{ws.name}</span>
+                  {" · Stage "}{ws.stage}
+                  {" · "}<span style={{ color: "rgba(255,255,255,0.80)" }}>{state.treeXP} XP</span>
+                  {ws.stage < 4 && <>{" · "}<span style={{ color: "#3fb86a" }}>{wPct}% to {wNext?.name}</span></>}
+                  {ws.stage < 4 && <><br/><span style={{ color: "rgba(255,255,255,0.35)" }}>Next: {wNext?.name} at {wNext?.threshold} XP ({Math.max(0, (wNext?.threshold ?? 0) - state.treeXP)} remaining)</span></>}
+                  {ws.stage >= 4 && <><br/><span style={{ color: "#C9A84C" }}>Max stage reached</span></>}
+                </div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {[50, 100, 250, 500].map((n) => (
+                    <button key={n} onClick={() => update((s) => ({ treeXP: s.treeXP + n }))}
+                      style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(63,184,106,0.10)", border: "1px solid rgba(63,184,106,0.30)", color: "#3fb86a" }}>
+                      +{n} XP
+                    </button>
+                  ))}
+                  <button onClick={() => update(() => ({ treeXP: 0 }))}
+                    style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
+                    Reset XP
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* PRO + Reset all */}
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => update((s) => ({ isPremium: !s.isPremium }))}
@@ -2377,23 +2433,42 @@ function WolfPage({
       </section>
 
       {/* XP + stats */}
-      <section className="px-6 mt-2">
-        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-muted-foreground">{wolfStage.name} · {WOLF_RANK_BY_STAGE[wolfStage.stage]}</span>
-            <span className="text-muted-foreground tabular-nums">{state.treeXP} / {wolfStage.next} XP</span>
-          </div>
-          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #C9A84C, #E8C06A)" }} />
-          </div>
-          <div className="flex items-center justify-between mt-2.5">
-            <p className="text-xs text-muted-foreground">
-              Day {day} · {state.treeXP} / {wolfStage.next} XP
-            </p>
-            <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>{health.label} · {daysThisWeek}/7</p>
-          </div>
-        </div>
-      </section>
+      {(() => {
+        const wNext = nextStage(WOLF_XP_CONFIG, wolfStage.stage);
+        const wPrevThresh = WOLF_XP_PREV[wolfStage.stage];
+        const wPct = wolfStage.stage >= 4 ? 100 : Math.min(100, Math.round(((state.treeXP - wPrevThresh) / (wolfStage.next - wPrevThresh)) * 100));
+        return (
+          <section className="px-6 mt-2">
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
+              {/* Stage name + XP numbers */}
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-muted-foreground">{wolfStage.name} · {WOLF_RANK_BY_STAGE[wolfStage.stage]}</span>
+                <span className="text-muted-foreground tabular-nums">{state.treeXP} / {wolfStage.stage >= 4 ? "MAX" : `${wolfStage.next} XP`}</span>
+              </div>
+              {/* Progress bar */}
+              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #C9A84C, #E8C06A)" }} />
+              </div>
+              {/* % label + next unlock */}
+              <div className="flex items-center justify-between mt-1.5 mb-0.5">
+                {wolfStage.stage < 4 ? (
+                  <span style={{ fontSize: 10, color: "#3fb86a" }}>{wPct}% to {wNext?.name}</span>
+                ) : (
+                  <span style={{ fontSize: 10, color: "#C9A84C" }}>Max stage reached</span>
+                )}
+                {wNext && (
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.30)" }}>Next: {wNext.name} at {wNext.threshold} XP</span>
+                )}
+              </div>
+              {/* Footer row */}
+              <div className="flex items-center justify-between mt-1.5">
+                <p className="text-xs text-muted-foreground">Day {day} · {state.treeXP} XP</p>
+                <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>{health.label} · {daysThisWeek}/7</p>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Hall of Legends */}
       <section className="px-6 mt-3">
@@ -2631,6 +2706,39 @@ function LifeTreePage({
             })}
           </div>
 
+          {/* ── Level Debugger ── */}
+          {(() => {
+            const ts = treeStage(state.treeXP);
+            const tPrev = ts.stage === 0 ? 0 : [0, 100, 300, 700, 1500, 3000][ts.stage];
+            const tPct = ts.stage >= 5 ? 100 : Math.round(((state.treeXP - tPrev) / (ts.next - tPrev)) * 100);
+            const tNext = nextStage(TREE_XP_CONFIG, ts.stage);
+            return (
+              <div style={{ marginBottom: 12 }}>
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Level Debugger</p>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginBottom: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", lineHeight: 1.7 }}>
+                  <span style={{ color: "#C9A84C", fontWeight: 700 }}>{ts.name}</span>
+                  {" · Stage "}{ts.stage}
+                  {" · "}<span style={{ color: "rgba(255,255,255,0.80)" }}>{state.treeXP} XP</span>
+                  {ts.stage < 5 && <>{" · "}<span style={{ color: "#3fb86a" }}>{tPct}% to {tNext?.name}</span></>}
+                  {ts.stage < 5 && <><br/><span style={{ color: "rgba(255,255,255,0.35)" }}>Next: {tNext?.name} at {tNext?.threshold} XP ({Math.max(0, (tNext?.threshold ?? 0) - state.treeXP)} remaining)</span></>}
+                  {ts.stage >= 5 && <><br/><span style={{ color: "#C9A84C" }}>Max stage reached — Ancient</span></>}
+                </div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {[50, 100, 250, 500].map((n) => (
+                    <button key={n} onClick={() => update((s) => ({ treeXP: s.treeXP + n }))}
+                      style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(63,184,106,0.10)", border: "1px solid rgba(63,184,106,0.30)", color: "#3fb86a" }}>
+                      +{n} XP
+                    </button>
+                  ))}
+                  <button onClick={() => update(() => ({ treeXP: 0 }))}
+                    style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
+                    Reset XP
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* PRO + Reset all */}
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => update((s) => ({ isPremium: !s.isPremium }))}
@@ -2757,35 +2865,52 @@ function LifeTreePage({
       </section>
 
       {/* XP + stats */}
-      <section className="px-6 mt-2">
-        <div style={{
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderTop: "1px solid rgba(201,168,76,0.12)",
-          borderRadius: 20, padding: "16px 18px",
-        }}>
-          <div className="flex items-center justify-between text-xs mb-2">
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{stage.name}</span>
-              <span style={{ color: "#C9A84C", opacity: 0.65, fontSize: 10 }}>· {RANK_BY_STAGE[stage.stage]}</span>
+      {(() => {
+        const tNext = nextStage(TREE_XP_CONFIG, stage.stage);
+        const tPct = stage.stage >= 5 ? 100 : Math.min(100, Math.round(pct));
+        return (
+          <section className="px-6 mt-2">
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
+              {/* Stage name + XP numbers */}
+              <div className="flex items-center justify-between text-xs mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">{stage.name}</span>
+                  <span style={{ color: "#C9A84C", opacity: 0.65, fontSize: 10 }}>· {RANK_BY_STAGE[stage.stage]}</span>
+                </div>
+                <span className="text-muted-foreground tabular-nums">
+                  {state.treeXP} / {stage.stage >= 5 ? "MAX" : `${stage.next} XP`}
+                </span>
+              </div>
+              {/* Progress bar */}
+              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${pct}%`, background: "linear-gradient(90deg, #C9A84C, #E8C06A)" }} />
+              </div>
+              {/* % label + next unlock */}
+              <div className="flex items-center justify-between mt-1.5 mb-0.5">
+                {stage.stage < 5 ? (
+                  <span style={{ fontSize: 10, color: "#3fb86a" }}>{tPct}% to {tNext?.name}</span>
+                ) : (
+                  <span style={{ fontSize: 10, color: "#C9A84C" }}>Ancient — max stage reached</span>
+                )}
+                {tNext && (
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.30)" }}>Next: {tNext.name} at {tNext.threshold} XP</span>
+                )}
+              </div>
+              {/* Footer row */}
+              <div className="flex items-center justify-between mt-1.5">
+                <p className="text-xs text-muted-foreground">
+                  <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
+                  Top <span className="text-success font-semibold">{TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users · Day {day}
+                </p>
+                <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>
+                  {health.emoji} {health.label} · {daysThisWeek}/7
+                </p>
+              </div>
             </div>
-            <span className="text-muted-foreground tabular-nums">Day {day} · {state.treeXP} / {stage.next} XP</span>
-          </div>
-          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${pct}%`, background: "linear-gradient(90deg, #C9A84C, #E8C06A)" }} />
-          </div>
-          <div className="flex items-center justify-between mt-2.5">
-            <p className="text-xs text-muted-foreground">
-              <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
-              Top <span className="text-success font-semibold">{TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users
-            </p>
-            <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>
-              {health.emoji} {health.label} · {daysThisWeek}/7
-            </p>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* Hall of Legends */}
       <section className="px-6 mt-3">
