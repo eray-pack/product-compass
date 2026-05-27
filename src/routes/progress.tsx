@@ -1618,112 +1618,115 @@ function ProgressScreen() {
            DOPAMINE DASHBOARD — BIO-SCANNER
          ══════════════════════════════════════════════════════ */}
       <section className="px-6 mt-5 fade-up-3">
-        <style>{`
-          @keyframes scan-sweep {
-            0%   { transform: translateY(-100%); opacity: 0.55; }
-            80%  { opacity: 0.55; }
-            100% { transform: translateY(700%); opacity: 0; }
-          }
-          .scan-line::after {
-            content: "";
-            position: absolute;
-            inset-inline: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(57,217,138,0.55), transparent);
-            animation: scan-sweep 2.6s ease-in 0.1s 1 forwards;
-            pointer-events: none;
-          }
-        `}</style>
 
-        <div className="flex items-center justify-between mb-3">
-          <SectionTitle>Dopamine Dashboard</SectionTitle>
-          <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.16em", color: "rgba(57,217,138,0.45)", fontFamily: MONO }}>
-            SYS_ONLINE
-          </span>
+        {/* ── Thin header bar ─────────────────────────────────────────────────── */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 14px",
+          borderRadius: 14,
+          background: "rgba(57,217,138,0.04)",
+          border: "1px solid rgba(255,255,255,0.05)",
+          marginBottom: 12,
+        }}>
+          {/* Left: title + SYS_ONLINE */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <SectionTitle>Dopamine Dashboard</SectionTitle>
+            <span style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "0.16em", color: "rgba(57,217,138,0.50)", fontFamily: MONO }}>
+              SYS_ONLINE
+            </span>
+          </div>
+
+          {/* Right: three status pills */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {([
+              { label: "DOPAMINE",  value: recoveryPct >= 50 ? "STABILIZING" : "RECOVERING", color: recoveryPct >= 50 ? NG : "#4A9ECC" },
+              { label: "PRUNING",   value: day > 7 ? "ACTIVE" : "INITIATING",                color: NG },
+              { label: "BASELINE",  value: day >= 30 ? "RESETTING" : "ADAPTING",             color: day >= 30 ? NG : "#4A9ECC" },
+            ] as const).map((s) => (
+              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <motion.span
+                  animate={{ opacity: [1, 0.25, 1] }}
+                  transition={{ duration: 1.7, repeat: Infinity, delay: Math.random() * 0.8 }}
+                  style={{ width: 4, height: 4, borderRadius: "50%", background: s.color, display: "block", flexShrink: 0, boxShadow: `0 0 5px ${s.color}` }}
+                />
+                <span style={{ fontSize: 7, color: s.color, fontWeight: 700, letterSpacing: "0.09em", fontFamily: MONO }}>{s.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* ① Circular bio-gauge — full width */}
-        <DopamineGauge pct={recoveryPct} day={day} />
-
-        {/* ② 2×2 digital readout grid */}
-        <div className="scan-line" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, position: "relative", overflow: "hidden" }}>
+        {/* ── 2×2 data tile grid ──────────────────────────────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
 
           {/* Card 1 — Avg Relapse Frequency */}
-          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
-            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
             <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(201,168,76,0.10)",border:"1px solid rgba(201,168,76,0.28)",display:"grid",placeItems:"center",marginBottom:9 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(201,168,76,0.10)",border:"1px solid rgba(201,168,76,0.28)",display:"grid",placeItems:"center",marginBottom:10 }}>
                 <Hourglass size={13} color="#C9A84C" strokeWidth={1.8}/>
               </div>
-              <p style={{ margin:0, fontSize:20, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
+              <p style={{ margin:0, fontSize:22, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {avgRelapseDays !== null ? `${avgRelapseDays}d` : "—"}
               </p>
-              <p style={{ margin:"4px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
+              <p style={{ margin:"5px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
                 AVG_RELAPSE<br/>FREQUENCY
               </p>
             </div>
           </div>
 
-          {/* Card 2 — Total App Sessions (with STABILIZING indicator) */}
-          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
-            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+          {/* Card 2 — Total App Sessions */}
+          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
             <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(57,217,138,0.10)",border:"1px solid rgba(57,217,138,0.22)",display:"grid",placeItems:"center",marginBottom:9 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(57,217,138,0.10)",border:"1px solid rgba(57,217,138,0.22)",display:"grid",placeItems:"center",marginBottom:10 }}>
                 <Smartphone size={13} color={NG} strokeWidth={1.8}/>
               </div>
-              <p style={{ margin:0, fontSize:20, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
+              <p style={{ margin:0, fontSize:22, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {String(totalLogins).padStart(2,"0")}
               </p>
-              <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:4 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:5 }}>
                 <motion.span
                   animate={{ opacity:[1,0.2,1] }}
                   transition={{ duration:1.5, repeat:Infinity }}
-                  style={{ width:5,height:5,borderRadius:"50%",background:NG,flexShrink:0,boxShadow:`0 0 5px ${NG}` }}
+                  style={{ width:4,height:4,borderRadius:"50%",background:NG,flexShrink:0,boxShadow:`0 0 5px ${NG}` }}
                 />
-                <p style={{ margin:0, fontSize:9, color:NG, lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em", fontWeight:700 }}>
-                  STABILIZING
+                <p style={{ margin:0, fontSize:9, color:"rgba(255,255,255,0.35)", fontFamily:MONO, letterSpacing:"0.06em" }}>
+                  TOTAL_SESSIONS
                 </p>
               </div>
-              <p style={{ margin:"2px 0 0", fontSize:9, color:"rgba(255,255,255,0.30)", fontFamily:MONO, letterSpacing:"0.06em" }}>
-                TOTAL_SESSIONS
-              </p>
             </div>
           </div>
 
           {/* Card 3 — Most Challenging Weekday */}
-          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
-            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
             <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(240,100,80,0.10)",border:"1px solid rgba(240,100,80,0.22)",display:"grid",placeItems:"center",marginBottom:9 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(240,100,80,0.10)",border:"1px solid rgba(240,100,80,0.22)",display:"grid",placeItems:"center",marginBottom:10 }}>
                 <CalendarDays size={13} color="#f06450" strokeWidth={1.8}/>
               </div>
-              <p style={{ margin:0, fontSize:20, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
+              <p style={{ margin:0, fontSize:22, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {peakDow ?? "—"}
               </p>
-              <p style={{ margin:"4px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
+              <p style={{ margin:"5px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
                 PEAK_RISK<br/>WEEKDAY
               </p>
             </div>
           </div>
 
-          {/* Card 4 — Level Multiplier */}
-          <div style={{ ...STONE_CARD, padding: "14px 13px" }}>
-            <div aria-hidden style={{ position:"absolute",inset:0,borderRadius:18,pointerEvents:"none",background:"repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.012) 8px,rgba(57,217,138,0.012) 9px)" }}/>
+          {/* Card 4 — XP Multiplier */}
+          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
             <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(168,200,124,0.10)",border:"1px solid rgba(168,200,124,0.22)",display:"grid",placeItems:"center",marginBottom:9 }}>
+              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(168,200,124,0.10)",border:"1px solid rgba(168,200,124,0.22)",display:"grid",placeItems:"center",marginBottom:10 }}>
                 <Zap size={13} color="#a8c87c" strokeWidth={1.8}/>
               </div>
-              <p style={{ margin:0, fontSize:20, fontWeight:900, color:hasDeepRoots?"#a8c87c":"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
+              <p style={{ margin:0, fontSize:22, fontWeight:900, color:hasDeepRoots?"#a8c87c":"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
                 {hasDeepRoots ? "×1.1" : "×1.0"}
               </p>
-              <p style={{ margin:"4px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
+              <p style={{ margin:"5px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
                 XP_CREDIT<br/>MULTIPLIER
               </p>
             </div>
           </div>
         </div>
 
-        {/* ③ Neural Pruning graph — full width */}
+        {/* ── Neural Pruning graph ─────────────────────────────────────────────── */}
         <NeuralPruningGraph day={day} />
       </section>
 
