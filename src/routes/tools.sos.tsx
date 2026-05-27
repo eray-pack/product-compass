@@ -355,7 +355,7 @@ function SOS() {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ position: "relative", zIndex: 1 }}>
         <Link
-          to="/"
+          to="/tools"
           className="inline-flex items-center gap-1 font-medium"
           style={{ color: "rgba(255,255,255,0.40)", fontSize: 13, fontFamily: "DM Sans, sans-serif" }}
         >
@@ -539,7 +539,7 @@ function SOS() {
       <div className="mt-5">
         {done ? (
           <button
-            onClick={() => navigate({ to: "/" })}
+            onClick={() => navigate({ to: "/tools" })}
             className="h-14 w-full rounded-2xl font-bold text-sm inline-flex items-center justify-center gap-2"
             style={{
               color: "#0a0705",

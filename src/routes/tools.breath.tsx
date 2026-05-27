@@ -160,7 +160,7 @@ function BreathBall() {
 
       {/* ── Back button ─────────────────────────────────────────────────────── */}
       <button
-        onClick={() => { clearTimer(); navigate({ to: "/" }); }}
+        onClick={() => { clearTimer(); navigate({ to: "/tools" }); }}
         className="absolute top-12 left-5 z-20 h-9 w-9 rounded-full grid place-items-center transition-opacity active:opacity-60"
         style={{
           background: "rgba(255,255,255,0.06)",

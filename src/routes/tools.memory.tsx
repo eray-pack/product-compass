@@ -323,7 +323,7 @@ function MemoryMatch() {
       <button
         onClick={() => {
           if (timerRef.current) clearInterval(timerRef.current);
-          navigate({ to: "/" });
+          navigate({ to: "/tools" });
         }}
         className="absolute top-12 left-5 z-20 h-9 w-9 rounded-full grid place-items-center"
         style={{

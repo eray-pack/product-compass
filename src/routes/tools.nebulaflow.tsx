@@ -315,7 +315,7 @@ function NebulaFlow() {
         padding: "52px 20px 16px",
       }}>
         <button
-          onClick={() => navigate({ to: "/" })}
+          onClick={() => navigate({ to: "/tools" })}
           style={{
             width: 36, height: 36, borderRadius: "50%",
             background: "rgba(168,85,247,0.12)",
@@ -684,7 +684,7 @@ function NebulaFlow() {
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => navigate({ to: "/" })}
+                  onClick={() => navigate({ to: "/tools" })}
                   style={{
                     flex: 1, padding: "13px 0", borderRadius: 50,
                     background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)",

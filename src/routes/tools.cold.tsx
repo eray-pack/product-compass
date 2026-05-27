@@ -8,7 +8,7 @@ export const Route = createFileRoute("/tools/cold")({
 function Cold() {
   return (
     <div className="min-h-screen mx-auto max-w-md px-6 pt-10 pb-12">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+      <Link to="/tools" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
         <ArrowLeft className="h-4 w-4" /> Back
       </Link>
       <div className="mt-6 text-center">

@@ -151,7 +151,7 @@ function VoidStare() {
 
       {/* ── Back button ───────────────────────────────────────────────────── */}
       <button
-        onClick={(e) => { e.stopPropagation(); clear(); navigate({ to: "/" }); }}
+        onClick={(e) => { e.stopPropagation(); clear(); navigate({ to: "/tools" }); }}
         className="absolute top-12 left-5 z-20 h-9 w-9 rounded-full grid place-items-center"
         style={{
           background: "rgba(20,0,35,0.85)",

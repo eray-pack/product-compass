@@ -123,7 +123,7 @@ function ClarityClimb() {
       }}
     >
       <motion.button
-        onClick={() => navigate({ to: "/" })}
+        onClick={() => navigate({ to: "/tools" })}
         className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center"
         style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.1)" }}
         whileTap={{ scale: 0.88 }}
