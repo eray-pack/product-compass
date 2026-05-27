@@ -1615,103 +1615,97 @@ function ProgressScreen() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-           DOPAMINE DASHBOARD — BIO-SCANNER
+           DOPAMINE DASHBOARD — DATA TERMINAL
          ══════════════════════════════════════════════════════ */}
       <section className="px-6 mt-5 fade-up-3">
 
-        {/* ── Floating header — no card, no border ────────────────────────────── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        {/* ── Standalone title ────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 18 }}>
           <SectionTitle>Dopamine Dashboard</SectionTitle>
-
-          {/* Status indicators inline to the right */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {([
-              { value: recoveryPct >= 50 ? "STABILIZING" : "RECOVERING", color: recoveryPct >= 50 ? NG : "#4A9ECC" },
-              { value: day > 7 ? "ACTIVE" : "INITIATING",                color: NG },
-              { value: day >= 30 ? "RESETTING" : "ADAPTING",             color: day >= 30 ? NG : "#4A9ECC" },
-            ] as const).map((s, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <motion.span
-                  animate={{ opacity: [1, 0.25, 1] }}
-                  transition={{ duration: 1.7, repeat: Infinity, delay: i * 0.35 }}
-                  style={{ width: 4, height: 4, borderRadius: "50%", background: s.color, display: "block", flexShrink: 0, boxShadow: `0 0 5px ${s.color}` }}
-                />
-                <span style={{ fontSize: 7, color: s.color, fontWeight: 700, letterSpacing: "0.09em", fontFamily: MONO }}>{s.value}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* ── 2×2 data tile grid ──────────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-
-          {/* Card 1 — Avg Relapse Frequency */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-            <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(201,168,76,0.10)",border:"1px solid rgba(201,168,76,0.28)",display:"grid",placeItems:"center",marginBottom:10 }}>
-                <Hourglass size={13} color="#C9A84C" strokeWidth={1.8}/>
+        {/* ── Borderless data rows ─────────────────────────────────────────────── */}
+        {([
+          {
+            glyph: (
+              <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+                <path d="M0 7 L3.5 7 L5.5 1.5 L8 12.5 L10 4 L12 10 L14 7 L20 7"
+                  stroke={NG} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity="0.65"/>
+                <path d="M0 7 L3.5 7 L5.5 1.5 L8 12.5 L10 4 L12 10 L14 7 L20 7"
+                  stroke={NG} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" opacity="0.06"/>
+              </svg>
+            ),
+            label: "AVG_RELAPSE_FREQ",
+            value: avgRelapseDays !== null ? `${avgRelapseDays}d` : "—",
+            valueColor: "#f5ede0",
+          },
+          {
+            glyph: (
+              <svg width="18" height="13" viewBox="0 0 18 13" fill="none">
+                <rect x="0" y="0"   width="18" height="1.6" rx="0.8" fill={NG} opacity="0.65"/>
+                <rect x="0" y="5.5" width="13" height="1.6" rx="0.8" fill={NG} opacity="0.42"/>
+                <rect x="0" y="11"  width="8"  height="1.6" rx="0.8" fill={NG} opacity="0.24"/>
+              </svg>
+            ),
+            label: "TOTAL_SESSIONS",
+            value: String(totalLogins).padStart(2, "0"),
+            valueColor: "#f5ede0",
+          },
+          {
+            glyph: (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="5.5" stroke={NG} strokeWidth="1" opacity="0.50"/>
+                <circle cx="8" cy="8" r="1.8" fill={NG} opacity="0.70"/>
+                <line x1="8" y1="0"  x2="8" y2="2.2"  stroke={NG} strokeWidth="1" opacity="0.38"/>
+                <line x1="8" y1="13.8" x2="8" y2="16" stroke={NG} strokeWidth="1" opacity="0.38"/>
+                <line x1="0"  y1="8" x2="2.2"  y2="8" stroke={NG} strokeWidth="1" opacity="0.38"/>
+                <line x1="13.8" y1="8" x2="16" y2="8" stroke={NG} strokeWidth="1" opacity="0.38"/>
+              </svg>
+            ),
+            label: "PEAK_RISK_WEEKDAY",
+            value: peakDow ?? "—",
+            valueColor: "#f5ede0",
+          },
+          {
+            glyph: (
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path d="M7.5 1 L14 7.5 L7.5 14 L1 7.5 Z" stroke={NG} strokeWidth="1" opacity="0.50"/>
+                <circle cx="7.5" cy="7.5" r="2.2" fill={NG} opacity="0.60"/>
+              </svg>
+            ),
+            label: "XP_CREDIT_MULTIPLIER",
+            value: hasDeepRoots ? "×1.1" : "×1.0",
+            valueColor: hasDeepRoots ? NG : "#f5ede0",
+          },
+        ] as const).map((row, i, arr) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "20px 0",
+            borderTop: "1px solid rgba(255,255,255,0.07)",
+            ...(i === arr.length - 1 ? { borderBottom: "1px solid rgba(255,255,255,0.07)" } : {}),
+          }}>
+            {/* Left: glyph + label */}
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 22, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {row.glyph}
               </div>
-              <p style={{ margin:0, fontSize:22, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
-                {avgRelapseDays !== null ? `${avgRelapseDays}d` : "—"}
-              </p>
-              <p style={{ margin:"5px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
-                AVG_RELAPSE<br/>FREQUENCY
-              </p>
+              <span style={{
+                fontSize: 9, fontFamily: MONO, letterSpacing: "2px",
+                color: "rgba(255,255,255,0.30)", textTransform: "uppercase",
+              }}>
+                {row.label}
+              </span>
             </div>
-          </div>
 
-          {/* Card 2 — Total App Sessions */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-            <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(57,217,138,0.10)",border:"1px solid rgba(57,217,138,0.22)",display:"grid",placeItems:"center",marginBottom:10 }}>
-                <Smartphone size={13} color={NG} strokeWidth={1.8}/>
-              </div>
-              <p style={{ margin:0, fontSize:22, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
-                {String(totalLogins).padStart(2,"0")}
-              </p>
-              <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:5 }}>
-                <motion.span
-                  animate={{ opacity:[1,0.2,1] }}
-                  transition={{ duration:1.5, repeat:Infinity }}
-                  style={{ width:4,height:4,borderRadius:"50%",background:NG,flexShrink:0,boxShadow:`0 0 5px ${NG}` }}
-                />
-                <p style={{ margin:0, fontSize:9, color:"rgba(255,255,255,0.35)", fontFamily:MONO, letterSpacing:"0.06em" }}>
-                  TOTAL_SESSIONS
-                </p>
-              </div>
-            </div>
+            {/* Right: large mono value */}
+            <span style={{
+              fontSize: 30, fontWeight: 800, fontFamily: MONO,
+              color: row.valueColor, letterSpacing: "-0.01em", lineHeight: 1,
+            }}>
+              {row.value}
+            </span>
           </div>
-
-          {/* Card 3 — Most Challenging Weekday */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-            <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(240,100,80,0.10)",border:"1px solid rgba(240,100,80,0.22)",display:"grid",placeItems:"center",marginBottom:10 }}>
-                <CalendarDays size={13} color="#f06450" strokeWidth={1.8}/>
-              </div>
-              <p style={{ margin:0, fontSize:22, fontWeight:900, color:"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
-                {peakDow ?? "—"}
-              </p>
-              <p style={{ margin:"5px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
-                PEAK_RISK<br/>WEEKDAY
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4 — XP Multiplier */}
-          <div style={{ ...STONE_CARD, padding: "16px 14px", border: "1px solid rgba(255,255,255,0.05)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-            <div style={{ position:"relative", zIndex:1 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:"rgba(168,200,124,0.10)",border:"1px solid rgba(168,200,124,0.22)",display:"grid",placeItems:"center",marginBottom:10 }}>
-                <Zap size={13} color="#a8c87c" strokeWidth={1.8}/>
-              </div>
-              <p style={{ margin:0, fontSize:22, fontWeight:900, color:hasDeepRoots?"#a8c87c":"#f5ede0", letterSpacing:"0.01em", fontFamily:MONO }}>
-                {hasDeepRoots ? "×1.1" : "×1.0"}
-              </p>
-              <p style={{ margin:"5px 0 0", fontSize:9, color:"rgba(255,255,255,0.35)", lineHeight:1.4, fontFamily:MONO, letterSpacing:"0.06em" }}>
-                XP_CREDIT<br/>MULTIPLIER
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
 
         {/* ── Neural Pruning graph ─────────────────────────────────────────────── */}
         <NeuralPruningGraph day={day} />
