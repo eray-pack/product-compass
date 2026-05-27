@@ -1,20 +1,25 @@
+import { supabase } from "@/lib/supabase";
+
 export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
 };
 
 export async function sendCoachMessage(messages: ChatMessage[]): Promise<string> {
+  // Get current session JWT — required for server-side auth verification
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not logged in");
+
   const res = await fetch("/api/chat", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "authorization": `Bearer ${session.access_token}`,
+    },
     body: JSON.stringify({ messages }),
   });
 
-  if (!res.ok) {
-    throw new Error(`/api/chat error: ${res.status}`);
-  }
-
   const json = (await res.json()) as { text?: string; error?: string };
-  if (!json.text) throw new Error(json.error ?? "Empty response");
+  if (!res.ok || !json.text) throw new Error(json.error ?? `Error ${res.status}`);
   return json.text;
 }
