@@ -14,7 +14,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     title: "Welcome to Stopamine.",
     items: [
       "Track any habit or addiction — your journey, your rules",
-      "Your tree grows as you stay clean",
+      "Your tree or wolf grows as you stay clean",
       "11 badges to unlock from Spark to Legend",
       "Tools built around real psychological techniques",
       "Daily check-ins that actually mean something",

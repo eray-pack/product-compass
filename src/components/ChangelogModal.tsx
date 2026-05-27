@@ -18,63 +18,78 @@ export function ChangelogModal({ open, onClose }: Props) {
 
   if (!entry) return null;
 
-  const handleClose = () => onClose();
-
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — soft fade */}
           <motion.div
             key="changelog-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={handleClose}
+            transition={{ duration: 0.35 }}
+            onClick={onClose}
             style={{
               position: "fixed",
               inset: 0,
               zIndex: 60,
-              background: "rgba(0,0,0,0.75)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
+              background: "rgba(0,0,0,0.82)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
             }}
           />
 
-          {/* Sheet */}
+          {/* Sheet — rises from bottom */}
           <motion.div
             key="changelog-sheet"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 380, damping: 36 }}
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", stiffness: 340, damping: 34, opacity: { duration: 0.3 } }}
             style={{
               position: "fixed",
               bottom: 0,
               left: 0,
               right: 0,
               zIndex: 61,
-              background: "#100d07",
-              borderTop: "1px solid rgba(201,168,76,0.18)",
-              borderRadius: "20px 20px 0 0",
-              padding: "28px 24px 48px",
+              background: "linear-gradient(170deg, #14100a 0%, #0c0905 100%)",
+              borderTop: "1px solid rgba(201,168,76,0.22)",
+              borderRadius: "24px 24px 0 0",
+              padding: "28px 24px 52px",
             }}
           >
+            {/* Ambient glow behind content */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: -40,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: 260,
+                height: 120,
+                borderRadius: "50%",
+                background: "radial-gradient(ellipse, rgba(201,168,76,0.10) 0%, transparent 70%)",
+                pointerEvents: "none",
+                filter: "blur(18px)",
+              }}
+            />
+
             {/* Handle */}
             <div
               style={{
                 width: 36,
                 height: 4,
                 borderRadius: 9999,
-                background: "rgba(255,255,255,0.12)",
-                margin: "0 auto 24px",
+                background: "rgba(255,255,255,0.10)",
+                margin: "0 auto 28px",
               }}
             />
 
             {/* Close */}
             <button
-              onClick={handleClose}
+              onClick={onClose}
               style={{
                 position: "absolute",
                 top: 20,
@@ -83,11 +98,11 @@ export function ChangelogModal({ open, onClose }: Props) {
                 height: 32,
                 borderRadius: "50%",
                 background: "rgba(255,255,255,0.06)",
-                border: "none",
+                border: "1px solid rgba(255,255,255,0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "rgba(255,255,255,0.5)",
+                color: "rgba(255,255,255,0.40)",
                 cursor: "pointer",
               }}
             >
@@ -95,7 +110,12 @@ export function ChangelogModal({ open, onClose }: Props) {
             </button>
 
             {/* Version chip */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.05 }}
+              style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}
+            >
               <Sparkles size={14} style={{ color: "#C9A84C" }} />
               <span
                 style={{
@@ -108,60 +128,93 @@ export function ChangelogModal({ open, onClose }: Props) {
               >
                 v{entry.version}
               </span>
-            </div>
+            </motion.div>
 
             {/* Title */}
-            <h2
+            <motion.h2
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
               className="day-monument"
-              style={{ fontSize: 24, fontWeight: 700, color: "#f5ede0", marginBottom: 20, lineHeight: 1.2 }}
+              style={{
+                fontSize: 26,
+                fontWeight: 700,
+                color: "#f5ede0",
+                marginBottom: 22,
+                lineHeight: 1.2,
+              }}
             >
               {entry.title}
-            </h2>
+            </motion.h2>
 
             {/* Items */}
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 15 }}>
               {entry.items.map((item, i) => (
                 <motion.li
                   key={i}
-                  initial={{ opacity: 0, x: -12 }}
+                  initial={{ opacity: 0, x: -14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.08 + i * 0.07, duration: 0.35 }}
-                  style={{ display: "flex", alignItems: "flex-start", gap: 12 }}
+                  transition={{ delay: 0.16 + i * 0.08, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: 13 }}
                 >
-                  <span
+                  <motion.span
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
                     style={{
-                      width: 6,
-                      height: 6,
+                      width: 5,
+                      height: 5,
                       borderRadius: "50%",
                       background: "#C9A84C",
+                      boxShadow: "0 0 6px rgba(201,168,76,0.6)",
                       flexShrink: 0,
-                      marginTop: 7,
+                      marginTop: 8,
                     }}
                   />
-                  <span style={{ fontSize: 15, color: "rgba(245,237,224,0.85)", lineHeight: 1.5 }}>
+                  <span style={{ fontSize: 15, color: "rgba(245,237,224,0.80)", lineHeight: 1.55 }}>
                     {item}
                   </span>
                 </motion.li>
               ))}
             </ul>
 
-            {/* CTA */}
+            {/* CTA — shimmer glow button */}
+            <style>{`
+              @keyframes clog-shimmer {
+                0%   { background-position: -200% center; }
+                100% { background-position:  200% center; }
+              }
+              .clog-btn {
+                background: linear-gradient(
+                  90deg,
+                  #b8842a 0%,
+                  #e0b050 30%,
+                  #fff8e8 50%,
+                  #e0b050 70%,
+                  #b8842a 100%
+                );
+                background-size: 200% auto;
+                animation: clog-shimmer 2.8s linear infinite;
+              }
+            `}</style>
             <motion.button
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 + entry.items.length * 0.07 + 0.1 }}
-              onClick={handleClose}
+              transition={{ delay: 0.16 + entry.items.length * 0.08 + 0.12, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              whileTap={{ scale: 0.97 }}
+              onClick={onClose}
+              className="clog-btn"
               style={{
-                marginTop: 28,
+                marginTop: 30,
                 width: "100%",
-                height: 52,
-                borderRadius: 14,
-                background: "var(--gradient-primary)",
-                color: "var(--primary-foreground)",
+                height: 54,
+                borderRadius: 16,
+                color: "#1a1000",
                 fontSize: 15,
-                fontWeight: 600,
+                fontWeight: 700,
                 border: "none",
                 cursor: "pointer",
+                letterSpacing: "0.02em",
+                boxShadow: "0 0 24px rgba(201,168,76,0.30), 0 4px 16px rgba(0,0,0,0.4)",
               }}
             >
               Let's go
