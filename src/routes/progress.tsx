@@ -1625,88 +1625,111 @@ function ProgressScreen() {
           <SectionTitle>Dopamine Dashboard</SectionTitle>
         </div>
 
-        {/* ── Borderless data rows ─────────────────────────────────────────────── */}
+        {/* ── Cyber-terminal data rows ─────────────────────────────────────────── */}
+        <div style={{
+          background: "rgba(0,0,0,0.55)",
+          borderRadius: 16,
+          padding: "0 16px",
+          border: "1px solid rgba(255,255,255,0.06)",
+        }}>
         {([
           {
+            glowColor: NG,
             glyph: (
               <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
                 <path d="M0 7 L3.5 7 L5.5 1.5 L8 12.5 L10 4 L12 10 L14 7 L20 7"
-                  stroke={NG} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity="0.65"/>
-                <path d="M0 7 L3.5 7 L5.5 1.5 L8 12.5 L10 4 L12 10 L14 7 L20 7"
-                  stroke={NG} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" opacity="0.06"/>
+                  stroke={NG} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             ),
             label: "AVG_RELAPSE_FREQ",
             value: avgRelapseDays !== null ? `${avgRelapseDays}d` : "—",
-            valueColor: "#f5ede0",
           },
           {
+            glowColor: "#4A9ECC",
             glyph: (
               <svg width="18" height="13" viewBox="0 0 18 13" fill="none">
-                <rect x="0" y="0"   width="18" height="1.6" rx="0.8" fill={NG} opacity="0.65"/>
-                <rect x="0" y="5.5" width="13" height="1.6" rx="0.8" fill={NG} opacity="0.42"/>
-                <rect x="0" y="11"  width="8"  height="1.6" rx="0.8" fill={NG} opacity="0.24"/>
+                <rect x="0" y="0"   width="18" height="2" rx="1" fill="#4A9ECC"/>
+                <rect x="0" y="5.5" width="13" height="2" rx="1" fill="#4A9ECC" opacity="0.70"/>
+                <rect x="0" y="11"  width="8"  height="2" rx="1" fill="#4A9ECC" opacity="0.40"/>
               </svg>
             ),
             label: "TOTAL_SESSIONS",
             value: String(totalLogins).padStart(2, "0"),
-            valueColor: "#f5ede0",
           },
           {
+            glowColor: "#C9A84C",
             glyph: (
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="5.5" stroke={NG} strokeWidth="1" opacity="0.50"/>
-                <circle cx="8" cy="8" r="1.8" fill={NG} opacity="0.70"/>
-                <line x1="8" y1="0"  x2="8" y2="2.2"  stroke={NG} strokeWidth="1" opacity="0.38"/>
-                <line x1="8" y1="13.8" x2="8" y2="16" stroke={NG} strokeWidth="1" opacity="0.38"/>
-                <line x1="0"  y1="8" x2="2.2"  y2="8" stroke={NG} strokeWidth="1" opacity="0.38"/>
-                <line x1="13.8" y1="8" x2="16" y2="8" stroke={NG} strokeWidth="1" opacity="0.38"/>
+                <circle cx="8" cy="8" r="5.5" stroke="#C9A84C" strokeWidth="1.2"/>
+                <circle cx="8" cy="8" r="2"   fill="#C9A84C"/>
+                <line x1="8" y1="0"    x2="8"  y2="2.2"  stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="8" y1="13.8" x2="8"  y2="16"   stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="0"   y1="8"  x2="2.2" y2="8"   stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="13.8" y1="8" x2="16"  y2="8"   stroke="#C9A84C" strokeWidth="1.2"/>
               </svg>
             ),
             label: "PEAK_RISK_WEEKDAY",
             value: peakDow ?? "—",
-            valueColor: "#f5ede0",
           },
           {
+            glowColor: hasDeepRoots ? NG : "rgba(255,255,255,0.35)",
             glyph: (
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <path d="M7.5 1 L14 7.5 L7.5 14 L1 7.5 Z" stroke={NG} strokeWidth="1" opacity="0.50"/>
-                <circle cx="7.5" cy="7.5" r="2.2" fill={NG} opacity="0.60"/>
+                <path d="M7.5 1 L14 7.5 L7.5 14 L1 7.5 Z" stroke={hasDeepRoots ? NG : "rgba(255,255,255,0.35)"} strokeWidth="1.3"/>
+                <circle cx="7.5" cy="7.5" r="2.5" fill={hasDeepRoots ? NG : "rgba(255,255,255,0.35)"}/>
               </svg>
             ),
             label: "XP_CREDIT_MULTIPLIER",
             value: hasDeepRoots ? "×1.1" : "×1.0",
-            valueColor: hasDeepRoots ? NG : "#f5ede0",
           },
         ] as const).map((row, i, arr) => (
           <div key={i} style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "20px 0",
-            borderTop: "1px solid rgba(255,255,255,0.07)",
-            ...(i === arr.length - 1 ? { borderBottom: "1px solid rgba(255,255,255,0.07)" } : {}),
+            display: "flex", alignItems: "center",
+            padding: "16px 0",
+            borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
           }}>
-            {/* Left: glyph + label */}
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 22, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {row.glyph}
-              </div>
-              <span style={{
-                fontSize: 9.5, fontFamily: MONO, letterSpacing: "1.2px",
-                color: "rgba(255,255,255,0.52)", textTransform: "uppercase",
-              }}>
-                {row.label}
-              </span>
-            </div>
+            {/* Icon — neon glow + breathing pulse */}
+            <motion.div
+              animate={{
+                filter: [
+                  `drop-shadow(0 0 3px ${row.glowColor}90)`,
+                  `drop-shadow(0 0 9px ${row.glowColor})`,
+                  `drop-shadow(0 0 3px ${row.glowColor}90)`,
+                ],
+                scale: [1, 1.08, 1],
+              }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", delay: i * 0.6 }}
+              style={{
+                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                background: `${row.glowColor}12`,
+                border: `1px solid ${row.glowColor}35`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                marginRight: 16,
+              }}
+            >
+              {row.glyph}
+            </motion.div>
 
-            {/* Right: value — balanced with label */}
+            {/* Label — primary, high-contrast */}
             <span style={{
-              fontSize: 22, fontWeight: 700, fontFamily: MONO,
-              color: row.valueColor, letterSpacing: "0.02em", lineHeight: 1,
+              flex: 1,
+              fontSize: 12, fontWeight: 700, fontFamily: MONO,
+              letterSpacing: "0.8px", textTransform: "uppercase",
+              color: "#ffffff",
+            }}>
+              {row.label}
+            </span>
+
+            {/* Value — secondary, muted */}
+            <span style={{
+              fontSize: 11, fontWeight: 500, fontFamily: MONO,
+              color: "rgba(255,255,255,0.38)", letterSpacing: "0.05em", flexShrink: 0,
             }}>
               {row.value}
             </span>
           </div>
         ))}
+        </div>
 
         {/* ── Neural Pruning graph ─────────────────────────────────────────────── */}
         <NeuralPruningGraph day={day} />
