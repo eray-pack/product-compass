@@ -88,6 +88,22 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+const SUPABASE_URL = "https://iikoxopupfjiavjjvkgm.supabase.co";
+
+// Verify Supabase JWT — returns user id if valid, null if not
+async function verifySupabaseJWT(token: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { "Authorization": `Bearer ${token}`, "apikey": "sb_publishable_lG6o7ZK94dOd5Px5iaBL-Q_d0rQGJ_f" },
+    });
+    if (!res.ok) return null;
+    const user = await res.json() as { id?: string };
+    return user.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // ── /api/chat — Anthropic proxy ──────────────────────────────────────────────
 // Handled before TanStack so the API key (from Cloudflare env binding) never
 // touches the client bundle or the SSR renderer.
@@ -102,6 +118,23 @@ async function handleChatApi(request: Request, env: Env): Promise<Response> {
     return new Response(JSON.stringify({ error: "Too many requests. Slow down." }), {
       status: 429,
       headers: { "content-type": "application/json", "retry-after": "60" },
+    });
+  }
+
+  // Verify user is logged in — blocks unauthenticated abuse
+  const authHeader = request.headers.get("authorization") ?? "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "content-type": "application/json" },
+    });
+  }
+  const userId = await verifySupabaseJWT(token);
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "Invalid session" }), {
+      status: 401,
+      headers: { "content-type": "application/json" },
     });
   }
 
