@@ -1542,26 +1542,18 @@ function ProgressScreen() {
       <section className="px-6 mt-6 fade-up-2">
         <style>{`
           @keyframes rank-halo { 0%,100%{opacity:0.55;transform:scale(0.96)} 50%{opacity:1;transform:scale(1.06)} }
-          @keyframes rank-rune  { 0%,100%{opacity:0.12} 50%{opacity:0.22} }
         `}</style>
-        <div style={{ ...STONE_CARD, padding: "20px 20px 18px" }}>
+        <div style={{
+          ...STONE_CARD,
+          padding: "20px 20px 18px",
+          border: "1px solid rgba(255,255,255,0.05)",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+        }}>
           {/* Stone grain overlay */}
           <div aria-hidden style={{
             position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
             background: "repeating-linear-gradient(-22deg, transparent, transparent 8px, rgba(201,168,76,0.018) 8px, rgba(201,168,76,0.018) 9px)",
           }}/>
-          {/* Corner runes */}
-          {["top-left","top-right"].map((pos) => (
-            <svg key={pos} aria-hidden width="22" height="22" viewBox="0 0 22 22" fill="none" style={{
-              position: "absolute",
-              top: pos.includes("top") ? 10 : undefined, bottom: pos.includes("bottom") ? 10 : undefined,
-              left: pos.includes("left") ? 10 : undefined, right: pos.includes("right") ? 10 : undefined,
-              animation: "rank-rune 4s ease-in-out infinite",
-            }}>
-              <path d="M2 2 L2 10 M2 2 L10 2" stroke="#C9A84C" strokeWidth="1.2" strokeLinecap="round"/>
-              <circle cx="2" cy="2" r="1.5" fill="#C9A84C" opacity="0.6"/>
-            </svg>
-          ))}
 
           <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 16 }}>
             {/* Rank badge circle */}
