@@ -895,12 +895,13 @@ function CoinCard({
   );
 }
 
-// ── Legacy rank tiers (driven by total clean days ever) ──────────────────────
+// ── Legacy rank tiers — must stay sorted highest min first ───────────────────
 const RANK_TIERS = [
-  { min: 90, name: "Sovereign",  roman: "IV", color: "#E8C87A", glow: "rgba(232,200,122,0.38)", desc: "You have mastered the battle within." },
-  { min: 30, name: "Sentinel",   roman: "III", color: "#7ec8e3", glow: "rgba(126,200,227,0.28)", desc: "A month of discipline forged your will." },
-  { min: 7,  name: "Guardian",   roman: "II",  color: "#a8c87c", glow: "rgba(168,200,124,0.26)", desc: "You have survived the first test." },
-  { min: 0,  name: "Initiate",   roman: "I",   color: "rgba(255,255,255,0.55)", glow: "rgba(255,255,255,0.08)", desc: "The path begins here. Keep going." },
+  { min: 90, name: "Sovereign", roman: "V",   color: "#E8C87A",               glow: "rgba(232,200,122,0.38)", desc: "You have mastered the battle within." },
+  { min: 60, name: "Sentinel",  roman: "IV",  color: "#7ec8e3",               glow: "rgba(126,200,227,0.28)", desc: "Two months of unbroken discipline." },
+  { min: 30, name: "Forge",     roman: "III", color: "#c87ea8",               glow: "rgba(200,126,168,0.26)", desc: "A month of fire has hardened your will." },
+  { min: 7,  name: "Guardian",  roman: "II",  color: "#a8c87c",               glow: "rgba(168,200,124,0.26)", desc: "You have survived the first test." },
+  { min: 0,  name: "Initiate",  roman: "I",   color: "rgba(255,255,255,0.55)", glow: "rgba(255,255,255,0.08)", desc: "The path begins here. Keep going." },
 ] as const;
 
 function getRank(totalDays: number) {
