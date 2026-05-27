@@ -1690,17 +1690,17 @@ function ProgressScreen() {
                 {row.glyph}
               </div>
               <span style={{
-                fontSize: 9, fontFamily: MONO, letterSpacing: "2px",
-                color: "rgba(255,255,255,0.30)", textTransform: "uppercase",
+                fontSize: 9.5, fontFamily: MONO, letterSpacing: "1.2px",
+                color: "rgba(255,255,255,0.52)", textTransform: "uppercase",
               }}>
                 {row.label}
               </span>
             </div>
 
-            {/* Right: large mono value */}
+            {/* Right: value — balanced with label */}
             <span style={{
-              fontSize: 30, fontWeight: 800, fontFamily: MONO,
-              color: row.valueColor, letterSpacing: "-0.01em", lineHeight: 1,
+              fontSize: 22, fontWeight: 700, fontFamily: MONO,
+              color: row.valueColor, letterSpacing: "0.02em", lineHeight: 1,
             }}>
               {row.value}
             </span>
