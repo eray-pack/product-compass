@@ -113,7 +113,7 @@ async function handleChatApi(request: Request, env: Env): Promise<Response> {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 400,
       system: SYSTEM_PROMPT,
       messages: body.messages,
@@ -122,8 +122,8 @@ async function handleChatApi(request: Request, env: Env): Promise<Response> {
 
   if (!upstream.ok) {
     const text = await upstream.text();
-    console.error(`/api/chat: Anthropic error ${upstream.status}:`, text);
-    return new Response(JSON.stringify({ error: "Upstream API error" }), {
+    console.error(`/api/chat: Anthropic ${upstream.status} — ${text}`);
+    return new Response(JSON.stringify({ error: "Upstream API error", detail: upstream.status }), {
       status: 502,
       headers: { "content-type": "application/json" },
     });

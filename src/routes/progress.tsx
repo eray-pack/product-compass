@@ -1294,10 +1294,10 @@ function ProgressScreen() {
     return count; // 0–7
   });
 
-  // ── Legacy rank ──────────────────────────────────────────────────────────────
-  const rank = getRank(state.totalCleanDays);
-  const nextRankTier = RANK_TIERS.slice().reverse().find((r) => state.totalCleanDays < r.min && r.min > 0);
-  const daysToNextRank = nextRankTier ? nextRankTier.min - state.totalCleanDays : 0;
+  // ── Legacy rank — driven by live streak (day), not the legacy totalCleanDays counter ──
+  const rank = getRank(day);
+  const nextRankTier = RANK_TIERS.slice().reverse().find((r) => day < r.min && r.min > 0);
+  const daysToNextRank = nextRankTier ? nextRankTier.min - day : 0;
 
   // ── Dopamine dashboard data ───────────────────────────────────────────────
   const relapses = state.relapses ?? [];
@@ -1596,13 +1596,13 @@ function ProgressScreen() {
               </p>
             </div>
 
-            {/* Total clean days */}
+            {/* Current streak */}
             <div style={{ textAlign: "right", flexShrink: 0 }}>
               <p style={{ margin: 0, fontSize: 28, fontWeight: 900, color: rank.color, lineHeight: 1, fontFamily: "DM Sans, sans-serif", letterSpacing: "-0.02em" }}>
-                {state.totalCleanDays}
+                {day}
               </p>
               <p style={{ margin: 0, fontSize: 9, color: "rgba(255,255,255,0.30)", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "DM Sans, sans-serif" }}>
-                total days
+                days clean
               </p>
               {daysToNextRank > 0 && (
                 <p style={{ margin: "4px 0 0", fontSize: 9, color: `${rank.color}80`, fontFamily: "DM Sans, sans-serif" }}>
