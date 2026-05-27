@@ -327,53 +327,47 @@ function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: bool
     return () => clearInterval(id);
   }, []);
 
-  // ── Heartbeat lifecycle ──────────────────────────────────────────────────────
+  // ── Heartbeat lifecycle — interval every 3s ──────────────────────────────────
   useEffect(() => {
     let active = true;
-    let timer: ReturnType<typeof setTimeout>;
 
-    function heartbeat() {
+    const id = setInterval(() => {
       if (!active) return;
 
+      // ── Step 1: Remove one random visible dot (start fade-out) ──────────────
+      let removedId: string | null = null;
       setDots((prev) => {
-        // Pick a visible dot to expire
-        const visibleIdxs = prev.map((d, i) => (d.phase === "visible" ? i : -1)).filter((i) => i >= 0);
-        if (visibleIdxs.length === 0) return prev;
-        const expireIdx = visibleIdxs[Math.floor(Math.random() * visibleIdxs.length)];
-
-        // Build new dot (entering phase — opacity 0)
-        const usedCoords = new Set(prev.map((d) => `${d.coords[0]},${d.coords[1]}`));
-        const newCoords = pickFreeCoord(usedCoords);
-        const newDot = makeDot(newCoords, "entering");
-
-        const next = prev.map((d, i) => (i === expireIdx ? { ...d, phase: "exiting" as DotPhase } : d));
-        return [...next, newDot];
+        const visible = prev.filter((d) => d.phase === "visible");
+        if (visible.length === 0) return prev;
+        const target = visible[Math.floor(Math.random() * visible.length)];
+        removedId = target.id;
+        return prev.map((d) => (d.id === target.id ? { ...d, phase: "exiting" as DotPhase } : d));
       });
 
-      // After one frame: flip entering → visible (triggers CSS opacity transition)
+      // After CSS fade-out completes (1.5s), remove the exiting dot from the array
       setTimeout(() => {
         if (!active) return;
-        setDots((prev) =>
-          prev.map((d) => (d.phase === "entering" ? { ...d, phase: "visible" as DotPhase } : d))
-        );
-      }, 32);
+        setDots((prev) => prev.filter((d) => d.id !== removedId));
+      }, 1500);
 
-      // After opacity fade completes: remove the exiting dot and reschedule
-      setTimeout(() => {
-        if (!active) return;
-        setDots((prev) => prev.filter((d) => d.phase !== "exiting"));
-        schedule();
-      }, 1600);
-    }
+      // ── Step 2: If under 25 dots, spawn a new one ───────────────────────────
+      setDots((prev) => {
+        const activeCount = prev.filter((d) => d.phase !== "exiting").length;
+        if (activeCount >= 25) return prev;
+        const usedCoords = new Set(prev.map((d) => `${d.coords[0]},${d.coords[1]}`));
+        const newDot = makeDot(pickFreeCoord(usedCoords), "entering");
 
-    function schedule() {
-      // 10-20 second random interval so it never feels like a loop
-      const delay = 10000 + Math.random() * 10000;
-      timer = setTimeout(heartbeat, delay);
-    }
+        // After one frame, flip entering → visible to trigger CSS fade-in
+        setTimeout(() => {
+          if (!active) return;
+          setDots((p) => p.map((d) => (d.id === newDot.id ? { ...d, phase: "visible" as DotPhase } : d)));
+        }, 32);
 
-    schedule();
-    return () => { active = false; clearTimeout(timer); };
+        return [...prev, newDot];
+      });
+    }, 3000);
+
+    return () => { active = false; clearInterval(id); };
   }, []);
 
   return (
@@ -475,7 +469,7 @@ function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: bool
           {/* Activity dots — heartbeat lifecycle with fade transitions */}
           {dots.map((dot) => (
             <Marker key={dot.id} coordinates={dot.coords}>
-              <g style={{ opacity: dot.phase === "visible" ? 1 : 0, transition: "opacity 1.5s ease" }}>
+              <g style={{ opacity: dot.phase === "visible" ? 1 : 0, transition: "opacity 1.5s ease-in-out" }}>
                 {/* Expanding ring — staggered delay per dot */}
                 <circle
                   r={3.5}
