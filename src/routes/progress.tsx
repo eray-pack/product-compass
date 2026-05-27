@@ -1619,34 +1619,21 @@ function ProgressScreen() {
          ══════════════════════════════════════════════════════ */}
       <section className="px-6 mt-5 fade-up-3">
 
-        {/* ── Thin header bar ─────────────────────────────────────────────────── */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 14px",
-          borderRadius: 14,
-          background: "rgba(57,217,138,0.04)",
-          border: "1px solid rgba(255,255,255,0.05)",
-          marginBottom: 12,
-        }}>
-          {/* Left: title + SYS_ONLINE */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <SectionTitle>Dopamine Dashboard</SectionTitle>
-            <span style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "0.16em", color: "rgba(57,217,138,0.50)", fontFamily: MONO }}>
-              SYS_ONLINE
-            </span>
-          </div>
+        {/* ── Floating header — no card, no border ────────────────────────────── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <SectionTitle>Dopamine Dashboard</SectionTitle>
 
-          {/* Right: three status pills */}
+          {/* Status indicators inline to the right */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {([
-              { label: "DOPAMINE",  value: recoveryPct >= 50 ? "STABILIZING" : "RECOVERING", color: recoveryPct >= 50 ? NG : "#4A9ECC" },
-              { label: "PRUNING",   value: day > 7 ? "ACTIVE" : "INITIATING",                color: NG },
-              { label: "BASELINE",  value: day >= 30 ? "RESETTING" : "ADAPTING",             color: day >= 30 ? NG : "#4A9ECC" },
-            ] as const).map((s) => (
-              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              { value: recoveryPct >= 50 ? "STABILIZING" : "RECOVERING", color: recoveryPct >= 50 ? NG : "#4A9ECC" },
+              { value: day > 7 ? "ACTIVE" : "INITIATING",                color: NG },
+              { value: day >= 30 ? "RESETTING" : "ADAPTING",             color: day >= 30 ? NG : "#4A9ECC" },
+            ] as const).map((s, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <motion.span
                   animate={{ opacity: [1, 0.25, 1] }}
-                  transition={{ duration: 1.7, repeat: Infinity, delay: Math.random() * 0.8 }}
+                  transition={{ duration: 1.7, repeat: Infinity, delay: i * 0.35 }}
                   style={{ width: 4, height: 4, borderRadius: "50%", background: s.color, display: "block", flexShrink: 0, boxShadow: `0 0 5px ${s.color}` }}
                 />
                 <span style={{ fontSize: 7, color: s.color, fontWeight: 700, letterSpacing: "0.09em", fontFamily: MONO }}>{s.value}</span>
