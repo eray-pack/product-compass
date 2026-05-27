@@ -2297,38 +2297,6 @@ function WolfPage({
             })}
           </div>
 
-          {/* ── Level Debugger ── */}
-          {(() => {
-            const ws = wolfXPStage(state.treeXP);
-            const wPrev = WOLF_XP_PREV[ws.stage];
-            const wPct = ws.stage >= 4 ? 100 : Math.round(((state.treeXP - wPrev) / (ws.next - wPrev)) * 100);
-            const wNext = nextStage(WOLF_XP_CONFIG, ws.stage);
-            return (
-              <div style={{ marginBottom: 12 }}>
-                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Level Debugger</p>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginBottom: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", lineHeight: 1.7 }}>
-                  <span style={{ color: "#C9A84C", fontWeight: 700 }}>{ws.name}</span>
-                  {" · Stage "}{ws.stage}
-                  {" · "}<span style={{ color: "rgba(255,255,255,0.80)" }}>{state.treeXP} XP</span>
-                  {ws.stage < 4 && <>{" · "}<span style={{ color: "#3fb86a" }}>{wPct}% to {wNext?.name}</span></>}
-                  {ws.stage < 4 && <><br/><span style={{ color: "rgba(255,255,255,0.35)" }}>Next: {wNext?.name} at {wNext?.threshold} XP ({Math.max(0, (wNext?.threshold ?? 0) - state.treeXP)} remaining)</span></>}
-                  {ws.stage >= 4 && <><br/><span style={{ color: "#C9A84C" }}>Max stage reached</span></>}
-                </div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {[50, 100, 250, 500].map((n) => (
-                    <button key={n} onClick={() => update((s) => ({ treeXP: s.treeXP + n }))}
-                      style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(63,184,106,0.10)", border: "1px solid rgba(63,184,106,0.30)", color: "#3fb86a" }}>
-                      +{n} XP
-                    </button>
-                  ))}
-                  <button onClick={() => update(() => ({ treeXP: 0 }))}
-                    style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
-                    Reset XP
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* PRO + Reset all */}
           <div style={{ display: "flex", gap: 8 }}>
@@ -2706,38 +2674,6 @@ function LifeTreePage({
             })}
           </div>
 
-          {/* ── Level Debugger ── */}
-          {(() => {
-            const ts = treeStage(state.treeXP);
-            const tPrev = ts.stage === 0 ? 0 : [0, 100, 300, 700, 1500, 3000][ts.stage];
-            const tPct = ts.stage >= 5 ? 100 : Math.round(((state.treeXP - tPrev) / (ts.next - tPrev)) * 100);
-            const tNext = nextStage(TREE_XP_CONFIG, ts.stage);
-            return (
-              <div style={{ marginBottom: 12 }}>
-                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Level Debugger</p>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginBottom: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", lineHeight: 1.7 }}>
-                  <span style={{ color: "#C9A84C", fontWeight: 700 }}>{ts.name}</span>
-                  {" · Stage "}{ts.stage}
-                  {" · "}<span style={{ color: "rgba(255,255,255,0.80)" }}>{state.treeXP} XP</span>
-                  {ts.stage < 5 && <>{" · "}<span style={{ color: "#3fb86a" }}>{tPct}% to {tNext?.name}</span></>}
-                  {ts.stage < 5 && <><br/><span style={{ color: "rgba(255,255,255,0.35)" }}>Next: {tNext?.name} at {tNext?.threshold} XP ({Math.max(0, (tNext?.threshold ?? 0) - state.treeXP)} remaining)</span></>}
-                  {ts.stage >= 5 && <><br/><span style={{ color: "#C9A84C" }}>Max stage reached — Ancient</span></>}
-                </div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {[50, 100, 250, 500].map((n) => (
-                    <button key={n} onClick={() => update((s) => ({ treeXP: s.treeXP + n }))}
-                      style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(63,184,106,0.10)", border: "1px solid rgba(63,184,106,0.30)", color: "#3fb86a" }}>
-                      +{n} XP
-                    </button>
-                  ))}
-                  <button onClick={() => update(() => ({ treeXP: 0 }))}
-                    style={{ fontSize: 11, padding: "5px 10px", borderRadius: 8, cursor: "pointer", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.25)", color: "#ff7777" }}>
-                    Reset XP
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* PRO + Reset all */}
           <div style={{ display: "flex", gap: 8 }}>

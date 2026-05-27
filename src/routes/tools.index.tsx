@@ -486,7 +486,6 @@ function ArcadeBadge({
   to: string; glow: string; label: string; icon: React.ReactNode;
   ambient: AmbientType; locked?: boolean; onLockedTap?: () => void;
 }) {
-  console.log(`[ArcadeBadge] "${label}" locked=${locked}`);
   const glowFilter = getGlowFilter(glow);
 
   const circle = (
