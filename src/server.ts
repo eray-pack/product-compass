@@ -70,12 +70,39 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+// ── Rate limiter — in-memory per Cloudflare isolate ──────────────────────────
+// 20 requests per IP per 60 seconds. Protects Anthropic credits from abuse.
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60_000;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  if (entry.count >= RATE_LIMIT) return true;
+  entry.count++;
+  return false;
+}
+
 // ── /api/chat — Anthropic proxy ──────────────────────────────────────────────
 // Handled before TanStack so the API key (from Cloudflare env binding) never
 // touches the client bundle or the SSR renderer.
 async function handleChatApi(request: Request, env: Env): Promise<Response> {
   if (request.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
+  }
+
+  // Rate limit by IP
+  const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for") ?? "unknown";
+  if (isRateLimited(ip)) {
+    return new Response(JSON.stringify({ error: "Too many requests. Slow down." }), {
+      status: 429,
+      headers: { "content-type": "application/json", "retry-after": "60" },
+    });
   }
 
   // Priority: Cloudflare binding (wrangler/prod) → process.env baked by vite define → import.meta.env (vite dev)
