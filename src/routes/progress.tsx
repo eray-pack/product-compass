@@ -1625,13 +1625,7 @@ function ProgressScreen() {
           <SectionTitle>Dopamine Dashboard</SectionTitle>
         </div>
 
-        {/* ── Cyber-terminal data rows ─────────────────────────────────────────── */}
-        <div style={{
-          background: "rgba(0,0,0,0.55)",
-          borderRadius: 16,
-          padding: "0 16px",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}>
+        {/* ── Cyber-terminal data rows — no container, float on dark bg ─────────── */}
         {([
           {
             glowColor: NG,
@@ -1649,8 +1643,8 @@ function ProgressScreen() {
             glyph: (
               <svg width="18" height="13" viewBox="0 0 18 13" fill="none">
                 <rect x="0" y="0"   width="18" height="2" rx="1" fill="#4A9ECC"/>
-                <rect x="0" y="5.5" width="13" height="2" rx="1" fill="#4A9ECC" opacity="0.70"/>
-                <rect x="0" y="11"  width="8"  height="2" rx="1" fill="#4A9ECC" opacity="0.40"/>
+                <rect x="0" y="5.5" width="13" height="2" rx="1" fill="#4A9ECC" opacity="0.75"/>
+                <rect x="0" y="11"  width="8"  height="2" rx="1" fill="#4A9ECC" opacity="0.45"/>
               </svg>
             ),
             label: "TOTAL_SESSIONS",
@@ -1662,21 +1656,21 @@ function ProgressScreen() {
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <circle cx="8" cy="8" r="5.5" stroke="#C9A84C" strokeWidth="1.2"/>
                 <circle cx="8" cy="8" r="2"   fill="#C9A84C"/>
-                <line x1="8" y1="0"    x2="8"  y2="2.2"  stroke="#C9A84C" strokeWidth="1.2"/>
-                <line x1="8" y1="13.8" x2="8"  y2="16"   stroke="#C9A84C" strokeWidth="1.2"/>
-                <line x1="0"   y1="8"  x2="2.2" y2="8"   stroke="#C9A84C" strokeWidth="1.2"/>
-                <line x1="13.8" y1="8" x2="16"  y2="8"   stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="8"    y1="0"    x2="8"    y2="2.2"  stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="8"    y1="13.8" x2="8"    y2="16"   stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="0"    y1="8"    x2="2.2"  y2="8"    stroke="#C9A84C" strokeWidth="1.2"/>
+                <line x1="13.8" y1="8"    x2="16"   y2="8"    stroke="#C9A84C" strokeWidth="1.2"/>
               </svg>
             ),
             label: "PEAK_RISK_WEEKDAY",
             value: peakDow ?? "—",
           },
           {
-            glowColor: hasDeepRoots ? NG : "rgba(255,255,255,0.35)",
+            glowColor: "#00F0FF",
             glyph: (
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <path d="M7.5 1 L14 7.5 L7.5 14 L1 7.5 Z" stroke={hasDeepRoots ? NG : "rgba(255,255,255,0.35)"} strokeWidth="1.3"/>
-                <circle cx="7.5" cy="7.5" r="2.5" fill={hasDeepRoots ? NG : "rgba(255,255,255,0.35)"}/>
+                <path d="M7.5 1 L14 7.5 L7.5 14 L1 7.5 Z" stroke="#00F0FF" strokeWidth="1.3"/>
+                <circle cx="7.5" cy="7.5" r="2.5" fill="#00F0FF"/>
               </svg>
             ),
             label: "XP_CREDIT_MULTIPLIER",
@@ -1685,24 +1679,25 @@ function ProgressScreen() {
         ] as const).map((row, i, arr) => (
           <div key={i} style={{
             display: "flex", alignItems: "center",
-            padding: "16px 0",
-            borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
+            padding: "17px 0",
+            borderTop: "1px solid rgba(255,255,255,0.07)",
+            ...(i === arr.length - 1 ? { borderBottom: "1px solid rgba(255,255,255,0.07)" } : {}),
           }}>
             {/* Icon — neon glow + breathing pulse */}
             <motion.div
               animate={{
                 filter: [
-                  `drop-shadow(0 0 3px ${row.glowColor}90)`,
-                  `drop-shadow(0 0 9px ${row.glowColor})`,
-                  `drop-shadow(0 0 3px ${row.glowColor}90)`,
+                  `drop-shadow(0 0 4px ${row.glowColor}aa)`,
+                  `drop-shadow(0 0 10px ${row.glowColor})`,
+                  `drop-shadow(0 0 4px ${row.glowColor}aa)`,
                 ],
-                scale: [1, 1.08, 1],
+                scale: [1, 1.07, 1],
               }}
               transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", delay: i * 0.6 }}
               style={{
-                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                background: `${row.glowColor}12`,
-                border: `1px solid ${row.glowColor}35`,
+                width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+                background: `${row.glowColor}10`,
+                border: `1px solid ${row.glowColor}40`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 marginRight: 16,
               }}
@@ -1710,26 +1705,25 @@ function ProgressScreen() {
               {row.glyph}
             </motion.div>
 
-            {/* Label — primary, high-contrast */}
+            {/* Label — pure white, primary */}
             <span style={{
               flex: 1,
               fontSize: 12, fontWeight: 700, fontFamily: MONO,
               letterSpacing: "0.8px", textTransform: "uppercase",
-              color: "#ffffff",
+              color: "#FFFFFF",
             }}>
               {row.label}
             </span>
 
-            {/* Value — secondary, muted */}
+            {/* Value — light grey, secondary */}
             <span style={{
               fontSize: 11, fontWeight: 500, fontFamily: MONO,
-              color: "rgba(255,255,255,0.38)", letterSpacing: "0.05em", flexShrink: 0,
+              color: "#CCCCCC", letterSpacing: "0.05em", flexShrink: 0,
             }}>
               {row.value}
             </span>
           </div>
         ))}
-        </div>
 
         {/* ── Neural Pruning graph ─────────────────────────────────────────────── */}
         <NeuralPruningGraph day={day} />
