@@ -247,33 +247,133 @@ function formatCount(n: number): string {
   return `${n}`;
 }
 
-// ─── Activity dots for the flat world map ────────────────────────────────────
-// Coordinates are [longitude, latitude] — GeoJSON convention
-const ACTIVITY_DOTS: { name: string; coords: [number, number] }[] = [
-  { name: "New York",   coords: [-74,    41    ] },
-  { name: "London",     coords: [-0.1,   51.5  ] },
-  { name: "Amsterdam",  coords: [4.9,    52.4  ] },
-  { name: "Paris",      coords: [2.3,    48.9  ] },
-  { name: "Berlin",     coords: [13.4,   52.5  ] },
-  { name: "São Paulo",  coords: [-46.6, -23.5  ] },
-  { name: "Lagos",      coords: [3.4,    6.5   ] },
-  { name: "Dubai",      coords: [55.3,   25.2  ] },
-  { name: "Mumbai",     coords: [72.8,   19.1  ] },
-  { name: "Singapore",  coords: [103.8,   1.3  ] },
-  { name: "Tokyo",      coords: [139.7,  35.7  ] },
-  { name: "Sydney",     coords: [151.2, -33.9  ] },
+// ─── Heartbeat map — world coordinate pool ───────────────────────────────────
+// [longitude, latitude] — GeoJSON convention
+const WORLD_POOL: [number, number][] = [
+  [-74,    41    ], // New York
+  [-0.1,   51.5  ], // London
+  [4.9,    52.4  ], // Amsterdam
+  [2.3,    48.9  ], // Paris
+  [13.4,   52.5  ], // Berlin
+  [-46.6, -23.5  ], // São Paulo
+  [3.4,    6.5   ], // Lagos
+  [55.3,   25.2  ], // Dubai
+  [72.8,   19.1  ], // Mumbai
+  [103.8,   1.3  ], // Singapore
+  [139.7,  35.7  ], // Tokyo
+  [151.2, -33.9  ], // Sydney
+  [-87.6,  41.8  ], // Chicago
+  [-118.2, 34.0  ], // Los Angeles
+  [-43.2, -22.9  ], // Rio de Janeiro
+  [-3.7,   40.4  ], // Madrid
+  [12.5,   41.9  ], // Rome
+  [28.9,   41.0  ], // Istanbul
+  [37.6,   55.7  ], // Moscow
+  [116.4,  39.9  ], // Beijing
+  [121.5,  31.2  ], // Shanghai
+  [126.9,  37.6  ], // Seoul
+  [100.5,  13.7  ], // Bangkok
+  [106.8,  -6.2  ], // Jakarta
+  [31.2,   30.1  ], // Cairo
+  [18.4,  -33.9  ], // Cape Town
+  [36.8,   -1.3  ], // Nairobi
+  [-99.1,  19.4  ], // Mexico City
+  [-79.4,  43.7  ], // Toronto
+  [-123.1, 49.3  ], // Vancouver
+  [-70.6, -33.4  ], // Santiago
+  [-58.4, -34.6  ], // Buenos Aires
+  [174.8, -37.0  ], // Auckland
+  [77.2,   28.6  ], // Delhi
+  [90.4,   23.7  ], // Dhaka
+  [23.3,   42.7  ], // Sofia
+  [14.5,   46.1  ], // Ljubljana
+  [-9.1,   38.7  ], // Lisbon
+  [144.9, -37.8  ], // Melbourne
+  [-73.6,  45.5  ], // Montreal
 ];
+
+type DotPhase = "entering" | "visible" | "exiting";
+type LiveDot  = { id: string; coords: [number, number]; phase: DotPhase; ringDelay: number };
+
+const TARGET_DOT_COUNT = 18;
+
+function pickFreeCoord(used: Set<string>): [number, number] {
+  const free = WORLD_POOL.filter((c) => !used.has(`${c[0]},${c[1]}`));
+  return (free.length ? free : WORLD_POOL)[Math.floor(Math.random() * (free.length || WORLD_POOL.length))];
+}
+
+function makeDot(coords: [number, number], phase: DotPhase = "visible"): LiveDot {
+  return { id: `d${Date.now()}${Math.random().toString(36).slice(2)}`, coords, phase, ringDelay: Math.random() * 2 };
+}
 
 const USER_CHECKIN_COORDS: [number, number] = [-74, 41]; // New York placeholder
 
 function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: boolean; extraMembers?: number }) {
   const [liveCount, setLiveCount] = useState(248);
 
+  // ── Initialise dots from a random subset of the world pool ──────────────────
+  const [dots, setDots] = useState<LiveDot[]>(() =>
+    [...WORLD_POOL]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, TARGET_DOT_COUNT)
+      .map((c) => makeDot(c, "visible"))
+  );
+
+  // ── Live member counter ──────────────────────────────────────────────────────
   useEffect(() => {
     const id = setInterval(() => {
       setLiveCount((n) => Math.max(240, Math.min(260, n + Math.floor(Math.random() * 5) - 2)));
     }, 3500);
     return () => clearInterval(id);
+  }, []);
+
+  // ── Heartbeat lifecycle ──────────────────────────────────────────────────────
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+
+    function heartbeat() {
+      if (!active) return;
+
+      setDots((prev) => {
+        // Pick a visible dot to expire
+        const visibleIdxs = prev.map((d, i) => (d.phase === "visible" ? i : -1)).filter((i) => i >= 0);
+        if (visibleIdxs.length === 0) return prev;
+        const expireIdx = visibleIdxs[Math.floor(Math.random() * visibleIdxs.length)];
+
+        // Build new dot (entering phase — opacity 0)
+        const usedCoords = new Set(prev.map((d) => `${d.coords[0]},${d.coords[1]}`));
+        const newCoords = pickFreeCoord(usedCoords);
+        const newDot = makeDot(newCoords, "entering");
+
+        const next = prev.map((d, i) => (i === expireIdx ? { ...d, phase: "exiting" as DotPhase } : d));
+        return [...next, newDot];
+      });
+
+      // After one frame: flip entering → visible (triggers CSS opacity transition)
+      setTimeout(() => {
+        if (!active) return;
+        setDots((prev) =>
+          prev.map((d) => (d.phase === "entering" ? { ...d, phase: "visible" as DotPhase } : d))
+        );
+      }, 32);
+
+      // After opacity fade completes: remove the exiting dot and reschedule
+      setTimeout(() => {
+        if (!active) return;
+        setDots((prev) => prev.filter((d) => d.phase !== "exiting"));
+        schedule();
+      }, 1600);
+    }
+
+    function schedule() {
+      // 10-20 second random interval so it never feels like a loop
+      const delay = 10000 + Math.random() * 10000;
+      timer = setTimeout(heartbeat, delay);
+    }
+
+    schedule();
+    return () => { active = false; clearTimeout(timer); };
   }, []);
 
   return (
@@ -372,24 +472,26 @@ function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: bool
             }
           </Geographies>
 
-          {/* Activity dots — pulsing gold */}
-          {ACTIVITY_DOTS.map(({ name, coords }, i) => (
-            <Marker key={name} coordinates={coords}>
-              {/* Expanding ring — staggered delay per dot */}
-              <circle
-                r={3.5}
-                fill="#C4873A"
-                fillOpacity={0.35}
-                className="rsm-dot-ring"
-                style={{ animationDelay: `${(i * 0.18) % 2}s` }}
-              />
-              {/* Solid gold core */}
-              <circle
-                r={2.2}
-                fill="#C4873A"
-                fillOpacity={0.95}
-                style={{ filter: "drop-shadow(0 0 3px #C4873A)" }}
-              />
+          {/* Activity dots — heartbeat lifecycle with fade transitions */}
+          {dots.map((dot) => (
+            <Marker key={dot.id} coordinates={dot.coords}>
+              <g style={{ opacity: dot.phase === "visible" ? 1 : 0, transition: "opacity 1.5s ease" }}>
+                {/* Expanding ring — staggered delay per dot */}
+                <circle
+                  r={3.5}
+                  fill="#C4873A"
+                  fillOpacity={0.35}
+                  className="rsm-dot-ring"
+                  style={{ animationDelay: `${dot.ringDelay}s` }}
+                />
+                {/* Solid gold core */}
+                <circle
+                  r={2.2}
+                  fill="#C4873A"
+                  fillOpacity={0.95}
+                  style={{ filter: "drop-shadow(0 0 3px #C4873A)" }}
+                />
+              </g>
             </Marker>
           ))}
 
