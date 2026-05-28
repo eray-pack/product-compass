@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useCapacitorBack } from "@/lib/useCapacitorBack";
 
 import appCss from "../styles.css?url";
 import "@/lib/i18n"; // initialise i18next before any route renders
@@ -95,6 +96,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const navigate = useNavigate();
   const [showSplash, setShowSplash] = useState(false);
+  useCapacitorBack();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
