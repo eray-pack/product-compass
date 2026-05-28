@@ -26,12 +26,13 @@ export default defineConfig({
       exclude: [
         "@revenuecat/purchases-capacitor",
         "@capacitor/push-notifications",
+        "@capacitor/app",
       ],
     },
     build: {
       rollupOptions: {
         // Native Capacitor plugins only run on device — exclude from web bundle
-        external: ["@capacitor/push-notifications"],
+        external: ["@capacitor/push-notifications", "@capacitor/app"],
       },
     },
   },
