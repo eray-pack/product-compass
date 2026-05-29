@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
@@ -2494,11 +2494,27 @@ function WolfPage({
       </section>
 
       <section className="px-6 mt-4 mb-2">
-        <div style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.10)", borderRadius: 24, padding: 20, textAlign: "center" }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", lineHeight: 1.6 }}>
-            <span style={{ color: "#f5ede0", fontWeight: 700 }}>You came back today.</span>{" "}
-            That alone is the work. Keep going.
-          </p>
+        <div style={{
+          background: "rgba(255,255,255,0.025)",
+          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderTop: "1px solid rgba(201,168,76,0.10)",
+          borderRadius: 28, padding: 20, opacity: 0.72,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", display: "grid", placeItems: "center", flexShrink: 0, fontSize: 22 }}>
+              ✨
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.45)" }}>More rewards coming</span>
+                <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: "rgba(201,168,76,0.5)", background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)", borderRadius: 6, padding: "2px 6px" }}>SOON</span>
+              </div>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", margin: 0, lineHeight: 1.5 }}>
+                <span style={{ color: "rgba(255,255,255,0.45)", fontWeight: 600 }}>You came back today.</span>{" "}That alone is the work.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -2565,14 +2581,15 @@ function LifeTreePage({
   ];
 
   // Scroll to shop section when navigated via credits chip (#grow-your-tree)
+  const location = useLocation();
   useEffect(() => {
-    if (window.location.hash === "#grow-your-tree") {
+    if (location.hash === "#grow-your-tree") {
       const el = document.getElementById("grow-your-tree");
       if (el) {
-        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
       }
     }
-  }, []);
+  }, [location.hash]);
 
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
@@ -2965,11 +2982,27 @@ function LifeTreePage({
       </section>
 
       <section className="px-6 mt-4 mb-2">
-        <div style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.10)", borderRadius: 24, padding: 20, textAlign: "center" }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", lineHeight: 1.6 }}>
-            <span style={{ color: "#f5ede0", fontWeight: 700 }}>You came back today.</span>{" "}
-            That alone is the work. Keep going.
-          </p>
+        <div style={{
+          background: "rgba(255,255,255,0.025)",
+          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderTop: "1px solid rgba(201,168,76,0.10)",
+          borderRadius: 28, padding: 20, opacity: 0.72,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", display: "grid", placeItems: "center", flexShrink: 0, fontSize: 22 }}>
+              ✨
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.45)" }}>More rewards coming</span>
+                <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: "rgba(201,168,76,0.5)", background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)", borderRadius: 6, padding: "2px 6px" }}>SOON</span>
+              </div>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", margin: 0, lineHeight: 1.5 }}>
+                <span style={{ color: "rgba(255,255,255,0.45)", fontWeight: 600 }}>You came back today.</span>{" "}That alone is the work.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
