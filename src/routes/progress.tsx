@@ -1068,80 +1068,146 @@ function NeuralPruningGraph({ day }: { day: number }) {
   const nowIdx = Math.min(points.length - 1, Math.floor((day / 90) * (points.length - 1)));
 
   return (
-    <div style={{ ...STONE_CARD, padding: "16px 16px 14px", marginTop: 10 }}>
+    <div style={{
+      ...STONE_CARD, padding: "16px 16px 14px", marginTop: 10,
+      border: "1px solid rgba(57,217,138,0.14)",
+      boxShadow: "0 0 24px rgba(57,217,138,0.07), inset 0 0 32px rgba(57,217,138,0.03)",
+    }}>
+      {/* scanlines */}
       <div aria-hidden style={{
         position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none",
-        background: "repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.013) 8px,rgba(57,217,138,0.013) 9px)",
+        background: "repeating-linear-gradient(-22deg,transparent,transparent 8px,rgba(57,217,138,0.018) 8px,rgba(57,217,138,0.018) 9px)",
       }} />
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* label row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.17em", color: "rgba(57,217,138,0.65)", textTransform: "uppercase", fontFamily: MONO }}>
+          <motion.span
+            style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.17em", color: "rgba(57,217,138,0.95)", textTransform: "uppercase", fontFamily: MONO, textShadow: "0 0 10px rgba(57,217,138,0.85)" }}
+            animate={{ opacity: [0.75, 1, 0.75] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
             NEURAL PRUNING
-          </span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(57,217,138,0.50)", fontFamily: MONO, letterSpacing: "0.08em" }}>
+          </motion.span>
+          <motion.span
+            style={{ fontSize: 9, fontWeight: 700, color: "rgba(57,217,138,0.80)", fontFamily: MONO, letterSpacing: "0.08em", textShadow: "0 0 8px rgba(57,217,138,0.65)" }}
+            animate={{ opacity: [0.55, 1, 0.55] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: 0.6 }}
+          >
             {prunedPct}%_PRUNED
-          </span>
+          </motion.span>
         </div>
 
         <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }}>
           <defs>
-            <filter id="np-glow" x="-20%" y="-60%" width="140%" height="220%">
-              <feGaussianBlur stdDeviation="2.5" result="b" />
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            {/* multi-layer glow for the line */}
+            <filter id="np-glow" x="-30%" y="-120%" width="160%" height="340%">
+              <feGaussianBlur stdDeviation="5" result="blur-wide" in="SourceGraphic"/>
+              <feGaussianBlur stdDeviation="2.5" result="blur-tight" in="SourceGraphic"/>
+              <feMerge>
+                <feMergeNode in="blur-wide"/>
+                <feMergeNode in="blur-tight"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
             </filter>
-            {/* line fades from dim (old habits) to bright (now) */}
+            {/* extra-wide glow for the dot */}
+            <filter id="np-dot-glow" x="-200%" y="-200%" width="500%" height="500%">
+              <feGaussianBlur stdDeviation="5" result="b1" in="SourceGraphic"/>
+              <feGaussianBlur stdDeviation="10" result="b2" in="SourceGraphic"/>
+              <feMerge>
+                <feMergeNode in="b2"/>
+                <feMergeNode in="b1"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            {/* line gradient: ghost → bright green */}
             <linearGradient id="np-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"                           stopColor="rgba(255,255,255,0.08)" />
-              <stop offset={`${Math.max(5,prunedPct-15)}%`} stopColor="rgba(255,255,255,0.08)" />
-              <stop offset={`${prunedPct}%`}             stopColor={NG} />
-              <stop offset="100%"                         stopColor={NG} />
+              <stop offset="0%"                              stopColor="rgba(255,255,255,0.05)" />
+              <stop offset={`${Math.max(5,prunedPct-22)}%`} stopColor="rgba(57,217,138,0.18)" />
+              <stop offset={`${Math.max(10,prunedPct-4)}%`} stopColor={NG} />
+              <stop offset="100%"                            stopColor={NG} />
+            </linearGradient>
+            {/* area gradient */}
+            <linearGradient id="np-area" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"             stopColor="rgba(57,217,138,0.00)" />
+              <stop offset={`${prunedPct}%`} stopColor="rgba(57,217,138,0.14)" />
+              <stop offset="100%"           stopColor="rgba(57,217,138,0.14)" />
             </linearGradient>
           </defs>
 
-          {/* subtle grid */}
+          {/* grid lines — slightly green tinted */}
           {[0.25, 0.5, 0.75].map((t) => (
-            <line key={t} x1="0" y1={H*t} x2={W} y2={H*t} stroke="rgba(255,255,255,0.045)" strokeWidth="0.5"/>
+            <line key={t} x1="0" y1={H*t} x2={W} y2={H*t}
+              stroke="rgba(57,217,138,0.07)" strokeWidth="0.5"/>
           ))}
 
-          {/* area fill */}
+          {/* soft wide shadow behind main line for depth */}
           <motion.path
-            d={`${path} L ${W} ${H} L 0 ${H} Z`}
-            fill={`rgba(57,217,138,0.04)`}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.6 }}
+            d={path} fill="none"
+            stroke="rgba(57,217,138,0.12)" strokeWidth="7"
+            strokeLinecap="round" strokeLinejoin="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 2.2, ease: "easeInOut", delay: 0.15 }}
           />
 
-          {/* the pruning line — draws in on mount */}
+          {/* area fill — breathes */}
           <motion.path
-            d={path}
-            fill="none"
-            stroke="url(#np-grad)"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            d={`${path} L ${W} ${H} L 0 ${H} Z`}
+            fill="url(#np-area)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.8, 0.55, 0.75] }}
+            transition={{ duration: 1.2, delay: 0.6, times: [0, 0.4, 0.7, 1],
+              repeat: Infinity, repeatType: "reverse", repeatDelay: 2 }}
+          />
+
+          {/* main glowing line */}
+          <motion.path
+            d={path} fill="none"
+            stroke="url(#np-grad)" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round"
             filter="url(#np-glow)"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
             transition={{ duration: 2.2, ease: "easeInOut", delay: 0.15 }}
           />
 
-          {/* current position pulse dot */}
+          {/* outer ring burst */}
           <motion.circle
             cx={points[nowIdx].x} cy={points[nowIdx].y}
-            r="3.8" fill={NG}
-            filter="url(#np-glow)"
-            animate={{ r: [3.8, 5.5, 3.8], opacity: [1, 0.5, 1] }}
+            r="6" fill="none" stroke={NG} strokeWidth="0.8"
+            animate={{ r: [6, 14, 6], opacity: [0.6, 0, 0.6] }}
             transition={{ duration: 2.2, repeat: Infinity }}
           />
+          {/* mid glow ring */}
+          <motion.circle
+            cx={points[nowIdx].x} cy={points[nowIdx].y}
+            r="5" fill="rgba(57,217,138,0.12)"
+            filter="url(#np-dot-glow)"
+            animate={{ r: [5, 7, 5], opacity: [0.9, 0.4, 0.9] }}
+            transition={{ duration: 2.2, repeat: Infinity, delay: 0.1 }}
+          />
+          {/* solid dot */}
+          <motion.circle
+            cx={points[nowIdx].x} cy={points[nowIdx].y}
+            r="3.5" fill={NG}
+            filter="url(#np-dot-glow)"
+            animate={{ opacity: [1, 0.7, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity }}
+          />
+          {/* bright white core */}
+          <circle cx={points[nowIdx].x} cy={points[nowIdx].y} r="1.2" fill="white" opacity={0.9} />
         </svg>
 
         {/* axis labels */}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
           <span style={{ fontSize: 7.5, color: "rgba(255,255,255,0.20)", fontFamily: MONO }}>DAY_01</span>
-          <span style={{ fontSize: 7.5, color: "rgba(57,217,138,0.45)", fontFamily: MONO }}>
+          <motion.span
+            style={{ fontSize: 7.5, color: "rgba(57,217,138,0.75)", fontFamily: MONO, textShadow: "0 0 6px rgba(57,217,138,0.55)" }}
+            animate={{ opacity: [0.55, 1, 0.55] }}
+            transition={{ duration: 1.6, repeat: Infinity }}
+          >
             ▶ DAY_{String(Math.max(day, 1)).padStart(2, "0")}
-          </span>
+          </motion.span>
           <span style={{ fontSize: 7.5, color: "rgba(255,255,255,0.20)", fontFamily: MONO }}>DAY_90</span>
         </div>
       </div>
@@ -1745,10 +1811,11 @@ function ProgressScreen() {
         <div style={{ position: "relative", paddingLeft: 36 }}>
           {/* Glowing vertical energy path — Neural Green */}
           <div aria-hidden style={{
-            position: "absolute", left: 11, top: 8, bottom: 8, width: 2,
+            position: "absolute", left: 18, top: 8, bottom: 8, width: 2,
             background: `linear-gradient(180deg, ${NG_GLOW}0.70) 0%, ${NG_GLOW}0.28) 60%, ${NG_GLOW}0.06) 100%)`,
             borderRadius: 2,
             boxShadow: `0 0 10px ${NG_GLOW}0.35)`,
+            zIndex: 0,
           }}/>
 
           {([
@@ -1773,13 +1840,13 @@ function ProgressScreen() {
                 position: "absolute", left: -28,
                 width: 22, height: 22, borderRadius: "50%",
                 background: m.earned
-                  ? `radial-gradient(circle at 38% 35%, ${NG_GLOW}0.22) 0%, rgba(10,7,2,0.98) 65%)`
-                  : "rgba(12,9,3,0.98)",
+                  ? `radial-gradient(circle at 38% 35%, ${NG_GLOW}0.30) 0%, rgba(8,5,1,1) 55%)`
+                  : "rgba(8,5,1,1)",
                 border: `1.5px solid ${m.earned ? `${NG_GLOW}0.65)` : "rgba(255,255,255,0.10)"}`,
                 boxShadow: m.earned ? `0 0 14px ${NG_GLOW}0.50)` : "none",
                 display: "grid", placeItems: "center",
                 animation: m.earned ? "tl-pulse 3s ease-in-out infinite" : "none",
-                zIndex: 1,
+                zIndex: 2,
               }}>
                 <span style={{ fontSize: 11 }}>{m.icon}</span>
               </div>

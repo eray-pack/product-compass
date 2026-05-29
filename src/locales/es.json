@@ -164,7 +164,15 @@
       "afternoon": "Tarde",
       "evening": "Noche",
       "night": "Madrugada",
-      "dow": { "0": "Dom", "1": "Lun", "2": "Mar", "3": "Mié", "4": "Jue", "5": "Vie", "6": "Sáb" }
+      "dow": {
+        "0": "Dom",
+        "1": "Lun",
+        "2": "Mar",
+        "3": "Mié",
+        "4": "Jue",
+        "5": "Vie",
+        "6": "Sáb"
+      }
     },
     "milestonesTitle": "Hitos",
     "milestonesUnlocked": "{{count}} de {{total}} desbloqueados",
@@ -184,7 +192,8 @@
     "coach": {
       "name": "Coach de recuperación",
       "desc": "Apoyo personalizado con IA",
-      "tagline": "Habla sobre ello. Sin juicios."
+      "tagline": "Habla sobre ello. Sin juicios.",
+      "cta": "Start →"
     },
     "sos": {
       "name": "SOS de emergencia",

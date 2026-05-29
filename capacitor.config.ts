@@ -1,11 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.stopamine.app',
+  appId: 'com.eraypack.stopamine',
   appName: 'Stopamine',
   webDir: 'dist/client',
   server: {
-    url: 'https://tanstack-start-app.stopamine.workers.dev',
+    url: 'https://stopamine.stopamine.workers.dev',
     cleartext: false,
   },
 };

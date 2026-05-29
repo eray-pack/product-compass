@@ -165,7 +165,15 @@
       "afternoon": "Afternoon",
       "evening": "Evening",
       "night": "Night",
-      "dow": { "0": "Sun", "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat" }
+      "dow": {
+        "0": "Sun",
+        "1": "Mon",
+        "2": "Tue",
+        "3": "Wed",
+        "4": "Thu",
+        "5": "Fri",
+        "6": "Sat"
+      }
     },
     "milestonesTitle": "Milestones",
     "milestonesUnlocked": "{{count}} of {{total}} unlocked",
@@ -185,7 +193,8 @@
     "coach": {
       "name": "Recovery Coach",
       "desc": "AI-powered 1-on-1 support",
-      "tagline": "Talk it through. No judgment."
+      "tagline": "Talk it through. No judgment.",
+      "cta": "Start →"
     },
     "sos": {
       "name": "Emergency SOS",

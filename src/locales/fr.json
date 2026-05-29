@@ -164,7 +164,15 @@
       "afternoon": "Après-midi",
       "evening": "Soir",
       "night": "Nuit",
-      "dow": { "0": "Dim", "1": "Lun", "2": "Mar", "3": "Mer", "4": "Jeu", "5": "Ven", "6": "Sam" }
+      "dow": {
+        "0": "Dim",
+        "1": "Lun",
+        "2": "Mar",
+        "3": "Mer",
+        "4": "Jeu",
+        "5": "Ven",
+        "6": "Sam"
+      }
     },
     "milestonesTitle": "Jalons",
     "milestonesUnlocked": "{{count}} sur {{total}} débloqués",
@@ -184,7 +192,8 @@
     "coach": {
       "name": "Coach de guérison",
       "desc": "Soutien personnalisé par IA",
-      "tagline": "Parle-en. Sans jugement."
+      "tagline": "Parle-en. Sans jugement.",
+      "cta": "Start →"
     },
     "sos": {
       "name": "SOS d'urgence",
@@ -234,7 +243,7 @@
       "desc": "Ancre ta raison la plus forte"
     },
     "darkroom": {
-      "name": "Chambre noire",
+      "name": "Chambre Noire",
       "desc": "Mode de privation sensorielle"
     },
     "voidstare": {
@@ -260,10 +269,6 @@
     "coldswitch": {
       "name": "Rupture Froide",
       "desc": "Baisse de température d'urgence"
-    },
-    "darkroom": {
-      "name": "Chambre Noire",
-      "desc": "Mode de privation sensorielle"
     },
     "steadyhand": {
       "name": "Main Ferme",
