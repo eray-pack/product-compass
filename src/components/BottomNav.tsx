@@ -226,7 +226,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
       {!onSettings && (
-        <div className="fixed top-3 right-4 z-30 flex items-center gap-2">
+        <div className="fixed right-4 z-30 flex items-center gap-2" style={{ top: "calc(0.75rem + env(safe-area-inset-top))" }}>
           <CreditsChip />
           <Link
             to="/settings"
