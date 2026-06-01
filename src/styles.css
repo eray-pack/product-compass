@@ -575,6 +575,15 @@ html.light {
   }
 }
 
+/* ── Hide scrollbar — native app feel ──────────────────────── */
+* {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+*::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, iOS */
+}
+
 /* ── iOS native feel — no text selection, no image dragging ─ */
 * {
   -webkit-user-select: none;
