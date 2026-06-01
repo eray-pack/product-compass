@@ -10,7 +10,7 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
   onDoneRef.current = onDone;
 
   useEffect(() => {
-    const t = window.setTimeout(() => onDoneRef.current(), 2000);
+    const t = window.setTimeout(() => onDoneRef.current(), 10000);
     return () => clearTimeout(t);
   }, []);
 
