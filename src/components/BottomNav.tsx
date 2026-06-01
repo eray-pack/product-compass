@@ -116,16 +116,16 @@ export function BottomNav() {
       <div
         className="flex items-center gap-1 px-2 py-2 rounded-[28px]"
         style={{
-          background: "oklch(0.13 0.020 265 / 0.94)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid oklch(0.26 0.028 265 / 0.55)",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3)",
+          background: "rgba(10, 8, 6, 0.97)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05) inset",
         }}
       >
         {navItems.map(({ to, label, Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
-          const sw = active ? 2.3 : 1.7;
+          const sw = active ? 2.2 : 1.8;
 
           return (
             <Link
@@ -133,7 +133,7 @@ export function BottomNav() {
               to={to}
               className="relative flex flex-col items-center transition-all"
               style={{
-                color: active ? "#C4873A" : "rgba(255,255,255,0.45)",
+                color: active ? "#C4873A" : "rgba(255,255,255,0.58)",
                 minWidth: active ? 72 : 52,
                 paddingTop: 10,
                 paddingBottom: 10,
