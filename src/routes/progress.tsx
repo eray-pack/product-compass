@@ -1066,6 +1066,19 @@ function NeuralPruningGraph({ day }: { day: number }) {
   const path   = toSvgPath(points);
   const prunedPct = Math.min(100, Math.round((day / 90) * 100));
   const nowIdx = Math.min(points.length - 1, Math.floor((day / 90) * (points.length - 1)));
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [probe, setProbe] = useState<{ idx: number; x: number; y: number } | null>(null);
+
+  const handleSvgTouch = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    const relX = Math.max(0, Math.min(1, (e.touches[0].clientX - rect.left) / rect.width));
+    const idx = Math.round(relX * (points.length - 1));
+    setProbe({ idx, x: points[idx].x, y: points[idx].y });
+  }, [points]);
+
+  const clearProbe = useCallback(() => setProbe(null), []);
 
   return (
     <div style={{
@@ -1097,7 +1110,8 @@ function NeuralPruningGraph({ day }: { day: number }) {
           </motion.span>
         </div>
 
-        <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible" }}>
+        <svg ref={svgRef} width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", overflow: "visible", touchAction: "none" }}
+          onTouchStart={handleSvgTouch} onTouchMove={handleSvgTouch} onTouchEnd={clearProbe}>
           <defs>
             {/* multi-layer glow for the line */}
             <filter id="np-glow" x="-30%" y="-120%" width="160%" height="340%">
@@ -1196,6 +1210,28 @@ function NeuralPruningGraph({ day }: { day: number }) {
           />
           {/* bright white core */}
           <circle cx={points[nowIdx].x} cy={points[nowIdx].y} r="1.2" fill="white" opacity={0.9} />
+
+          {/* ── Touch probe — vertical line + bubble ── */}
+          {probe && (
+            <g>
+              <line x1={probe.x} y1={0} x2={probe.x} y2={H}
+                stroke="rgba(57,217,138,0.5)" strokeWidth="0.8" strokeDasharray="3 2"/>
+              <circle cx={probe.x} cy={probe.y} r="4" fill={NG} opacity={0.9}/>
+              <circle cx={probe.x} cy={probe.y} r="2" fill="white" opacity={0.95}/>
+              <g transform={`translate(${probe.x > W * 0.65 ? probe.x - 72 : probe.x + 6}, ${Math.max(4, probe.y - 22)})`}>
+                <rect x="0" y="0" width="66" height="20" rx="4"
+                  fill="rgba(6,20,12,0.92)" stroke="rgba(57,217,138,0.45)" strokeWidth="0.7"/>
+                <text x="8" y="8.5" fontSize="6.5" fontWeight="700" fill={NG} fontFamily="monospace">
+                  {`DAY_${String(Math.round((probe.idx / (points.length - 1)) * 90)).padStart(2,"0")}`}
+                </text>
+                <text x="8" y="16" fontSize="6" fill="rgba(255,255,255,0.60)" fontFamily="monospace">
+                  {`${Math.min(100, Math.round((probe.idx / (points.length - 1)) * 100))}% pruned`}
+                </text>
+              </g>
+            </g>
+          )}
+          {/* transparent hit area for reliable touch */}
+          <rect x="0" y="0" width={W} height={H} fill="transparent"/>
         </svg>
 
         {/* axis labels */}
@@ -1277,6 +1313,7 @@ function ProgressScreen() {
   const [state, update] = useAppState();
   const [progressView, setProgressView] = useState<"grid" | "bars" | "streak">("grid");
   const [showVictory, setShowVictory] = useState(false);
+  const [barTip, setBarTip] = useState<number | null>(null);
 
   // ── Dev mode ──────────────────────────────────────────────────────────────
   const [devOpen, setDevOpen] = useState(false);
@@ -2058,9 +2095,24 @@ function ProgressScreen() {
                   {weekBars.map((count, i) => {
                     const isLast = i === weekBars.length - 1;
                     const pct = count / 7;
+                    const weeksAgo = weekBars.length - 1 - i;
+                    const weekStart = new Date(Date.now() - (weeksAgo * 7 + 6) * 86400000);
+                    const weekLabel = weekStart.toLocaleDateString("en", { month: "short", day: "numeric" });
+                    const isSelected = barTip === i;
                     return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1" style={{ position: "relative" }}>
+                        {isSelected && (
+                          <div style={{
+                            position: "absolute", bottom: "100%", left: "50%", transform: "translateX(-50%)",
+                            marginBottom: 6, background: "rgba(6,20,12,0.95)", border: "1px solid rgba(57,217,138,0.4)",
+                            borderRadius: 6, padding: "4px 8px", whiteSpace: "nowrap", zIndex: 10,
+                          }}>
+                            <p style={{ margin: 0, fontSize: 9, fontWeight: 700, color: NG, fontFamily: "monospace" }}>{count}/7 days</p>
+                            <p style={{ margin: 0, fontSize: 8, color: "rgba(255,255,255,0.50)", fontFamily: "monospace" }}>wk of {weekLabel}</p>
+                          </div>
+                        )}
                         <div
+                          onClick={() => setBarTip(isSelected ? null : i)}
                           style={{
                             width: "100%",
                             height: Math.max(4, pct * 68),
@@ -2068,8 +2120,9 @@ function ProgressScreen() {
                             background: isLast
                               ? "linear-gradient(180deg, #C9A84C, #a07830)"
                               : pct > 0.5 ? "#3fb86a" : pct > 0 ? "#2d8a4e" : "rgba(255,255,255,0.06)",
-                            boxShadow: isLast ? "0 0 12px rgba(201,168,76,0.35)" : "none",
+                            boxShadow: isSelected ? "0 0 12px rgba(57,217,138,0.5)" : isLast ? "0 0 12px rgba(201,168,76,0.35)" : "none",
                             transition: "height 0.4s ease",
+                            cursor: "pointer",
                           }}
                         />
                         <span style={{ fontSize: 9, color: isLast ? "#C9A84C" : "rgba(255,255,255,0.25)" }}>
