@@ -1,6 +1,7 @@
-import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown, Trophy } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
@@ -11,21 +12,6 @@ export const Route = createFileRoute("/tools/")({
   component: Tools,
 });
 
-// ── Page entrance animation variants ─────────────────────────────────────────
-const pageContainer: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.07, delayChildren: 0.04 } },
-};
-const popUp: Variants = {
-  hidden: { opacity: 0, y: 24, scale: 0.96 },
-  show:   { opacity: 1, y: 0,  scale: 1,
-    transition: { type: "spring", stiffness: 340, damping: 26 } },
-};
-const popUpFast: Variants = {
-  hidden: { opacity: 0, y: 14, scale: 0.97 },
-  show:   { opacity: 1, y: 0,  scale: 1,
-    transition: { type: "spring", stiffness: 380, damping: 28 } },
-};
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const CARD: React.CSSProperties = {
@@ -651,11 +637,7 @@ function Tools() {
   const { t } = useTranslation();
   const [state, update] = useAppState();
   const [reframeIdx, setReframeIdx] = useState<number | null>(null);
-  const location = useLocation();
-  const [animKey, setAnimKey] = useState(0);
-  useEffect(() => {
-    if (location.pathname === "/tools/") setAnimKey(k => k + 1);
-  }, [location.pathname]);
+  const animKey = usePageAnimation("/tools/");
 
   // ── Dev mode (triple-tap "Tools" title or subtitle) ───────────────────────
   const [devOpen, setDevOpen] = useState(false);

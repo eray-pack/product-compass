@@ -1,4 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Lock, Hourglass, Smartphone, CalendarDays, Zap } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
@@ -1322,6 +1323,7 @@ function ProgressScreen() {
   }, [state.isPremium]);
   const [progressView, setProgressView] = useState<"grid" | "bars" | "streak">("grid");
   const [showVictory, setShowVictory] = useState(false);
+  const animKey = usePageAnimation("/progress");
   const [barTip, setBarTip] = useState<number | null>(null);
 
   // ── Dev mode ──────────────────────────────────────────────────────────────
@@ -1471,16 +1473,17 @@ function ProgressScreen() {
       <AnimatePresence>
         {showVictory && <Victory90Modal onDismiss={handleDismissVictory} addiction={active?.name} />}
       </AnimatePresence>
+      <motion.div key={animKey} variants={pageContainer} initial="hidden" animate="show">
 
       {/* ── Header ──────────────────────────────────────────── */}
-      <header className="px-6 pt-12 pb-2 fade-up">
+      <motion.header variants={popUp} className="px-6 pt-12 pb-2">
         <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
           <SectionTitle>{t("nav.progress")}</SectionTitle>
         </div>
         <p style={{ fontSize: 13, color: "#ffffff", opacity: 0.45, marginTop: 4, fontFamily: "DM Sans, sans-serif", fontWeight: 400 }}>
           {t("progress.header")}
         </p>
-      </header>
+      </motion.header>
 
       {/* ── Dev Panel (triple-tap "Progress" to toggle) ──────── */}
       {devOpen && (
@@ -1624,17 +1627,17 @@ function ProgressScreen() {
       )}
 
       {/* ── Neural Core hero ──────────────────────────────── */}
-      <section className="flex flex-col items-center pt-6 pb-4 px-6 fade-up-1">
+      <motion.section variants={popUp} className="flex flex-col items-center pt-6 pb-4 px-6">
         <NeuralCore pct={recoveryPct} day={day} legendary={legendary} />
         <p className="mt-6 text-sm text-muted-foreground text-center max-w-[220px]">
           {recoveryPct < 100
             ? t("progress.ring.daysRemaining", { count: 90 - day })
             : t("progress.ring.achieved")}
         </p>
-      </section>
+      </motion.section>
 
       {/* ── Inline key stats ────────────────────────────────── */}
-      <div className="px-6 mt-2 flex divide-x fade-up-2" style={{ borderColor: "var(--border)" }}>
+      <motion.div variants={popUp} className="px-6 mt-2 flex divide-x" style={{ borderColor: "var(--border)" }}>
         <div className="flex-1 text-center py-4">
           <p className="text-[22px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>{day}d</p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.streak")}</p>
@@ -1647,12 +1650,12 @@ function ProgressScreen() {
           <p className="text-[22px] font-bold tabular-nums">{state.totalCleanDays}</p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{t("progress.stats.total")}</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* ══════════════════════════════════════════════════════
            LEGACY RANK CARD
          ══════════════════════════════════════════════════════ */}
-      <section className="px-6 mt-6 fade-up-2">
+      <motion.section variants={popUp} className="px-6 mt-6">
         <style>{`
           @keyframes rank-halo { 0%,100%{opacity:0.55;transform:scale(0.96)} 50%{opacity:1;transform:scale(1.06)} }
         `}</style>
@@ -1725,12 +1728,12 @@ function ProgressScreen() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ══════════════════════════════════════════════════════
            DOPAMINE DASHBOARD — DATA TERMINAL
          ══════════════════════════════════════════════════════ */}
-      <section className="px-6 mt-5 fade-up-3">
+      <motion.section variants={popUp} className="px-6 mt-5">
 
         {/* ── Standalone title ────────────────────────────────────────────────── */}
         <div style={{ marginBottom: 18 }}>
@@ -1852,12 +1855,12 @@ function ProgressScreen() {
 
         {/* ── Neural Pruning graph ─────────────────────────────────────────────── */}
         <NeuralPruningGraph day={day} />
-      </section>
+      </motion.section>
 
       {/* ══════════════════════════════════════════════════════
            VERTICAL MILESTONE TIMELINE
          ══════════════════════════════════════════════════════ */}
-      <section className="px-6 mt-6 fade-up-3">
+      <motion.section variants={popUp} className="px-6 mt-6">
         <style>{`
           @keyframes tl-pulse { 0%,100%{opacity:0.55;transform:scale(1)} 50%{opacity:1;transform:scale(1.18)} }
           @keyframes tl-flow  { 0%{background-position:0% 0%} 100%{background-position:0% 100%} }
@@ -1953,10 +1956,10 @@ function ProgressScreen() {
             </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* ── Consistency ─────────────────────────────────────── */}
-      <section className="px-6 mt-8 pt-7 fade-up-3" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
+      <motion.section variants={popUp} className="px-6 mt-8 pt-7" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <div className="flex items-center justify-between mb-3">
           <SectionTitle>Consistency</SectionTitle>
           {!state.isPremium && (
@@ -2219,11 +2222,11 @@ function ProgressScreen() {
             </button>
           )}
         </div>
-      </section>
+      </motion.section>
 
 
       {/* ── Pattern Detector (PRO) ──────────────────────────── */}
-      <section className="px-6 mt-8 pt-7 fade-up-5" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
+      <motion.section variants={popUp} className="px-6 mt-8 pt-7" style={{ borderTop: "1px solid oklch(0.22 0.03 265 / 0.7)" }}>
         <style>{`
           @keyframes pd-scan  { 0%{opacity:0.55} 50%{opacity:1} 100%{opacity:0.55} }
           @keyframes pd-glitch {
@@ -2395,9 +2398,10 @@ function ProgressScreen() {
             </button>
           )}
         </div>
-      </section>
+      </motion.section>
 
       <div className="pb-8" />
+      </motion.div>
     </PageShell>
   );
 }

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { useState, useRef } from "react";
 import {
   ArrowLeft,
@@ -1418,6 +1419,7 @@ function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 function Settings() {
+  const animKey = usePageAnimation("/settings");
   const navigate = useNavigate();
   const [state, update] = useAppState();
 

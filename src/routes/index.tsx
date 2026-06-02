@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { useEffect, useRef, useState } from "react";
 import { Coins, X, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -899,6 +900,7 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
 function Dashboard() {
   const { t } = useTranslation();
   const [state, update] = useAppState();
+  const animKey = usePageAnimation("/");
   const navigate        = useNavigate();
   const [showRelapse,    setShowRelapse]    = useState(false);
   const [rewardMsg,      setRewardMsg]      = useState<string | null>(null);
@@ -968,13 +970,12 @@ function Dashboard() {
   return (
     <PageShell>
       <FloatingHabitBg emoji={recoveryEmoji(active?.id ?? "")} />
+      <motion.div key={animKey} variants={pageContainer} initial="hidden" animate="show">
 
       {/* ── NAV ──────────────────────────────────────────────── */}
       <motion.header
+        variants={popUp}
         className="px-6 pt-12 pb-3 flex items-center justify-between"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
       >
         <span
           className="text-[10px] font-bold tracking-[0.45em] uppercase"
@@ -1287,6 +1288,7 @@ function Dashboard() {
 
       {/* ── CHANGELOG ─────────────────────────────────────────── */}
       <ChangelogModal open={showChangelog} onClose={() => setShowChangelog(false)} />
+      </motion.div>
 
     </PageShell>
   );

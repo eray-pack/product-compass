@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { PremiumBackground } from "@/components/PremiumBackground";
@@ -975,6 +976,7 @@ function CommunityProModal({ onClose }: { onClose: () => void }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 function CommunityPage() {
   const [state, update] = useAppState();
+  const animKey = usePageAnimation("/community");
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [joinedRooms, setJoinedRooms] = useState<string[]>(["global"]);
   const [showCreate, setShowCreate] = useState(false);
@@ -1205,7 +1207,7 @@ function CommunityPage() {
       )}
 
       {/* ── World map hero ───────────────────────────────────── */}
-      <div className="fade-up-1">
+      <div variants={popUp} className="">
         <WorldMapHero userCheckedIn={checkedIn} extraMembers={devExtraMembers} />
       </div>
 
@@ -1213,7 +1215,7 @@ function CommunityPage() {
       <GlobalCheckInBar checkedIn={checkedIn} onCheckIn={handleCheckIn} />
 
       {/* ── Room list ────────────────────────────────────────── */}
-      <section className="px-6 mt-2 fade-up-2">
+      <motion.section variants={popUp} className="px-6 mt-2">
         <div className="space-y-0">
           {[...ROOMS, ...userRooms, ...devRooms].map((room, i, all) => {
             const joined = joinedRooms.includes(room.id);
@@ -1286,7 +1288,7 @@ function CommunityPage() {
             );
           })}
         </div>
-      </section>
+      </motion.section>
 
       {/* ── Actions ──────────────────────────────────────────── */}
       <style>{`
@@ -1299,7 +1301,7 @@ function CommunityPage() {
         .si-badge-hover:hover { transform: scale(1.06); }
         .si-badge-hover:active { transform: scale(0.97); }
       `}</style>
-      <section className="px-6 mt-6 pb-6 fade-up-3"
+      <motion.section variants={popUp} className="px-6 mt-6 pb-6"
         style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 20 }}>
 
         {/* ① Create Community — full-width anchor row */}
@@ -1480,7 +1482,7 @@ function CommunityPage() {
           </button>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ── Modals & toasts ──────────────────────────────────── */}
       {showProModal && <CommunityProModal onClose={() => setShowProModal(false)} />}

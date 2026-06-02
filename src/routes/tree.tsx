@@ -1,4 +1,5 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
@@ -2211,9 +2212,11 @@ function WolfPage({
     { label: "⚡ Alpha",      xp: 1600 },
   ];
 
+  const animKeyWolf = usePageAnimation("/tree");
   return (
     <PageShell>
-      <header className="px-6 pt-12">
+      <motion.div key={animKeyWolf} variants={pageContainer} initial="hidden" animate="show">
+      <motion.header variants={popUp} className="px-6 pt-12">
         <div onClick={handleWolfDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
           <p style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 700, fontStyle: "italic", color: "#C9A84C", letterSpacing: 0, margin: 0 }}>Your Companion</p>
         </div>
@@ -2221,7 +2224,7 @@ function WolfPage({
         <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
           This wolf is yours. Every clean day makes it stronger.
         </p>
-      </header>
+      </motion.header>
 
       {/* ── Dev panel (triple-tap "Your Companion" to toggle) ────────────── */}
       {wolfDevMode && (
@@ -2525,6 +2528,7 @@ function WolfPage({
         onSwitchToTree={() => update({ companion: "tree" })}
         onSwitchToWolf={() => {}}
       />
+      </motion.div>
     </PageShell>
   );
 }
@@ -2611,14 +2615,16 @@ function LifeTreePage({
     setTimeout(() => setShopFeedback(null), 2000);
   };
 
+  const animKeyTree = usePageAnimation("/tree");
   return (
     <PageShell>
-      <header className="px-6 pt-4">
+      <motion.div key={animKeyTree} variants={pageContainer} initial="hidden" animate="show">
+      <motion.header variants={popUp} className="px-6 pt-4">
         <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
           <SectionTitle>Sacred Ground</SectionTitle>
         </div>
         <h1 className="mt-0.5 text-2xl font-bold">Your Life Tree</h1>
-      </header>
+      </motion.header>
 
       {/* ── Dev panel (triple-tap "Sacred Ground" to toggle) ─────────────── */}
       {devMode && (
@@ -3016,6 +3022,7 @@ function LifeTreePage({
           update({ companion: "wolf" });
         }}
       />
+      </motion.div>
     </PageShell>
   );
 }
