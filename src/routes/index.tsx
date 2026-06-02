@@ -696,17 +696,26 @@ function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; 
         />
       ))}
 
-      {/* Core symbol */}
+      {/* Core symbol — fixed-size centering wrapper eliminates glyph metric offsets */}
       <motion.span
         className="font-bold leading-none select-none"
-        style={{ position: "relative", zIndex: 1, transform: `scale(${fx.symbolScale})` }}
+        style={{
+          position: "relative", zIndex: 1,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: 160, height: 160,
+          transformOrigin: "center center",
+        }}
         animate={{ scale: fx.pulseScale.map(s => s * fx.symbolScale) as [number,number,number,number,number] }}
         transition={{ repeat: Infinity, duration: fx.pulseDur, ease: "easeInOut" }}
       >
         <span
           style={{
             fontSize: "clamp(7rem, 30vw, 10rem)",
-            display: "block",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: 1,
+            textAlign: "center" as const,
             background: `radial-gradient(circle at 40% 35%, #ffffff 0%, ${badge.color}cc 30%, ${badge.color} 65%)`,
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
