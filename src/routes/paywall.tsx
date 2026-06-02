@@ -60,10 +60,12 @@ const LIVE_FEED = [
 ];
 
 const FEATURES = [
-  "Multi-habit tracking — run unlimited counters",
-  "AI Coach remembers your patterns across sessions",
-  "8 specialized tools for when it gets hardest",
-  "Full relapse analytics — see your trigger patterns",
+  "AI Coach — personalized reframes when you need them most",
+  "Progress page — full analytics, streaks & milestone timeline",
+  "9 PRO craving games — Cold Switch, Void Stare, Echo Chamber & more",
+  "Sacred Tree & Wolf companion — evolve them over 90 days",
+  "Community — create rooms, connect with others on the same path",
+  "XP Multiplier — bonus XP for deep streak milestones",
   "PRO members are 3× more likely to reach day 90",
 ];
 
