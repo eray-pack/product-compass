@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Lock, Hourglass, Smartphone, CalendarDays, Zap } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
@@ -1315,6 +1315,11 @@ function PdLearnMore() {
 function ProgressScreen() {
   const { t } = useTranslation();
   const [state, update] = useAppState();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!state.isPremium) navigate({ to: "/paywall" });
+  }, [state.isPremium]);
   const [progressView, setProgressView] = useState<"grid" | "bars" | "streak">("grid");
   const [showVictory, setShowVictory] = useState(false);
   const [barTip, setBarTip] = useState<number | null>(null);
