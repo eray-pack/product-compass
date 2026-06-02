@@ -44,10 +44,13 @@ const TESTIMONIALS = [
 const FEATURES = [
   { icon: "🧠", label: "AI Coach" },
   { icon: "🆘", label: "SOS Tools" },
-  { icon: "⏰", label: "Daily Check-in" },
-  { icon: "📈", label: "Progress" },
+  { icon: "📊", label: "Progress" },
   { icon: "🌳", label: "Sacred Tree" },
-  { icon: "🎮", label: "Craving Games" },
+  { icon: "🐺", label: "Wolf Companion" },
+  { icon: "🎮", label: "9 Pro Games" },
+  { icon: "🏆", label: "Milestones" },
+  { icon: "💬", label: "Community" },
+  { icon: "⚡", label: "XP Multiplier" },
 ];
 
 // ── Variants ─────────────────────────────────────────────────────────────────
