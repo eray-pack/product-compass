@@ -42,15 +42,15 @@ const TESTIMONIALS = [
 ];
 
 const FEATURES = [
-  { icon: "🧠", label: "AI Coach" },
-  { icon: "🆘", label: "SOS Tools" },
-  { icon: "📊", label: "Progress" },
-  { icon: "🌳", label: "Sacred Tree" },
-  { icon: "🐺", label: "Wolf Companion" },
-  { icon: "🎮", label: "9 Pro Games" },
-  { icon: "🏆", label: "Milestones" },
-  { icon: "💬", label: "Community" },
-  { icon: "⚡", label: "XP Multiplier" },
+  { icon: "🧠", label: "AI Coach",        desc: "Personalized reframes on demand",       glow: "#7C3AED" },
+  { icon: "📊", label: "Progress",         desc: "Full analytics & milestone timeline",   glow: "#10B981" },
+  { icon: "🎮", label: "9 Pro Games",      desc: "Cold Switch, Void Stare & 7 more",      glow: "#F97316" },
+  { icon: "🌳", label: "Sacred Tree",      desc: "Companion that grows with your streak", glow: "#16A34A" },
+  { icon: "🐺", label: "Wolf Companion",   desc: "8 evolution stages over 90 days",       glow: "#6366F1" },
+  { icon: "🆘", label: "SOS Tools",        desc: "Urge surfing, reframes & cold guide",   glow: "#EF4444" },
+  { icon: "🏆", label: "Milestones",       desc: "30+ achievement badges to earn",        glow: "#C9A84C" },
+  { icon: "💬", label: "Community",        desc: "Create rooms & connect with others",    glow: "#0EA5E9" },
+  { icon: "⚡", label: "XP Multiplier",    desc: "Bonus XP for deep streak milestones",   glow: "#EAB308" },
 ];
 
 // ── Variants ─────────────────────────────────────────────────────────────────
@@ -233,26 +233,58 @@ export function PaywallContent({
         })}
       </motion.div>
 
-      {/* ── Feature grid ── */}
+      {/* ── Feature list ── */}
       <motion.div
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06 } } }}
-        style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+        style={{
+          background: CARD_BG_HEX,
+          border: BORDER_SUB,
+          borderRadius: 18,
+          overflow: "hidden",
+        }}
       >
-        {FEATURES.map(({ icon, label }) => (
+        {FEATURES.map(({ icon, label, desc, glow }, i) => (
           <motion.div
             key={label}
             variants={iV}
             style={{
-              background: CARD_BG_HEX,
-              border: BORDER_SUB,
-              borderRadius: 14, padding: "14px 8px",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
+              display: "flex", alignItems: "center", gap: 14,
+              padding: "13px 16px",
+              borderBottom: i < FEATURES.length - 1 ? "1px solid rgba(201,168,76,0.06)" : "none",
             }}
           >
-            <span style={{ fontSize: 22 }}>{icon}</span>
-            <p style={{ fontSize: 11, color: MUTED, margin: 0, textAlign: "center", lineHeight: 1.2 }}>
-              <span style={{ color: GOLD, fontWeight: 700, marginRight: 2 }}>✓</span>{label}
-            </p>
+            {/* Glow icon box */}
+            <div style={{
+              width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+              background: `${glow}18`,
+              border: `1px solid ${glow}40`,
+              boxShadow: `0 0 10px ${glow}22`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 18,
+            }}>
+              {icon}
+            </div>
+
+            {/* Text */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: WHITE, margin: 0, lineHeight: 1.2 }}>
+                {label}
+              </p>
+              <p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0", lineHeight: 1.3 }}>
+                {desc}
+              </p>
+            </div>
+
+            {/* Check */}
+            <div style={{
+              width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
+              background: `${glow}20`,
+              border: `1px solid ${glow}60`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 9, color: glow, fontWeight: 700,
+            }}>
+              ✓
+            </div>
           </motion.div>
         ))}
       </motion.div>
