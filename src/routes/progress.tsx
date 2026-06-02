@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Lock, Hourglass, Smartphone, CalendarDays, Zap } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
-import { useAppState, dayCount, longestCleanPeriod, activeAddiction } from "@/lib/store";
+import { useAppState, dayCount, longestCleanPeriod, activeAddiction, loadState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -20,6 +20,10 @@ const msItem = {
 };
 
 export const Route = createFileRoute("/progress")({
+  beforeLoad: () => {
+    if (typeof window === "undefined") return;
+    if (!loadState().isPremium) throw redirect({ to: "/paywall" });
+  },
   component: ProgressScreen,
 });
 
