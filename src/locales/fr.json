@@ -3,6 +3,7 @@
     "home": "Accueil",
     "tools": "Outils",
     "community": "Communauté",
+    "games": "Jeux",
     "progress": "Progrès",
     "tree": "Arbre",
     "companion": "Compagnon"
@@ -273,6 +274,10 @@
     "steadyhand": {
       "name": "Main Ferme",
       "desc": "Exercice de concentration précise"
+    },
+    "nebulaflow": {
+      "name": "Flux Nébuleux",
+      "desc": "Dérive à travers les étoiles"
     }
   },
   "settings": {
@@ -445,6 +450,84 @@
       "afternoon": "Après-midi",
       "evening": "Soir",
       "night": "Nuit"
+    }
+  },
+  "paywall": {
+    "unlockPro": "Débloquer Pro",
+    "finalOffer": "Offre Finale",
+    "reclaimYourLife": "Reprends ta vie.",
+    "oneLast": "Une dernière chance.",
+    "subCopy": "Rejoins 46 000+ personnes qui ont choisi autrement.",
+    "finalSubCopy": "Prix le plus bas jamais vu. Seulement sur cet écran.",
+    "annual": "Annuel",
+    "monthly": "Mensuel",
+    "perMonth": "par mois",
+    "billedAnnually": "facturé 39,99 $/an",
+    "getAnnual": "Choisir Annuel — 3,33 $/mois",
+    "getMonthly": "Choisir Mensuel — 19,99 $/mois",
+    "noThanks": "Non merci",
+    "processing": "Traitement…",
+    "features": {
+      "aiCoach": "Coach IA",
+      "aiCoachDesc": "Recadrages personnalisés à la demande",
+      "progress": "Progrès",
+      "progressDesc": "Analytiques complètes & chronologie des jalons",
+      "proGames": "9 Jeux Pro",
+      "proGamesDesc": "Rupture Froide, Regard du Vide & 7 autres",
+      "sacredTree": "Arbre Sacré",
+      "sacredTreeDesc": "Compagnon qui grandit avec ta série",
+      "wolfCompanion": "Compagnon Loup",
+      "wolfCompanionDesc": "8 stades d'évolution en 90 jours",
+      "sosTools": "Outils SOS",
+      "sosToolsDesc": "Surf sur les envies, recadrages & guide froid",
+      "milestones": "Jalons",
+      "milestonesDesc": "30+ badges à débloquer",
+      "community": "Communauté",
+      "communityDesc": "Créer des salles & se connecter avec d'autres",
+      "xpMultiplier": "Multiplicateur XP",
+      "xpMultiplierDesc": "XP bonus pour les grandes étapes de série"
+    }
+  },
+  "coldPage": {
+    "title": "Exposition au Froid",
+    "subtitle": "2 minutes de respiration guidée pour la douche froide.",
+    "subtitleAccent": "Fais-le quand l'envie frappe le plus fort.",
+    "whyItWorks": "Pourquoi ça fonctionne",
+    "dopamineReset": "Réinitialisation de la dopamine",
+    "dopamineResetDesc": "L'eau froide déclenche un pic de dopamine de 2,5× — plus durable que n'importe quelle substance. C'est le high le plus pur que ton cerveau puisse produire.",
+    "urgeSuppressor": "Suppresseur d'envie",
+    "urgeSuppressorDesc": "Le choc du froid neutralise le signal de désir dans ton cortex préfrontal. Tu ne peux pas ressentir une envie et un choc froid en même temps.",
+    "willpowerTraining": "Entraînement de la volonté",
+    "willpowerTrainingDesc": "Chaque fois que tu choisis intentionnellement l'inconfort, tu renforces le même chemin neural qui résiste aux mauvaises habitudes. Une douche froide = une répétition.",
+    "theProtocol": "Le protocole",
+    "step1": "Entre. Ne te raidis pas — laisse l'eau frapper directement ta poitrine.",
+    "step2": "Inspire pendant 4 secondes par le nez. Lentement et de manière contrôlée.",
+    "step3": "Expire lentement pendant 6 secondes par la bouche. Laisse le choc passer.",
+    "step4": "Après 60 secondes, tourne le dos au jet. Tu l'as mérité.",
+    "step5": "À 90 secondes, respire normalement. Scanne ton corps — sens le calme arriver.",
+    "step6": "À 2 minutes — sors. Tu viens de recâbler une réponse au stress.",
+    "scienceLabel": "Science :",
+    "scienceText": "L'exposition au froid augmente la noradrénaline jusqu'à 300 %. C'est le même neurotransmetteur responsable de la concentration, de l'humeur et du contrôle des impulsions — exactement ce que l'addiction épuise."
+  },
+  "addAddict": {
+    "label": "Ajouter une habitude",
+    "title": "Contre quoi d'autre te bats-tu ?",
+    "subtitle": "Chaque combat suivi séparément. Tout le XP nourrit ton arbre.",
+    "somethingElse": "Autre chose…",
+    "allTracked": "Toutes les habitudes prédéfinies sont déjà suivies.",
+    "pickEmoji": "Choisir un emoji",
+    "namePlaceholder": "Nomme ton habitude…",
+    "startTracking": "Commencer le suivi",
+    "habits": {
+      "porn":            { "name": "Pornographie",    "desc": "Retrouve ta concentration, énergie et confiance." },
+      "socialMedia":     { "name": "Réseaux sociaux", "desc": "Arrête le drainage de dopamine qui détruit ton attention." },
+      "sugar":           { "name": "Sucre",           "desc": "Stabilise ton énergie, ton humeur et ta santé." },
+      "alcohol":         { "name": "Alcool",          "desc": "Libère ton esprit, protège ton corps et économise ton argent." },
+      "nicotine":        { "name": "Nicotine",        "desc": "Reprends tes poumons et brise la laisse chimique." },
+      "cannabis":        { "name": "Cannabis",        "desc": "Restaure la motivation, la mémoire et la clarté mentale." },
+      "gambling":        { "name": "Jeu d'argent",    "desc": "Arrête de nourrir la machine — ton avenir n'est pas un pari." },
+      "gaming":          { "name": "Jeux vidéo",      "desc": "Redirige cette énergie vers quelque chose qui dure." },
+      "procrastination": { "name": "Procrastination", "desc": "La version de toi qui agit sans attendre." }
     }
   },
   "relapse": {

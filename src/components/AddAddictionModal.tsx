@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { type Addiction } from "@/lib/store";
 
 const GOLD  = "#C9A84C";
@@ -14,16 +15,16 @@ const CUSTOM_EMOJIS = [
   "💪","🔥","🎯","🧩","🎰","💉","🥦","🍰",
 ];
 
-const PRESET_HABITS = [
-  { name: "Porn",            emoji: "🧠", desc: "Reclaim your focus, energy, and real-world confidence.",     glow: "#C9A84C" },
-  { name: "Social media",    emoji: "📱", desc: "Stop the dopamine drain destroying your attention span.",    glow: "#3B82F6" },
-  { name: "Sugar",           emoji: "🍩", desc: "Stabilise your energy, mood, and long-term health.",         glow: "#F43F5E" },
-  { name: "Alcohol",         emoji: "🍺", desc: "Clear your mind, protect your body, and save your money.",   glow: "#F59E0B" },
-  { name: "Nicotine",        emoji: "🚬", desc: "Take back your lungs and break the chemical leash.",         glow: "#94A3B8" },
-  { name: "Cannabis",        emoji: "🌿", desc: "Restore motivation, memory, and mental sharpness.",          glow: "#22C55E" },
-  { name: "Gambling",        emoji: "🎰", desc: "Stop feeding the machine — your future is not a bet.",       glow: "#EF4444" },
-  { name: "Gaming",          emoji: "🎮", desc: "Redirect that drive into something that lasts.",             glow: "#8B5CF6" },
-  { name: "Procrastination", emoji: "⏳", desc: "The version of you that acts without waiting.",              glow: "#F97316" },
+const PRESET_META = [
+  { key: "porn",            emoji: "🧠", glow: "#C9A84C" },
+  { key: "socialMedia",     emoji: "📱", glow: "#3B82F6" },
+  { key: "sugar",           emoji: "🍩", glow: "#F43F5E" },
+  { key: "alcohol",         emoji: "🍺", glow: "#F59E0B" },
+  { key: "nicotine",        emoji: "🚬", glow: "#94A3B8" },
+  { key: "cannabis",        emoji: "🌿", glow: "#22C55E" },
+  { key: "gambling",        emoji: "🎰", glow: "#EF4444" },
+  { key: "gaming",          emoji: "🎮", glow: "#8B5CF6" },
+  { key: "procrastination", emoji: "⏳", glow: "#F97316" },
 ];
 
 interface Props {
@@ -35,10 +36,18 @@ interface Props {
 const spring = { type: "spring" as const, stiffness: 340, damping: 28 };
 
 export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
+  const { t } = useTranslation();
   const [customName,  setCustomName]  = useState("");
   const [customEmoji, setCustomEmoji] = useState("☕");
   const [showCustom,  setShowCustom]  = useState(false);
   const [added,       setAdded]       = useState<string | null>(null);
+
+  const PRESET_HABITS = PRESET_META.map(({ key, emoji, glow }) => ({
+    name:  t(`addAddict.habits.${key}.name`),
+    emoji,
+    desc:  t(`addAddict.habits.${key}.desc`),
+    glow,
+  }));
 
   const available = PRESET_HABITS.filter(
     (h) => !trackedIds.has(h.name.toLowerCase().replace(/\s+/g, "-"))
@@ -104,17 +113,17 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
             <div>
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, margin: "0 0 6px" }}>
-                Add a habit
+                {t("addAddict.label")}
               </p>
               <h2 style={{
                 fontFamily: "Cormorant Garamond, Georgia, serif",
                 fontSize: 26, fontWeight: 700, color: WHITE,
                 margin: "0 0 6px", lineHeight: 1.2,
               }}>
-                What else are you<br />fighting?
+                {t("addAddict.title")}
               </h2>
               <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.5 }}>
-                Each battle tracked separately. All XP feeds your tree.
+                {t("addAddict.subtitle")}
               </p>
             </div>
             <button
@@ -212,7 +221,7 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
                   }}
                 >
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: MUTED, margin: "0 0 12px" }}>
-                    Pick an emoji
+                    {t("addAddict.pickEmoji")}
                   </p>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 6, marginBottom: 14 }}>
                     {CUSTOM_EMOJIS.map((e) => (
@@ -246,7 +255,7 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
                       value={customName}
                       onChange={(e) => setCustomName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && addCustom()}
-                      placeholder="Name your habit…"
+                      placeholder={t("addAddict.namePlaceholder")}
                       style={{
                         flex: 1, background: "transparent", border: "none", outline: "none",
                         fontSize: 14, color: WHITE,
@@ -271,7 +280,7 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
                       boxShadow: customName.trim() ? "0 4px 24px rgba(201,168,76,0.30)" : "none",
                     }}
                   >
-                    <Check size={15} /> Start tracking
+                    <Check size={15} /> {t("addAddict.startTracking")}
                   </button>
                 </motion.div>
               ) : (
@@ -299,14 +308,14 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
                   }}
                 >
                   <Plus size={15} />
-                  Something else…
+                  {t("addAddict.somethingElse")}
                 </motion.button>
               )}
             </AnimatePresence>
 
             {available.length === 0 && !showCustom && (
               <p style={{ textAlign: "center", fontSize: 13, color: MUTED, padding: "16px 0" }}>
-                All preset habits are already tracked.
+                {t("addAddict.allTracked")}
               </p>
             )}
           </div>

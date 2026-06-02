@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowLeft, Snowflake, Zap, Brain, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/tools/cold")({
   component: Cold,
@@ -13,35 +14,9 @@ const WHITE = "#f0ece4";
 const MUTED = "rgba(255,255,255,0.38)";
 const BG    = "#04080f";
 
-const STEPS = [
-  { num: 1, text: "Step in. Don't brace — let the water hit your chest directly.", time: null },
-  { num: 2, text: "Inhale for 4 seconds through your nose. Slow and controlled.", time: "0:00" },
-  { num: 3, text: "Exhale slowly for 6 seconds through your mouth. Let the shock pass.", time: "0:10" },
-  { num: 4, text: "After 60 seconds, turn your back to the stream. You've earned it.", time: "1:00" },
-  { num: 5, text: "At 90 seconds, breathe normally. Scan your body — feel the calm arrive.", time: "1:30" },
-  { num: 6, text: "At 2 minutes — step out. You just rewired a stress response.", time: "2:00" },
-];
-
-const WHY_CARDS = [
-  {
-    icon: Brain,
-    glow: "#8B5CF6",
-    title: "Dopamine reset",
-    desc: "Cold water triggers a 2.5× spike in dopamine — longer-lasting than any substance. It's the cleanest high your brain can produce.",
-  },
-  {
-    icon: Zap,
-    glow: CYAN,
-    title: "Urge suppressor",
-    desc: "The cold shock overrides the craving signal in your prefrontal cortex. You can't feel an urge and cold shock at the same time.",
-  },
-  {
-    icon: TrendingUp,
-    glow: "#22C55E",
-    title: "Willpower training",
-    desc: "Every time you choose discomfort on purpose, you strengthen the same neural pathway that resists bad habits. One cold shower = one rep.",
-  },
-];
+const STEP_TIMES = [null, "0:00", "0:10", "1:00", "1:30", "2:00"] as const;
+const WHY_GLOWS  = ["#8B5CF6", CYAN, "#22C55E"] as const;
+const WHY_ICONS  = [Brain, Zap, TrendingUp] as const;
 
 const iV = {
   hidden:  { opacity: 0, y: 16 },
@@ -53,6 +28,22 @@ const iV = {
 
 function Cold() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const WHY_CARDS = [
+    { icon: WHY_ICONS[0], glow: WHY_GLOWS[0], title: t("coldPage.dopamineReset"),   desc: t("coldPage.dopamineResetDesc") },
+    { icon: WHY_ICONS[1], glow: WHY_GLOWS[1], title: t("coldPage.urgeSuppressor"),  desc: t("coldPage.urgeSuppressorDesc") },
+    { icon: WHY_ICONS[2], glow: WHY_GLOWS[2], title: t("coldPage.willpowerTraining"), desc: t("coldPage.willpowerTrainingDesc") },
+  ];
+
+  const STEPS = [
+    { num: 1, text: t("coldPage.step1"), time: STEP_TIMES[0] },
+    { num: 2, text: t("coldPage.step2"), time: STEP_TIMES[1] },
+    { num: 3, text: t("coldPage.step3"), time: STEP_TIMES[2] },
+    { num: 4, text: t("coldPage.step4"), time: STEP_TIMES[3] },
+    { num: 5, text: t("coldPage.step5"), time: STEP_TIMES[4] },
+    { num: 6, text: t("coldPage.step6"), time: STEP_TIMES[5] },
+  ];
 
   return (
     <div style={{
@@ -89,7 +80,7 @@ function Cold() {
             marginBottom: 36,
           }}
         >
-          <ArrowLeft size={14} /> Back
+          <ArrowLeft size={14} /> {t("common.back")}
         </button>
 
         {/* Hero */}
@@ -115,11 +106,11 @@ function Cold() {
             fontSize: 32, fontWeight: 700, color: WHITE,
             margin: "0 0 10px", lineHeight: 1.15,
           }}>
-            Cold Exposure
+            {t("coldPage.title")}
           </h1>
           <p style={{ fontSize: 14, color: MUTED, margin: 0, lineHeight: 1.6 }}>
-            2 minutes of guided breathing for the cold shower.<br />
-            <span style={{ color: "rgba(255,255,255,0.55)" }}>Do this when the urge hits hardest.</span>
+            {t("coldPage.subtitle")}<br />
+            <span style={{ color: "rgba(255,255,255,0.55)" }}>{t("coldPage.subtitleAccent")}</span>
           </p>
         </motion.div>
 
@@ -130,7 +121,7 @@ function Cold() {
           transition={{ delay: 0.2 }}
           style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, margin: "0 0 12px" }}
         >
-          Why it works
+          {t("coldPage.whyItWorks")}
         </motion.p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
@@ -173,7 +164,7 @@ function Cold() {
           transition={{ delay: 0.4 }}
           style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, margin: "0 0 12px" }}
         >
-          The protocol
+          {t("coldPage.theProtocol")}
         </motion.p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -238,7 +229,7 @@ function Cold() {
           }}
         >
           <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.7, textAlign: "center" }}>
-            <span style={{ color: GOLD, fontWeight: 600 }}>Science:</span> Cold exposure raises norepinephrine by up to 300%. This is the same neurotransmitter responsible for focus, mood, and impulse control — the exact things addiction depletes.
+            <span style={{ color: GOLD, fontWeight: 600 }}>{t("coldPage.scienceLabel")}</span> {t("coldPage.scienceText")}
           </p>
         </motion.div>
 

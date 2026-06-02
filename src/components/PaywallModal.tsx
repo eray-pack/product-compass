@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAppState } from "@/lib/store";
 import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
 
@@ -41,16 +42,16 @@ const TESTIMONIALS = [
   { name: "Arjun, 31",  text: "the momentum thing is genius. i relapsed once and kept going. old me would've quit" },
 ];
 
-const FEATURES = [
-  { icon: "🧠", label: "AI Coach",        desc: "Personalized reframes on demand",       glow: "#7C3AED" },
-  { icon: "📊", label: "Progress",         desc: "Full analytics & milestone timeline",   glow: "#10B981" },
-  { icon: "🎮", label: "9 Pro Games",      desc: "Cold Switch, Void Stare & 7 more",      glow: "#F97316" },
-  { icon: "🌳", label: "Sacred Tree",      desc: "Companion that grows with your streak", glow: "#16A34A" },
-  { icon: "🐺", label: "Wolf Companion",   desc: "8 evolution stages over 90 days",       glow: "#6366F1" },
-  { icon: "🆘", label: "SOS Tools",        desc: "Urge surfing, reframes & cold guide",   glow: "#EF4444" },
-  { icon: "🏆", label: "Milestones",       desc: "30+ achievement badges to earn",        glow: "#C9A84C" },
-  { icon: "💬", label: "Community",        desc: "Create rooms & connect with others",    glow: "#0EA5E9" },
-  { icon: "⚡", label: "XP Multiplier",    desc: "Bonus XP for deep streak milestones",   glow: "#EAB308" },
+const FEATURE_META = [
+  { icon: "🧠", labelKey: "aiCoach",       descKey: "aiCoachDesc",       glow: "#7C3AED" },
+  { icon: "📊", labelKey: "progress",      descKey: "progressDesc",      glow: "#10B981" },
+  { icon: "🎮", labelKey: "proGames",      descKey: "proGamesDesc",      glow: "#F97316" },
+  { icon: "🌳", labelKey: "sacredTree",    descKey: "sacredTreeDesc",    glow: "#16A34A" },
+  { icon: "🐺", labelKey: "wolfCompanion", descKey: "wolfCompanionDesc", glow: "#6366F1" },
+  { icon: "🆘", labelKey: "sosTools",      descKey: "sosToolsDesc",      glow: "#EF4444" },
+  { icon: "🏆", labelKey: "milestones",    descKey: "milestonesDesc",    glow: "#C9A84C" },
+  { icon: "💬", labelKey: "community",     descKey: "communityDesc",     glow: "#0EA5E9" },
+  { icon: "⚡", labelKey: "xpMultiplier",  descKey: "xpMultiplierDesc",  glow: "#EAB308" },
 ];
 
 // ── Variants ─────────────────────────────────────────────────────────────────
@@ -121,7 +122,15 @@ export function PaywallContent({
   purchasing = false,
   isFinalOffer = false,
 }: PaywallContentProps) {
+  const { t } = useTranslation();
   const [tIdx, setTIdx] = useState(0);
+
+  const FEATURES = FEATURE_META.map(({ icon, labelKey, descKey, glow }) => ({
+    icon,
+    label: t(`paywall.features.${labelKey}`),
+    desc:  t(`paywall.features.${descKey}`),
+    glow,
+  }));
 
   useEffect(() => {
     const t = setInterval(() => setTIdx((i) => (i + 1) % TESTIMONIALS.length), 3000);
@@ -142,19 +151,17 @@ export function PaywallContent({
           fontSize: 16, fontWeight: 700, fontStyle: "italic",
           color: GOLD, margin: "0 0 8px", letterSpacing: 0,
         }}>
-          {isFinalOffer ? "Final Offer" : "Unlock Pro"}
+          {isFinalOffer ? t("paywall.finalOffer") : t("paywall.unlockPro")}
         </p>
         <h1 style={{
           fontFamily: "Cormorant Garamond, Georgia, serif",
           fontSize: 30, fontWeight: 700, color: WHITE,
           margin: "0 0 6px", lineHeight: 1.15,
         }}>
-          {isFinalOffer ? "One last chance." : "Reclaim your life."}
+          {isFinalOffer ? t("paywall.oneLast") : t("paywall.reclaimYourLife")}
         </h1>
         <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>
-          {isFinalOffer
-            ? "Lowest price ever. Only on this screen."
-            : "Join 46,000+ people who chose differently."}
+          {isFinalOffer ? t("paywall.finalSubCopy") : t("paywall.subCopy")}
         </p>
       </motion.div>
 
@@ -208,15 +215,15 @@ export function PaywallContent({
                   color: sel ? GOLD : MUTED,
                   margin: "0 0 8px",
                 }}>
-                  {isAnnual ? "Annual" : "Monthly"}
+                  {isAnnual ? t("paywall.annual") : t("paywall.monthly")}
                 </p>
                 <p style={{ fontSize: 22, fontWeight: 700, color: WHITE, margin: 0, lineHeight: 1 }}>
                   {isAnnual ? "$3.33" : "$19.99"}
                 </p>
-                <p style={{ fontSize: 10, color: MUTED, margin: "4px 0 0" }}>per month</p>
+                <p style={{ fontSize: 10, color: MUTED, margin: "4px 0 0" }}>{t("paywall.perMonth")}</p>
                 {isAnnual && (
                   <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0", opacity: 0.6 }}>
-                    billed $39.99/yr
+                    {t("paywall.billedAnnually")}
                   </p>
                 )}
               </motion.div>
@@ -346,7 +353,7 @@ export function PaywallContent({
           {purchasing ? (
             <>
               <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />
-              Processing…
+              {t("paywall.processing")}
             </>
           ) : (
             <AnimatePresence mode="wait">
@@ -358,7 +365,7 @@ export function PaywallContent({
                 transition={{ duration: 0.18 }}
                 style={{ position: "relative", zIndex: 1 }}
               >
-                {plan === "annual" ? "Get Annual — $3.33/mo" : "Get Monthly — $19.99/mo"}
+                {plan === "annual" ? t("paywall.getAnnual") : t("paywall.getMonthly")}
               </motion.span>
             </AnimatePresence>
           )}
@@ -375,7 +382,7 @@ export function PaywallContent({
             fontFamily: "DM Sans, sans-serif", padding: "6px 0",
           }}
         >
-          No thanks
+          {t("paywall.noThanks")}
         </button>
       </motion.div>
     </motion.div>

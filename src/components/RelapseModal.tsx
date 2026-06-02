@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, X, Flame, Brain, TrendingUp, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAppState, dayCount, activeAddiction } from "@/lib/store";
 import { getReframe } from "@/lib/reframe";
 
@@ -11,13 +12,13 @@ const WHITE  = "#f0ece4";
 const MUTED  = "rgba(255,255,255,0.38)";
 const BG     = "#0a0806";
 
-const TRIGGERS = [
-  { id: "stressed", label: "Stressed",          emoji: "🧠", glow: "#9333EA" },
-  { id: "bored",    label: "Bored",              emoji: "🥱", glow: "#3B82F6" },
-  { id: "alone",    label: "Alone",              emoji: "🌑", glow: "#6366F1" },
-  { id: "late",     label: "Late at night",      emoji: "🌌", glow: "#0EA5E9" },
-  { id: "online",   label: "Triggered online",   emoji: "📱", glow: "#F97316" },
-  { id: "unknown",  label: "I don't know",       emoji: "❓", glow: "#C9A84C" },
+const TRIGGER_META = [
+  { id: "stressed", emoji: "🧠", glow: "#9333EA" },
+  { id: "bored",    emoji: "🥱", glow: "#3B82F6" },
+  { id: "alone",    emoji: "🌑", glow: "#6366F1" },
+  { id: "late",     emoji: "🌌", glow: "#0EA5E9" },
+  { id: "online",   emoji: "📱", glow: "#F97316" },
+  { id: "unknown",  emoji: "❓", glow: "#C9A84C" },
 ];
 
 const FALLBACK_REFRAMES = [
@@ -55,11 +56,16 @@ interface Props { onClose: () => void; totalCleanDays: number; }
 type Step = "confirm" | "trigger_select" | "ai_reframe" | "done";
 
 export function RelapseModal({ onClose, totalCleanDays }: Props) {
+  const { t } = useTranslation();
   const [state, update] = useAppState();
   const [step, setStep]           = useState<Step>("confirm");
   const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
   const [reframeText, setReframeText] = useState<string | null>(null);
   const [loading, setLoading]     = useState(false);
+
+  const TRIGGERS = TRIGGER_META.map(({ id, emoji, glow }) => ({
+    id, emoji, glow, label: t(`relapse.trigger.${id}`),
+  }));
 
   const active          = activeAddiction(state);
   const streakDay       = active?.startDate ? dayCount(active.startDate) : 1;
@@ -121,11 +127,11 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                 fontSize: 26, fontWeight: 700, color: WHITE,
                 margin: "0 0 10px", lineHeight: 1.2,
               }}>
-                Did you relapse?
+                {t("relapse.confirm.title")}
               </h2>
               <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, margin: 0 }}>
-                Be honest with yourself. Logging it is an act of courage —{" "}
-                <span style={{ color: "rgba(255,255,255,0.65)" }}>your counter stays exactly where it is.</span>
+                {t("relapse.confirm.body").split("—")[0].trimEnd()}{" "}—{" "}
+                <span style={{ color: "rgba(255,255,255,0.65)" }}>{t("relapse.confirm.body").split("—")[1]?.trimStart()}</span>
               </p>
 
               <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -138,7 +144,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                   boxShadow: "0 4px 28px rgba(200,50,30,0.35), inset 0 1px 0 rgba(255,255,255,0.10)",
                   letterSpacing: "0.01em",
                 }}>
-                  Yes, log it honestly
+                  {t("relapse.confirm.yes")}
                 </button>
                 <button onClick={onClose} style={{
                   width: "100%", height: 52, borderRadius: 16,
@@ -147,7 +153,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                   color: "rgba(255,255,255,0.45)",
                   fontSize: 14, fontWeight: 500, cursor: "pointer",
                 }}>
-                  No, I'm still clean
+                  {t("relapse.confirm.no")}
                 </button>
               </div>
             </div>
@@ -169,17 +175,17 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
             </div>
 
             <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.18em", color: MUTED, margin: "0 0 8px" }}>
-              Step 1 of 2
+              {t("relapse.trigger.step")}
             </p>
             <h2 style={{
               fontFamily: "Cormorant Garamond, Georgia, serif",
               fontSize: 24, fontWeight: 700, color: WHITE,
               margin: "0 0 6px", lineHeight: 1.25,
             }}>
-              What happened right before?
+              {t("relapse.trigger.title")}
             </h2>
             <p style={{ fontSize: 13, color: MUTED, margin: "0 0 20px" }}>
-              Be specific. This shapes your reframe.
+              {t("relapse.trigger.subtitle")}
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -264,13 +270,13 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                   >
                     <Loader2 size={24} style={{ color: GOLD }} className="animate-spin" />
                     <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.20em", color: MUTED, margin: 0 }}>
-                      Analysing your pattern…
+                      {t("relapse.reframe.analysing")}
                     </p>
                   </motion.div>
                 ) : (
                   <motion.div key="content" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                     <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.20em", color: GOLD, margin: "0 0 14px" }}>
-                      Read this.
+                      {t("relapse.reframe.readThis")}
                     </p>
                     <p style={{ fontSize: 14, lineHeight: 1.85, color: WHITE, margin: 0 }}>
                       {highlightText(reframeText ?? "")}
@@ -294,12 +300,12 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                         <TrendingUp size={18} style={{ color: GREEN }} />
                       </div>
                       <div>
-                        <p style={{ fontSize: 11, color: MUTED, margin: 0 }}>Total clean days</p>
+                        <p style={{ fontSize: 11, color: MUTED, margin: 0 }}>{t("relapse.reframe.totalClean")}</p>
                         <p style={{ fontSize: 30, fontWeight: 800, color: WHITE, lineHeight: 1.1, margin: "2px 0 2px" }}>
                           {totalCleanDays}
                         </p>
                         <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.16em", color: GREEN, margin: 0 }}>
-                          unchanged
+                          {t("common.unchanged")}
                         </p>
                       </div>
                     </div>
@@ -316,7 +322,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                         letterSpacing: "0.01em",
                       }}
                     >
-                      Day 1 starts now. Keep going.
+                      {t("relapse.reframe.cta")}
                     </button>
                   </motion.div>
                 )}
@@ -354,14 +360,10 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                 fontSize: 28, fontWeight: 700, color: WHITE,
                 margin: "0 0 12px", fontStyle: "italic", lineHeight: 1.2,
               }}>
-                You're still in the game.
+                {t("relapse.done.title")}
               </h2>
               <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.75, margin: 0 }}>
-                Logging that took guts.{" "}
-                <span style={{ color: "rgba(255,255,255,0.60)" }}>
-                  Close this, open the SOS tools, and identify what triggered it.
-                </span>{" "}
-                That's the work.
+                {t("relapse.done.body")}
               </p>
 
               <button
@@ -377,7 +379,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                   letterSpacing: "0.01em",
                 }}
               >
-                Back to dashboard
+                {t("relapse.done.cta")}
               </button>
             </div>
           </motion.div>
