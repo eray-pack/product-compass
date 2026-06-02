@@ -502,42 +502,55 @@ function HabitSwitcher({
   onAdd: () => void;
 }) {
   const pills = (
-    <motion.div
-      className="flex justify-center items-center gap-2 flex-wrap"
-      variants={questContainer}
-      initial="hidden"
-      animate="show"
+    <div
+      style={{
+        overflowX: "auto",
+        overflowY: "visible",
+        scrollbarWidth: "none",
+        WebkitOverflowScrolling: "touch",
+        paddingLeft: 24,
+        paddingRight: 130, // clears the fixed credits + settings chip
+        paddingBottom: 4,
+      }}
     >
-      {addictions.map((a) => (
-        <QuestPill
-          key={a.id}
-          addiction={a}
-          isActive={a.id === activeId}
-          onClick={onSwitch}
-        />
-      ))}
+      <motion.div
+        className="flex items-center gap-2"
+        style={{ width: "max-content" }}
+        variants={questContainer}
+        initial="hidden"
+        animate="show"
+      >
+        {addictions.map((a) => (
+          <QuestPill
+            key={a.id}
+            addiction={a}
+            isActive={a.id === activeId}
+            onClick={onSwitch}
+          />
+        ))}
 
-      {/* + button — PRO gate */}
-      <motion.div variants={questItem}>
-        <motion.button
-          onClick={onAdd}
-          whileHover={{ scale: 1.12, y: -2, transition: { duration: 0.15 } }}
-          whileTap={{ scale: 0.88 }}
-          style={{
-            width: 28, height: 28, borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(255,255,255,0.04)",
-            color: "rgba(255,255,255,0.35)",
-            fontSize: 16, lineHeight: 1,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", flexShrink: 0,
-          }}
-          aria-label="Add habit"
-        >
-          +
-        </motion.button>
+        {/* + button — PRO gate */}
+        <motion.div variants={questItem}>
+          <motion.button
+            onClick={onAdd}
+            whileHover={{ scale: 1.12, y: -2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.88 }}
+            style={{
+              width: 28, height: 28, borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.04)",
+              color: "rgba(255,255,255,0.35)",
+              fontSize: 16, lineHeight: 1,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", flexShrink: 0,
+            }}
+            aria-label="Add habit"
+          >
+            +
+          </motion.button>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 
   if (addictions.length <= 1) {
