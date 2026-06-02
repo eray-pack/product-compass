@@ -1428,12 +1428,10 @@ function Settings() {
       <PremiumBackground />
       {/* Sticky header */}
       <header
-        className="sticky top-0 z-20 flex items-end gap-3 px-4 border-b border-border/50 backdrop-blur-xl"
+        className="sticky z-20 flex items-center gap-3 px-4 h-14 border-b border-border/50 backdrop-blur-xl"
         style={{
           background: "rgba(10,8,6,0.82)",
-          paddingTop: "env(safe-area-inset-top)",
-          paddingBottom: "0.75rem",
-          top: 0,
+          top: "env(safe-area-inset-top)",
         }}
       >
         <button
