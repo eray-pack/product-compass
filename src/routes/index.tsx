@@ -615,18 +615,19 @@ const RANK_FX: Record<string, {
   particleSpread: number;
   symbolScale: number;  // compensates for Unicode chars that render smaller than their em-square
   symbolOffsetY: number; // px nudge for chars with uneven vertical font metrics
+  symbolOffsetX: number; // px nudge for horizontal glyph offset
 }> = {
-  Spark:    { glowScale: [1, 1.30, 1], glowDur: 3.8, ringDur: 6.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.04, 0.98, 1.02, 1], pulseDur: 1.4, particleCount: 12, particleSpread: 1.18, symbolScale: 1.7, symbolOffsetY:  0 },
-  Riser:    { glowScale: [1, 1.20, 1], glowDur: 2.8, ringDur: 4.5,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.06, 1.00, 1.03, 1], pulseDur: 1.1, particleCount: 8,  particleSpread: 1.10, symbolScale: 1.5, symbolOffsetY:  2 },
-  Awaken:   { glowScale: [1, 1.40, 1], glowDur: 4.2, ringDur: 8.0,  ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.08, 0.96, 1.04, 1], pulseDur: 1.8, particleCount: 10, particleSpread: 1.22, symbolScale: 1.2, symbolOffsetY:  0 },
-  Clarity:  { glowScale: [1, 1.25, 1], glowDur: 3.5, ringDur: 5.0,  ringRotate: 180,  ringDouble: false, pulseScale: [1, 1.03, 0.99, 1.01, 1], pulseDur: 2.2, particleCount: 8,  particleSpread: 1.08, symbolScale: 1.3, symbolOffsetY:  0 },
-  Warrior:  { glowScale: [1, 1.35, 1], glowDur: 2.4, ringDur: 3.5,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.07, 0.95, 1.05, 1], pulseDur: 0.9, particleCount: 12, particleSpread: 1.25, symbolScale: 1.0, symbolOffsetY: -6 },
-  Ironmind: { glowScale: [1, 1.15, 1], glowDur: 5.0, ringDur: 9.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.02, 0.99, 1.01, 1], pulseDur: 3.0, particleCount: 6,  particleSpread: 1.05, symbolScale: 1.0, symbolOffsetY: -6 },
-  Forge:    { glowScale: [1, 1.45, 1], glowDur: 2.0, ringDur: 3.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.09, 0.94, 1.06, 1], pulseDur: 0.8, particleCount: 12, particleSpread: 1.30, symbolScale: 1.3, symbolOffsetY:  0 },
-  Titan:    { glowScale: [1, 1.20, 1], glowDur: 6.0, ringDur: 12.0, ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.02, 0.98, 1.01, 1], pulseDur: 4.0, particleCount: 8,  particleSpread: 1.12, symbolScale: 0.6, symbolOffsetY:  0 },
-  Gorilla:  { glowScale: [1, 1.38, 1], glowDur: 3.0, ringDur: 4.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.08, 0.94, 1.06, 1], pulseDur: 1.0, particleCount: 10, particleSpread: 1.20, symbolScale: 1.2, symbolOffsetY:  0 },
-  Apex:     { glowScale: [1, 1.50, 1], glowDur: 3.2, ringDur: 5.5,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.06, 0.96, 1.04, 1], pulseDur: 1.5, particleCount: 12, particleSpread: 1.28, symbolScale: 1.2, symbolOffsetY:  0 },
-  Legend:   { glowScale: [1, 1.60, 1], glowDur: 4.0, ringDur: 7.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.10, 0.92, 1.08, 1], pulseDur: 1.2, particleCount: 12, particleSpread: 1.35, symbolScale: 1.1, symbolOffsetY: -4 },
+  Spark:    { glowScale: [1, 1.30, 1], glowDur: 3.8, ringDur: 6.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.04, 0.98, 1.02, 1], pulseDur: 1.4, particleCount: 12, particleSpread: 1.18, symbolScale: 1.7, symbolOffsetY: 10, symbolOffsetX: 0 },
+  Riser:    { glowScale: [1, 1.20, 1], glowDur: 2.8, ringDur: 4.5,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.06, 1.00, 1.03, 1], pulseDur: 1.1, particleCount: 8,  particleSpread: 1.10, symbolScale: 1.5, symbolOffsetY:  2 , symbolOffsetX:  0 },
+  Awaken:   { glowScale: [1, 1.40, 1], glowDur: 4.2, ringDur: 8.0,  ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.08, 0.96, 1.04, 1], pulseDur: 1.8, particleCount: 10, particleSpread: 1.22, symbolScale: 1.2, symbolOffsetY:  0 , symbolOffsetX:  0 },
+  Clarity:  { glowScale: [1, 1.25, 1], glowDur: 3.5, ringDur: 5.0,  ringRotate: 180,  ringDouble: false, pulseScale: [1, 1.03, 0.99, 1.01, 1], pulseDur: 2.2, particleCount: 8,  particleSpread: 1.08, symbolScale: 1.3, symbolOffsetY:  0 , symbolOffsetX:  0 },
+  Warrior:  { glowScale: [1, 1.35, 1], glowDur: 2.4, ringDur: 3.5,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.07, 0.95, 1.05, 1], pulseDur: 0.9, particleCount: 12, particleSpread: 1.25, symbolScale: 1.0, symbolOffsetY: -6 , symbolOffsetX:  0 },
+  Ironmind: { glowScale: [1, 1.15, 1], glowDur: 5.0, ringDur: 9.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.02, 0.99, 1.01, 1], pulseDur: 3.0, particleCount: 6,  particleSpread: 1.05, symbolScale: 1.0, symbolOffsetY: -6 , symbolOffsetX:  0 },
+  Forge:    { glowScale: [1, 1.45, 1], glowDur: 2.0, ringDur: 3.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.09, 0.94, 1.06, 1], pulseDur: 0.8, particleCount: 12, particleSpread: 1.30, symbolScale: 1.3, symbolOffsetY:  0 , symbolOffsetX:  0 },
+  Titan:    { glowScale: [1, 1.20, 1], glowDur: 6.0, ringDur: 12.0, ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.02, 0.98, 1.01, 1], pulseDur: 4.0, particleCount: 8,  particleSpread: 1.12, symbolScale: 0.6, symbolOffsetY:  0 , symbolOffsetX:  0 },
+  Gorilla:  { glowScale: [1, 1.38, 1], glowDur: 3.0, ringDur: 4.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.08, 0.94, 1.06, 1], pulseDur: 1.0, particleCount: 10, particleSpread: 1.20, symbolScale: 1.2, symbolOffsetY:  0 , symbolOffsetX:  0 },
+  Apex:     { glowScale: [1, 1.50, 1], glowDur: 3.2, ringDur: 5.5,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.06, 0.96, 1.04, 1], pulseDur: 1.5, particleCount: 12, particleSpread: 1.28, symbolScale: 1.2, symbolOffsetY:  0 , symbolOffsetX:  0 },
+  Legend:   { glowScale: [1, 1.60, 1], glowDur: 4.0, ringDur: 7.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.10, 0.92, 1.08, 1], pulseDur: 1.2, particleCount: 12, particleSpread: 1.35, symbolScale: 1.1, symbolOffsetY: -4 , symbolOffsetX:  0 },
 };
 
 function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; color: string; glow: string } }) {
@@ -706,6 +707,7 @@ function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; 
           width: 160, height: 160,
           transformOrigin: "center center",
           marginTop: fx.symbolOffsetY,
+          marginLeft: fx.symbolOffsetX,
         }}
         animate={{ scale: fx.pulseScale.map(s => s * fx.symbolScale) as [number,number,number,number,number] }}
         transition={{ repeat: Infinity, duration: fx.pulseDur, ease: "easeInOut" }}
