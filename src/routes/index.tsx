@@ -617,7 +617,7 @@ const RANK_FX: Record<string, {
   symbolOffsetY: number; // px nudge for chars with uneven vertical font metrics
   symbolOffsetX: number; // px nudge for horizontal glyph offset
 }> = {
-  Spark:    { glowScale: [1, 1.30, 1], glowDur: 3.8, ringDur: 6.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.04, 0.98, 1.02, 1], pulseDur: 1.4, particleCount: 12, particleSpread: 1.18, symbolScale: 1.7, symbolOffsetY: 10, symbolOffsetX: 0 },
+  Spark:    { glowScale: [1, 1.30, 1], glowDur: 3.8, ringDur: 6.0,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.04, 0.98, 1.02, 1], pulseDur: 1.4, particleCount: 12, particleSpread: 1.18, symbolScale: 1.7, symbolOffsetY: -10, symbolOffsetX: 0 },
   Riser:    { glowScale: [1, 1.20, 1], glowDur: 2.8, ringDur: 4.5,  ringRotate: 360,  ringDouble: false, pulseScale: [1, 1.06, 1.00, 1.03, 1], pulseDur: 1.1, particleCount: 8,  particleSpread: 1.10, symbolScale: 1.5, symbolOffsetY:  2 , symbolOffsetX:  0 },
   Awaken:   { glowScale: [1, 1.40, 1], glowDur: 4.2, ringDur: 8.0,  ringRotate: -360, ringDouble: true,  pulseScale: [1, 1.08, 0.96, 1.04, 1], pulseDur: 1.8, particleCount: 10, particleSpread: 1.22, symbolScale: 1.2, symbolOffsetY:  0 , symbolOffsetX:  0 },
   Clarity:  { glowScale: [1, 1.25, 1], glowDur: 3.5, ringDur: 5.0,  ringRotate: 180,  ringDouble: false, pulseScale: [1, 1.03, 0.99, 1.01, 1], pulseDur: 2.2, particleCount: 8,  particleSpread: 1.08, symbolScale: 1.3, symbolOffsetY:  0 , symbolOffsetX:  0 },
