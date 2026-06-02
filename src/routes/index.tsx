@@ -790,21 +790,53 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                 {earned ? (
                   <PremiumBadgeSymbol badge={b} />
                 ) : (
-                  <div className="relative inline-flex items-center justify-center">
+                  <div className="relative flex items-center justify-center"
+                    style={{ width: 200, height: 200 }}>
+                    {/* Blurred symbol — same container as earned */}
                     <span className="font-bold leading-none select-none"
                       style={{
-                        fontSize: "clamp(5rem, 22vw, 7.5rem)",
-                        color: "rgba(255,255,255,0.06)",
-                        filter: "blur(9px)",
+                        fontSize: "7rem",
+                        color: "rgba(255,255,255,0.07)",
+                        filter: "blur(10px)",
                         userSelect: "none",
+                        position: "absolute",
                       }}>
                       {b.symbol}
                     </span>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                      <span className="text-[10px] font-bold tracking-[0.25em] uppercase"
-                            style={{ color: "rgba(255,255,255,0.38)" }}>Unlocks at</span>
-                      <span className="text-[20px] font-bold tabular-nums"
-                            style={{ color: "rgba(255,255,255,0.55)" }}>Day {b.day}</span>
+
+                    {/* Frosted lock bar */}
+                    <div style={{
+                      position: "absolute",
+                      left: "50%", top: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: 148,
+                      backdropFilter: "blur(10px)",
+                      WebkitBackdropFilter: "blur(10px)",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      borderRadius: 14,
+                      padding: "10px 16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 4,
+                    }}>
+                      {/* Lock icon */}
+                      <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                        <rect x="3" y="8" width="10" height="9" rx="2" fill="none"
+                          stroke="rgba(255,255,255,0.40)" strokeWidth="1.4"/>
+                        <path d="M5 8V5.5a3 3 0 0 1 6 0V8"
+                          stroke="rgba(255,255,255,0.40)" strokeWidth="1.4" strokeLinecap="round"/>
+                        <circle cx="8" cy="12.5" r="1.2" fill="rgba(255,255,255,0.35)"/>
+                      </svg>
+                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.15em",
+                        textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                        Day {b.day}
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.20)",
+                        letterSpacing: "0.05em" }}>
+                        {b.name}
+                      </span>
                     </div>
                   </div>
                 )}
