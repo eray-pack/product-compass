@@ -634,7 +634,7 @@ function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; 
   const particles = BADGE_PARTICLES.slice(0, fx.particleCount);
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
+    <div className="relative flex items-center justify-center" style={{ width: 270, height: 270 }}>
       {/* Outer atmospheric glow */}
       <motion.div
         aria-hidden
@@ -787,13 +787,13 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                 {/* Ambient glow */}
                 {earned && (
                   <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
-                    style={{ width: 280, height: 280, borderRadius: "50%",
+                    style={{ width: 380, height: 380, borderRadius: "50%",
                       background: `radial-gradient(circle, ${b.glow.replace("0.40","0.12")} 0%, transparent 68%)`,
                       filter: "blur(40px)" }} />
                 )}
 
                 {/* Eyebrow */}
-                <p className="text-[9px] font-bold tracking-[0.45em] uppercase mb-3"
+                <p className="text-[10px] font-bold tracking-[0.45em] uppercase mb-3"
                    style={{ color: earned ? `${b.color}70` : "rgba(255,255,255,0.15)" }}>
                   {earned
                     ? i === earnedCount - 1 ? "Your rank" : "Earned"
@@ -805,11 +805,11 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                   <PremiumBadgeSymbol badge={b} />
                 ) : (
                   <div className="relative flex items-center justify-center"
-                    style={{ width: 200, height: 200 }}>
+                    style={{ width: 270, height: 270 }}>
                     {/* Blurred symbol — same container as earned */}
                     <span className="font-bold leading-none select-none"
                       style={{
-                        fontSize: "7rem",
+                        fontSize: "9rem",
                         color: "rgba(255,255,255,0.07)",
                         filter: "blur(10px)",
                         userSelect: "none",
@@ -859,7 +859,7 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                 <p
                   className="mt-3 font-bold leading-tight"
                   style={{
-                    fontSize: "clamp(1.5rem, 6.5vw, 2rem)",
+                    fontSize: "clamp(2rem, 8vw, 2.8rem)",
                     color: earned ? "#ffffff" : "rgba(255,255,255,0.18)",
                     letterSpacing: "0.025em",
                     textShadow: earned ? [
