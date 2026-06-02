@@ -2323,7 +2323,7 @@ function WolfPage({
 
 
       {/* Wolf scene */}
-      <section className="mt-4 relative" style={{ height: 380 }}>
+      <motion.section variants={popUp} className="mt-4 relative" style={{ height: 380 }}>
 
         {/* Circular wolf scene — landscape + wolf fully contained */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -2401,7 +2401,7 @@ function WolfPage({
           </div>
         </div>
 
-      </section>
+      </motion.section>
 
       {/* XP + stats */}
       {(() => {
@@ -2409,7 +2409,7 @@ function WolfPage({
         const wPrevThresh = WOLF_XP_PREV[wolfStage.stage];
         const wPct = wolfStage.stage >= 4 ? 100 : Math.min(100, Math.round(((state.treeXP - wPrevThresh) / (wolfStage.next - wPrevThresh)) * 100));
         return (
-          <section className="px-6 mt-2">
+          <motion.section variants={popUp} className="px-6 mt-2">
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
               {/* Stage name + XP numbers */}
               <div className="flex items-center justify-between text-xs mb-1">
@@ -2437,12 +2437,12 @@ function WolfPage({
                 <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>{health.label} · {daysThisWeek}/7</p>
               </div>
             </div>
-          </section>
+          </motion.section>
         );
       })()}
 
       {/* Hall of Legends */}
-      <section className="px-6 mt-3">
+      <motion.section variants={popUp} className="px-6 mt-3">
         <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "14px 18px" }}>
           <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
           <div className="space-y-2.5">
@@ -2455,25 +2455,25 @@ function WolfPage({
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Share card */}
-      <section className="px-6 mt-4">
+      <motion.section variants={popUp} className="px-6 mt-4">
         <ShareWolfCard wolfStage={wolfStage} day={day} xp={state.treeXP} />
-      </section>
+      </motion.section>
 
       {/* Remember why */}
-      <section className="px-6 mt-4">
+      <motion.section variants={popUp} className="px-6 mt-4">
         <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5">
           <p className="text-xs uppercase tracking-wider text-primary">Remember why</p>
           <p className="mt-2 text-base leading-snug">
             Every clean day sharpens who this wolf becomes.
           </p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Feed your wolf — etched glass shop */}
-      <section className="px-6 mt-6">
+      <motion.section variants={popUp} className="px-6 mt-6">
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82, marginBottom: 4 }}>
           Feed your wolf
         </p>
@@ -2494,9 +2494,9 @@ function WolfPage({
             />
           );
         })}
-      </section>
+      </motion.section>
 
-      <section className="px-6 mt-4 mb-2">
+      <motion.section variants={popUp} className="px-6 mt-4 mb-2">
         <div style={{
           background: "rgba(255,255,255,0.025)",
           backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
@@ -2519,7 +2519,7 @@ function WolfPage({
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ── Companion Switcher ── */}
       <CompanionSwitcher
@@ -2719,7 +2719,7 @@ function LifeTreePage({
       )}
 
       {/* Tree scene — full-bleed, no card frame */}
-      <section className="mt-1 relative" style={{ height: 380 }}>
+      <motion.section variants={popUp} className="mt-1 relative" style={{ height: 380 }}>
         {/* Bottom fade — sky bleeds into page background */}
         <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
           style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
@@ -2821,14 +2821,14 @@ function LifeTreePage({
 
             </div>
           </div>
-      </section>
+      </motion.section>
 
       {/* XP + stats */}
       {(() => {
         const tNext = nextStage(TREE_XP_CONFIG, stage.stage);
         const tPct = stage.stage >= 5 ? 100 : Math.min(100, Math.round(pct));
         return (
-          <section className="px-6 mt-2">
+          <motion.section variants={popUp} className="px-6 mt-2">
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "16px 18px" }}>
               {/* Stage name + XP numbers */}
               <div className="flex items-center justify-between text-xs mb-1">
@@ -2867,12 +2867,12 @@ function LifeTreePage({
                 </p>
               </div>
             </div>
-          </section>
+          </motion.section>
         );
       })()}
 
       {/* Hall of Legends */}
-      <section className="px-6 mt-3">
+      <motion.section variants={popUp} className="px-6 mt-3">
         <div style={{
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(255,255,255,0.07)",
@@ -2890,15 +2890,15 @@ function LifeTreePage({
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Social share */}
-      <section className="px-6 mt-4">
+      <motion.section variants={popUp} className="px-6 mt-4">
         <ShareTreeCard stage={stage} day={day} xp={state.treeXP} />
-      </section>
+      </motion.section>
 
       {/* Why this matters */}
-      <section className="px-6 mt-4">
+      <motion.section variants={popUp} className="px-6 mt-4">
         <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5">
           <p className="text-xs uppercase tracking-wider text-primary">Remember why</p>
           <p className="mt-2 text-base leading-snug">
@@ -2909,7 +2909,7 @@ function LifeTreePage({
             . Every day this tree grows, that future gets closer.
           </p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Upgrades — etched glass shop (also contains daily claim) */}
       <section id="grow-your-tree" className="px-6 mt-6">
@@ -2987,7 +2987,7 @@ function LifeTreePage({
         })}
       </section>
 
-      <section className="px-6 mt-4 mb-2">
+      <motion.section variants={popUp} className="px-6 mt-4 mb-2">
         <div style={{
           background: "rgba(255,255,255,0.025)",
           backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
@@ -3010,7 +3010,7 @@ function LifeTreePage({
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ── Companion Switcher ── */}
       <CompanionSwitcher
@@ -3102,7 +3102,7 @@ function CompanionSwitcher({
         }
       `}</style>
 
-      <section className="px-6 mt-4 pb-4">
+      <motion.section variants={popUp} className="px-6 mt-4 pb-4">
 
         {/* ── Outer ambient halo ── */}
         <div style={{ position: "relative" }}>
@@ -3537,7 +3537,7 @@ function CompanionSwitcher({
             </div>{/* end inner card */}
           </div>{/* end border wrapper */}
         </div>{/* end relative position wrapper */}
-      </section>
+      </motion.section>
     </>
   );
 }
