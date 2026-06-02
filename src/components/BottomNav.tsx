@@ -218,13 +218,51 @@ function CreditsChip() {
   );
 }
 
+function LogoPill() {
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "5px 14px",
+        borderRadius: 999,
+        background: "rgba(8,5,1,0.55)",
+        border: "1px solid rgba(201,168,76,0.28)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        boxShadow: "0 0 14px rgba(201,168,76,0.10), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'Space Grotesk', system-ui, sans-serif",
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: "0.30em",
+          textTransform: "uppercase" as const,
+          color: "#C4873A",
+          textShadow: "0 0 12px rgba(196,135,58,0.50)",
+        }}
+      >
+        STOPAMINE
+      </span>
+    </div>
+  );
+}
+
 export function PageShell({ children }: { children: React.ReactNode }) {
   const path       = useRouterState({ select: (r) => r.location.pathname });
   const onSettings = path === "/settings";
+  const onHome     = path === "/";
 
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
+      {onHome && (
+        <div className="fixed left-4 z-30" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
+          <LogoPill />
+        </div>
+      )}
       {!onSettings && (
         <div className="fixed right-4 z-30 flex items-center gap-2" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
           <CreditsChip />

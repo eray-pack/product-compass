@@ -1024,26 +1024,8 @@ function Dashboard() {
       <FloatingHabitBg emoji={recoveryEmoji(active?.id ?? "")} />
       <motion.div key={animKey} variants={pageContainer} initial="hidden" animate="show">
 
-      {/* ── NAV ──────────────────────────────────────────────── */}
-      <motion.header
-        variants={popUp}
-        className="px-6 pt-3 pb-1 flex items-center"
-        style={{ minHeight: "2.75rem" }}
-      >
-        <span
-          style={{
-            fontFamily: "'Space Grotesk', system-ui, sans-serif",
-            fontSize: 13,
-            fontWeight: 800,
-            letterSpacing: "0.32em",
-            textTransform: "uppercase",
-            color: "#C4873A",
-            textShadow: "0 0 18px rgba(196,135,58,0.55), 0 0 36px rgba(196,135,58,0.20)",
-          }}
-        >
-          STOPAMINE
-        </span>
-      </motion.header>
+      {/* ── NAV spacer — logo is now a fixed pill in PageShell ── */}
+      <div style={{ height: "2.75rem" }} />
 
       {/* ── HABIT SWITCHER + BADGE CAROUSEL ──────────────────── */}
       <motion.div
