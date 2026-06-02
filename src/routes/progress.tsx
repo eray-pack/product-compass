@@ -1738,8 +1738,9 @@ function ProgressScreen() {
                   stroke={NG} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             ),
-            label: "AVG_RELAPSE_FREQ",
-            value: avgRelapseDays !== null ? `${avgRelapseDays}d` : "—",
+            label: "Relapse Frequency",
+            sublabel: "avg. days between relapses",
+            value: avgRelapseDays !== null ? `every ${avgRelapseDays}d` : "Not enough data",
           },
           {
             glowColor: "#4A9ECC",
@@ -1750,8 +1751,9 @@ function ProgressScreen() {
                 <rect x="0" y="11"  width="8"  height="2" rx="1" fill="#4A9ECC" opacity="0.45"/>
               </svg>
             ),
-            label: "TOTAL_SESSIONS",
-            value: String(totalLogins).padStart(2, "0"),
+            label: "Total Sessions",
+            sublabel: "days you opened the app",
+            value: `${String(totalLogins).padStart(2, "0")} days`,
           },
           {
             glowColor: "#C9A84C",
@@ -1765,8 +1767,9 @@ function ProgressScreen() {
                 <line x1="13.8" y1="8"    x2="16"   y2="8"    stroke="#C9A84C" strokeWidth="1.2"/>
               </svg>
             ),
-            label: "PEAK_RISK_WEEKDAY",
-            value: peakDow ?? "—",
+            label: "Peak Risk Day",
+            sublabel: "highest relapse rate",
+            value: peakDow ?? "No data yet",
           },
           {
             glowColor: "#00F0FF",
@@ -1776,7 +1779,8 @@ function ProgressScreen() {
                 <circle cx="7.5" cy="7.5" r="2.5" fill="#00F0FF"/>
               </svg>
             ),
-            label: "XP_CREDIT_MULTIPLIER",
+            label: "XP Multiplier",
+            sublabel: "bonus earned from streaks",
             value: hasDeepRoots ? "×1.1" : "×1.0",
           },
         ] as const).map((row, i, arr) => (
@@ -1808,20 +1812,29 @@ function ProgressScreen() {
               {row.glyph}
             </motion.div>
 
-            {/* Label — pure white, primary */}
-            <span style={{
-              flex: 1,
-              fontSize: 12, fontWeight: 700, fontFamily: MONO,
-              letterSpacing: "0.8px", textTransform: "uppercase",
-              color: "#FFFFFF",
-            }}>
-              {row.label}
-            </span>
+            {/* Label + sublabel */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+              <span style={{
+                fontSize: 13, fontWeight: 600,
+                letterSpacing: "0.01em",
+                color: "#FFFFFF",
+              }}>
+                {row.label}
+              </span>
+              <span style={{
+                fontSize: 10, fontWeight: 400,
+                color: "rgba(255,255,255,0.35)",
+                letterSpacing: "0.02em",
+              }}>
+                {row.sublabel}
+              </span>
+            </div>
 
-            {/* Value — light grey, secondary */}
+            {/* Value */}
             <span style={{
-              fontSize: 11, fontWeight: 500, fontFamily: MONO,
-              color: "#CCCCCC", letterSpacing: "0.05em", flexShrink: 0,
+              fontSize: 13, fontWeight: 600, fontFamily: MONO,
+              color: row.glowColor, letterSpacing: "0.04em", flexShrink: 0,
+              textShadow: `0 0 8px ${row.glowColor}66`,
             }}>
               {row.value}
             </span>
