@@ -424,6 +424,30 @@ function Hairline() {
 }
 
 
+// ─── Badge Medallion — tiny rank circle used in pills and settings ────────────
+function BadgeMedallion({ day, size = 18 }: { day: number; size?: number }) {
+  const badge = [...BADGES].reverse().find(b => day >= b.day) ?? BADGES[0];
+  const glow  = badge.glow.replace(/[\d.]+\)$/, "");
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: size, height: size, borderRadius: "50%", flexShrink: 0,
+      background: `radial-gradient(circle at 40% 35%, rgba(255,240,180,0.10) 0%, rgba(8,5,1,0.98) 65%)`,
+      border: `1.5px solid ${badge.color}99`,
+      boxShadow: `0 0 ${size / 2}px ${glow}0.55)`,
+    }}>
+      <span style={{
+        fontSize: size * 0.48,
+        lineHeight: 1,
+        color: badge.color,
+        filter: `drop-shadow(0 0 ${size / 5}px ${glow}0.9))`,
+      }}>
+        {badge.symbol}
+      </span>
+    </span>
+  );
+}
+
 // ─── Quest Pill ───────────────────────────────────────────────────────────────
 function QuestPill({
   addiction, isActive, onClick,
@@ -483,7 +507,8 @@ function QuestPill({
             transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5, ease: "easeInOut" }}
           />
         )}
-        <span style={{ position: "relative", zIndex: 1 }}>
+        <span style={{ position: "relative", zIndex: 1, display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <BadgeMedallion day={dayCount(addiction.startDate)} size={16} />
           {addiction.emoji} {addiction.name}
         </span>
       </motion.button>

@@ -679,6 +679,29 @@ function DeleteHabitModal({
   );
 }
 
+function BadgeMedallion({ day, size = 20 }: { day: number; size?: number }) {
+  const badge = [...BADGES].reverse().find(b => day >= b.day) ?? BADGES[0];
+  const glow  = badge.glow.replace(/[\d.]+\)$/, "");
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: size, height: size, borderRadius: "50%", flexShrink: 0,
+      background: `radial-gradient(circle at 40% 35%, rgba(255,240,180,0.10) 0%, rgba(8,5,1,0.98) 65%)`,
+      border: `1.5px solid ${badge.color}99`,
+      boxShadow: `0 0 ${size / 2}px ${glow}0.55)`,
+    }}>
+      <span style={{
+        fontSize: size * 0.48,
+        lineHeight: 1,
+        color: badge.color,
+        filter: `drop-shadow(0 0 ${size / 5}px ${glow}0.9))`,
+      }}>
+        {badge.symbol}
+      </span>
+    </span>
+  );
+}
+
 function TrackedHabitsSection({
   state,
   update,
@@ -811,7 +834,8 @@ function TrackedHabitsSection({
                         }}>
                           {a.name}
                         </p>
-                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em" }}>
+                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 6 }}>
+                          <BadgeMedallion day={day} size={18} />
                           Day {day}
                         </p>
                       </div>
