@@ -167,7 +167,7 @@ function DarkRoom() {
 
       <button
         onClick={() => { clearTimer(); navigate({ to: "/tools" }); }}
-        className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center active:scale-90 transition-transform"
+        className="absolute top-12 left-5 z-20 h-9 w-9 rounded-full grid place-items-center active:scale-90 transition-transform"
         style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}
       >
         <ArrowLeft className="h-4 w-4" />
