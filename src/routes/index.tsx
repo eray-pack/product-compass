@@ -975,15 +975,22 @@ function Dashboard() {
       {/* ── NAV ──────────────────────────────────────────────── */}
       <motion.header
         variants={popUp}
-        className="px-6 pt-12 pb-3 flex items-center justify-between"
+        className="px-6 pt-3 pb-3 flex items-center"
+        style={{ minHeight: "2.75rem" }}
       >
         <span
-          className="text-[10px] font-bold tracking-[0.45em] uppercase"
-          style={{ color: "rgba(255,255,255,0.3)" }}
+          style={{
+            fontFamily: "'Space Grotesk', system-ui, sans-serif",
+            fontSize: 13,
+            fontWeight: 800,
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: "#C4873A",
+            textShadow: "0 0 18px rgba(196,135,58,0.55), 0 0 36px rgba(196,135,58,0.20)",
+          }}
         >
-          Stopamine
+          STOPAMINE
         </span>
-
       </motion.header>
 
       {/* ── HABIT SWITCHER + BADGE CAROUSEL ──────────────────── */}
