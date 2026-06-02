@@ -20,12 +20,15 @@ const iV = {
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: "🧠", label: "Brain Reset" },
-  { icon: "🆘", label: "SOS Mode" },
-  { icon: "⏰", label: "Smart Alerts" },
-  { icon: "📈", label: "Momentum" },
-  { icon: "🌳", label: "Life Tree" },
-  { icon: "🎮", label: "Craving Games" },
+  { icon: "🧠", label: "AI Coach" },
+  { icon: "🆘", label: "SOS Tools" },
+  { icon: "📊", label: "Progress" },
+  { icon: "🌳", label: "Sacred Tree" },
+  { icon: "🐺", label: "Wolf Companion" },
+  { icon: "🎮", label: "9 Pro Games" },
+  { icon: "🏆", label: "Milestones" },
+  { icon: "💬", label: "Community" },
+  { icon: "⚡", label: "XP Multiplier" },
 ];
 
 const TESTIMONIALS = [
@@ -33,6 +36,83 @@ const TESTIMONIALS = [
   { initials: "J", name: "Jaylen, 19", quote: "actually makes me motivated" },
   { initials: "S", name: "Sven, 22",   quote: "best decision I made this year" },
 ];
+
+// ── Background particles ───────────────────────────────────────────────────────
+const PARTICLES = Array.from({ length: 38 }, (_, i) => ({
+  x:     (i * 37.3 + 11) % 100,
+  y:     (i * 61.7 + 7)  % 100,
+  size:  0.8 + (i % 5) * 0.5,
+  dur:   3.5 + (i % 7) * 0.9,
+  delay: (i * 0.41)      % 4,
+  drift: ((i % 3) - 1) * 18,
+}));
+
+function PaywallBackground() {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+      <style>{`
+        @keyframes pw-float {
+          0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
+          15%  { opacity: 1; }
+          85%  { opacity: 0.6; }
+          100% { transform: translateY(-60px) translateX(var(--drift)); opacity: 0; }
+        }
+        @keyframes pw-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      {/* Deep vignette bottom */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse 100% 55% at 50% 110%, rgba(201,168,76,0.06) 0%, transparent 70%)",
+      }} />
+
+      {/* Top crown glow */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse 80% 40% at 50% -5%, rgba(201,168,76,0.13) 0%, transparent 65%)",
+      }} />
+
+      {/* Diagonal fine grid */}
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.045 }}>
+        <defs>
+          <pattern id="pw-grid" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+            <path d="M 28 0 L 0 0 0 28" fill="none" stroke={GOLD} strokeWidth="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#pw-grid)" />
+      </svg>
+
+      {/* Floating gold dust */}
+      {PARTICLES.map((p, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left:   `${p.x}%`,
+            top:    `${p.y}%`,
+            width:  p.size,
+            height: p.size,
+            borderRadius: "50%",
+            background: GOLD,
+            boxShadow: `0 0 ${p.size * 2}px ${GOLD}`,
+            // @ts-ignore
+            "--drift": `${p.drift}px`,
+            animation: `pw-float ${p.dur}s ${p.delay}s ease-in-out infinite`,
+          } as React.CSSProperties}
+        />
+      ))}
+
+      {/* Centre radial fade to keep text readable */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, rgba(9,7,5,0.55) 100%)",
+      }} />
+    </div>
+  );
+}
 
 // ── FlipUnit ──────────────────────────────────────────────────────────────────
 function FlipUnit({ value }: { value: number }) {
@@ -229,11 +309,7 @@ export function PaywallScreen({ onSubscribe, onDismiss }: PaywallScreenProps) {
         overflow: "hidden",
       }}
     >
-      {/* Ambient glow */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse 70% 35% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 60%)",
-      }} />
+      <PaywallBackground />
 
       {/* Close */}
       <motion.button
@@ -255,7 +331,7 @@ export function PaywallScreen({ onSubscribe, onDismiss }: PaywallScreenProps) {
       {/* 1 — Timer */}
       <motion.div variants={iV} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, paddingTop: 8 }}>
         <p style={{ fontSize: 10, letterSpacing: "0.3em", color: GOLD, textTransform: "uppercase", margin: 0 }}>
-          This offer expires in
+          Limited offer ends in
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <FlipUnit value={minutes} />
@@ -271,15 +347,15 @@ export function PaywallScreen({ onSubscribe, onDismiss }: PaywallScreenProps) {
           fontSize: 16, fontWeight: 700, fontStyle: "italic",
           color: GOLD, margin: "0 0 6px",
         }}>
-          Final Offer
+          Unlock Pro
         </p>
         <h1 style={{
           fontFamily: "Cormorant Garamond, Georgia, serif",
           fontSize: 30, fontWeight: 700, color: WHITE,
           margin: 0, lineHeight: 1.15,
         }}>
-          One last chance.{" "}
-          <span style={{ color: GOLD }}>Lowest price ever.</span>
+          Reclaim your life.{" "}
+          <span style={{ color: GOLD }}>Every tool. Unlocked.</span>
         </h1>
       </motion.div>
 
