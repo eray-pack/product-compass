@@ -704,7 +704,7 @@ function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; 
       >
         <span
           style={{
-            fontSize: "clamp(5rem, 22vw, 7.5rem)",
+            fontSize: "clamp(7rem, 30vw, 10rem)",
             display: "block",
             background: `radial-gradient(circle at 40% 35%, #ffffff 0%, ${badge.color}cc 30%, ${badge.color} 65%)`,
             WebkitBackgroundClip: "text",
