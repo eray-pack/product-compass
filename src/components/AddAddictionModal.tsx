@@ -1,6 +1,12 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Check } from "lucide-react";
-import { type Addiction, type AppState } from "@/lib/store";
+import { type Addiction } from "@/lib/store";
+
+const GOLD  = "#C9A84C";
+const WHITE = "#f0ece4";
+const MUTED = "rgba(255,255,255,0.36)";
+const BG    = "#09070a";
 
 const CUSTOM_EMOJIS = [
   "☕","🍕","🍔","🍟","🍩","🍫","🧁","🍭","🍷","🍻","🥃","🥤",
@@ -8,61 +14,16 @@ const CUSTOM_EMOJIS = [
   "💪","🔥","🎯","🧩","🎰","💉","🥦","🍰",
 ];
 
-const PRESET_HABITS: { name: string; emoji: string; desc: string; color: string }[] = [
-  {
-    name: "Porn",
-    emoji: "🧠",
-    desc: "Reclaim your focus, energy, and real-world confidence.",
-    color: "rgba(196,135,58,0.12)",
-  },
-  {
-    name: "Social media",
-    emoji: "📱",
-    desc: "Stop the dopamine drain destroying your attention span.",
-    color: "rgba(100,149,237,0.10)",
-  },
-  {
-    name: "Sugar",
-    emoji: "🍩",
-    desc: "Stabilise your energy, mood, and long-term health.",
-    color: "rgba(220,80,80,0.10)",
-  },
-  {
-    name: "Alcohol",
-    emoji: "🍺",
-    desc: "Clear your mind, protect your body, and save your money.",
-    color: "rgba(200,160,60,0.10)",
-  },
-  {
-    name: "Nicotine",
-    emoji: "🚬",
-    desc: "Take back your lungs and break the chemical leash.",
-    color: "rgba(150,150,150,0.10)",
-  },
-  {
-    name: "Cannabis",
-    emoji: "🌿",
-    desc: "Restore motivation, memory, and mental sharpness.",
-    color: "rgba(60,180,100,0.10)",
-  },
-  {
-    name: "Gambling",
-    emoji: "🎰",
-    desc: "Stop feeding the machine — your future is not a bet.",
-    color: "rgba(220,50,50,0.10)",
-  },
-  {
-    name: "Gaming",
-    emoji: "🎮",
-    desc: "Redirect that drive into something that lasts.",
-    color: "rgba(100,80,220,0.10)",
-  },
-  {
-    name: "Procrastination",
-    emoji: "⏳",
-    desc: "The version of you that acts without waiting.",
-    color: "rgba(196,135,58,0.08)",
-  },
+const PRESET_HABITS = [
+  { name: "Porn",            emoji: "🧠", desc: "Reclaim your focus, energy, and real-world confidence.",     glow: "#C9A84C" },
+  { name: "Social media",    emoji: "📱", desc: "Stop the dopamine drain destroying your attention span.",    glow: "#3B82F6" },
+  { name: "Sugar",           emoji: "🍩", desc: "Stabilise your energy, mood, and long-term health.",         glow: "#F43F5E" },
+  { name: "Alcohol",         emoji: "🍺", desc: "Clear your mind, protect your body, and save your money.",   glow: "#F59E0B" },
+  { name: "Nicotine",        emoji: "🚬", desc: "Take back your lungs and break the chemical leash.",         glow: "#94A3B8" },
+  { name: "Cannabis",        emoji: "🌿", desc: "Restore motivation, memory, and mental sharpness.",          glow: "#22C55E" },
+  { name: "Gambling",        emoji: "🎰", desc: "Stop feeding the machine — your future is not a bet.",       glow: "#EF4444" },
+  { name: "Gaming",          emoji: "🎮", desc: "Redirect that drive into something that lasts.",             glow: "#8B5CF6" },
+  { name: "Procrastination", emoji: "⏳", desc: "The version of you that acts without waiting.",              glow: "#F97316" },
 ];
 
 interface Props {
@@ -71,10 +32,13 @@ interface Props {
   onAdd: (addiction: Addiction) => void;
 }
 
+const spring = { type: "spring" as const, stiffness: 340, damping: 28 };
+
 export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
   const [customName,  setCustomName]  = useState("");
   const [customEmoji, setCustomEmoji] = useState("☕");
   const [showCustom,  setShowCustom]  = useState(false);
+  const [added,       setAdded]       = useState<string | null>(null);
 
   const available = PRESET_HABITS.filter(
     (h) => !trackedIds.has(h.name.toLowerCase().replace(/\s+/g, "-"))
@@ -83,14 +47,10 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
   const addHabit = (name: string, emoji: string) => {
     const id = name.toLowerCase().replace(/\s+/g, "-");
     if (trackedIds.has(id)) return;
-    onAdd({
-      id,
-      name,
-      emoji,
-      startDate: Date.now(),
-      totalCleanDays: 0,
-      urgesSurvived: 0,
-    });
+    setAdded(name);
+    setTimeout(() => {
+      onAdd({ id, name, emoji, startDate: Date.now(), totalCleanDays: 0, urgesSurvived: 0 });
+    }, 320);
   };
 
   const addCustom = () => {
@@ -100,134 +60,258 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div
-        className="relative w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 max-h-[85vh] overflow-y-auto border border-border/60"
-        style={{ background: "var(--card)" }}
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 50,
+      background: "rgba(0,0,0,0.86)",
+      backdropFilter: "blur(16px)",
+      WebkitBackdropFilter: "blur(16px)",
+      display: "flex", alignItems: "flex-end", justifyContent: "center",
+    }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        initial={{ y: "100%", opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: "100%", opacity: 0 }}
+        transition={spring}
+        style={{
+          position: "relative",
+          width: "100%", maxWidth: 480,
+          background: `radial-gradient(ellipse 100% 40% at 50% 0%, #16100a 0%, ${BG} 55%)`,
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "28px 28px 0 0",
+          maxHeight: "88dvh",
+          overflow: "hidden",
+          boxShadow: "0 -24px 80px rgba(0,0,0,0.60)",
+        }}
       >
-        {/* Content */}
-        <div className="relative z-10">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <p
-              className="text-[11px] font-bold tracking-[0.25em] uppercase"
-              style={{ color: "var(--primary)" }}
-            >
-              Add a habit
-            </p>
-            <h2 className="mt-1 text-xl font-bold leading-snug">
-              What else are you<br />fighting?
-            </h2>
-            <p className="mt-1.5 text-[12px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Each battle tracked separately. All XP feeds your tree.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="h-9 w-9 grid place-items-center rounded-full border border-border/60 text-muted-foreground hover:text-foreground transition-colors shrink-0 ml-3"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        {/* Gold top glow */}
+        <div style={{
+          position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+          width: "70%", height: 100, pointerEvents: "none",
+          background: "radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%)",
+        }} />
+
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, paddingBottom: 4 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.22)" }} />
         </div>
 
-        {/* Preset list */}
-        <div className="space-y-2">
-          {available.map(({ name, emoji, desc, color }) => (
-            <button
-              key={name}
-              onClick={() => addHabit(name, emoji)}
-              className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl border border-border/60 transition-all text-left group"
-              style={{ background: color }}
-            >
-              <span className="text-2xl leading-none shrink-0">{emoji}</span>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[14px]" style={{ color: "rgba(255,255,255,0.88)" }}>
-                  {name}
-                </p>
-                <p className="text-[11px] mt-0.5 leading-snug" style={{ color: "rgba(255,255,255,0.38)" }}>
-                  {desc}
-                </p>
-              </div>
-              <Plus
-                className="h-4 w-4 shrink-0 transition-colors"
-                style={{ color: "rgba(255,255,255,0.22)" }}
-              />
-            </button>
-          ))}
+        {/* Scrollable content */}
+        <div style={{ overflowY: "auto", maxHeight: "calc(88dvh - 22px)", padding: "16px 20px 40px", position: "relative", zIndex: 1 }}>
 
-          {/* Custom entry */}
-          {showCustom ? (
-            <div
-              className="rounded-2xl border-2 border-primary p-4 space-y-4"
-              style={{ background: "oklch(0.62 0.22 255 / 0.07)" }}
-            >
-              {/* Emoji picker */}
-              <div>
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2.5"
-                   style={{ color: "rgba(255,255,255,0.35)" }}>
-                  Pick an emoji
-                </p>
-                <div className="grid grid-cols-8 gap-1.5">
-                  {CUSTOM_EMOJIS.map((e) => (
-                    <button
-                      key={e}
-                      onClick={() => setCustomEmoji(e)}
-                      className="h-9 w-full rounded-xl text-xl flex items-center justify-center transition-all"
-                      style={{
-                        background: customEmoji === e ? "rgba(196,135,58,0.20)" : "rgba(255,255,255,0.04)",
-                        border: customEmoji === e ? "1.5px solid rgba(196,135,58,0.55)" : "1.5px solid transparent",
-                        transform: customEmoji === e ? "scale(1.15)" : "scale(1)",
-                      }}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Name input with selected emoji preview */}
-              <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                <span className="text-2xl leading-none shrink-0">{customEmoji}</span>
-                <input
-                  autoFocus
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addCustom()}
-                  placeholder="Name your habit…"
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                />
-              </div>
-
-              <button
-                onClick={addCustom}
-                disabled={!customName.trim()}
-                className="w-full h-11 rounded-xl font-bold text-sm text-white disabled:opacity-30 inline-flex items-center justify-center gap-2"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <Check className="h-4 w-4" /> Start tracking
-              </button>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, margin: "0 0 6px" }}>
+                Add a habit
+              </p>
+              <h2 style={{
+                fontFamily: "Cormorant Garamond, Georgia, serif",
+                fontSize: 26, fontWeight: 700, color: WHITE,
+                margin: "0 0 6px", lineHeight: 1.2,
+              }}>
+                What else are you<br />fighting?
+              </h2>
+              <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.5 }}>
+                Each battle tracked separately. All XP feeds your tree.
+              </p>
             </div>
-          ) : (
             <button
-              onClick={() => setShowCustom(true)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-dashed border-border/50 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors text-left text-sm font-medium"
+              onClick={onClose}
+              style={{
+                width: 32, height: 32, borderRadius: "50%", flexShrink: 0, marginLeft: 12,
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                display: "grid", placeItems: "center",
+                cursor: "pointer", color: MUTED,
+              }}
             >
-              <Plus className="h-4 w-4" />
-              Something else…
+              <X size={15} />
             </button>
-          )}
-        </div>
+          </div>
 
-        {available.length === 0 && !showCustom && (
-          <p className="text-center text-sm text-muted-foreground py-4">
-            All preset habits are already tracked.
-          </p>
-        )}
+          {/* Habit list */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {available.map(({ name, emoji, desc, glow }) => {
+              const isAdded = added === name;
+              return (
+                <motion.button
+                  key={name}
+                  onClick={() => addHabit(name, emoji)}
+                  animate={isAdded ? { scale: [1, 0.97, 1], opacity: [1, 0.6, 0] } : {}}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    width: "100%",
+                    display: "flex", alignItems: "center", gap: 14,
+                    padding: "14px 16px",
+                    background: `${glow}0c`,
+                    border: `1px solid ${glow}28`,
+                    borderRadius: 18,
+                    cursor: "pointer", textAlign: "left",
+                    transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.borderColor = `${glow}55`;
+                    el.style.background  = `${glow}18`;
+                    el.style.boxShadow   = `0 0 20px ${glow}18`;
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.borderColor = `${glow}28`;
+                    el.style.background  = `${glow}0c`;
+                    el.style.boxShadow   = "none";
+                  }}
+                >
+                  {/* Icon box */}
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+                    background: `${glow}16`,
+                    border: `1px solid ${glow}35`,
+                    boxShadow: `0 0 14px ${glow}18`,
+                    display: "grid", placeItems: "center",
+                    fontSize: 22,
+                  }}>
+                    {emoji}
+                  </div>
+
+                  {/* Text */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: WHITE, margin: 0 }}>{name}</p>
+                    <p style={{ fontSize: 11, color: MUTED, margin: "3px 0 0", lineHeight: 1.4 }}>{desc}</p>
+                  </div>
+
+                  {/* Plus */}
+                  <div style={{
+                    width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
+                    background: `${glow}18`,
+                    border: `1px solid ${glow}40`,
+                    display: "grid", placeItems: "center",
+                    color: glow,
+                  }}>
+                    <Plus size={13} />
+                  </div>
+                </motion.button>
+              );
+            })}
+
+            {/* Custom entry */}
+            <AnimatePresence>
+              {showCustom ? (
+                <motion.div
+                  key="custom-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={spring}
+                  style={{
+                    borderRadius: 18, padding: 16,
+                    background: "rgba(201,168,76,0.06)",
+                    border: `1px solid ${GOLD}35`,
+                  }}
+                >
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: MUTED, margin: "0 0 12px" }}>
+                    Pick an emoji
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 6, marginBottom: 14 }}>
+                    {CUSTOM_EMOJIS.map((e) => (
+                      <button
+                        key={e}
+                        onClick={() => setCustomEmoji(e)}
+                        style={{
+                          height: 36, borderRadius: 10, fontSize: 18,
+                          display: "grid", placeItems: "center",
+                          background: customEmoji === e ? "rgba(201,168,76,0.22)" : "rgba(255,255,255,0.04)",
+                          border: customEmoji === e ? `1.5px solid ${GOLD}60` : "1.5px solid transparent",
+                          transform: customEmoji === e ? "scale(1.12)" : "scale(1)",
+                          transition: "all 0.12s",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "10px 14px", borderRadius: 12, marginBottom: 12,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                  }}>
+                    <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{customEmoji}</span>
+                    <input
+                      autoFocus
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addCustom()}
+                      placeholder="Name your habit…"
+                      style={{
+                        flex: 1, background: "transparent", border: "none", outline: "none",
+                        fontSize: 14, color: WHITE,
+                        fontFamily: "DM Sans, sans-serif",
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    onClick={addCustom}
+                    disabled={!customName.trim()}
+                    style={{
+                      width: "100%", height: 46, borderRadius: 13,
+                      background: customName.trim()
+                        ? "linear-gradient(135deg, #8B5E2A, #C9A84C, #E8C96A)"
+                        : "rgba(255,255,255,0.06)",
+                      border: "none",
+                      color: customName.trim() ? "#120d04" : MUTED,
+                      fontSize: 14, fontWeight: 700, cursor: customName.trim() ? "pointer" : "default",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      transition: "background 0.2s, color 0.2s",
+                      boxShadow: customName.trim() ? "0 4px 24px rgba(201,168,76,0.30)" : "none",
+                    }}
+                  >
+                    <Check size={15} /> Start tracking
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="custom-btn"
+                  onClick={() => setShowCustom(true)}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    width: "100%",
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "14px 16px", borderRadius: 18,
+                    background: "transparent",
+                    border: "1.5px dashed rgba(255,255,255,0.12)",
+                    cursor: "pointer", color: MUTED,
+                    fontSize: 13, fontWeight: 500,
+                    transition: "border-color 0.15s, color 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = `${GOLD}50`;
+                    e.currentTarget.style.color = GOLD;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+                    e.currentTarget.style.color = MUTED;
+                  }}
+                >
+                  <Plus size={15} />
+                  Something else…
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            {available.length === 0 && !showCustom && (
+              <p style={{ textAlign: "center", fontSize: 13, color: MUTED, padding: "16px 0" }}>
+                All preset habits are already tracked.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
