@@ -135,14 +135,6 @@ export function PaywallContent({
       animate="visible"
       style={{ display: "flex", flexDirection: "column", gap: 22 }}
     >
-      {/* ── Timer ── */}
-      <motion.div variants={iV} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-        <FlipClock seconds={timerSeconds} />
-        <p style={{ fontSize: 11, color: MUTED, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>
-          offer expires
-        </p>
-      </motion.div>
-
       {/* ── Headline ── */}
       <motion.div variants={iV} style={{ textAlign: "center" }}>
         <p style={{
@@ -162,7 +154,7 @@ export function PaywallContent({
         <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>
           {isFinalOffer
             ? "Lowest price ever. Only on this screen."
-            : "Join 46,000+ men who chose differently."}
+            : "Join 46,000+ people who chose differently."}
         </p>
       </motion.div>
 
