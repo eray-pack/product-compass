@@ -508,8 +508,8 @@ function QuestPill({
           />
         )}
         <span style={{ position: "relative", zIndex: 1, display: "inline-flex", alignItems: "center", gap: 5 }}>
-          <BadgeMedallion day={dayCount(addiction.startDate)} size={16} />
           {addiction.emoji} {addiction.name}
+          <BadgeMedallion day={dayCount(addiction.startDate)} size={16} />
         </span>
       </motion.button>
     </motion.div>
