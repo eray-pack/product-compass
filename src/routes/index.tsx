@@ -509,7 +509,7 @@ function HabitSwitcher({
         scrollbarWidth: "none",
         WebkitOverflowScrolling: "touch",
         paddingLeft: 24,
-        paddingRight: 130, // clears the fixed credits + settings chip
+        paddingRight: 160, // clears the fixed credits + settings chip
         paddingBottom: 4,
       }}
     >
@@ -783,7 +783,7 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
           {BADGES.map((b, i) => {
             const earned = day >= b.day;
             return (
-              <div key={b.name} style={{ minWidth: "100%", width: "100%" }} className="relative pt-8 pb-2 flex flex-col items-center">
+              <div key={b.name} style={{ minWidth: "100%", width: "100%" }} className="relative pt-3 pb-2 flex flex-col items-center">
                 {/* Ambient glow */}
                 {earned && (
                   <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
@@ -988,7 +988,7 @@ function Dashboard() {
       {/* ── NAV ──────────────────────────────────────────────── */}
       <motion.header
         variants={popUp}
-        className="px-6 pt-3 pb-3 flex items-center"
+        className="px-6 pt-3 pb-1 flex items-center"
         style={{ minHeight: "2.75rem" }}
       >
         <span
@@ -1012,7 +1012,7 @@ function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: EASE }}
       >
-        <div className="px-6 pb-3 pt-1">
+        <div className="pb-1 pt-1">
           <HabitSwitcher
             addictions={state.addictions}
             activeId={state.activeAddictionId}
