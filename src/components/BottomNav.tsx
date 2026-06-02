@@ -223,7 +223,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   const onSettings = path === "/settings";
 
   return (
-    <div className="min-h-screen pb-32 mx-auto max-w-md" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <div className="min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
       {!onSettings && (
         <div className="fixed right-4 z-30 flex items-center gap-2" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
