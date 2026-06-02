@@ -161,14 +161,13 @@ function EchoChamber() {
         }
       `}</style>
 
-      <motion.button
+      <button
         onClick={() => { playId.current += 1; navigate({ to: "/tools" }); }}
-        className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center"
+        className="absolute top-12 left-5 z-10 h-9 w-9 rounded-full grid place-items-center active:scale-90 transition-transform"
         style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-        whileTap={{ scale: 0.88 }}
       >
         <ArrowLeft className="h-4 w-4" />
-      </motion.button>
+      </button>
 
       <div className="pt-12 pb-2 px-6 text-center relative z-10">
         <p className="text-[11px] font-semibold tracking-[0.25em] uppercase" style={{ color: `${C}99` }}>Echo Chamber</p>
