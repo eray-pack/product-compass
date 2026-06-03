@@ -886,7 +886,7 @@ function Onboarding() {
                               src={treeStage3YoungUrl}
                               alt="Young Tree"
                               style={{
-                                height: "210%",
+                                height: "270%",
                                 width: "auto",
                                 objectFit: "contain",
                                 objectPosition: "center bottom",
