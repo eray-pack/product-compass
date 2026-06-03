@@ -961,6 +961,17 @@ function Dashboard() {
   const [showAddHabit,   setShowAddHabit]   = useState(false);
   const [showChangelog,  setShowChangelog]  = useState(false);
 
+  // ── Dev mode (triple-tap DAY counter) ───────────────────────────────────────
+  const [devOpen, setDevOpen]   = useState(false);
+  const devTapCount             = useRef(0);
+  const devTapTimer             = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleDevTap = () => {
+    devTapCount.current += 1;
+    if (devTapTimer.current) clearTimeout(devTapTimer.current);
+    devTapTimer.current = setTimeout(() => { devTapCount.current = 0; }, 600);
+    if (devTapCount.current >= 3) { devTapCount.current = 0; setDevOpen((v) => !v); }
+  };
+
   const active      = activeAddiction(state);
   const day         = active ? dayCount(active.startDate) : 1;
   const recoveryPct = Math.min(100, Math.round((day / 90) * 100));
@@ -1058,10 +1069,10 @@ function Dashboard() {
         variants={seq(0.45, 0.08)}
       >
         {[
-          { value: `${recoveryPct}%`, sub: t("progress.stats.streak"),  gold: true  },
+          { value: `${recoveryPct}%`, sub: t("progress.stats.streak"),  gold: true, onTap: handleDevTap },
           { value: `${bestStreak}d`,  sub: t("progress.stats.best"),    gold: false },
           { value: state.relapses.length, sub: "Relapses",              gold: false },
-        ].map(({ value, sub, gold }, i) => (
+        ].map(({ value, sub, gold, onTap }: { value: string | number; sub: string; gold: boolean; onTap?: () => void }, i) => (
           <motion.div
             key={sub}
             className="flex flex-col items-center justify-center py-5"
@@ -1071,6 +1082,7 @@ function Dashboard() {
             variants={up}
             whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" }}
             transition={{ duration: 0.2 }}
+            onClick={onTap}
           >
             <span
               className="text-[28px] font-bold tabular-nums leading-none"
@@ -1087,6 +1099,46 @@ function Dashboard() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* ── DEV PANEL ─────────────────────────────────────────── */}
+      {devOpen && (
+        <div style={{
+          margin: "0 16px 16px",
+          padding: "14px 16px",
+          borderRadius: 16,
+          background: "rgba(20,20,20,0.92)",
+          border: "1px solid rgba(255,80,80,0.35)",
+          backdropFilter: "blur(16px)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", color: "#ff5555", textTransform: "uppercase" }}>
+              🛠 Dev Mode
+            </span>
+            <button onClick={() => setDevOpen(false)} style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>✕</button>
+          </div>
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Access</p>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            {(["FREE", "PRO"] as const).map((tier) => {
+              const isActive = tier === "PRO" ? state.isPremium : !state.isPremium;
+              return (
+                <button key={tier} onClick={() => update({ isPremium: tier === "PRO" })}
+                  style={{
+                    fontSize: 11, padding: "5px 16px", borderRadius: 8, cursor: "pointer",
+                    background: isActive ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.06)",
+                    border: isActive ? "1px solid rgba(201,168,76,0.55)" : "1px solid rgba(255,255,255,0.12)",
+                    color: isActive ? "#C9A84C" : "rgba(255,255,255,0.55)",
+                    fontWeight: isActive ? 700 : 400,
+                  }}>
+                  {tier}
+                </button>
+              );
+            })}
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", marginLeft: 4 }}>
+              {state.isPremium ? "Multiple addictions unlocked" : "1 addiction max"}
+            </span>
+          </div>
+        </div>
+      )}
 
       <Hairline />
 
