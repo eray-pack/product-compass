@@ -468,6 +468,8 @@
     "noThanks": "Nee bedankt",
     "processing": "Verwerken…",
     "features": {
+      "multipleAddictions": "Meerdere verslavingen",
+      "multipleAddictionsDesc": "Volg en stop al je gewoontes tegelijk",
       "aiCoach": "AI Coach",
       "aiCoachDesc": "Gepersonaliseerde herkaderingen op aanvraag",
       "progress": "Voortgang",

@@ -468,6 +468,8 @@
     "noThanks": "Non merci",
     "processing": "Traitement…",
     "features": {
+      "multipleAddictions": "Addictions multiples",
+      "multipleAddictionsDesc": "Suis et arrête toutes tes habitudes ensemble",
       "aiCoach": "Coach IA",
       "aiCoachDesc": "Recadrages personnalisés à la demande",
       "progress": "Progrès",

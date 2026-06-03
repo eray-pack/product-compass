@@ -468,6 +468,8 @@
     "noThanks": "No gracias",
     "processing": "Procesando…",
     "features": {
+      "multipleAddictions": "Múltiples adicciones",
+      "multipleAddictionsDesc": "Sigue y abandona todos tus hábitos a la vez",
       "aiCoach": "Entrenador IA",
       "aiCoachDesc": "Reencuadres personalizados bajo demanda",
       "progress": "Progreso",

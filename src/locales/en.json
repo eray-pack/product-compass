@@ -468,6 +468,8 @@
     "noThanks": "No thanks",
     "processing": "Processing…",
     "features": {
+      "multipleAddictions": "Multiple Addictions",
+      "multipleAddictionsDesc": "Track and quit all your habits side-by-side",
       "aiCoach": "AI Coach",
       "aiCoachDesc": "Personalized reframes on demand",
       "progress": "Progress",

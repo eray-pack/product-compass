@@ -43,6 +43,7 @@ const TESTIMONIALS = [
 ];
 
 const FEATURE_META = [
+  { icon: "🔗", labelKey: "multipleAddictions", descKey: "multipleAddictionsDesc", glow: "#C9A84C" },
   { icon: "🧠", labelKey: "aiCoach",       descKey: "aiCoachDesc",       glow: "#7C3AED" },
   { icon: "📊", labelKey: "progress",      descKey: "progressDesc",      glow: "#10B981" },
   { icon: "🎮", labelKey: "proGames",      descKey: "proGamesDesc",      glow: "#F97316" },
