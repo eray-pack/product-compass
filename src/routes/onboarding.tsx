@@ -409,7 +409,6 @@ export const Route = createFileRoute("/onboarding")({
 // ── Main component ─────────────────────────────────────────────────────────────
 function Onboarding() {
   const [state, update] = useAppState();
-  const [showProAlert, setShowProAlert] = useState(false);
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
@@ -669,7 +668,7 @@ function Onboarding() {
                     const isSelected = pickedHabits.includes(h.label);
                     const handleClick = () => {
                       if (isSelected) { toggle(pickedHabits, h.label, setPickedHabits); return; }
-                      if (!state.isPremium && pickedHabits.length >= 1) { setShowProAlert(true); return; }
+                      if (!state.isPremium && pickedHabits.length >= 1) { triggerPaywall(); return; }
                       toggle(pickedHabits, h.label, setPickedHabits);
                     };
                     return (
@@ -683,89 +682,6 @@ function Onboarding() {
                   <span>Continue</span><ArrowRight size={16} />
                 </GoldButton>
 
-                {/* ── Pro upgrade alert modal ── */}
-                <AnimatePresence>
-                  {showProAlert && (
-                    <motion.div
-                      key="pro-alert-backdrop"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.18 }}
-                      onClick={() => setShowProAlert(false)}
-                      style={{
-                        position: "fixed", inset: 0, zIndex: 100,
-                        background: "rgba(0,0,0,0.72)",
-                        display: "flex", alignItems: "flex-end",
-                        padding: "0 0 32px",
-                        backdropFilter: "blur(6px)",
-                        WebkitBackdropFilter: "blur(6px)",
-                      }}
-                    >
-                      <motion.div
-                        key="pro-alert-sheet"
-                        initial={{ y: 60, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 60, opacity: 0 }}
-                        transition={{ type: "spring", stiffness: 420, damping: 32 }}
-                        onClick={e => e.stopPropagation()}
-                        style={{
-                          width: "100%", maxWidth: 448, margin: "0 auto",
-                          background: "linear-gradient(160deg, #1a1508 0%, #0f0c06 100%)",
-                          border: "1px solid rgba(201,168,76,0.28)",
-                          borderRadius: "24px 24px 16px 16px",
-                          padding: "28px 24px 24px",
-                          boxShadow: "0 -8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,168,76,0.08)",
-                        }}
-                      >
-                        {/* Icon */}
-                        <div style={{
-                          width: 48, height: 48, borderRadius: "50%", margin: "0 auto 16px",
-                          background: "rgba(201,168,76,0.12)",
-                          border: "1px solid rgba(201,168,76,0.32)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 22,
-                        }}>🔒</div>
-
-                        <p style={{ fontSize: 17, fontWeight: 700, color: "#fff", textAlign: "center", margin: "0 0 8px", lineHeight: 1.3 }}>
-                          PRO required
-                        </p>
-                        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.52)", textAlign: "center", margin: "0 0 24px", lineHeight: 1.55 }}>
-                          You need a Pro account to track multiple addictions side-by-side.
-                        </p>
-
-                        {/* Upgrade button */}
-                        <button
-                          onClick={() => { setShowProAlert(false); triggerPaywall(); }}
-                          style={{
-                            width: "100%", padding: "14px 0",
-                            background: "linear-gradient(135deg, #C9A84C, #E8C96A)",
-                            border: "none", borderRadius: 14,
-                            fontSize: 15, fontWeight: 700,
-                            color: "#1a1000", cursor: "pointer",
-                            marginBottom: 10,
-                            boxShadow: "0 4px 18px rgba(201,168,76,0.32)",
-                          }}
-                        >
-                          Upgrade Now
-                        </button>
-
-                        {/* Dismiss */}
-                        <button
-                          onClick={() => setShowProAlert(false)}
-                          style={{
-                            width: "100%", padding: "12px 0",
-                            background: "transparent", border: "none",
-                            fontSize: 14, color: "rgba(255,255,255,0.38)",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Maybe later
-                        </button>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             )}
 
