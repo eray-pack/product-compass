@@ -109,10 +109,10 @@ function SerifEm({ children }: { children: React.ReactNode }) {
 function EmojiCircle({ emoji }: { emoji: string }) {
   return (
     <div style={{
-      width: 36, height: 36, borderRadius: "50%",
-      background: "rgba(201,168,76,0.1)",
-      border: "1px solid rgba(201,168,76,0.15)",
-      fontSize: 16, flexShrink: 0,
+      width: 38, height: 38, borderRadius: "50%",
+      background: "rgba(201,168,76,0.08)",
+      border: "1px solid rgba(201,168,76,0.12)",
+      fontSize: 18, flexShrink: 0,
       display: "flex", alignItems: "center", justifyContent: "center",
     }}>
       {emoji}
@@ -131,6 +131,21 @@ function Eyebrow({ step, total }: { step: number; total: number }) {
   );
 }
 
+function StepHero({ emoji }: { emoji: string }) {
+  return (
+    <div style={{
+      width: 60, height: 60, borderRadius: 20,
+      background: "rgba(201,168,76,0.07)",
+      border: "1px solid rgba(201,168,76,0.18)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: 28, marginBottom: 20,
+      boxShadow: "0 0 24px rgba(201,168,76,0.10)",
+    }}>
+      {emoji}
+    </div>
+  );
+}
+
 // Checkmark that springs in
 function SpringCheck() {
   return (
@@ -139,42 +154,130 @@ function SpringCheck() {
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0, opacity: 0 }}
       transition={{ type: "spring", stiffness: 500, damping: 25 }}
-      style={{ fontSize: 10, color: BG, fontWeight: 900, lineHeight: 1, userSelect: "none" }}
+      style={{ fontSize: 9, color: "#1a1000", fontWeight: 900, lineHeight: 1, userSelect: "none" }}
     >
       ✓
     </motion.span>
   );
 }
 
-// Single-select option card (radio)
+// 2-column tile card — for short-label grid layouts
+function TileCard({ emoji, label, selected, onClick }: {
+  emoji: string; label: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.94 }}
+      animate={{
+        borderColor: selected ? G : CARD_BORDER,
+        backgroundColor: selected ? "rgba(201,168,76,0.10)" : CARD_BG,
+        boxShadow: selected
+          ? "0 0 0 1.5px rgba(201,168,76,0.50), 0 0 22px rgba(201,168,76,0.15)"
+          : "0 0 0 0px rgba(0,0,0,0)",
+      }}
+      transition={{ duration: 0.18 }}
+      style={{
+        width: "100%", minHeight: 108,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        gap: 10, padding: "16px 10px",
+        borderRadius: 18, borderWidth: 1.5, borderStyle: "solid",
+        cursor: "pointer", position: "relative", textAlign: "center",
+      }}
+    >
+      <span style={{ fontSize: 30, lineHeight: 1 }}>{emoji}</span>
+      <span style={{
+        fontSize: 13, fontWeight: 600, lineHeight: 1.3,
+        color: selected ? "#fff" : "#9a8a6a",
+        fontFamily: "DM Sans, sans-serif",
+      }}>
+        {label}
+      </span>
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            style={{
+              position: "absolute", top: 9, right: 9,
+              width: 18, height: 18, borderRadius: "50%",
+              background: G,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 9, color: "#1a1000", fontWeight: 900,
+            }}
+          >
+            ✓
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+}
+
+// Pill chip — for compact multi-select (habits)
+function HabitChip({ emoji, label, selected, onClick }: {
+  emoji: string; label: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.93 }}
+      animate={{
+        borderColor: selected ? G : CARD_BORDER,
+        backgroundColor: selected ? "rgba(201,168,76,0.12)" : CARD_BG,
+        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.18)" : "none",
+      }}
+      transition={{ duration: 0.18 }}
+      style={{
+        display: "flex", alignItems: "center", gap: 7,
+        padding: "10px 16px", borderRadius: 50,
+        borderWidth: 1.5, borderStyle: "solid",
+        cursor: "pointer", whiteSpace: "nowrap",
+      }}
+    >
+      <span style={{ fontSize: 18, lineHeight: 1 }}>{emoji}</span>
+      <span style={{
+        fontSize: 13, fontWeight: 600,
+        color: selected ? "#fff" : "#9a8a6a",
+        fontFamily: "DM Sans, sans-serif",
+      }}>
+        {label}
+      </span>
+    </motion.button>
+  );
+}
+
+// Single-select option card (radio) — for longer-label vertical lists
 function OptionCard({ emoji, label, selected, onClick }: {
   emoji: string; label: string; selected: boolean; onClick: () => void;
 }) {
   return (
     <motion.button
       onClick={onClick}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.97 }}
       animate={{
         borderColor: selected ? G : CARD_BORDER,
         backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
-        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+        boxShadow: selected ? "0 0 16px rgba(201,168,76,0.14)" : "0 0 0px rgba(0,0,0,0)",
       }}
       transition={{ duration: 0.2 }}
       style={{
         width: "100%", display: "flex", alignItems: "center", gap: 12,
-        padding: "14px 16px", borderRadius: 16,
+        padding: "15px 16px", borderRadius: 16,
         borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
       }}
     >
       <EmojiCircle emoji={emoji} />
       <span style={{
         flex: 1, fontSize: 14, fontWeight: 500,
-        color: selected ? "#fff" : "#5a5040",
+        color: selected ? "#fff" : "#9a8a6a",
         fontFamily: "DM Sans, sans-serif",
       }}>
         {label}
       </span>
-      {/* Radio circle */}
       <div style={{
         width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
         border: `1.5px solid ${selected ? G : "#2a2010"}`,
@@ -195,28 +298,27 @@ function CheckCard({ emoji, label, selected, onClick }: {
   return (
     <motion.button
       onClick={onClick}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.97 }}
       animate={{
         borderColor: selected ? G : CARD_BORDER,
         backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
-        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+        boxShadow: selected ? "0 0 16px rgba(201,168,76,0.14)" : "0 0 0px rgba(0,0,0,0)",
       }}
       transition={{ duration: 0.2 }}
       style={{
         width: "100%", display: "flex", alignItems: "center", gap: 12,
-        padding: "14px 16px", borderRadius: 16,
+        padding: "15px 16px", borderRadius: 16,
         borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
       }}
     >
       <EmojiCircle emoji={emoji} />
       <span style={{
         flex: 1, fontSize: 14, fontWeight: 500,
-        color: selected ? "#fff" : "#5a5040",
+        color: selected ? "#fff" : "#9a8a6a",
         fontFamily: "DM Sans, sans-serif",
       }}>
         {label}
       </span>
-      {/* Checkbox square */}
       <div style={{
         width: 20, height: 20, borderRadius: 6, flexShrink: 0,
         border: `1.5px solid ${selected ? G : "#2a2010"}`,
@@ -389,17 +491,20 @@ function Onboarding() {
             {/* STEP 0 — Duration */}
             {step === 0 && (
               <div>
+                <StepHero emoji="⏳" />
                 <Eyebrow step={1} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Before we start — be honest with <SerifEm>yourself</SerifEm>
                 </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   How long have you been struggling with this?
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 0 }}>
                   {durations.map((d) => (
-                    <OptionCard key={d.label} emoji={d.emoji} label={d.label}
-                      selected={duration === d.label} onClick={() => setDuration(d.label)} />
+                    <div key={d.label} style={{ flex: "1 1 calc(50% - 5px)", maxWidth: "calc(50% - 5px)" }}>
+                      <TileCard emoji={d.emoji} label={d.label}
+                        selected={duration === d.label} onClick={() => setDuration(d.label)} />
+                    </div>
                   ))}
                 </div>
                 <GoldButton disabled={!duration} onClick={next}>
@@ -411,18 +516,21 @@ function Onboarding() {
             {/* STEP 1 — Costs */}
             {step === 1 && (
               <div>
+                <StepHero emoji="⚖️" />
                 <Eyebrow step={2} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   What does it cost <SerifEm>you?</SerifEm>
                 </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   Select everything this has taken from you.
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                   {costs.map((c) => (
-                    <CheckCard key={c.label} emoji={c.emoji} label={c.label}
-                      selected={pickedCosts.includes(c.label)}
-                      onClick={() => toggle(pickedCosts, c.label, setPickedCosts)} />
+                    <div key={c.label} style={{ flex: "1 1 calc(50% - 5px)", maxWidth: "calc(50% - 5px)" }}>
+                      <TileCard emoji={c.emoji} label={c.label}
+                        selected={pickedCosts.includes(c.label)}
+                        onClick={() => toggle(pickedCosts, c.label, setPickedCosts)} />
+                    </div>
                   ))}
                 </div>
                 <GoldButton disabled={pickedCosts.length === 0} onClick={next}>
@@ -436,19 +544,29 @@ function Onboarding() {
             {/* STEP 2 — Triggers */}
             {step === 2 && (
               <div>
+                <StepHero emoji="🎯" />
                 <Eyebrow step={3} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Your trigger <SerifEm>profile</SerifEm>
                 </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   When are you most vulnerable? We'll use this for smart reminders.
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {triggers.map((t) => (
-                    <CheckCard key={t.label} emoji={t.emoji} label={t.label}
-                      selected={pickedTriggers.includes(t.label)}
-                      onClick={() => toggle(pickedTriggers, t.label, setPickedTriggers)} />
-                  ))}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                  {triggers.map((t, i) => {
+                    const isOddLast = triggers.length % 2 !== 0 && i === triggers.length - 1;
+                    return (
+                      <div key={t.label} style={{
+                        flex: "1 1 calc(50% - 5px)",
+                        maxWidth: "calc(50% - 5px)",
+                        ...(isOddLast ? { marginLeft: "auto", marginRight: "auto" } : {}),
+                      }}>
+                        <TileCard emoji={t.emoji} label={t.label}
+                          selected={pickedTriggers.includes(t.label)}
+                          onClick={() => toggle(pickedTriggers, t.label, setPickedTriggers)} />
+                      </div>
+                    );
+                  })}
                 </div>
                 <GoldButton disabled={pickedTriggers.length === 0} onClick={next}>
                   {pickedTriggers.length
@@ -546,18 +664,16 @@ function Onboarding() {
                   <span style={{ marginLeft: "auto", fontSize: 14, color: G, opacity: 0.7 }}>›</span>
                 </button>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {otherHabitOptions.map((h) => {
                     const isSelected = pickedHabits.includes(h.label);
                     const handleClick = () => {
-                      // Always allow deselection
                       if (isSelected) { toggle(pickedHabits, h.label, setPickedHabits); return; }
-                      // Free users: max 1 selection
                       if (!state.isPremium && pickedHabits.length >= 1) { setShowProAlert(true); return; }
                       toggle(pickedHabits, h.label, setPickedHabits);
                     };
                     return (
-                      <CheckCard key={h.label} emoji={h.emoji} label={h.label}
+                      <HabitChip key={h.label} emoji={h.emoji} label={h.label}
                         selected={isSelected} onClick={handleClick} />
                     );
                   })}
