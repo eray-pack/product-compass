@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Stopamine',
   webDir: 'dist/client',
   server: {
-    url: 'https://stopamine.stopamine.workers.dev',
+    url: 'https://stopamineapp.com',
     cleartext: false,
   },
 };
