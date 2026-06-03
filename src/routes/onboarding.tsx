@@ -490,7 +490,6 @@ function Onboarding() {
             {/* STEP 0 — Duration */}
             {step === 0 && (
               <div>
-                <StepHero emoji="⏳" />
                 <Eyebrow step={1} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Before we start — be honest with <SerifEm>yourself</SerifEm>
@@ -513,7 +512,6 @@ function Onboarding() {
             {/* STEP 1 — Costs */}
             {step === 1 && (
               <div>
-                <StepHero emoji="⚖️" />
                 <Eyebrow step={2} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   What does it cost <SerifEm>you?</SerifEm>
@@ -539,7 +537,6 @@ function Onboarding() {
             {/* STEP 2 — Triggers */}
             {step === 2 && (
               <div>
-                <StepHero emoji="🎯" />
                 <Eyebrow step={3} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Your trigger <SerifEm>profile</SerifEm>
