@@ -107,12 +107,19 @@ function RootComponent() {
   }, []);
 
   // Auth guard — redirect to /auth if not signed in
+  // Exclude public routes: /auth, /privacy, /terms (must be readable without an account)
+  const PUBLIC_PATHS = ["/auth", "/privacy", "/terms"];
   useEffect(() => {
+    const currentPath = window.location.pathname;
+    if (PUBLIC_PATHS.some((p) => currentPath.startsWith(p))) return;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) navigate({ to: "/auth" });
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) navigate({ to: "/auth" });
+      if (!session && !PUBLIC_PATHS.some((p) => window.location.pathname.startsWith(p))) {
+        navigate({ to: "/auth" });
+      }
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
