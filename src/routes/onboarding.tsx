@@ -668,7 +668,7 @@ function Onboarding() {
                     const isSelected = pickedHabits.includes(h.label);
                     const handleClick = () => {
                       if (isSelected) { toggle(pickedHabits, h.label, setPickedHabits); return; }
-                      if (!state.isPremium && pickedHabits.length >= 1) { triggerPaywall(); return; }
+                      if (pickedHabits.length >= 1) { triggerPaywall(); return; }
                       toggle(pickedHabits, h.label, setPickedHabits);
                     };
                     return (
