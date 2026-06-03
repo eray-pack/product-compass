@@ -345,34 +345,37 @@ function IdentityCard({ emoji, text, selected, onClick }: {
   return (
     <motion.button
       onClick={onClick}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.98 }}
       animate={{
-        borderColor: selected ? G : CARD_BORDER,
-        backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
-        boxShadow: selected ? "0 0 12px rgba(201,168,76,0.12)" : "0 0 0px rgba(0,0,0,0)",
+        borderColor: selected ? G : "rgba(255,255,255,0.07)",
+        backgroundColor: selected ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.03)",
+        boxShadow: selected
+          ? "0 0 0 1px rgba(201,168,76,0.25), 0 4px 24px rgba(201,168,76,0.10)"
+          : "0 0 0 0px transparent",
       }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.18 }}
       style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 12,
-        padding: "14px 16px", borderRadius: 16,
-        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+        width: "100%", display: "flex", alignItems: "center", gap: 14,
+        padding: "16px 18px", borderRadius: 18,
+        borderWidth: 1, borderStyle: "solid", cursor: "pointer", textAlign: "left",
       }}
     >
-      <EmojiCircle emoji={emoji} />
+      <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0, width: 28, textAlign: "center" }}>{emoji}</span>
       <span style={{
-        flex: 1, fontSize: 13, fontWeight: 500, lineHeight: 1.4,
-        color: selected ? "#e0d8c8" : "#5a5040",
+        flex: 1, fontSize: 14, fontWeight: 500, lineHeight: 1.45,
+        color: selected ? "#fff" : "#b8a888",
         fontFamily: "DM Sans, sans-serif",
+        transition: "color 0.18s",
       }}>
         I am someone who{" "}
-        <span style={{ color: selected ? G : "#5a5040" }}>{text}</span>
+        <span style={{ color: selected ? G : "#8a7a60", transition: "color 0.18s" }}>{text}</span>
       </span>
       <div style={{
-        width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-        border: `1.5px solid ${selected ? G : "#2a2010"}`,
+        width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+        border: `1.5px solid ${selected ? G : "rgba(255,255,255,0.15)"}`,
         background: selected ? G : "transparent",
         display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "border-color 0.2s, background 0.2s",
+        transition: "border-color 0.18s, background 0.18s",
       }}>
         <AnimatePresence>{selected && <SpringCheck />}</AnimatePresence>
       </div>
@@ -788,7 +791,7 @@ function Onboarding() {
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Choose your recovery <SerifEm>companion.</SerifEm>
                 </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   They grow alongside you — day by day, stage by stage.
                 </p>
                 <div style={{ display: "flex", gap: 12, marginBottom: 4 }}>
@@ -1077,22 +1080,22 @@ function Onboarding() {
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Your <SerifEm>commitment.</SerifEm>
                 </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   Read it. Sign it. This is who you are now.
                 </p>
                 <div style={{
-                  borderRadius: 16, border: `1px solid ${CARD_BORDER}`,
-                  background: CARD_BG, padding: "20px", marginBottom: 24,
+                  borderRadius: 18, border: "1px solid rgba(201,168,76,0.18)",
+                  background: "rgba(201,168,76,0.05)", padding: "22px 20px", marginBottom: 24,
                 }}>
-                  <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "2px", color: "#5a5040", marginBottom: 8 }}>
+                  <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "2px", color: "rgba(201,168,76,0.5)", marginBottom: 10 }}>
                     Identity
                   </p>
-                  <p style={{ fontSize: 18, lineHeight: 1.6, color: "#ddd", margin: 0 }}>
+                  <p style={{ fontSize: 17, lineHeight: 1.65, color: "#d4c8b0", margin: 0, fontWeight: 400 }}>
                     I am becoming someone who{" "}
-                    <span style={{ color: G }}>{identity || "…"}</span>.
+                    <span style={{ color: G, fontWeight: 600 }}>{identity || "…"}</span>.
                   </p>
                 </div>
-                <label style={{ display: "block", fontSize: 13, color: "#5a5040", marginBottom: 8 }}>
+                <label style={{ display: "block", fontSize: 13, color: "#9a8a6a", marginBottom: 10 }}>
                   Sign with your first name
                 </label>
                 <input
@@ -1100,15 +1103,15 @@ function Onboarding() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your first name"
                   style={{
-                    width: "100%", borderRadius: 16,
-                    border: `1.5px solid ${CARD_BORDER}`,
-                    background: CARD_BG, padding: "14px 16px",
-                    fontSize: 18, color: "#fff",
+                    width: "100%", borderRadius: 18,
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    background: "rgba(255,255,255,0.03)", padding: "16px 18px",
+                    fontSize: 17, color: "#fff",
                     fontFamily: "DM Sans, sans-serif",
                     outline: "none", boxSizing: "border-box",
                   }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = G; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = CARD_BORDER; }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = G; e.currentTarget.style.boxShadow = "0 0 0 1px rgba(201,168,76,0.25)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.boxShadow = "none"; }}
                 />
                 <GoldButton disabled={!name.trim()} onClick={finish}>
                   {name.trim()
