@@ -498,12 +498,10 @@ function Onboarding() {
                 <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   How long have you been struggling with this?
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 0 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {durations.map((d) => (
-                    <div key={d.label} style={{ flex: "1 1 calc(50% - 5px)", maxWidth: "calc(50% - 5px)" }}>
-                      <TileCard emoji={d.emoji} label={d.label}
-                        selected={duration === d.label} onClick={() => setDuration(d.label)} />
-                    </div>
+                    <OptionCard key={d.label} emoji={d.emoji} label={d.label}
+                      selected={duration === d.label} onClick={() => setDuration(d.label)} />
                   ))}
                 </div>
                 <GoldButton disabled={!duration} onClick={next}>
@@ -523,13 +521,11 @@ function Onboarding() {
                 <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   Select everything this has taken from you.
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {costs.map((c) => (
-                    <div key={c.label} style={{ flex: "1 1 calc(50% - 5px)", maxWidth: "calc(50% - 5px)" }}>
-                      <TileCard emoji={c.emoji} label={c.label}
-                        selected={pickedCosts.includes(c.label)}
-                        onClick={() => toggle(pickedCosts, c.label, setPickedCosts)} />
-                    </div>
+                    <CheckCard key={c.label} emoji={c.emoji} label={c.label}
+                      selected={pickedCosts.includes(c.label)}
+                      onClick={() => toggle(pickedCosts, c.label, setPickedCosts)} />
                   ))}
                 </div>
                 <GoldButton disabled={pickedCosts.length === 0} onClick={next}>
