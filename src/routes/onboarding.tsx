@@ -551,21 +551,12 @@ function Onboarding() {
                 <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   When are you most vulnerable? We'll use this for smart reminders.
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                  {triggers.map((t, i) => {
-                    const isOddLast = triggers.length % 2 !== 0 && i === triggers.length - 1;
-                    return (
-                      <div key={t.label} style={{
-                        flex: "1 1 calc(50% - 5px)",
-                        maxWidth: "calc(50% - 5px)",
-                        ...(isOddLast ? { marginLeft: "auto", marginRight: "auto" } : {}),
-                      }}>
-                        <TileCard emoji={t.emoji} label={t.label}
-                          selected={pickedTriggers.includes(t.label)}
-                          onClick={() => toggle(pickedTriggers, t.label, setPickedTriggers)} />
-                      </div>
-                    );
-                  })}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {triggers.map((t) => (
+                    <CheckCard key={t.label} emoji={t.emoji} label={t.label}
+                      selected={pickedTriggers.includes(t.label)}
+                      onClick={() => toggle(pickedTriggers, t.label, setPickedTriggers)} />
+                  ))}
                 </div>
                 <GoldButton disabled={pickedTriggers.length === 0} onClick={next}>
                   {pickedTriggers.length
