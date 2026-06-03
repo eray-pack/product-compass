@@ -250,40 +250,43 @@ function HabitChip({ emoji, label, selected, onClick }: {
   );
 }
 
-// Single-select option card (radio) — for longer-label vertical lists
+// Single-select option card (radio)
 function OptionCard({ emoji, label, selected, onClick }: {
   emoji: string; label: string; selected: boolean; onClick: () => void;
 }) {
   return (
     <motion.button
       onClick={onClick}
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.98 }}
       animate={{
-        borderColor: selected ? G : CARD_BORDER,
-        backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
-        boxShadow: selected ? "0 0 16px rgba(201,168,76,0.14)" : "0 0 0px rgba(0,0,0,0)",
+        borderColor: selected ? G : "rgba(255,255,255,0.07)",
+        backgroundColor: selected ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.03)",
+        boxShadow: selected
+          ? "0 0 0 1px rgba(201,168,76,0.25), 0 4px 24px rgba(201,168,76,0.10)"
+          : "0 0 0 0px transparent",
       }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.18 }}
       style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 12,
-        padding: "15px 16px", borderRadius: 16,
-        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+        width: "100%", display: "flex", alignItems: "center", gap: 14,
+        padding: "16px 18px", borderRadius: 18,
+        borderWidth: 1, borderStyle: "solid", cursor: "pointer", textAlign: "left",
       }}
     >
-      <EmojiCircle emoji={emoji} />
+      <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0, width: 28, textAlign: "center" }}>{emoji}</span>
       <span style={{
-        flex: 1, fontSize: 14, fontWeight: 500,
-        color: selected ? "#fff" : "#9a8a6a",
+        flex: 1, fontSize: 15, fontWeight: 500, letterSpacing: "-0.1px",
+        color: selected ? "#fff" : "#b8a888",
         fontFamily: "DM Sans, sans-serif",
+        transition: "color 0.18s",
       }}>
         {label}
       </span>
       <div style={{
-        width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-        border: `1.5px solid ${selected ? G : "#2a2010"}`,
+        width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+        border: `1.5px solid ${selected ? G : "rgba(255,255,255,0.15)"}`,
         background: selected ? G : "transparent",
         display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "border-color 0.2s, background 0.2s",
+        transition: "border-color 0.18s, background 0.18s",
       }}>
         <AnimatePresence>{selected && <SpringCheck />}</AnimatePresence>
       </div>
@@ -298,33 +301,36 @@ function CheckCard({ emoji, label, selected, onClick }: {
   return (
     <motion.button
       onClick={onClick}
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.98 }}
       animate={{
-        borderColor: selected ? G : CARD_BORDER,
-        backgroundColor: selected ? "rgba(201,168,76,0.08)" : CARD_BG,
-        boxShadow: selected ? "0 0 16px rgba(201,168,76,0.14)" : "0 0 0px rgba(0,0,0,0)",
+        borderColor: selected ? G : "rgba(255,255,255,0.07)",
+        backgroundColor: selected ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.03)",
+        boxShadow: selected
+          ? "0 0 0 1px rgba(201,168,76,0.25), 0 4px 24px rgba(201,168,76,0.10)"
+          : "0 0 0 0px transparent",
       }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.18 }}
       style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 12,
-        padding: "15px 16px", borderRadius: 16,
-        borderWidth: 1.5, borderStyle: "solid", cursor: "pointer", textAlign: "left",
+        width: "100%", display: "flex", alignItems: "center", gap: 14,
+        padding: "16px 18px", borderRadius: 18,
+        borderWidth: 1, borderStyle: "solid", cursor: "pointer", textAlign: "left",
       }}
     >
-      <EmojiCircle emoji={emoji} />
+      <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0, width: 28, textAlign: "center" }}>{emoji}</span>
       <span style={{
-        flex: 1, fontSize: 14, fontWeight: 500,
-        color: selected ? "#fff" : "#9a8a6a",
+        flex: 1, fontSize: 15, fontWeight: 500, letterSpacing: "-0.1px",
+        color: selected ? "#fff" : "#b8a888",
         fontFamily: "DM Sans, sans-serif",
+        transition: "color 0.18s",
       }}>
         {label}
       </span>
       <div style={{
-        width: 20, height: 20, borderRadius: 6, flexShrink: 0,
-        border: `1.5px solid ${selected ? G : "#2a2010"}`,
+        width: 22, height: 22, borderRadius: 7, flexShrink: 0,
+        border: `1.5px solid ${selected ? G : "rgba(255,255,255,0.15)"}`,
         background: selected ? G : "transparent",
         display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "border-color 0.2s, background 0.2s",
+        transition: "border-color 0.18s, background 0.18s",
       }}>
         <AnimatePresence>{selected && <SpringCheck />}</AnimatePresence>
       </div>
