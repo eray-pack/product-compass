@@ -470,6 +470,7 @@ function NotificationsSection() {
 function PrivacySection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
   const navigate = useNavigate();
   const [deleteArmed, setDeleteArmed] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleExport = () => {
     const payload = {
@@ -490,11 +491,21 @@ function PrivacySection({ state }: { state: ReturnType<typeof useAppState>[0] })
     URL.revokeObjectURL(url);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteArmed) {
       setDeleteArmed(true);
       setTimeout(() => setDeleteArmed(false), 5000);
       return;
+    }
+    setDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from("user_state").delete().eq("user_id", session.user.id);
+        await supabase.auth.signOut();
+      }
+    } catch (e) {
+      console.warn("[DeleteAccount] Supabase cleanup failed", e);
     }
     ["stopamine.v1", "stopamine.v2", "stopamine.theme"].forEach((k) =>
       localStorage.removeItem(k)
@@ -509,9 +520,9 @@ function PrivacySection({ state }: { state: ReturnType<typeof useAppState>[0] })
         <Row icon={Download} label="Export my data" onClick={handleExport} />
         <Row
           icon={Trash2}
-          label={deleteArmed ? "Tap again to confirm deletion" : "Delete account"}
+          label={deleting ? "Deleting…" : deleteArmed ? "Tap again to confirm deletion" : "Delete account"}
           destructive
-          onClick={handleDelete}
+          onClick={deleting ? undefined : handleDelete}
         />
       </Card>
       <p className="mt-2 px-1 text-xs text-muted-foreground">
