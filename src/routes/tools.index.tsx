@@ -778,7 +778,7 @@ function Tools() {
       </motion.header>
 
       {/* ── Dev Panel (triple-tap "Tools" or subtitle to toggle) ─────────── */}
-      {devOpen && (
+      {import.meta.env.DEV && devOpen && (
         <div style={{
           margin: "8px 16px 0",
           padding: "14px 16px",

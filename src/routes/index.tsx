@@ -1101,7 +1101,7 @@ function Dashboard() {
       </motion.div>
 
       {/* ── DEV PANEL ─────────────────────────────────────────── */}
-      {devOpen && (
+      {import.meta.env.DEV && devOpen && (
         <div style={{
           margin: "0 16px 16px",
           padding: "14px 16px",

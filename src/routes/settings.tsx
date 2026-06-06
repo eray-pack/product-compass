@@ -347,20 +347,17 @@ function BillingSection({ state, update }: {
 
   async function handleRestore() {
     setRestoring(true);
-    // TODO: wire to RevenueCat restorePurchases() when on native
-    // For now: grant PRO in both localStorage AND Supabase so the sync doesn't revert it
-    update({ isPremium: true });
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await supabase.from("user_state").upsert({
-          user_id: session.user.id,
-          is_premium: true,
-          updated_at: new Date().toISOString(),
-        });
+      const { restorePurchases } = await import("@/lib/purchases");
+      const restored = await restorePurchases();
+      if (restored) {
+        // RevenueCat confirms purchase — re-fetch premium status from Supabase
+        const { checkPremium } = await import("@/lib/purchases");
+        const isPremium = await checkPremium();
+        update({ isPremium });
       }
     } catch (e) {
-      console.warn("[Restore] Supabase sync failed", e);
+      console.warn("[Restore] RevenueCat restore failed", e);
     }
     setRestoring(false);
   }

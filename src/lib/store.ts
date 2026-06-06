@@ -124,6 +124,8 @@ export function loadState(): AppState {
     const parsed = JSON.parse(raw);
     const merged: AppState = { ...defaultState(), ...parsed };
     if (!VALID_COMPANIONS.has(merged.companion)) merged.companion = "tree";
+    // isPremium is never trusted from localStorage — always derived from Supabase/RevenueCat
+    merged.isPremium = false;
     return merged;
   } catch {
     return defaultState();
@@ -134,7 +136,9 @@ const STATE_CHANGE_EVENT = "stopamine-state-changed";
 
 export function saveState(s: AppState) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(KEY, JSON.stringify(s));
+  // Strip isPremium — never persisted locally; authoritative source is Supabase/RevenueCat
+  const { isPremium: _stripped, ...rest } = s;
+  localStorage.setItem(KEY, JSON.stringify(rest));
   window.dispatchEvent(new CustomEvent(STATE_CHANGE_EVENT, { detail: s }));
 }
 
