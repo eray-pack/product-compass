@@ -256,6 +256,28 @@ html.light {
 }
 .animate-shimmer-leaf { animation: shimmer-leaf 3s ease-in-out infinite; }
 
+/* ── iOS / mobile touch optimizations ───────────────────── */
+/* Remove 300ms tap delay and grey flash on all interactive elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+html {
+  /* Smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+button, a, [role="button"], [role="tab"], [role="switch"] {
+  /* Removes 300ms tap delay on iOS */
+  touch-action: manipulation;
+  /* Prevent text selection on rapid taps */
+  -webkit-user-select: none;
+  user-select: none;
+}
+input, textarea {
+  /* Allow text selection in inputs */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 /* Neural mesh backgrounds */
 .neural-mesh {
   background-image:
