@@ -1323,7 +1323,7 @@ function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) 
             rgba(255,255,255,0.18) 60%,
             transparent 100%
           );
-          animation: coin-shimmer 4s ease-in-out infinite;
+          animation: coin-shimmer 6s ease-in-out infinite;
           pointer-events: none;
           z-index: 4;
         }

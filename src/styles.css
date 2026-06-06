@@ -491,11 +491,12 @@ input, textarea {
 }
 /* fill-mode: backwards → holds the 0% keyframe (opacity 0.025) during any
    animation-delay, preventing the default opacity:1 flash on mount.        */
-.coach-wave   { animation: coach-wave-breathe 20s ease-in-out          infinite; animation-fill-mode: backwards; }
-.coach-wave-2 { animation: coach-wave-breathe 20s ease-in-out  4s      infinite; animation-fill-mode: backwards; }
-.coach-wave-3 { animation: coach-wave-breathe 20s ease-in-out  8s      infinite; animation-fill-mode: backwards; }
-.coach-wave-4 { animation: coach-wave-breathe 20s ease-in-out 12s      infinite; animation-fill-mode: backwards; }
-.coach-wave-5 { animation: coach-wave-breathe 20s ease-in-out 16s      infinite; animation-fill-mode: backwards; }
+/* Wave lines — static opacity, no continuous animation (saves GPU on mobile) */
+.coach-wave   { opacity: 0.035; }
+.coach-wave-2 { opacity: 0.030; }
+.coach-wave-3 { opacity: 0.030; }
+.coach-wave-4 { opacity: 0.025; }
+.coach-wave-5 { opacity: 0.025; }
 /* The overlay wrapper fades in the whole layer over 2 s on mount */
 .coach-overlay { animation: coach-overlay-fadein 2s ease-out both; }
 
