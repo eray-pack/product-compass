@@ -899,7 +899,7 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                   className="mt-3 font-bold leading-tight"
                   style={{
                     fontSize: "clamp(2rem, 8vw, 2.8rem)",
-                    color: earned ? "#ffffff" : "rgba(255,255,255,0.18)",
+                    color: earned ? "#ffffff" : "rgba(255,255,255,0.60)",
                     letterSpacing: "0.025em",
                     textShadow: earned ? [
                       "0 0 18px rgba(255,255,255,0.85)",

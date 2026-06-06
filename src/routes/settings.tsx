@@ -1257,7 +1257,7 @@ function CoinCard({
           letterSpacing: "0.04em",
           textAlign: "center",
           lineHeight: 1.2,
-          color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.17)",
+          color: earned ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.60)",
         }}
       >
         {badge.name}
@@ -1270,7 +1270,7 @@ function CoinCard({
           fontWeight: 700,
           letterSpacing: "0.10em",
           textTransform: "uppercase" as const,
-          color: earned ? badge.color : "rgba(255,255,255,0.12)",
+          color: earned ? badge.color : "rgba(255,255,255,0.35)",
           background: earned ? `${badge.color}1a` : "transparent",
           border: `1px solid ${earned ? badge.color + "30" : "transparent"}`,
           borderRadius: 20,

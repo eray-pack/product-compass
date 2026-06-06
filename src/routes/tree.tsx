@@ -2212,18 +2212,107 @@ function WolfPage({
     { label: "⚡ Alpha",      xp: 1600 },
   ];
 
+  // Scroll to shop section when navigated via credits chip (#feed-your-wolf)
+  const wolfLocation = useLocation();
+  useEffect(() => {
+    if (wolfLocation.hash === "#feed-your-wolf") {
+      const el = document.getElementById("feed-your-wolf");
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
+      }
+    }
+  }, [wolfLocation.hash]);
+
+  // ── Overscroll easter egg — pull down past top triggers howl ──────────────
+  const [wolfEasterEgg, setWolfEasterEgg] = useState(false);
+  const wolfEggCooldown = useRef(false);
+  const wolfTouchStartY = useRef(0);
+  const wolfTouchStartScroll = useRef(0);
+  useEffect(() => {
+    const onStart = (e: TouchEvent) => {
+      wolfTouchStartY.current = e.touches[0].clientY;
+      wolfTouchStartScroll.current = window.scrollY;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (wolfEggCooldown.current) return;
+      const dy = e.touches[0].clientY - wolfTouchStartY.current;
+      if (wolfTouchStartScroll.current <= 0 && dy > 70) {
+        wolfEggCooldown.current = true;
+        setWolfEasterEgg(true);
+        setTimeout(() => {
+          setWolfEasterEgg(false);
+          setTimeout(() => { wolfEggCooldown.current = false; }, 1500);
+        }, 2000);
+      }
+    };
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchmove", onMove);
+    };
+  }, []);
+
   const animKeyWolf = usePageAnimation("/tree");
   return (
     <PageShell>
+      {/* ── Wolf overscroll easter egg ── */}
+      <AnimatePresence>
+        {wolfEasterEgg && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "fixed", inset: 0, zIndex: 9000,
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              background: "radial-gradient(ellipse at 50% 45%, rgba(196,135,58,0.18) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          >
+            <motion.div
+              animate={{ y: [0, -12, 0, -6, 0] }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+              style={{ fontSize: 72, lineHeight: 1 }}
+            >🐺</motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              style={{
+                marginTop: 12, fontFamily: "'DM Sans', system-ui, sans-serif",
+                fontSize: 22, fontWeight: 900, letterSpacing: "0.22em",
+                textTransform: "uppercase", color: "#C4873A",
+                textShadow: "0 0 24px rgba(196,135,58,0.80)",
+              }}
+            >AWOOOO</motion.p>
+            {/* Paw prints scatter */}
+            {["🐾","🐾","🐾","🐾","🐾","🐾"].map((p, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 0.9, 0],
+                  x: (i % 2 === 0 ? 1 : -1) * (40 + i * 28),
+                  y: -60 - i * 22,
+                  scale: [0, 1, 0.7],
+                  rotate: (i % 2 === 0 ? 1 : -1) * (15 + i * 8),
+                }}
+                transition={{ delay: 0.15 + i * 0.08, duration: 1.2, ease: "easeOut" }}
+                style={{ position: "absolute", fontSize: 20, pointerEvents: "none" }}
+              >{p}</motion.span>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div key={animKeyWolf} variants={pageContainer} initial="hidden" animate="show">
-      <motion.header variants={popUp} className="px-6 pt-12">
+      <motion.header variants={popUp} className="px-6 pt-4">
         <div onClick={handleWolfDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
-          <p style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 700, fontStyle: "italic", color: "#C9A84C", letterSpacing: 0, margin: 0 }}>Your Companion</p>
+          <SectionTitle>Your Companion</SectionTitle>
         </div>
-        <h1 className="mt-2 text-3xl font-bold">Your Wolf</h1>
-        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-          This wolf is yours. Every clean day makes it stronger.
-        </p>
+        <h1 className="mt-0.5 text-2xl font-bold">Your Wolf</h1>
       </motion.header>
 
       {/* ── Dev panel (triple-tap "Your Companion" to toggle) ────────────── */}
@@ -2322,85 +2411,94 @@ function WolfPage({
       )}
 
 
-      {/* Wolf scene */}
-      <motion.section variants={popUp} className="mt-4 relative" style={{ height: 380 }}>
+      {/* Wolf scene — full-bleed, no card frame */}
+      <motion.section variants={popUp} className="mt-1 relative" style={{ height: 380 }}>
+        {/* Bottom fade — sky bleeds into page background */}
+        <div className="absolute bottom-0 inset-x-0 z-10 pointer-events-none"
+          style={{ height: 100, background: "linear-gradient(to bottom, transparent, #080604)" }} />
 
-        {/* Circular wolf scene — landscape + wolf fully contained */}
+        {/* Wolf visual */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div style={{ position: "relative", width: 280, height: 280, flexShrink: 0 }}>
+          {/* Single 300px anchor — sized for iPhone, rings + oval positioned relative to this */}
+          <div style={{ position: "relative", width: 300, height: 300, flexShrink: 0 }}>
 
-            {/* Atmospheric halo — diffuse gold glow behind circle */}
-            <motion.div
-              aria-hidden
-              style={{
-                position: "absolute",
-                top: "50%", left: "50%", marginTop: -170, marginLeft: -170,
-                width: 340, height: 340, borderRadius: "50%",
-                background: "radial-gradient(circle, transparent 38%, rgba(196,135,58,0.18) 52%, rgba(196,135,58,0.08) 66%, transparent 80%)",
-                pointerEvents: "none", zIndex: 1,
-              }}
-              animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
-              transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
-            />
-            {/* Primary crisp gold ring */}
-            <motion.div
-              aria-hidden
-              style={{
-                position: "absolute",
-                top: "50%", left: "50%", marginTop: -148, marginLeft: -148,
-                width: 296, height: 296, borderRadius: "50%",
-                border: "2.5px solid rgba(196,135,58,0.88)",
-                filter: "blur(1px)",
-                boxShadow: "0 0 16px 6px rgba(196,135,58,0.45), 0 0 36px 14px rgba(196,135,58,0.18)",
-                pointerEvents: "none", zIndex: 5,
-              }}
-              animate={{ scale: [1, 1.012, 1], rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-            />
-            {/* Outer softer gold ring */}
-            <motion.div
-              aria-hidden
-              style={{
-                position: "absolute",
-                top: "50%", left: "50%", marginTop: -163, marginLeft: -163,
-                width: 326, height: 326, borderRadius: "50%",
-                border: "1px solid rgba(196,135,58,0.28)",
-                filter: "blur(2px)",
-                pointerEvents: "none", zIndex: 5,
-              }}
-              animate={{ scale: [1, 1.008, 1], rotate: -360 }}
-              transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-            />
+            {/* ── Badge-style glow ring ── */}
+            <>
+              {/* Atmospheric halo — diffuse glow sitting outside the circle */}
+              <motion.div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "50%", left: "50%", marginTop: -188, marginLeft: -188,
+                  width: 376, height: 376, borderRadius: "50%",
+                  background: "radial-gradient(circle, transparent 38%, rgba(196,135,58,0.22) 52%, rgba(196,135,58,0.10) 66%, transparent 80%)",
+                  pointerEvents: "none", zIndex: 3,
+                }}
+                animate={{ scale: [1, 1.015, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+              />
+              {/* Primary crisp ring — outside the circle */}
+              <motion.div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "50%", left: "50%", marginTop: -172, marginLeft: -172,
+                  width: 344, height: 344, borderRadius: "50%",
+                  border: "2.5px solid rgba(196,135,58,0.88)",
+                  filter: "blur(1.5px)",
+                  boxShadow: "0 0 16px 6px rgba(196,135,58,0.55), 0 0 36px 14px rgba(196,135,58,0.20)",
+                  pointerEvents: "none", zIndex: 3,
+                }}
+                animate={{ scale: [1, 1.012, 1], rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+              />
+              {/* Outer softer ring */}
+              <motion.div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "50%", left: "50%", marginTop: -190, marginLeft: -190,
+                  width: 380, height: 380, borderRadius: "50%",
+                  border: "1px solid rgba(196,135,58,0.30)",
+                  filter: "blur(2px)",
+                  pointerEvents: "none", zIndex: 3,
+                }}
+                animate={{ scale: [1, 1.008, 1], rotate: -360 }}
+                transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+              />
+            </>
 
-            {/* Hard circle — WolfBackground + wolf clipped inside */}
+            {/* Oval — masked sky + wolf, fills the 300px anchor */}
             <div style={{
               position: "absolute", inset: 0,
-              borderRadius: "50%", overflow: "hidden",
+              maskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 62%, transparent 86%)",
               zIndex: 2,
             }}>
-              <WolfBackground />
-              <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
-              {/* Wolf — bottom-anchored so it stands on the ground */}
-              <div style={{
-                position: "absolute", inset: 0,
-                display: "flex", alignItems: "flex-end", justifyContent: "center",
-                zIndex: 2,
-                filter: hasAlphaMark
-                  ? `${health.companionFilter === "none" ? "" : health.companionFilter + " "}drop-shadow(0 0 18px rgba(196,135,58,0.85)) drop-shadow(0 0 40px rgba(196,135,58,0.45)) brightness(1.12)`
-                  : health.companionFilter,
-                transition: "filter 1.2s ease",
-              }}>
-                <div style={{ width: 300, height: 340 }}>
-                  <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
+              {/* Sky fills the oval */}
+              <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "50%" }}>
+                <WolfBackground />
+                <div style={{ position: "absolute", inset: 0, background: health.sceneOverlay, pointerEvents: "none" }} />
+                {/* Wolf — bottom-anchored so it stands on the ground */}
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 2,
+                  filter: hasAlphaMark
+                    ? `${health.companionFilter === "none" ? "" : health.companionFilter + " "}drop-shadow(0 0 18px rgba(196,135,58,0.85)) drop-shadow(0 0 40px rgba(196,135,58,0.45)) brightness(1.12)`
+                    : health.companionFilter,
+                  transition: "filter 1.2s ease",
+                }}>
+                  <div style={{ width: 300, height: 340 }}>
+                    <CompanionAvatar type="wolf" day={day} stage={wolfStage.stage} relapseCount={state.relapses.length} className="w-full h-full" />
+                  </div>
                 </div>
+                {/* Active upgrade overlays — layered above the wolf, clipped by oval */}
+                <WolfUpgradeOverlays packBond={hasPackBond} furCoat={hasFurCoat} ancient={hasAncient} />
               </div>
-              {/* Active upgrade overlays — layered above the wolf, clipped by circle */}
-              <WolfUpgradeOverlays packBond={hasPackBond} furCoat={hasFurCoat} ancient={hasAncient} />
             </div>
 
           </div>
         </div>
-
       </motion.section>
 
       {/* XP + stats */}
@@ -2473,7 +2571,7 @@ function WolfPage({
       </motion.section>
 
       {/* Feed your wolf — etched glass shop */}
-      <motion.section variants={popUp} className="px-6 mt-6">
+      <motion.section id="feed-your-wolf" variants={popUp} className="px-6 mt-6">
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A84C", opacity: 0.82, marginBottom: 4 }}>
           Feed your wolf
         </p>
@@ -2595,6 +2693,36 @@ function LifeTreePage({
     }
   }, [location.hash]);
 
+  // ── Overscroll easter egg — pull down past top triggers leaf burst ─────────
+  const [treeEasterEgg, setTreeEasterEgg] = useState(false);
+  const treeEggCooldown = useRef(false);
+  const treeTouchStartY = useRef(0);
+  const treeTouchStartScroll = useRef(0);
+  useEffect(() => {
+    const onStart = (e: TouchEvent) => {
+      treeTouchStartY.current = e.touches[0].clientY;
+      treeTouchStartScroll.current = window.scrollY;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (treeEggCooldown.current) return;
+      const dy = e.touches[0].clientY - treeTouchStartY.current;
+      if (treeTouchStartScroll.current <= 0 && dy > 70) {
+        treeEggCooldown.current = true;
+        setTreeEasterEgg(true);
+        setTimeout(() => {
+          setTreeEasterEgg(false);
+          setTimeout(() => { treeEggCooldown.current = false; }, 1500);
+        }, 2000);
+      }
+    };
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchmove", onMove);
+    };
+  }, []);
+
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
     if (state.points < cost) {
@@ -2618,6 +2746,57 @@ function LifeTreePage({
   const animKeyTree = usePageAnimation("/tree");
   return (
     <PageShell>
+      {/* ── Tree overscroll easter egg ── */}
+      <AnimatePresence>
+        {treeEasterEgg && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "fixed", inset: 0, zIndex: 9000,
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              background: "radial-gradient(ellipse at 50% 45%, rgba(63,184,106,0.14) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          >
+            <motion.div
+              animate={{ rotate: [0, -8, 8, -4, 0], y: [0, -6, 0] }}
+              transition={{ duration: 1.4, ease: "easeInOut" }}
+              style={{ fontSize: 72, lineHeight: 1 }}
+            >🌳</motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              style={{
+                marginTop: 12, fontFamily: "'DM Sans', system-ui, sans-serif",
+                fontSize: 18, fontWeight: 900, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: "#3fb86a",
+                textShadow: "0 0 24px rgba(63,184,106,0.80)",
+              }}
+            >ROOTS RUN DEEP</motion.p>
+            {/* Leaf scatter */}
+            {["🍃","🍀","🌿","🍃","🌱","🍀"].map((leaf, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 0.9, 0],
+                  x: (i % 2 === 0 ? 1 : -1) * (35 + i * 30),
+                  y: -50 - i * 20,
+                  scale: [0, 1, 0.6],
+                  rotate: (i % 2 === 0 ? 1 : -1) * (20 + i * 10),
+                }}
+                transition={{ delay: 0.15 + i * 0.08, duration: 1.3, ease: "easeOut" }}
+                style={{ position: "absolute", fontSize: 20, pointerEvents: "none" }}
+              >{leaf}</motion.span>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div key={animKeyTree} variants={pageContainer} initial="hidden" animate="show">
       <motion.header variants={popUp} className="px-6 pt-4">
         <div onClick={handleDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
