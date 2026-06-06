@@ -33,6 +33,15 @@ export default defineConfig({
       rollupOptions: {
         // Native Capacitor plugins only run on device — exclude from web bundle
         external: ["@capacitor/push-notifications", "@capacitor/app"],
+        output: {
+          manualChunks: {
+            "vendor-react": ["react", "react-dom"],
+            "vendor-motion": ["framer-motion"],
+            "vendor-supabase": ["@supabase/supabase-js"],
+            "vendor-i18n": ["i18next", "react-i18next"],
+            "vendor-icons": ["lucide-react"],
+          },
+        },
       },
     },
   },

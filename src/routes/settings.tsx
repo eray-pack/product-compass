@@ -1143,7 +1143,6 @@ function CoinCard({
         duration: 0.54,
         ease: [0.22, 1, 0.36, 1],
       }}
-      whileHover={earned ? { scale: 1.07, y: -8 } : {}}
       whileTap={earned ? { scale: 0.93 } : {}}
       onClick={handleFlip}
     >
@@ -1169,13 +1168,8 @@ function CoinCard({
                 ? `2px solid ${badge.color}75`
                 : "2px solid rgba(255,255,255,0.07)",
               boxShadow: earned
-                ? [
-                    `0 0 0 1px ${badge.color}14`,
-                    `0 0 18px 5px ${badge.glow}`,
-                    `0 0 52px 12px ${dimGlow}`,
-                    `0 5px 28px rgba(0,0,0,0.60)`,
-                  ].join(", ")
-                : "0 3px 10px rgba(0,0,0,0.38)",
+                ? `0 0 16px 4px ${badge.glow}, 0 4px 16px rgba(0,0,0,0.50)`
+                : "0 2px 8px rgba(0,0,0,0.30)",
             }}
           >
             {/* Inner engraved ring — earned only */}
@@ -1216,9 +1210,8 @@ function CoinCard({
                   fontSize: 30,
                   lineHeight: 1,
                   color: earned ? "#ffffff" : "rgba(255,255,255,0.07)",
-                  filter: earned
-                    ? `drop-shadow(0 0 9px ${badge.color}) drop-shadow(0 2px 4px rgba(0,0,0,0.7))`
-                    : "blur(3.5px)",
+                  opacity: earned ? 1 : 0.08,
+                  filter: earned ? `drop-shadow(0 0 8px ${badge.color})` : "none",
                   userSelect: "none",
                 }}
               >
@@ -1323,7 +1316,7 @@ function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) 
             rgba(255,255,255,0.18) 60%,
             transparent 100%
           );
-          animation: coin-shimmer 4s ease-in-out infinite;
+          animation: coin-shimmer 6s ease-in-out infinite;
           pointer-events: none;
           z-index: 4;
         }
@@ -1388,7 +1381,7 @@ function BadgesSection({ state }: { state: ReturnType<typeof useAppState>[0] }) 
       >
         <div
           className="grid grid-cols-3"
-          style={{ gap: "30px 6px" }}
+          style={{ gap: "30px 6px", willChange: "transform" }}
         >
           {BADGES.map((b, i) => (
             <CoinCard

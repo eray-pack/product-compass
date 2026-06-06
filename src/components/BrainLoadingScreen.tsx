@@ -17,35 +17,14 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
   return (
     <>
       <style>{`
-        /* Text: blur-in → sharpen → breathe → dissolve */
+        /* Text: fade + scale only — GPU accelerated, no layout thrash */
         @keyframes stopamineIntro {
-          0% {
-            opacity: 0;
-            filter: blur(12px);
-            letter-spacing: 0.10em;
-            transform: scale(0.94);
-          }
-          40% {
-            opacity: 1;
-            filter: blur(0px);
-            letter-spacing: 0.38em;
-            transform: scale(1.00);
-          }
-          75% {
-            opacity: 1;
-            filter: blur(0px);
-            letter-spacing: 0.50em;
-            transform: scale(1.02);
-          }
-          100% {
-            opacity: 1;
-            filter: blur(0px);
-            letter-spacing: 0.54em;
-            transform: scale(1.03);
-          }
+          0%   { opacity: 0; transform: scale(0.92); }
+          45%  { opacity: 1; transform: scale(1.00); }
+          100% { opacity: 1; transform: scale(1.01); }
         }
 
-        /* Shimmer sweep: appears at 40%, crosses word by 62%, vanishes */
+        /* Shimmer sweep — GPU accelerated (transform only) */
         @keyframes stopamineShimmer {
           0%   { transform: translateX(-280%); opacity: 0; }
           35%  { transform: translateX(-280%); opacity: 0; }
@@ -55,19 +34,19 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
           100% { transform: translateX(340%);  opacity: 0; }
         }
 
-        /* Overlay: hold full opacity until 75%, then fade to 0 at 100% */
+        /* Overlay: hold then fade */
         @keyframes stopamineOverlay {
           0%   { opacity: 1; }
           75%  { opacity: 1; }
           100% { opacity: 0; }
         }
 
-        /* Ambient glow: pulse in with the text, fades with overlay */
+        /* Glow: scale + opacity only */
         @keyframes stopamineGlow {
-          0%   { opacity: 0;    transform: scale(0.80); }
-          40%  { opacity: 1;    transform: scale(1.00); }
+          0%   { opacity: 0; transform: scale(0.80); }
+          40%  { opacity: 1; transform: scale(1.00); }
           75%  { opacity: 0.85; transform: scale(1.05); }
-          100% { opacity: 0;    transform: scale(1.10); }
+          100% { opacity: 0; transform: scale(1.10); }
         }
       `}</style>
 
@@ -93,8 +72,7 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
             width: "70vw",
             height: "38vh",
             borderRadius: "50%",
-            background: "radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.20) 0%, rgba(212,175,55,0.06) 55%, transparent 75%)",
-            filter: "blur(48px)",
+            background: "radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.04) 55%, transparent 75%)",
             pointerEvents: "none",
             animation: "stopamineGlow 2s cubic-bezier(0.4, 0, 0.2, 1) forwards",
           }}
@@ -109,7 +87,7 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
               fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
               fontSize: "clamp(22px, 6.5vw, 32px)",
               fontWeight: 800,
-              letterSpacing: "0.38em",
+              letterSpacing: "0.48em",
               textTransform: "uppercase",
               color: "#d4af37",
               textShadow: [
@@ -118,7 +96,7 @@ export function BrainLoadingScreen({ onDone }: BrainLoadingScreenProps) {
                 "0 0 100px rgba(212,175,55,0.12)",
               ].join(", "),
               animation: "stopamineIntro 2s cubic-bezier(0.25, 0.1, 0.1, 1) forwards",
-              willChange: "opacity, filter, letter-spacing, transform",
+              willChange: "opacity, transform",
             }}
           >
             STOPAMINE
