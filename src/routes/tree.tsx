@@ -2256,53 +2256,39 @@ function WolfPage({
   const animKeyWolf = usePageAnimation("/tree");
   return (
     <PageShell>
-      {/* ── Wolf overscroll easter egg ── */}
+      {/* ── Wolf overscroll easter egg — top-edge banner ── */}
       <AnimatePresence>
         {wolfEasterEgg && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.2 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: "spring", damping: 18, stiffness: 280 }}
             style={{
-              position: "fixed", inset: 0, zIndex: 9000,
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              background: "radial-gradient(ellipse at 50% 45%, rgba(196,135,58,0.18) 0%, transparent 70%)",
+              position: "fixed", top: 0, left: 0, right: 0, zIndex: 9000,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              paddingTop: "calc(env(safe-area-inset-top) + 10px)",
+              paddingBottom: 14,
+              background: "linear-gradient(to bottom, rgba(10,7,3,0.96) 0%, rgba(10,7,3,0.0) 100%)",
               pointerEvents: "none",
             }}
           >
-            <motion.div
-              animate={{ y: [0, -12, 0, -6, 0] }}
-              transition={{ duration: 1.2, ease: "easeInOut" }}
-              style={{ fontSize: 72, lineHeight: 1 }}
-            >🐺</motion.div>
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              style={{
-                marginTop: 12, fontFamily: "'DM Sans', system-ui, sans-serif",
-                fontSize: 22, fontWeight: 900, letterSpacing: "0.22em",
-                textTransform: "uppercase", color: "#C4873A",
-                textShadow: "0 0 24px rgba(196,135,58,0.80)",
-              }}
-            >AWOOOO</motion.p>
-            {/* Paw prints scatter */}
-            {["🐾","🐾","🐾","🐾","🐾","🐾"].map((p, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
-                animate={{
-                  opacity: [0, 0.9, 0],
-                  x: (i % 2 === 0 ? 1 : -1) * (40 + i * 28),
-                  y: -60 - i * 22,
-                  scale: [0, 1, 0.7],
-                  rotate: (i % 2 === 0 ? 1 : -1) * (15 + i * 8),
-                }}
-                transition={{ delay: 0.15 + i * 0.08, duration: 1.2, ease: "easeOut" }}
-                style={{ position: "absolute", fontSize: 20, pointerEvents: "none" }}
-              >{p}</motion.span>
-            ))}
+            <motion.span
+              animate={{ rotate: [0, -15, 15, -8, 0] }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              style={{ fontSize: 28 }}
+            >🐺</motion.span>
+            <span style={{
+              fontFamily: "'DM Sans', system-ui, sans-serif",
+              fontSize: 15, fontWeight: 900, letterSpacing: "0.28em",
+              textTransform: "uppercase", color: "#C4873A",
+              textShadow: "0 0 16px rgba(196,135,58,0.70)",
+            }}>AWOOOO</span>
+            <motion.span
+              animate={{ rotate: [0, 15, -15, 8, 0] }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              style={{ fontSize: 28 }}
+            >🐾</motion.span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2746,53 +2732,39 @@ function LifeTreePage({
   const animKeyTree = usePageAnimation("/tree");
   return (
     <PageShell>
-      {/* ── Tree overscroll easter egg ── */}
+      {/* ── Tree overscroll easter egg — top-edge banner ── */}
       <AnimatePresence>
         {treeEasterEgg && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.2 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: "spring", damping: 18, stiffness: 280 }}
             style={{
-              position: "fixed", inset: 0, zIndex: 9000,
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              background: "radial-gradient(ellipse at 50% 45%, rgba(63,184,106,0.14) 0%, transparent 70%)",
+              position: "fixed", top: 0, left: 0, right: 0, zIndex: 9000,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              paddingTop: "calc(env(safe-area-inset-top) + 10px)",
+              paddingBottom: 14,
+              background: "linear-gradient(to bottom, rgba(4,10,6,0.96) 0%, rgba(4,10,6,0.0) 100%)",
               pointerEvents: "none",
             }}
           >
-            <motion.div
-              animate={{ rotate: [0, -8, 8, -4, 0], y: [0, -6, 0] }}
-              transition={{ duration: 1.4, ease: "easeInOut" }}
-              style={{ fontSize: 72, lineHeight: 1 }}
-            >🌳</motion.div>
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              style={{
-                marginTop: 12, fontFamily: "'DM Sans', system-ui, sans-serif",
-                fontSize: 18, fontWeight: 900, letterSpacing: "0.18em",
-                textTransform: "uppercase", color: "#3fb86a",
-                textShadow: "0 0 24px rgba(63,184,106,0.80)",
-              }}
-            >ROOTS RUN DEEP</motion.p>
-            {/* Leaf scatter */}
-            {["🍃","🍀","🌿","🍃","🌱","🍀"].map((leaf, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
-                animate={{
-                  opacity: [0, 0.9, 0],
-                  x: (i % 2 === 0 ? 1 : -1) * (35 + i * 30),
-                  y: -50 - i * 20,
-                  scale: [0, 1, 0.6],
-                  rotate: (i % 2 === 0 ? 1 : -1) * (20 + i * 10),
-                }}
-                transition={{ delay: 0.15 + i * 0.08, duration: 1.3, ease: "easeOut" }}
-                style={{ position: "absolute", fontSize: 20, pointerEvents: "none" }}
-              >{leaf}</motion.span>
-            ))}
+            <motion.span
+              animate={{ rotate: [0, -12, 12, -6, 0] }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+              style={{ fontSize: 28 }}
+            >🌿</motion.span>
+            <span style={{
+              fontFamily: "'DM Sans', system-ui, sans-serif",
+              fontSize: 15, fontWeight: 900, letterSpacing: "0.22em",
+              textTransform: "uppercase", color: "#3fb86a",
+              textShadow: "0 0 16px rgba(63,184,106,0.70)",
+            }}>ROOTS RUN DEEP</span>
+            <motion.span
+              animate={{ rotate: [0, 12, -12, 6, 0] }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+              style={{ fontSize: 28 }}
+            >🌱</motion.span>
           </motion.div>
         )}
       </AnimatePresence>
