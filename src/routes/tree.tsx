@@ -2153,6 +2153,112 @@ function TreeUpgradeOverlays({
   );
 }
 
+// ── Overscroll easter egg — physically tracks the iOS rubber-band pull ───────
+// Sits above (top) and below (bottom) the viewport, revealed as the page
+// stretches. Follows the finger proportionally, springs back on release.
+function OverscrollEasterEgg({
+  topContent,
+  bottomContent,
+}: {
+  topContent: React.ReactNode;
+  bottomContent: React.ReactNode;
+}) {
+  const [topPull, setTopPull]       = useState(0);
+  const [bottomPull, setBottomPull] = useState(0);
+  const touchStartY                 = useRef(0);
+  const touchStartScrollY           = useRef(0);
+  const isTop                       = useRef(false);
+  const isBottom                    = useRef(false);
+
+  useEffect(() => {
+    const onStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY;
+      touchStartScrollY.current = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      isTop.current    = touchStartScrollY.current <= 2;
+      isBottom.current = touchStartScrollY.current >= maxScroll - 4;
+    };
+    const onMove = (e: TouchEvent) => {
+      const dy = e.touches[0].clientY - touchStartY.current;
+      if (isTop.current && dy > 0) {
+        // Pulling down at top — reveal top easter egg
+        setTopPull(Math.min(dy * 0.52, 88));
+        setBottomPull(0);
+      } else if (isBottom.current && dy < 0) {
+        // Pulling up at bottom — reveal bottom easter egg
+        setBottomPull(Math.min(-dy * 0.52, 88));
+        setTopPull(0);
+      }
+    };
+    const onEnd = () => {
+      setTopPull(0);
+      setBottomPull(0);
+    };
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchmove",  onMove,  { passive: true });
+    window.addEventListener("touchend",   onEnd,   { passive: true });
+    window.addEventListener("touchcancel", onEnd,  { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchmove",  onMove);
+      window.removeEventListener("touchend",   onEnd);
+      window.removeEventListener("touchcancel", onEnd);
+    };
+  }, []);
+
+  const STRIP_H  = 72; // px — height of each hidden strip
+  const FADE_IN  = 24; // px of pull before it starts fading in
+
+  return (
+    <>
+      {/* ── Top strip — hidden above viewport, slides down on pull ── */}
+      <div
+        aria-hidden
+        style={{
+          position: "fixed",
+          top: -STRIP_H,
+          left: 0, right: 0,
+          height: STRIP_H,
+          display: "flex", alignItems: "flex-end", justifyContent: "center",
+          paddingBottom: 10,
+          transform: `translateY(${topPull}px)`,
+          // Spring-back when released, instant-follow while pulling
+          transition: topPull === 0
+            ? "transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease"
+            : "none",
+          opacity: topPull < FADE_IN ? 0 : Math.min(1, (topPull - FADE_IN) / 28),
+          pointerEvents: "none",
+          zIndex: 9100,
+        }}
+      >
+        {topContent}
+      </div>
+
+      {/* ── Bottom strip — hidden below viewport, slides up on pull ── */}
+      <div
+        aria-hidden
+        style={{
+          position: "fixed",
+          bottom: -STRIP_H,
+          left: 0, right: 0,
+          height: STRIP_H,
+          display: "flex", alignItems: "flex-start", justifyContent: "center",
+          paddingTop: 10,
+          transform: `translateY(-${bottomPull}px)`,
+          transition: bottomPull === 0
+            ? "transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease"
+            : "none",
+          opacity: bottomPull < FADE_IN ? 0 : Math.min(1, (bottomPull - FADE_IN) / 28),
+          pointerEvents: "none",
+          zIndex: 9100,
+        }}
+      >
+        {bottomContent}
+      </div>
+    </>
+  );
+}
+
 // ── Wolf companion page ───────────────────────────────────────────────────────
 function WolfPage({
   state,
@@ -2223,75 +2329,26 @@ function WolfPage({
     }
   }, [wolfLocation.hash]);
 
-  // ── Overscroll easter egg — pull down past top triggers howl ──────────────
-  const [wolfEasterEgg, setWolfEasterEgg] = useState(false);
-  const wolfEggCooldown = useRef(false);
-  const wolfTouchStartY = useRef(0);
-  const wolfTouchStartScroll = useRef(0);
-  useEffect(() => {
-    const onStart = (e: TouchEvent) => {
-      wolfTouchStartY.current = e.touches[0].clientY;
-      wolfTouchStartScroll.current = window.scrollY;
-    };
-    const onMove = (e: TouchEvent) => {
-      if (wolfEggCooldown.current) return;
-      const dy = e.touches[0].clientY - wolfTouchStartY.current;
-      if (wolfTouchStartScroll.current <= 0 && dy > 70) {
-        wolfEggCooldown.current = true;
-        setWolfEasterEgg(true);
-        setTimeout(() => {
-          setWolfEasterEgg(false);
-          setTimeout(() => { wolfEggCooldown.current = false; }, 1500);
-        }, 2000);
-      }
-    };
-    window.addEventListener("touchstart", onStart, { passive: true });
-    window.addEventListener("touchmove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("touchstart", onStart);
-      window.removeEventListener("touchmove", onMove);
-    };
-  }, []);
 
   const animKeyWolf = usePageAnimation("/tree");
   return (
     <PageShell>
-      {/* ── Wolf overscroll easter egg — top-edge banner ── */}
-      <AnimatePresence>
-        {wolfEasterEgg && (
-          <motion.div
-            initial={{ y: -80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -80, opacity: 0 }}
-            transition={{ type: "spring", damping: 18, stiffness: 280 }}
-            style={{
-              position: "fixed", top: 0, left: 0, right: 0, zIndex: 9000,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              paddingTop: "calc(env(safe-area-inset-top) + 10px)",
-              paddingBottom: 14,
-              background: "linear-gradient(to bottom, rgba(10,7,3,0.96) 0%, rgba(10,7,3,0.0) 100%)",
-              pointerEvents: "none",
-            }}
-          >
-            <motion.span
-              animate={{ rotate: [0, -15, 15, -8, 0] }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              style={{ fontSize: 28 }}
-            >🐺</motion.span>
-            <span style={{
-              fontFamily: "'DM Sans', system-ui, sans-serif",
-              fontSize: 15, fontWeight: 900, letterSpacing: "0.28em",
-              textTransform: "uppercase", color: "#C4873A",
-              textShadow: "0 0 16px rgba(196,135,58,0.70)",
-            }}>AWOOOO</span>
-            <motion.span
-              animate={{ rotate: [0, 15, -15, 8, 0] }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              style={{ fontSize: 28 }}
-            >🐾</motion.span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <OverscrollEasterEgg
+        topContent={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 26 }}>🐺</span>
+            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.28em", textTransform: "uppercase", color: "#C4873A", textShadow: "0 0 14px rgba(196,135,58,0.65)" }}>AWOOOO</span>
+            <span style={{ fontSize: 26 }}>🐾</span>
+          </div>
+        }
+        bottomContent={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 26 }}>🐾</span>
+            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.28em", textTransform: "uppercase", color: "#C4873A", textShadow: "0 0 14px rgba(196,135,58,0.65)" }}>STAY STRONG</span>
+            <span style={{ fontSize: 26 }}>🐺</span>
+          </div>
+        }
+      />
 
       <motion.div key={animKeyWolf} variants={pageContainer} initial="hidden" animate="show">
       <motion.header variants={popUp} className="px-6 pt-4">
@@ -2679,35 +2736,6 @@ function LifeTreePage({
     }
   }, [location.hash]);
 
-  // ── Overscroll easter egg — pull down past top triggers leaf burst ─────────
-  const [treeEasterEgg, setTreeEasterEgg] = useState(false);
-  const treeEggCooldown = useRef(false);
-  const treeTouchStartY = useRef(0);
-  const treeTouchStartScroll = useRef(0);
-  useEffect(() => {
-    const onStart = (e: TouchEvent) => {
-      treeTouchStartY.current = e.touches[0].clientY;
-      treeTouchStartScroll.current = window.scrollY;
-    };
-    const onMove = (e: TouchEvent) => {
-      if (treeEggCooldown.current) return;
-      const dy = e.touches[0].clientY - treeTouchStartY.current;
-      if (treeTouchStartScroll.current <= 0 && dy > 70) {
-        treeEggCooldown.current = true;
-        setTreeEasterEgg(true);
-        setTimeout(() => {
-          setTreeEasterEgg(false);
-          setTimeout(() => { treeEggCooldown.current = false; }, 1500);
-        }, 2000);
-      }
-    };
-    window.addEventListener("touchstart", onStart, { passive: true });
-    window.addEventListener("touchmove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("touchstart", onStart);
-      window.removeEventListener("touchmove", onMove);
-    };
-  }, []);
 
   const buyWithPoints = (id: string, cost: number, pro?: boolean) => {
     if (pro && !state.isPremium) { triggerPaywall(); return; }
@@ -2732,42 +2760,22 @@ function LifeTreePage({
   const animKeyTree = usePageAnimation("/tree");
   return (
     <PageShell>
-      {/* ── Tree overscroll easter egg — top-edge banner ── */}
-      <AnimatePresence>
-        {treeEasterEgg && (
-          <motion.div
-            initial={{ y: -80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -80, opacity: 0 }}
-            transition={{ type: "spring", damping: 18, stiffness: 280 }}
-            style={{
-              position: "fixed", top: 0, left: 0, right: 0, zIndex: 9000,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              paddingTop: "calc(env(safe-area-inset-top) + 10px)",
-              paddingBottom: 14,
-              background: "linear-gradient(to bottom, rgba(4,10,6,0.96) 0%, rgba(4,10,6,0.0) 100%)",
-              pointerEvents: "none",
-            }}
-          >
-            <motion.span
-              animate={{ rotate: [0, -12, 12, -6, 0] }}
-              transition={{ duration: 0.9, ease: "easeInOut" }}
-              style={{ fontSize: 28 }}
-            >🌿</motion.span>
-            <span style={{
-              fontFamily: "'DM Sans', system-ui, sans-serif",
-              fontSize: 15, fontWeight: 900, letterSpacing: "0.22em",
-              textTransform: "uppercase", color: "#3fb86a",
-              textShadow: "0 0 16px rgba(63,184,106,0.70)",
-            }}>ROOTS RUN DEEP</span>
-            <motion.span
-              animate={{ rotate: [0, 12, -12, 6, 0] }}
-              transition={{ duration: 0.9, ease: "easeInOut" }}
-              style={{ fontSize: 28 }}
-            >🌱</motion.span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <OverscrollEasterEgg
+        topContent={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 26 }}>🌿</span>
+            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.22em", textTransform: "uppercase", color: "#3fb86a", textShadow: "0 0 14px rgba(63,184,106,0.65)" }}>ROOTS RUN DEEP</span>
+            <span style={{ fontSize: 26 }}>🌱</span>
+          </div>
+        }
+        bottomContent={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 26 }}>🌱</span>
+            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.22em", textTransform: "uppercase", color: "#3fb86a", textShadow: "0 0 14px rgba(63,184,106,0.65)" }}>KEEP GROWING</span>
+            <span style={{ fontSize: 26 }}>🌿</span>
+          </div>
+        }
+      />
 
       <motion.div key={animKeyTree} variants={pageContainer} initial="hidden" animate="show">
       <motion.header variants={popUp} className="px-6 pt-4">

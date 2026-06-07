@@ -578,8 +578,8 @@ input, textarea {
 @layer base {
   * { border-color: var(--color-border); }
   html {
-    /* Hardcoded dark — inline style in __root.tsx overrides this, but kept as fallback */
-    background-color: #000000;
+    /* Match app background exactly — this fills the iOS rubber-band elastic space */
+    background-color: #0D0A08;
     color-scheme: dark;
   }
   body {
