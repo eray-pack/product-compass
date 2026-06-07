@@ -2155,10 +2155,9 @@ function TreeUpgradeOverlays({
 }
 
 // ── Overscroll easter egg ─────────────────────────────────────────────────────
-// Rendered via React portal (outside the elastic wrapper) so position: fixed
-// works correctly against the viewport, not any transformed ancestor.
-// Tracks the same touch gesture as PageShell's elastic bounce — they move in
-// sync because they both listen to the same window touch events.
+// Zero React re-renders — drives DOM directly via refs, same as PageShell's
+// elastic bounce. Portal keeps it outside the elastic wrapper so position:fixed
+// stays viewport-relative even though parent has a CSS transform.
 function OverscrollEasterEgg({
   topContent,
   bottomContent,
@@ -2166,18 +2165,38 @@ function OverscrollEasterEgg({
   topContent: React.ReactNode;
   bottomContent: React.ReactNode;
 }) {
-  const [topPull, setTopPull]       = useState(0);
-  const [bottomPull, setBottomPull] = useState(0);
-  const startY    = useRef(0);
-  const atTop     = useRef(false);
-  const atBottom  = useRef(false);
+  const topRef    = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let sY = 0, edgeDy = 0, atEdge = false, side = 0, sTime = 0;
+    const top    = topRef.current;
+    const bottom = bottomRef.current;
+    if (!top || !bottom) return;
+
+    const STRIP  = 72;
+    const FADE   = 20;
+    const SPRING = "transform 0.52s cubic-bezier(0.22,1,0.36,1), opacity 0.35s ease";
+
+    let sY = 0, sTime = 0, edgeDy = 0, atEdge = false, side = 0;
+
+    const setTop = (pull: number, animated: boolean) => {
+      top.style.transition = animated ? SPRING : "none";
+      top.style.transform  = `translateY(${pull}px)`;
+      top.style.opacity    = pull < FADE ? "0" : String(Math.min(1, (pull - FADE) / 30));
+    };
+    const setBottom = (pull: number, animated: boolean) => {
+      bottom.style.transition = animated ? SPRING : "none";
+      bottom.style.transform  = `translateY(-${pull}px)`;
+      bottom.style.opacity    = pull < FADE ? "0" : String(Math.min(1, (pull - FADE) / 30));
+    };
+    const reset = (animated: boolean) => { setTop(0, animated); setBottom(0, animated); };
 
     const onStart = (e: TouchEvent) => {
       sY = e.touches[0].clientY; sTime = Date.now();
       atEdge = false; side = 0;
+      // Kill any in-progress spring
+      top.style.transition    = "none";
+      bottom.style.transition = "none";
     };
     const onMove = (e: TouchEvent) => {
       const dy      = e.touches[0].clientY - sY;
@@ -2185,31 +2204,31 @@ function OverscrollEasterEgg({
       const max     = document.documentElement.scrollHeight - window.innerHeight;
 
       if (!atEdge) {
-        if (scrollY <= 0 && dy > 0)      { atEdge = true; edgeDy = dy; side =  1; }
-        else if (scrollY >= max - 1 && dy < 0) { atEdge = true; edgeDy = dy; side = -1; }
+        if      (scrollY <= 0     && dy > 0) { atEdge = true; edgeDy = dy; side =  1; }
+        else if (scrollY >= max-1 && dy < 0) { atEdge = true; edgeDy = dy; side = -1; }
       }
       if (atEdge) {
         const excess = dy - edgeDy;
-        if (side ===  1) { setTopPull(Math.max(0, Math.min(excess * 0.38, 90))); setBottomPull(0); }
-        if (side === -1) { setBottomPull(Math.max(0, Math.min(-excess * 0.38, 90))); setTopPull(0); }
+        if (side ===  1) { setTop(Math.max(0, Math.min(excess * 0.38, 90)), false); setBottom(0, false); }
+        if (side === -1) { setBottom(Math.max(0, Math.min(-excess * 0.38, 90)), false); setTop(0, false); }
         if ((side === 1 && dy < edgeDy) || (side === -1 && dy > edgeDy)) {
-          atEdge = false; side = 0; setTopPull(0); setBottomPull(0);
+          atEdge = false; side = 0; reset(true);
         }
       }
     };
     const onEnd = (e: TouchEvent) => {
-      const endY     = e.changedTouches[0].clientY;
-      const velocity = (endY - sY) / Math.max(1, Date.now() - sTime);
+      const velocity = (e.changedTouches[0].clientY - sY) / Math.max(1, Date.now() - sTime);
       const scrollY  = window.scrollY;
       const max      = document.documentElement.scrollHeight - window.innerHeight;
       if (!atEdge) {
-        if (scrollY <= 6 && velocity > 1.8)       setTopPull(Math.min(velocity * 18, 55));
-        else if (scrollY >= max - 6 && velocity < -1.8) setBottomPull(Math.min(-velocity * 18, 55));
+        if      (scrollY <= 6     && velocity >  1.8) { setTop(Math.min(velocity * 18, 55), false); requestAnimationFrame(() => setTop(0, true)); }
+        else if (scrollY >= max-6 && velocity < -1.8) { setBottom(Math.min(-velocity * 18, 55), false); requestAnimationFrame(() => setBottom(0, true)); }
+      } else {
+        reset(true);
       }
       atEdge = false; side = 0;
-      setTimeout(() => { setTopPull(0); setBottomPull(0); }, atEdge ? 0 : 16);
     };
-    const onCancel = () => { atEdge = false; side = 0; setTopPull(0); setBottomPull(0); };
+    const onCancel = () => { atEdge = false; side = 0; reset(true); };
 
     window.addEventListener("touchstart",  onStart,  { passive: true });
     window.addEventListener("touchmove",   onMove,   { passive: true });
@@ -2223,33 +2242,24 @@ function OverscrollEasterEgg({
     };
   }, []);
 
-  const STRIP  = 72;
-  const FADE   = 20; // px pull before fading in
-  const spring = "transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease";
+  const stripStyle = (pos: "top" | "bottom"): React.CSSProperties => ({
+    position: "fixed",
+    [pos]: -72, left: 0, right: 0, height: 72,
+    display: "flex",
+    alignItems:     pos === "top" ? "flex-end"   : "flex-start",
+    justifyContent: "center",
+    paddingBottom:  pos === "top" ? 10 : 0,
+    paddingTop:     pos === "top" ? 0  : 10,
+    opacity: 0,          // JS drives this — start hidden
+    transform: "translateY(0px)",
+    pointerEvents: "none",
+    zIndex: 9100,
+  });
 
-  // Portal renders outside the elastic wrapper — position: fixed stays viewport-relative
   return createPortal(
     <>
-      <div aria-hidden style={{
-        position: "fixed", top: -STRIP, left: 0, right: 0, height: STRIP,
-        display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 10,
-        transform: `translateY(${topPull}px)`,
-        transition: topPull === 0 ? spring : "none",
-        opacity: topPull < FADE ? 0 : Math.min(1, (topPull - FADE) / 30),
-        pointerEvents: "none", zIndex: 9100,
-      }}>
-        {topContent}
-      </div>
-      <div aria-hidden style={{
-        position: "fixed", bottom: -STRIP, left: 0, right: 0, height: STRIP,
-        display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 10,
-        transform: `translateY(-${bottomPull}px)`,
-        transition: bottomPull === 0 ? spring : "none",
-        opacity: bottomPull < FADE ? 0 : Math.min(1, (bottomPull - FADE) / 30),
-        pointerEvents: "none", zIndex: 9100,
-      }}>
-        {bottomContent}
-      </div>
+      <div ref={topRef}    aria-hidden style={stripStyle("top")}>{topContent}</div>
+      <div ref={bottomRef} aria-hidden style={stripStyle("bottom")}>{bottomContent}</div>
     </>,
     document.body
   );
