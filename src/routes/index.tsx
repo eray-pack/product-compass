@@ -815,10 +815,12 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
   const dragDX                  = useRef(0);     // live drag offset (no re-render)
   const horizontal              = useRef(false); // locked-in axis for this gesture
 
-  // Snap to latest earned badge whenever the active habit changes
+  // Snap to the current (latest earned) badge whenever the habit changes OR the
+  // day count changes — e.g. a relapse reset drops day 11 → 1, so we must drop
+  // off the now-locked Awaken badge back to Spark instead of staying parked.
   useEffect(() => {
     setIdx(Math.max(0, BADGES.filter((b) => day >= b.day).length - 1));
-  }, [addictionId]);
+  }, [addictionId, day]);
 
   const SNAP = "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
   const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
