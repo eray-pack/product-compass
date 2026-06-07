@@ -2,28 +2,31 @@ import { useEffect, useRef } from "react";
 import { useMotionValue, animate, type MotionValue } from "framer-motion";
 
 // ── Page elastic overscroll bounce ────────────────────────────────────────────
-// JS-driven rubber-band for full pages (the native WKWebView bounce is
-// unreliable inside Capacitor). Transforms a content wrapper directly (GPU,
-// no React re-renders), engages ONLY at the scroll edges, springs back on
-// release. Set transform back to "" at rest so it never breaks position:fixed.
-const BOUNCE_MAX        = 150;   // px max stretch (asymptotic, never hard-capped feel)
-const BOUNCE_DIMENSION  = 600;   // rubber-band reference dimension
-const BOUNCE_CONSTANT   = 0.5;   // lower = stiffer
-const BOUNCE_SPRING     = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+// One continuous spring model so it flows like water: the finger tracks a
+// soft asymptotic rubber-band (no hard wall), and on release your finger's
+// velocity carries straight into the spring-back. A fast scroll that reaches
+// an edge feeds its leftover momentum into the same spring. Transform resets
+// to "" at rest so it never breaks position:fixed.
+const RESIST_ASYMPTOTE  = 200;   // px the pull asymptotically approaches (soft, no wall)
+const RESIST_SLOPE      = 0.5;   // resistance at the start of the pull (1 = 1:1 with finger)
 
-// Fling → bounce (momentum carry-through): a fast scroll that REACHES an edge
-// with leftover velocity flows straight into the rubber-band, no hard stop.
+// Spring that settles to rest — smooth, minimal oscillation (water, not jelly)
+const SPRING = { type: "spring" as const, stiffness: 200, damping: 30, restDelta: 0.2, restSpeed: 2 };
+const FLING_SPRING = { type: "spring" as const, stiffness: 190, damping: 26, restDelta: 0.2, restSpeed: 2 };
+
+// Fling → bounce (momentum carry-through)
 const FLING_THRESHOLD   = 0.35;  // px/ms remaining velocity at the edge to trigger
-const FLING_SCALE       = 0.55;  // how much scroll velocity converts to bounce impulse
-const FLING_MAX_V       = 1500;  // px/s cap on the impulse fed into the spring
+const FLING_SCALE       = 0.6;   // scroll velocity → bounce impulse
+const FLING_MAX_V       = 1800;  // px/s cap on the impulse fed into the spring
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
+// Soft asymptotic resistance — gentle 1:~0.5 at first, approaches the asymptote,
+// never hits a flat cap. This is what removes the "wall" feeling.
 function bounceResist(distance: number) {
+  const sign = distance < 0 ? -1 : 1;
   const x = Math.abs(distance);
-  const b = (x * BOUNCE_DIMENSION * BOUNCE_CONSTANT) / (BOUNCE_DIMENSION + BOUNCE_CONSTANT * x);
-  const capped = Math.min(b, BOUNCE_MAX);
-  return distance < 0 ? -capped : capped;
+  return sign * (x * RESIST_ASYMPTOTE * RESIST_SLOPE) / (RESIST_ASYMPTOTE + RESIST_SLOPE * x);
 }
 
 // True if the touch began inside an overlay (position:fixed) or its own inner
@@ -49,33 +52,50 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    el.style.willChange = "transform";
+    el.style.transition = "none"; // always JS-driven; never let CSS fight the finger
 
-    let fling: { stop: () => void } | null = null;
-    const stopFling = () => { if (fling) { fling.stop(); fling = null; } };
-    const setT = (v: number) => {
-      const c = clamp(v, -BOUNCE_MAX, BOUNCE_MAX);
-      el.style.transform = c === 0 ? "" : `translate3d(0, ${c}px, 0)`;
+    let offset = 0;                                    // current transform offset (px)
+    let anim: { stop: () => void } | null = null;
+    const stop = () => { if (anim) { anim.stop(); anim = null; } };
+    const setNow = (v: number) => {
+      offset = v;
+      el.style.transform = v === 0 ? "" : `translate3d(0, ${v}px, 0)`;
+    };
+    // One spring to rule them all — `from`/`to`/`velocity` cover drag-release,
+    // fling, and snap-back identically, so the motion is always continuous.
+    const spring = (from: number, velocity: number, cfg = SPRING) => {
+      stop();
+      anim = animate(from, 0, {
+        ...cfg, velocity,
+        onUpdate: setNow,
+        onComplete: () => { setNow(0); anim = null; },
+      });
     };
 
     // ── Manual pull (finger at the edge) ──────────────────────────────────────
     let startY = 0, dragging = false, decided = false, skip = false, touching = false;
+    let maxScroll = 0;
     let rafId = 0, pending = 0;
-    const flush = () => { rafId = 0; setT(pending); };
+    let lastMoveY = 0, lastMoveT = 0, dragVel = 0;     // px/ms during the pull
+    const flush = () => { rafId = 0; setNow(pending); };
     const queue = (v: number) => { pending = v; if (!rafId) rafId = requestAnimationFrame(flush); };
 
     const onStart = (e: TouchEvent) => {
       touching = true; dragging = false; decided = false;
       skip = startedInOverlayOrScroller(e.target);
       startY = e.touches[0].clientY;
-      stopFling();
-      el.style.transition = "none";
+      lastMoveY = startY; lastMoveT = performance.now(); dragVel = 0;
+      maxScroll = document.documentElement.scrollHeight - window.innerHeight; // cache once
+      stop();
     };
     const onMove = (e: TouchEvent) => {
       if (skip) return;
-      const dy = e.touches[0].clientY - startY;
+      const cy = e.touches[0].clientY;
+      const dy = cy - startY;
       if (!decided) {
         const atTop    = window.scrollY <= 0;
-        const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+        const atBottom = window.scrollY + window.innerHeight >= maxScroll - 1;
         if (atTop && dy > 0)         { dragging = true; decided = true; }
         else if (atBottom && dy < 0) { dragging = true; decided = true; }
         else if (Math.abs(dy) > 3)   { decided = true; } // normal scroll — hands off
@@ -83,43 +103,33 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
       if (!dragging) return;
       e.preventDefault();
       queue(bounceResist(dy));
+      const now = performance.now();
+      const dt = now - lastMoveT;
+      if (dt > 0) dragVel = (cy - lastMoveY) / dt;       // track finger velocity
+      lastMoveY = cy; lastMoveT = now;
     };
     const onEnd = () => {
       touching = false;
       if (!dragging) return;
       dragging = false;
       if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-      pending = 0;
-      el.style.transition = BOUNCE_SPRING;
-      el.style.transform = "";
+      // Carry the finger's release velocity into the spring → continuous flow.
+      spring(offset, dragVel * 1000, SPRING);
     };
 
-    // ── Fling carry-through (momentum reaches the edge) ───────────────────────
+    // ── Fling carry-through (momentum reaches the edge, no finger) ─────────────
     let lastY = window.scrollY, lastT = performance.now(), vel = 0, cooldown = false;
-    const fireFling = (impulsePerMs: number) => {
-      cooldown = true;
-      stopFling();
-      el.style.transition = "none";
-      // Spring from 0 → 0 with an initial velocity = overshoot then settle back.
-      const v0 = clamp(impulsePerMs * 1000 * FLING_SCALE, -FLING_MAX_V, FLING_MAX_V);
-      fling = animate(0, 0, {
-        type: "spring", velocity: v0, stiffness: 170, damping: 22,
-        restDelta: 0.4, restSpeed: 3,
-        onUpdate: (val: number) => setT(val),
-        onComplete: () => { el.style.transform = ""; fling = null; },
-      });
-    };
     const onScroll = () => {
       const now = performance.now();
       const y = window.scrollY;
       const dt = now - lastT;
       if (dt > 0) vel = (y - lastY) / dt; // px/ms (negative = toward top)
       lastY = y; lastT = now;
-      if (touching || dragging) return;   // finger handles edges directly
+      if (touching || dragging) return;   // finger path owns the edges
       const max = document.documentElement.scrollHeight - window.innerHeight;
       if (!cooldown) {
-        if (y <= 0 && vel < -FLING_THRESHOLD)        fireFling(-vel); // hit top with speed
-        else if (y >= max - 1 && vel > FLING_THRESHOLD) fireFling(-vel); // hit bottom
+        if (y <= 0 && vel < -FLING_THRESHOLD)           { cooldown = true; spring(0, clamp(-vel * 1000 * FLING_SCALE, -FLING_MAX_V, FLING_MAX_V), FLING_SPRING); }
+        else if (y >= max - 1 && vel > FLING_THRESHOLD) { cooldown = true; spring(0, clamp(-vel * 1000 * FLING_SCALE, -FLING_MAX_V, FLING_MAX_V), FLING_SPRING); }
       }
       if (y > 2 && y < max - 2) cooldown = false; // re-arm once away from edges
     };
@@ -131,7 +141,7 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
     window.addEventListener("scroll",      onScroll, { passive: true });
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
-      stopFling();
+      stop();
       window.removeEventListener("touchstart",  onStart);
       window.removeEventListener("touchmove",   onMove);
       window.removeEventListener("touchend",    onEnd);
