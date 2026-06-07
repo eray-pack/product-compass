@@ -596,6 +596,14 @@ input, textarea {
     --sal: env(safe-area-inset-left);
     --sar: env(safe-area-inset-right);
     padding-top: env(safe-area-inset-top);
+    /* Prevent horizontal scroll — no black edges on swipe */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
