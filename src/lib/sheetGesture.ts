@@ -7,15 +7,15 @@ import { useMotionValue, animate, type MotionValue } from "framer-motion";
 // velocity carries straight into the spring-back. A fast scroll that reaches
 // an edge feeds its leftover momentum into the same spring. Transform resets
 // to "" at rest so it never breaks position:fixed.
-const RESIST_ASYMPTOTE  = 200;   // px the pull asymptotically approaches (soft, no wall)
-const RESIST_SLOPE      = 0.5;   // resistance at the start of the pull (1 = 1:1 with finger)
+const RESIST_ASYMPTOTE  = 240;   // px the pull asymptotically approaches (soft, no wall)
+const RESIST_SLOPE      = 0.8;   // tracking at the start of the pull (1 = 1:1 with finger)
 
 // Spring that settles to rest — smooth, minimal oscillation (water, not jelly)
 const SPRING = { type: "spring" as const, stiffness: 200, damping: 30, restDelta: 0.2, restSpeed: 2 };
 const FLING_SPRING = { type: "spring" as const, stiffness: 190, damping: 26, restDelta: 0.2, restSpeed: 2 };
 
 // Fling → bounce (momentum carry-through)
-const FLING_THRESHOLD   = 0.35;  // px/ms remaining velocity at the edge to trigger
+const FLING_THRESHOLD   = 0.2;   // px/ms remaining velocity at the edge to trigger (gentle)
 const FLING_SCALE       = 0.6;   // scroll velocity → bounce impulse
 const FLING_MAX_V       = 1800;  // px/s cap on the impulse fed into the spring
 
@@ -94,8 +94,10 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
       const cy = e.touches[0].clientY;
       const dy = cy - startY;
       if (!decided) {
+        // maxScroll = scrollHeight - innerHeight, so "at bottom" is simply
+        // scrollY >= maxScroll (NOT scrollY + innerHeight, which double-counts).
         const atTop    = window.scrollY <= 0;
-        const atBottom = window.scrollY + window.innerHeight >= maxScroll - 1;
+        const atBottom = window.scrollY >= maxScroll - 1;
         if (atTop && dy > 0)         { dragging = true; decided = true; }
         else if (atBottom && dy < 0) { dragging = true; decided = true; }
         else if (Math.abs(dy) > 3)   { decided = true; } // normal scroll — hands off
