@@ -1551,10 +1551,11 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   };
 
   return (
-    <div className="min-h-screen max-w-md mx-auto flex flex-col">
+    <div className="flex flex-col" style={{ position: "fixed", inset: 0, maxWidth: 448, margin: "0 auto", zIndex: 40 }}>
       <PremiumBackground />
-      <header className="sticky top-0 z-30 backdrop-blur-xl px-4 py-3 flex items-center gap-3"
-        style={{ background: "oklch(0.13 0.020 265 / 0.92)", borderBottom: "1px solid oklch(0.20 0.025 265 / 0.7)" }}>
+      {/* ── Fixed header — pinned, never scrolls ── */}
+      <header className="z-30 backdrop-blur-xl px-4 pb-3 flex items-center gap-3 shrink-0"
+        style={{ background: "oklch(0.13 0.020 265 / 0.92)", borderBottom: "1px solid oklch(0.20 0.025 265 / 0.7)", paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <button onClick={onBack}
           className="h-9 w-9 rounded-xl grid place-items-center transition-colors"
           style={{ border: "1px solid oklch(0.22 0.03 265)", color: "var(--muted-foreground)" }}>
@@ -1573,14 +1574,16 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
       </header>
 
       {room.isGlobal && (
-        <div className="px-4 py-2.5" style={{ background: "oklch(0.15 0.020 265 / 0.6)", borderBottom: "1px solid oklch(0.20 0.025 265 / 0.5)" }}>
+        <div className="px-4 py-2.5 shrink-0 z-30" style={{ background: "oklch(0.15 0.020 265 / 0.6)", borderBottom: "1px solid oklch(0.20 0.025 265 / 0.5)" }}>
           <p className="text-[10px] text-center" style={{ color: "oklch(0.52 0.015 265 / 0.7)" }}>
             10-second cooldown between messages · Be kind
           </p>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-32">
+      {/* ── Scrollable message list — the only scroller ── */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5"
+        style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {messages.length === 0 && (
           <div className="text-center py-16">
             <MessageCircle className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
@@ -1638,7 +1641,7 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 max-w-md mx-auto backdrop-blur-xl px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
+      <div className="shrink-0 backdrop-blur-xl px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
         style={{ background: "oklch(0.13 0.020 265 / 0.95)", borderTop: "1px solid oklch(0.20 0.025 265 / 0.7)" }}>
         {cooldown > 0 && (
           <div className="mb-2 flex items-center gap-2">
