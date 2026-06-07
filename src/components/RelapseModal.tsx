@@ -63,6 +63,8 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
   const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
   const [reframeText, setReframeText] = useState<string | null>(null);
   const [loading, setLoading]     = useState(false);
+  const [didReset, setDidReset]   = useState(false);
+  const [loggedDay, setLoggedDay] = useState(0);
 
   const TRIGGERS = TRIGGER_META.map(({ id, emoji, glow }) => ({
     id, emoji, glow, label: t(`relapse.trigger.${id}`),
@@ -73,8 +75,30 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
   const addictionName   = active?.name ?? "Porn";
   const onboardingTriggers = state.onboarding?.triggers ?? [];
 
+  // ── 3-strike system ───────────────────────────────────────────────────────
+  // Slips 1 & 2 keep the counter (with an honest heads-up). The 3rd slip this
+  // streak resets the counter to 0 — told straight, but framed so they keep going.
+  const priorStrikes = active?.startDate
+    ? state.relapses.filter((r) => r.ts >= active.startDate).length
+    : 0;
+  const thisStrike   = priorStrikes + 1;       // the slip about to be logged
+  const willReset    = thisStrike >= 3;        // 3rd slip resets
+
   const logRelapse = () => {
-    update((s) => ({ relapses: [...s.relapses, { ts: Date.now(), reframeShown: true }] }));
+    setLoggedDay(streakDay);
+    setDidReset(willReset);
+    update((s) => {
+      const now = Date.now();
+      const act = activeAddiction(s);
+      const prior = act?.startDate ? s.relapses.filter((r) => r.ts >= act.startDate).length : 0;
+      const reset = prior + 1 >= 3;
+      return {
+        relapses: [...s.relapses, { ts: now, reframeShown: true }],
+        ...(reset && act
+          ? { addictions: s.addictions.map((a) => (a.id === act.id ? { ...a, startDate: now + 1 } : a)) }
+          : {}),
+      };
+    });
     setStep("trigger_select");
   };
 
@@ -148,7 +172,33 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                 <span style={{ color: "rgba(255,255,255,0.65)" }}>{t("relapse.confirm.body").split("—")[1]?.trimStart()}</span>
               </p>
 
-              <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* ── Honest 3-strike heads-up ── */}
+              <div style={{
+                marginTop: 20, padding: "12px 14px", borderRadius: 14,
+                background: willReset ? "rgba(220,70,50,0.10)" : "rgba(201,168,76,0.07)",
+                border: `1px solid ${willReset ? "rgba(220,70,50,0.35)" : "rgba(201,168,76,0.22)"}`,
+              }}>
+                {/* Strike dots */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  {[1, 2, 3].map((n) => (
+                    <span key={n} style={{
+                      width: 8, height: 8, borderRadius: "50%",
+                      background: n <= thisStrike ? (willReset ? RED : GOLD) : "rgba(255,255,255,0.14)",
+                      boxShadow: n <= thisStrike ? `0 0 8px ${willReset ? "rgba(220,70,50,0.6)" : "rgba(201,168,76,0.5)"}` : "none",
+                    }} />
+                  ))}
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: willReset ? RED : GOLD, marginLeft: 4 }}>
+                    Slip {Math.min(thisStrike, 3)} of 3
+                  </span>
+                </div>
+                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.62)", lineHeight: 1.6, margin: 0 }}>
+                  {willReset
+                    ? <>This is your <span style={{ color: WHITE, fontWeight: 600 }}>3rd slip</span> this streak — so we keep our promise to be straight with you: logging it <span style={{ color: WHITE, fontWeight: 600 }}>resets your counter to zero</span>. No hiding it.</>
+                    : <>Your <span style={{ color: WHITE, fontWeight: 600 }}>{streakDay}-day</span> counter still stands. A <span style={{ color: WHITE, fontWeight: 600 }}>3rd slip resets it to zero</span> — we tell you now so you can feel that line before you reach it.</>}
+                </p>
+              </div>
+
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
                 <button onClick={logRelapse} style={{
                   width: "100%", height: 52, borderRadius: 16,
                   background: "linear-gradient(135deg, #AF2B1C, #D74430)",
@@ -374,11 +424,22 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
                 fontSize: 28, fontWeight: 700, color: WHITE,
                 margin: "0 0 12px", fontStyle: "italic", lineHeight: 1.2,
               }}>
-                {t("relapse.done.title")}
+                {didReset ? "The counter resets — you don't." : t("relapse.done.title")}
               </h2>
-              <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.75, margin: 0 }}>
-                {t("relapse.done.body")}
-              </p>
+              {didReset ? (
+                <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.75, margin: 0 }}>
+                  That was your third slip, so we keep our word: your counter goes back to{" "}
+                  <span style={{ color: WHITE, fontWeight: 600 }}>zero</span> today. That's the hard part — and you deserve the truth over a comfortable lie.{" "}
+                  But hear this: you <span style={{ color: GREEN, fontWeight: 600 }}>made it {loggedDay} {loggedDay === 1 ? "day" : "days"}</span>. That happened. Your brain changed in those days and it doesn't un-change. Day 1 again isn't starting over — it's starting with everything you learned. Most people never make it this far even once. Go again.
+                </p>
+              ) : (
+                <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.75, margin: 0 }}>
+                  {t("relapse.done.body")}{" "}
+                  <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                    Your {loggedDay}-{loggedDay === 1 ? "day" : "day"} counter is still standing — {3 - thisStrike} {3 - thisStrike === 1 ? "slip" : "slips"} before it resets. Use that.
+                  </span>
+                </p>
+              )}
 
               <button
                 onClick={onClose}
