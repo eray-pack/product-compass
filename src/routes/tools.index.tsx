@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown, Trophy } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
@@ -655,6 +655,7 @@ function Tools() {
   const [planOpen, setPlanOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [lbOpen, setLbOpen] = useState(false);
+  const lbDragControls = useDragControls();
   const [lbFilter, setLbFilter] = useState("All");
   const [trigger, setTrigger] = useState("");
   const [action, setAction] = useState("");
@@ -1443,6 +1444,14 @@ function Tools() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              drag="y"
+              dragListener={false}
+              dragControls={lbDragControls}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.6 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 140 || info.velocity.y > 600) setLbOpen(false);
+              }}
               style={{
                 position: "fixed", bottom: 0, left: 0, right: 0,
                 height: "88vh", zIndex: 51,
@@ -1474,9 +1483,12 @@ function Tools() {
                 }
               `}</style>
 
-              {/* Drag handle */}
-              <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 6, flexShrink: 0 }}>
-                <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.20)" }} />
+              {/* Drag handle — pull down to dismiss */}
+              <div
+                onPointerDown={(e) => lbDragControls.start(e)}
+                style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 10, flexShrink: 0, cursor: "grab", touchAction: "none" }}
+              >
+                <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(201,168,76,0.28)" }} />
               </div>
 
               {/* Scrollable content */}
