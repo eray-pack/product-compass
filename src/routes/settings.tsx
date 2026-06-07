@@ -23,7 +23,8 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
-import { motion, useAnimation, AnimatePresence, useDragControls } from "framer-motion";
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
+import { usePageSwipeDismiss } from "@/lib/sheetGesture";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { BADGES, currentBadge, badgeSplit, type Badge } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
@@ -1448,7 +1449,6 @@ function Settings() {
   const navigate = useNavigate();
   const router = useRouter();
   const [state, update] = useAppState();
-  const dragControls = useDragControls();
 
   // Return to the page the user came from (fall back to home on cold entry)
   const goBack = () => {
@@ -1456,32 +1456,26 @@ function Settings() {
     else navigate({ to: "/" });
   };
 
+  // Pull down from the top of the page (anywhere) to go back — scroll-gated so
+  // the content still scrolls normally once you're past the top.
+  const dismissY = usePageSwipeDismiss(goBack);
+
   return (
     <motion.div
       className="min-h-screen pb-16 mx-auto max-w-md"
-      drag="y"
-      dragListener={false}
-      dragControls={dragControls}
-      dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={{ top: 0, bottom: 0.6 }}
-      onDragEnd={(_, info) => {
-        if (info.offset.y > 140 || info.velocity.y > 600) goBack();
-      }}
+      style={{ y: dismissY }}
     >
       <PremiumBackground />
-      {/* Sticky header — also the swipe-down-to-go-back grab zone */}
+      {/* Sticky header */}
       <header
-        onPointerDown={(e) => dragControls.start(e)}
         className="sticky z-20 flex items-center gap-3 px-4 h-14 border-b border-border/50 backdrop-blur-xl"
         style={{
           background: "rgba(10,8,6,0.82)",
           top: "env(safe-area-inset-top)",
-          touchAction: "pan-x",
         }}
       >
         <button
           onClick={goBack}
-          onPointerDown={(e) => e.stopPropagation()}
           className="h-9 w-9 rounded-xl grid place-items-center transition-colors hover:bg-foreground/[0.06]"
           aria-label="Back"
         >
