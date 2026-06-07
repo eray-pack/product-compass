@@ -1,11 +1,10 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
-import { PageShell, SectionTitle, rubberBand } from "@/components/BottomNav";
+import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
@@ -2154,124 +2153,6 @@ function TreeUpgradeOverlays({
   );
 }
 
-// ── Overscroll easter egg ─────────────────────────────────────────────────────
-// Zero React re-renders — drives DOM directly via refs, same as PageShell's
-// elastic bounce. Portal keeps it outside the elastic wrapper so position:fixed
-// stays viewport-relative even though parent has a CSS transform.
-function OverscrollEasterEgg({
-  topContent,
-  bottomContent,
-}: {
-  topContent: React.ReactNode;
-  bottomContent: React.ReactNode;
-}) {
-  const topRef    = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const top    = topRef.current;
-    const bottom = bottomRef.current;
-    if (!top || !bottom) return;
-
-    const FADE   = 16;
-    const SPRING = "transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease";
-
-    let sY = 0, sTime = 0, edgeDy = 0, atEdge = false, side = 0;
-    let dimension = 800, maxScroll = 0;
-    let rafId = 0, pendingTop = 0, pendingBottom = 0;
-
-    const write = () => {
-      rafId = 0;
-      top.style.transform    = `translate3d(0, ${pendingTop}px, 0)`;
-      top.style.opacity      = pendingTop < FADE ? "0" : String(Math.min(1, (pendingTop - FADE) / 28));
-      bottom.style.transform = `translate3d(0, ${-pendingBottom}px, 0)`;
-      bottom.style.opacity   = pendingBottom < FADE ? "0" : String(Math.min(1, (pendingBottom - FADE) / 28));
-    };
-    const queue = (t: number, b: number) => {
-      pendingTop = t; pendingBottom = b;
-      if (!rafId) rafId = requestAnimationFrame(write);
-    };
-    const spring = () => {
-      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-      pendingTop = 0; pendingBottom = 0;
-      top.style.transition = SPRING; bottom.style.transition = SPRING;
-      top.style.transform = "translate3d(0,0,0)"; top.style.opacity = "0";
-      bottom.style.transform = "translate3d(0,0,0)"; bottom.style.opacity = "0";
-    };
-
-    const onStart = (e: TouchEvent) => {
-      sY = e.touches[0].clientY; sTime = Date.now();
-      atEdge = false; side = 0;
-      dimension = window.innerHeight;
-      maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      top.style.transition = "none"; bottom.style.transition = "none";
-    };
-    const onMove = (e: TouchEvent) => {
-      const dy = e.touches[0].clientY - sY;
-      if (!atEdge) {
-        const scrollY = window.scrollY;
-        if      (scrollY <= 0           && dy > 0) { atEdge = true; edgeDy = dy; side =  1; }
-        else if (scrollY >= maxScroll-1 && dy < 0) { atEdge = true; edgeDy = dy; side = -1; }
-      }
-      if (atEdge) {
-        const excess = dy - edgeDy;
-        if ((side === 1 && excess <= 0) || (side === -1 && excess >= 0)) {
-          atEdge = false; side = 0; spring(); return;
-        }
-        const pull = rubberBand(Math.abs(excess), dimension);
-        if (side === 1) queue(pull, 0);
-        else            queue(0, pull);
-      }
-    };
-    const onEnd = (e: TouchEvent) => {
-      const velocity = (e.changedTouches[0].clientY - sY) / Math.max(1, Date.now() - sTime);
-      if (atEdge) {
-        spring();
-      } else {
-        const scrollY = window.scrollY;
-        if      (scrollY <= 4           && velocity >  1.6) { top.style.transition = "none"; queue(Math.min(velocity * 14, 44), 0); requestAnimationFrame(spring); }
-        else if (scrollY >= maxScroll-4 && velocity < -1.6) { bottom.style.transition = "none"; queue(0, Math.min(-velocity * 14, 44)); requestAnimationFrame(spring); }
-      }
-      atEdge = false; side = 0;
-    };
-    const onCancel = () => { atEdge = false; side = 0; spring(); };
-
-    window.addEventListener("touchstart",  onStart,  { passive: true });
-    window.addEventListener("touchmove",   onMove,   { passive: true });
-    window.addEventListener("touchend",    onEnd,    { passive: true });
-    window.addEventListener("touchcancel", onCancel, { passive: true });
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener("touchstart",  onStart);
-      window.removeEventListener("touchmove",   onMove);
-      window.removeEventListener("touchend",    onEnd);
-      window.removeEventListener("touchcancel", onCancel);
-    };
-  }, []);
-
-  const stripStyle = (pos: "top" | "bottom"): React.CSSProperties => ({
-    position: "fixed",
-    [pos]: -72, left: 0, right: 0, height: 72,
-    display: "flex",
-    alignItems:     pos === "top" ? "flex-end"   : "flex-start",
-    justifyContent: "center",
-    paddingBottom:  pos === "top" ? 10 : 0,
-    paddingTop:     pos === "top" ? 0  : 10,
-    opacity: 0,          // JS drives this — start hidden
-    transform: "translateY(0px)",
-    pointerEvents: "none",
-    zIndex: 9100,
-  });
-
-  return createPortal(
-    <>
-      <div ref={topRef}    aria-hidden style={stripStyle("top")}>{topContent}</div>
-      <div ref={bottomRef} aria-hidden style={stripStyle("bottom")}>{bottomContent}</div>
-    </>,
-    document.body
-  );
-}
-
 // ── Wolf companion page ───────────────────────────────────────────────────────
 function WolfPage({
   state,
@@ -2346,23 +2227,6 @@ function WolfPage({
   const animKeyWolf = usePageAnimation("/tree");
   return (
     <PageShell>
-      <OverscrollEasterEgg
-        topContent={
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 26 }}>🐺</span>
-            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.28em", textTransform: "uppercase", color: "#C4873A", textShadow: "0 0 14px rgba(196,135,58,0.65)" }}>AWOOOO</span>
-            <span style={{ fontSize: 26 }}>🐾</span>
-          </div>
-        }
-        bottomContent={
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 26 }}>🐾</span>
-            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.28em", textTransform: "uppercase", color: "#C4873A", textShadow: "0 0 14px rgba(196,135,58,0.65)" }}>STAY STRONG</span>
-            <span style={{ fontSize: 26 }}>🐺</span>
-          </div>
-        }
-      />
-
       <motion.div key={animKeyWolf} variants={pageContainer} initial="hidden" animate="show">
       <motion.header variants={popUp} className="px-6 pt-4">
         <div onClick={handleWolfDevTap} style={{ cursor: "default", userSelect: "none", display: "inline-block" }}>
@@ -2773,22 +2637,6 @@ function LifeTreePage({
   const animKeyTree = usePageAnimation("/tree");
   return (
     <PageShell>
-      <OverscrollEasterEgg
-        topContent={
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 26 }}>🌿</span>
-            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.22em", textTransform: "uppercase", color: "#3fb86a", textShadow: "0 0 14px rgba(63,184,106,0.65)" }}>ROOTS RUN DEEP</span>
-            <span style={{ fontSize: 26 }}>🌱</span>
-          </div>
-        }
-        bottomContent={
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 26 }}>🌱</span>
-            <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.22em", textTransform: "uppercase", color: "#3fb86a", textShadow: "0 0 14px rgba(63,184,106,0.65)" }}>KEEP GROWING</span>
-            <span style={{ fontSize: 26 }}>🌿</span>
-          </div>
-        }
-      />
 
       <motion.div key={animKeyTree} variants={pageContainer} initial="hidden" animate="show">
       <motion.header variants={popUp} className="px-6 pt-4">

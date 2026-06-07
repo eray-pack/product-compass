@@ -5,127 +5,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
 
-// ── iOS rubber-band resistance ────────────────────────────────────────────────
-// Asymptotic: pull is unbounded but gets progressively harder, never hard-stops.
-// b(x) = (x · d · c) / (d + c · x)  — Apple's actual UIScrollView formula.
-// As x → ∞, b → d, so it approaches the dimension but you can pull forever.
-export function rubberBand(distance: number, dimension: number, constant = 0.55) {
-  const x = Math.abs(distance);
-  const b = (x * dimension * constant) / (dimension + constant * x);
-  return distance < 0 ? -b : b;
-}
-
-// ── JS elastic bounce — makes page feel springy at scroll edges ───────────────
-function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    let startY    = 0;
-    let startTime = 0;
-    let edgeDy    = 0;       // dy value at the moment we first hit the edge
-    let atEdge    = false;
-    let edgeSide  = 0;       // 1 = top edge, -1 = bottom edge
-    let dimension = 800;     // viewport height, cached at touchstart
-    let maxScroll = 0;       // cached at touchstart (avoids reflow per frame)
-    let rafId     = 0;
-    let pendingY  = 0;       // latest target, flushed in rAF
-    let curOffset = 0;       // current applied offset
-
-    const flush = () => {
-      rafId = 0;
-      curOffset = pendingY;
-      el.style.transform = pendingY === 0 ? "" : `translate3d(0, ${pendingY}px, 0)`;
-    };
-    const queue = (y: number) => {
-      pendingY = y;
-      if (!rafId) rafId = requestAnimationFrame(flush);
-    };
-    const spring = () => {
-      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-      el.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
-      el.style.transform = "";
-      pendingY = 0; curOffset = 0;
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      startY    = e.touches[0].clientY;
-      startTime = Date.now();
-      atEdge    = false;
-      edgeSide  = 0;
-      dimension = window.innerHeight;
-      maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      // Kill any in-progress spring so the finger has full control instantly
-      el.style.transition = "none";
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      const dy = e.touches[0].clientY - startY;
-
-      // Detect the moment we first cross an edge (live scrollY, cheap read)
-      if (!atEdge) {
-        const scrollY = window.scrollY;
-        if (scrollY <= 0 && dy > 0) {
-          atEdge = true; edgeDy = dy; edgeSide = 1;
-          el.style.transition = "none";
-        } else if (scrollY >= maxScroll - 1 && dy < 0) {
-          atEdge = true; edgeDy = dy; edgeSide = -1;
-          el.style.transition = "none";
-        }
-      }
-
-      if (atEdge) {
-        const excess = dy - edgeDy;   // movement past the edge only
-        // Released back into content?
-        if ((edgeSide === 1 && excess <= 0) || (edgeSide === -1 && excess >= 0)) {
-          atEdge = false; edgeSide = 0;
-          spring();
-          return;
-        }
-        queue(rubberBand(excess, dimension));
-      }
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      const endY     = e.changedTouches[0].clientY;
-      const dt       = Math.max(1, Date.now() - startTime);
-      const velocity = (endY - startY) / dt;       // px/ms
-
-      if (atEdge) {
-        spring();
-      } else {
-        // Fast fling that lands on an edge — small predictive overshoot
-        const scrollY = window.scrollY;
-        if (scrollY <= 4 && velocity > 1.6) {
-          el.style.transition = "none";
-          el.style.transform = `translate3d(0, ${Math.min(velocity * 14, 48)}px, 0)`;
-          requestAnimationFrame(spring);
-        } else if (scrollY >= maxScroll - 4 && velocity < -1.6) {
-          el.style.transition = "none";
-          el.style.transform = `translate3d(0, ${Math.max(velocity * 14, -48)}px, 0)`;
-          requestAnimationFrame(spring);
-        }
-      }
-      atEdge = false; edgeSide = 0;
-    };
-
-    const onCancel = () => { atEdge = false; edgeSide = 0; spring(); };
-
-    window.addEventListener("touchstart",  onTouchStart, { passive: true });
-    window.addEventListener("touchmove",   onTouchMove,  { passive: true });
-    window.addEventListener("touchend",    onTouchEnd,   { passive: true });
-    window.addEventListener("touchcancel", onCancel,     { passive: true });
-
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener("touchstart",  onTouchStart);
-      window.removeEventListener("touchmove",   onTouchMove);
-      window.removeEventListener("touchend",    onTouchEnd);
-      window.removeEventListener("touchcancel", onCancel);
-    };
-  }, [ref]);
-}
-
 function useScrollHide() {
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
@@ -377,15 +256,10 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   const onHome     = path === "/";
   const onTree     = path === "/tree";
 
-  // Elastic bounce — only applied to the content div, not fixed chrome
-  const elasticRef = useRef<HTMLDivElement>(null);
-  useElasticBounce(elasticRef);
-
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
 
-      {/* ── Fixed chrome — outside elastic wrapper so it never bounces ── */}
       {onHome && (
         <div className="fixed left-4 z-30" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
           <LogoPill />
@@ -406,10 +280,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       )}
       <BottomNav />
 
-      {/* ── Elastic content wrapper — only this moves on overscroll ── */}
-      <div ref={elasticRef} style={{ willChange: "transform" }}>
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
