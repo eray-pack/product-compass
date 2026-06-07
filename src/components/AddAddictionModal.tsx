@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { X, Plus, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type Addiction } from "@/lib/store";
@@ -37,6 +37,7 @@ const spring = { type: "spring" as const, stiffness: 340, damping: 28 };
 
 export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
   const { t } = useTranslation();
+  const dragControls = useDragControls();
   const [customName,  setCustomName]  = useState("");
   const [customEmoji, setCustomEmoji] = useState("☕");
   const [showCustom,  setShowCustom]  = useState(false);
@@ -83,6 +84,12 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={spring}
+        drag="y"
+        dragListener={false}
+        dragControls={dragControls}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.04, bottom: 0.7 }}
+        onDragEnd={(_, info) => { if (info.offset.y > 110 || info.velocity.y > 500) onClose(); }}
         style={{
           position: "relative",
           width: "100%", maxWidth: 480,
@@ -101,9 +108,12 @@ export function AddAddictionModal({ trackedIds, onClose, onAdd }: Props) {
           background: "radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%)",
         }} />
 
-        {/* Drag handle */}
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, paddingBottom: 4 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.22)" }} />
+        {/* Drag handle — pull down to dismiss */}
+        <div
+          onPointerDown={(e) => dragControls.start(e)}
+          style={{ display: "flex", justifyContent: "center", paddingTop: 14, paddingBottom: 10, cursor: "grab", touchAction: "none" }}
+        >
+          <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(201,168,76,0.30)" }} />
         </div>
 
         {/* Scrollable content */}

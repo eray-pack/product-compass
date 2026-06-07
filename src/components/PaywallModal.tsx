@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppState } from "@/lib/store";
@@ -397,6 +397,7 @@ export function PaywallModal() {
   const [seconds, setSeconds] = useState(TIMER_START);
   const [plan, setPlan]   = useState<"annual" | "monthly">("annual");
   const hasOpenedRef      = useRef(false);
+  const dragControls      = useDragControls();
 
   useEffect(() => {
     if (!open) return;
@@ -450,6 +451,12 @@ export function PaywallModal() {
           initial={{ y: "100%", opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 280, damping: 30 }}
+          drag="y"
+          dragListener={false}
+          dragControls={dragControls}
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.04, bottom: 0.7 }}
+          onDragEnd={(_, info) => { if (info.offset.y > 120 || info.velocity.y > 500) dismiss(); }}
           style={{
             position: "relative", width: "100%", maxWidth: 480,
             background: "radial-gradient(ellipse at 50% 20%, #0c0812 0%, #07050e 55%, #020104 100%)",
@@ -506,9 +513,12 @@ export function PaywallModal() {
 
           {/* ── Scrollable content ── */}
           <div style={{ position: "relative", zIndex: 1, overflowY: "auto", maxHeight: "93dvh" }}>
-            {/* Drag handle */}
-            <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
-              <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(201,168,76,0.22)" }} />
+            {/* Drag handle — pull down to dismiss */}
+            <div
+              onPointerDown={(e) => dragControls.start(e)}
+              style={{ display: "flex", justifyContent: "center", padding: "14px 0 6px", cursor: "grab", touchAction: "none" }}
+            >
+              <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(201,168,76,0.30)" }} />
             </div>
 
             {/* Close button */}

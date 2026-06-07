@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 import { CHANGELOG, CURRENT_VERSION, markChangelogSeen } from "@/lib/changelog";
+import { dragDismissProps } from "@/components/BottomSheet";
 
 type Props = {
   open: boolean;
@@ -47,6 +48,7 @@ export function ChangelogModal({ open, onClose }: Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", stiffness: 340, damping: 34, opacity: { duration: 0.3 } }}
+            {...dragDismissProps(onClose)}
             style={{
               position: "fixed",
               bottom: 0,
@@ -57,6 +59,7 @@ export function ChangelogModal({ open, onClose }: Props) {
               borderTop: "1px solid rgba(201,168,76,0.22)",
               borderRadius: "24px 24px 0 0",
               padding: "28px 24px 52px",
+              touchAction: "none",
             }}
           >
             {/* Ambient glow behind content */}

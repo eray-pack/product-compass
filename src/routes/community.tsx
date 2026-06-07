@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { PremiumBackground } from "@/components/PremiumBackground";
+import { dragDismissProps } from "@/components/BottomSheet";
 import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
 import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";
@@ -672,8 +673,9 @@ function SovereignInviteModal({ onClose, onGrantBadge, isPro }: { onClose: () =>
           exit={{ y: 64, opacity: 0 }}
           transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
+          {...dragDismissProps(onClose)}
           style={{
-            width: "100%", maxWidth: 448,
+            width: "100%", maxWidth: 448, touchAction: "none",
             /* Brushed Steel & Gold sheet */
             background: "linear-gradient(170deg, rgba(32,26,14,0.99) 0%, rgba(20,18,12,0.99) 60%, rgba(28,22,10,0.99) 100%)",
             borderTop: "1.5px solid rgba(201,168,76,0.42)",
@@ -847,7 +849,8 @@ function CommunityProModal({ onClose }: { onClose: () => void }) {
           exit={{ y: 64, opacity: 0 }}
           transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
-          style={{ width: "100%", maxWidth: 448, position: "relative" }}
+          {...dragDismissProps(onClose)}
+          style={{ width: "100%", maxWidth: 448, position: "relative", touchAction: "none" }}
         >
           {/* Gold-leaf border wrapper — 1.5px gradient border */}
           <div style={{

@@ -12,6 +12,7 @@ import { initPurchases, checkPremium } from "@/lib/purchases";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
+import { dragDismissProps } from "@/components/BottomSheet";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
 import { ChangelogModal } from "@/components/ChangelogModal";
@@ -1386,10 +1387,11 @@ function Dashboard() {
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end justify-center p-6 pb-10">
           <motion.div
             className="rounded-3xl border border-primary/20 p-7 w-full max-w-sm space-y-5 text-center relative"
-            style={{ background: "var(--card)" }}
+            style={{ background: "var(--card)", touchAction: "none" }}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
+            {...dragDismissProps(() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); })}
           >
             <button
               onClick={() => { setShowIdentity(false); update({ lastIdentityShown: Date.now() }); }}
