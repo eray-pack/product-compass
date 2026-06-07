@@ -257,7 +257,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   const onTree     = path === "/tree";
 
   return (
-    <div className="min-h-screen pb-32 mx-auto max-w-md">
+    <div className="app-page min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
 
       {onHome && (

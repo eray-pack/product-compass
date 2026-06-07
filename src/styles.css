@@ -621,16 +621,17 @@ input, textarea, [contenteditable="true"], [contenteditable=""] {
     --sal: env(safe-area-inset-left);
     --sar: env(safe-area-inset-right);
     padding-top: env(safe-area-inset-top);
-    /* Prevent horizontal scroll — clip doesn't create a scroll container,
-       so it leaves the native vertical rubber-band bounce fully intact. */
-    overflow-x: clip;
-    width: 100%;
-    max-width: 100vw;
+    /* NOTE: do NOT put overflow-x: clip/hidden on html or body — it kills the
+       native iOS rubber-band overscroll on the document. Horizontal overflow
+       is contained on the page wrapper (.app-page) instead. */
   }
-  html {
-    overflow-x: clip;
-    max-width: 100vw;
-  }
+}
+
+/* Page wrapper clips horizontal bleed WITHOUT touching the document scroller,
+   so the native vertical rubber-band bounce stays alive on every page. */
+.app-page {
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 /* ── Hide scrollbar — native app feel ──────────────────────── */

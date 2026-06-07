@@ -1462,7 +1462,7 @@ function Settings() {
 
   return (
     <motion.div
-      className="min-h-screen pb-16 mx-auto max-w-md"
+      className="app-page min-h-screen pb-16 mx-auto max-w-md"
       style={{ y: dismissY }}
     >
       <PremiumBackground />
