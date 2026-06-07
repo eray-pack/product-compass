@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useRef } from "react";
-import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown, Trophy } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
+import { BottomSheet } from "@/components/BottomSheet";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useTranslation } from "react-i18next";
@@ -655,7 +656,6 @@ function Tools() {
   const [planOpen, setPlanOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [lbOpen, setLbOpen] = useState(false);
-  const lbDragControls = useDragControls();
   const [lbFilter, setLbFilter] = useState("All");
   const [trigger, setTrigger] = useState("");
   const [action, setAction] = useState("");
@@ -1422,77 +1422,28 @@ function Tools() {
 
       </motion.div>{/* end content z-1 */}
 
-      {/* ── Leaderboard modal ─────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {lbOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              key="lb-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
-              onClick={() => setLbOpen(false)}
-              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 50, backdropFilter: "blur(3px)" }}
-            />
-
-            {/* Sheet */}
-            <motion.div
-              key="lb-sheet"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              drag="y"
-              dragListener={false}
-              dragControls={lbDragControls}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.6 }}
-              onDragEnd={(_, info) => {
-                if (info.offset.y > 140 || info.velocity.y > 600) setLbOpen(false);
-              }}
-              style={{
-                position: "fixed", bottom: 0, left: 0, right: 0,
-                height: "88vh", zIndex: 51,
-                background: "linear-gradient(180deg, #0a0705 0%, #06050a 50%, #04060a 100%)",
-                borderRadius: "24px 24px 0 0",
-                borderTop: "1px solid rgba(201,168,76,0.25)",
-                boxShadow: "0 -4px 60px rgba(201,168,76,0.08)",
-                display: "flex", flexDirection: "column",
-                overflow: "hidden",
-              }}
-            >
-              <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&display=swap');
-                @keyframes lb-shimmer {
-                  0%,100% { opacity:0.70; transform:scale(1); }
-                  50%      { opacity:1.00; transform:scale(1.018); }
-                }
-                @keyframes lb-pulse-gold {
-                  0%,100% { box-shadow: 0 0 10px 2px rgba(201,168,76,0.35), inset 0 0 8px rgba(201,168,76,0.08); }
-                  50%      { box-shadow: 0 0 22px 6px rgba(201,168,76,0.65), inset 0 0 16px rgba(201,168,76,0.14); }
-                }
-                @keyframes lb-pulse-silver {
-                  0%,100% { box-shadow: 0 0 8px 2px rgba(160,180,220,0.30); }
-                  50%      { box-shadow: 0 0 18px 5px rgba(160,180,220,0.55); }
-                }
-                @keyframes lb-pulse-bronze {
-                  0%,100% { box-shadow: 0 0 8px 2px rgba(205,127,50,0.30); }
-                  50%      { box-shadow: 0 0 18px 5px rgba(205,127,50,0.55); }
-                }
-              `}</style>
-
-              {/* Drag handle — pull down to dismiss */}
-              <div
-                onPointerDown={(e) => lbDragControls.start(e)}
-                style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 10, flexShrink: 0, cursor: "grab", touchAction: "none" }}
-              >
-                <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(201,168,76,0.28)" }} />
-              </div>
-
-              {/* Scrollable content */}
-              <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "0 14px 40px" }}>
+      {/* ── Leaderboard sheet — physics-based drag-to-dismiss ── */}
+      <BottomSheet open={lbOpen} onClose={() => setLbOpen(false)} ariaLabel="Leaderboard">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&display=swap');
+          @keyframes lb-shimmer {
+            0%,100% { opacity:0.70; transform:scale(1); }
+            50%      { opacity:1.00; transform:scale(1.018); }
+          }
+          @keyframes lb-pulse-gold {
+            0%,100% { box-shadow: 0 0 10px 2px rgba(201,168,76,0.35), inset 0 0 8px rgba(201,168,76,0.08); }
+            50%      { box-shadow: 0 0 22px 6px rgba(201,168,76,0.65), inset 0 0 16px rgba(201,168,76,0.14); }
+          }
+          @keyframes lb-pulse-silver {
+            0%,100% { box-shadow: 0 0 8px 2px rgba(160,180,220,0.30); }
+            50%      { box-shadow: 0 0 18px 5px rgba(160,180,220,0.55); }
+          }
+          @keyframes lb-pulse-bronze {
+            0%,100% { box-shadow: 0 0 8px 2px rgba(205,127,50,0.30); }
+            50%      { box-shadow: 0 0 18px 5px rgba(205,127,50,0.55); }
+          }
+        `}</style>
+        <div style={{ padding: "0 14px 40px" }}>
 
                 {/* ── Header ── */}
                 <div style={{ padding: "8px 2px 16px", borderBottom: "1px solid rgba(201,168,76,0.10)", marginBottom: 16 }}>
@@ -1670,11 +1621,8 @@ function Tools() {
                   </div>
                 </div>
 
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        </div>
+      </BottomSheet>
     </PageShell>
   );
 }

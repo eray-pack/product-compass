@@ -294,6 +294,15 @@ input, textarea, [contenteditable="true"], [contenteditable=""] {
   -webkit-touch-callout: default;
 }
 
+/* Bottom-sheet grab pill — pulses on first open to teach the drag gesture */
+@keyframes sheet-grab-pulse {
+  0%, 100% { opacity: 0.45; transform: scaleX(1); }
+  50%      { opacity: 1;    transform: scaleX(1.25); }
+}
+.sheet-grab-pulse {
+  animation: sheet-grab-pulse 1.4s ease-in-out infinite;
+}
+
 /* Neural mesh backgrounds */
 .neural-mesh {
   background-image:
