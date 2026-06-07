@@ -2173,34 +2173,53 @@ function OverscrollEasterEgg({
   const atBottom  = useRef(false);
 
   useEffect(() => {
+    let sY = 0, edgeDy = 0, atEdge = false, side = 0, sTime = 0;
+
     const onStart = (e: TouchEvent) => {
-      startY.current   = e.touches[0].clientY;
-      const scrollY    = window.scrollY;
-      const max        = document.documentElement.scrollHeight - window.innerHeight;
-      atTop.current    = scrollY <= 1;
-      atBottom.current = scrollY >= max - 1;
+      sY = e.touches[0].clientY; sTime = Date.now();
+      atEdge = false; side = 0;
     };
     const onMove = (e: TouchEvent) => {
-      const dy = e.touches[0].clientY - startY.current;
-      if (atTop.current && dy > 0) {
-        setTopPull(Math.min(dy * 0.38, 96));
-        setBottomPull(0);
-      } else if (atBottom.current && dy < 0) {
-        setBottomPull(Math.min(-dy * 0.38, 96));
-        setTopPull(0);
+      const dy      = e.touches[0].clientY - sY;
+      const scrollY = window.scrollY;
+      const max     = document.documentElement.scrollHeight - window.innerHeight;
+
+      if (!atEdge) {
+        if (scrollY <= 0 && dy > 0)      { atEdge = true; edgeDy = dy; side =  1; }
+        else if (scrollY >= max - 1 && dy < 0) { atEdge = true; edgeDy = dy; side = -1; }
+      }
+      if (atEdge) {
+        const excess = dy - edgeDy;
+        if (side ===  1) { setTopPull(Math.max(0, Math.min(excess * 0.38, 90))); setBottomPull(0); }
+        if (side === -1) { setBottomPull(Math.max(0, Math.min(-excess * 0.38, 90))); setTopPull(0); }
+        if ((side === 1 && dy < edgeDy) || (side === -1 && dy > edgeDy)) {
+          atEdge = false; side = 0; setTopPull(0); setBottomPull(0);
+        }
       }
     };
-    const onEnd = () => { setTopPull(0); setBottomPull(0); };
+    const onEnd = (e: TouchEvent) => {
+      const endY     = e.changedTouches[0].clientY;
+      const velocity = (endY - sY) / Math.max(1, Date.now() - sTime);
+      const scrollY  = window.scrollY;
+      const max      = document.documentElement.scrollHeight - window.innerHeight;
+      if (!atEdge) {
+        if (scrollY <= 6 && velocity > 1.8)       setTopPull(Math.min(velocity * 18, 55));
+        else if (scrollY >= max - 6 && velocity < -1.8) setBottomPull(Math.min(-velocity * 18, 55));
+      }
+      atEdge = false; side = 0;
+      setTimeout(() => { setTopPull(0); setBottomPull(0); }, atEdge ? 0 : 16);
+    };
+    const onCancel = () => { atEdge = false; side = 0; setTopPull(0); setBottomPull(0); };
 
     window.addEventListener("touchstart",  onStart,  { passive: true });
     window.addEventListener("touchmove",   onMove,   { passive: true });
     window.addEventListener("touchend",    onEnd,    { passive: true });
-    window.addEventListener("touchcancel", onEnd,    { passive: true });
+    window.addEventListener("touchcancel", onCancel, { passive: true });
     return () => {
       window.removeEventListener("touchstart",  onStart);
       window.removeEventListener("touchmove",   onMove);
       window.removeEventListener("touchend",    onEnd);
-      window.removeEventListener("touchcancel", onEnd);
+      window.removeEventListener("touchcancel", onCancel);
     };
   }, []);
 

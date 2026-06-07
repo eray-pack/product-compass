@@ -6,20 +6,18 @@ import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
 
 // ── JS elastic bounce — makes page feel springy at scroll edges ───────────────
-// Wraps page content (not fixed chrome) and physically moves it on overscroll.
-// Completely replaces native iOS bounce so it's consistent across all devices.
 function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    let startY        = 0;
-    let startScrollY  = 0;
-    let atTop         = false;
-    let atBottom      = false;
-    let pulling       = false;
+    let startY    = 0;
+    let startTime = 0;
+    let edgeDy    = 0;    // dy value at the moment we first hit the edge
+    let atEdge    = false;
+    let edgeSide  = 0;    // 1 = top edge, -1 = bottom edge
 
-    const setTransform = (y: number, animated: boolean) => {
+    const apply = (y: number, animated: boolean) => {
       el.style.transition = animated
         ? "transform 0.52s cubic-bezier(0.22, 1, 0.36, 1)"
         : "none";
@@ -27,45 +25,80 @@ function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
     };
 
     const onTouchStart = (e: TouchEvent) => {
-      startY       = e.touches[0].clientY;
-      startScrollY = window.scrollY;
-      const max    = document.documentElement.scrollHeight - window.innerHeight;
-      atTop        = startScrollY <= 1;
-      atBottom     = startScrollY >= max - 1;
-      pulling      = false;
+      startY    = e.touches[0].clientY;
+      startTime = Date.now();
+      atEdge    = false;
+      edgeSide  = 0;
+      // Kill any in-progress spring so it doesn't fight the finger
+      el.style.transition = "none";
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      const dy = e.touches[0].clientY - startY;
+      const currentY = e.touches[0].clientY;
+      const dy       = currentY - startY;
+      const scrollY  = window.scrollY;
+      const max      = document.documentElement.scrollHeight - window.innerHeight;
 
-      if (atTop && dy > 0) {
-        // Pulling down at top — push content down with resistance
-        pulling = true;
-        setTransform(Math.min(dy * 0.38, 96), false);
-      } else if (atBottom && dy < 0) {
-        // Pulling up at bottom — push content up with resistance
-        pulling = true;
-        setTransform(Math.max(dy * 0.38, -96), false);
+      // Detect the moment we first hit an edge (checked live, not just at touchstart)
+      if (!atEdge) {
+        if (scrollY <= 0 && dy > 0) {
+          atEdge = true; edgeDy = dy; edgeSide = 1;
+        } else if (scrollY >= max - 1 && dy < 0) {
+          atEdge = true; edgeDy = dy; edgeSide = -1;
+        }
+      }
+
+      if (atEdge) {
+        // Only stretch based on movement PAST the edge point, not the whole gesture
+        const excess = dy - edgeDy;
+        if (edgeSide === 1) {
+          apply(Math.max(0, Math.min(excess * 0.38, 90)), false);
+        } else {
+          apply(Math.min(0, Math.max(excess * 0.38, -90)), false);
+        }
+        // If finger reversed back into content, release
+        if ((edgeSide === 1 && dy < edgeDy) || (edgeSide === -1 && dy > edgeDy)) {
+          atEdge = false; edgeSide = 0;
+          apply(0, true);
+        }
       }
     };
 
-    const onTouchEnd = () => {
-      if (pulling) {
-        pulling = false;
-        setTransform(0, true);
+    const onTouchEnd = (e: TouchEvent) => {
+      const endY     = e.changedTouches[0].clientY;
+      const dt       = Math.max(1, Date.now() - startTime);
+      const velocity = (endY - startY) / dt;          // px/ms, positive = downward
+      const scrollY  = window.scrollY;
+      const max      = document.documentElement.scrollHeight - window.innerHeight;
+
+      if (atEdge) {
+        // Actively pulling — spring back
+        apply(0, true);
+      } else if (scrollY <= 6 && velocity > 1.8) {
+        // Fast swipe ended right at top — predictive overshoot
+        apply(Math.min(velocity * 18, 55), false);
+        requestAnimationFrame(() => apply(0, true));
+      } else if (scrollY >= max - 6 && velocity < -1.8) {
+        // Fast swipe ended right at bottom
+        apply(Math.max(velocity * 18, -55), false);
+        requestAnimationFrame(() => apply(0, true));
       }
+
+      atEdge = false; edgeSide = 0;
     };
 
-    window.addEventListener("touchstart",  onTouchStart,  { passive: true });
-    window.addEventListener("touchmove",   onTouchMove,   { passive: true });
-    window.addEventListener("touchend",    onTouchEnd,    { passive: true });
-    window.addEventListener("touchcancel", onTouchEnd,    { passive: true });
+    const onCancel = () => { atEdge = false; edgeSide = 0; apply(0, true); };
+
+    window.addEventListener("touchstart",  onTouchStart, { passive: true });
+    window.addEventListener("touchmove",   onTouchMove,  { passive: true });
+    window.addEventListener("touchend",    onTouchEnd,   { passive: true });
+    window.addEventListener("touchcancel", onCancel,     { passive: true });
 
     return () => {
       window.removeEventListener("touchstart",  onTouchStart);
       window.removeEventListener("touchmove",   onTouchMove);
       window.removeEventListener("touchend",    onTouchEnd);
-      window.removeEventListener("touchcancel", onTouchEnd);
+      window.removeEventListener("touchcancel", onCancel);
     };
   }, [ref]);
 }
