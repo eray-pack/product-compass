@@ -254,6 +254,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   const path       = useRouterState({ select: (r) => r.location.pathname });
   const onSettings = path === "/settings";
   const onHome     = path === "/";
+  const onTree     = path === "/tree";
 
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
@@ -265,7 +266,8 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       )}
       {!onSettings && (
         <div className="fixed right-4 z-30 flex items-center gap-2" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
-          <CreditsChip />
+          {/* Credits chip only on tree/wolf page — that's the only place you can spend them */}
+          {onTree && <CreditsChip />}
           <Link
             to="/settings"
             className="h-9 w-9 rounded-xl grid place-items-center border border-border/60 transition-colors hover:bg-foreground/[0.06]"
