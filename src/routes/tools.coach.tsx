@@ -109,9 +109,11 @@ function Coach() {
 
   return (
     <div
-      className="flex flex-col h-[100dvh]"
+      className="flex flex-col"
       style={{
-        position: "relative",
+        position: "fixed", inset: 0, zIndex: 40,
+        maxWidth: 448, margin: "0 auto",
+        overflow: "hidden",
         background: "radial-gradient(ellipse at 50% 42%, #161412 0%, #0a0806 42%, #000000 100%)",
       }}
     >
@@ -188,8 +190,8 @@ function Coach() {
 
       {/* ── Header ─────────────────────────────────────────── */}
       <header
-        className="flex items-center gap-3 px-4 pt-12 pb-4 shrink-0"
-        style={{ position: "relative", zIndex: 1, borderBottom: "1px solid var(--border)" }}
+        className="flex items-center gap-3 px-4 pb-4 shrink-0"
+        style={{ position: "relative", zIndex: 1, borderBottom: "1px solid var(--border)", paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
       >
         <Link
           to="/tools"
@@ -232,7 +234,7 @@ function Coach() {
       </header>
 
       {/* ── Messages ───────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4" style={{ position: "relative", zIndex: 1 }}>
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-5 space-y-4" style={{ position: "relative", zIndex: 1, WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -299,8 +301,8 @@ function Coach() {
 
       {/* ── Input ──────────────────────────────────────────── */}
       <div
-        className="shrink-0 px-4 pb-8 pt-3"
-        style={{ position: "relative", zIndex: 1, borderTop: "1px solid var(--border)" }}
+        className="shrink-0 px-4 pt-3"
+        style={{ position: "relative", zIndex: 1, borderTop: "1px solid var(--border)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
       >
         {/* Free limit banner */}
         {!state.isPremium && (

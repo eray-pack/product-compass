@@ -536,7 +536,10 @@ function HabitSwitcher({
         WebkitOverflowScrolling: "touch",
         paddingLeft: 24,
         paddingRight: 160, // clears the fixed credits + settings chip
-        paddingBottom: 4,
+        // Vertical breathing room so the press bounce + gold glow isn't clipped
+        // (overflowX:auto forces overflowY to clip, so the pill needs padding).
+        paddingTop: 14,
+        paddingBottom: 12,
       }}
     >
       <motion.div
@@ -1092,7 +1095,7 @@ function Dashboard() {
       <motion.div key={animKey} variants={pageContainer} initial="hidden" animate="show">
 
       {/* ── NAV spacer — logo is now a fixed pill in PageShell ── */}
-      <div style={{ height: "2.75rem" }} />
+      <div style={{ height: "3.5rem" }} />
 
       {/* ── HABIT SWITCHER + BADGE CAROUSEL ──────────────────── */}
       <motion.div

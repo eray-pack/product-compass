@@ -169,57 +169,82 @@ const PAGE_SNAP   = { type: "spring", stiffness: 300, damping: 30 } as const;
 const PAGE_EXIT   = { type: "tween", duration: 0.24, ease: [0.32, 0, 0.67, 0] } as const;
 
 /**
- * Swipe-to-dismiss for a full scrolling PAGE (a route, not an overlay sheet).
- * Returns a MotionValue<number> to bind to the page's `style={{ y }}`.
+ * Swipe-to-dismiss for a full presented PAGE (a route, not an overlay sheet).
+ * Returns a MotionValue<number> to bind to the page's `style={{ y }}` (axis "y")
+ * or `style={{ x }}` (axis "x").
  *
- * Gating: a pull only becomes a dismiss-drag when the document is scrolled to
- * the top AND you're pulling down — otherwise the page scrolls natively. While
- * dragging, touchmove is preventDefault'd so the native rubber-band doesn't
- * fight the transform.
+ * - axis "y" (default): slides up from the bottom; swipe DOWN to dismiss.
+ *   Scroll-gated — a pull only dismisses when the page is scrolled to the top.
+ * - axis "x": slides in from the right; swipe RIGHT (from anywhere) to dismiss.
+ *   Only engages when the gesture is horizontally dominant, so vertical scroll
+ *   is never hijacked.
+ *
+ * `entrance: true` animates it in from off-screen on mount.
  */
-export function usePageSwipeDismiss(onDismiss: () => void): MotionValue<number> {
-  const y = useMotionValue(0);
+export function usePageSwipeDismiss(
+  onDismiss: () => void,
+  opts: { axis?: "x" | "y"; entrance?: boolean } = {},
+): MotionValue<number> {
+  const axis = opts.axis ?? "y";
+  const v = useMotionValue(0);
   const cb = useRef(onDismiss);
   cb.current = onDismiss;
 
   useEffect(() => {
-    let startY = 0, dragging = false, decided = false;
-    let samples: { t: number; y: number }[] = [];
+    const offscreen = () => (axis === "x" ? window.innerWidth : window.innerHeight);
+
+    // Entrance — slide in from off-screen
+    if (opts.entrance) {
+      v.set(offscreen());
+      animate(v, 0, { type: "spring", stiffness: 320, damping: 34 });
+    }
+
+    let startX = 0, startY = 0, dragging = false, decided = false;
+    let samples: { t: number; p: number }[] = [];
+    const pos = (e: TouchEvent) => (axis === "x" ? e.touches[0].clientX : e.touches[0].clientY);
 
     const onStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       dragging = false; decided = false;
-      samples = [{ t: performance.now(), y: startY }];
-      y.stop();
+      samples = [{ t: performance.now(), p: pos(e) }];
+      v.stop();
     };
     const onMove = (e: TouchEvent) => {
-      const cur = e.touches[0].clientY;
-      const dy  = cur - startY;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
       if (!decided) {
-        if (window.scrollY <= 0 && dy > 4) { dragging = true; decided = true; }
-        else if (Math.abs(dy) > 4) decided = true; // it's a scroll — hands off
+        if (axis === "x") {
+          // swipe right, horizontally dominant
+          if (dx > 6 && dx > Math.abs(dy)) { dragging = true; decided = true; }
+          else if (Math.abs(dx) > 6 || Math.abs(dy) > 6) decided = true;
+        } else {
+          if (window.scrollY <= 0 && dy > 4) { dragging = true; decided = true; }
+          else if (Math.abs(dy) > 4) decided = true;
+        }
       }
       if (!dragging) return;
       e.preventDefault();
-      y.set(dy < 0 ? dy * 0.4 : dy); // tiny resistance if dragged up past origin
+      const d = axis === "x" ? dx : dy;
+      v.set(d < 0 ? d * 0.35 : d); // light resistance past the origin
       const now = performance.now();
-      samples.push({ t: now, y: cur });
+      samples.push({ t: now, p: pos(e) });
       while (samples.length > 2 && now - samples[0].t > PAGE_SAMPLE_MS) samples.shift();
     };
     const onEnd = () => {
       if (!dragging) return;
       dragging = false;
-      const offset = y.get();
-      let v = 0;
+      const offset = v.get();
+      let vel = 0;
       if (samples.length >= 2) {
         const f = samples[0], l = samples[samples.length - 1];
         const dt = l.t - f.t;
-        if (dt > 0) v = (l.y - f.y) / dt;
+        if (dt > 0) vel = (l.p - f.p) / dt;
       }
-      if (offset > PAGE_DISMISS_OFFSET || v > PAGE_DISMISS_VELOCITY) {
-        animate(y, window.innerHeight, { ...PAGE_EXIT, velocity: v * 1000 }).then(() => cb.current());
+      if (offset > PAGE_DISMISS_OFFSET || vel > PAGE_DISMISS_VELOCITY) {
+        animate(v, offscreen(), { ...PAGE_EXIT, velocity: vel * 1000 }).then(() => cb.current());
       } else {
-        animate(y, 0, PAGE_SNAP);
+        animate(v, 0, PAGE_SNAP);
       }
     };
 
@@ -233,9 +258,10 @@ export function usePageSwipeDismiss(onDismiss: () => void): MotionValue<number> 
       window.removeEventListener("touchend",    onEnd);
       window.removeEventListener("touchcancel", onEnd);
     };
-  }, [y]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v, axis]);
 
-  return y;
+  return v;
 }
 
 export function dragDismissProps(onClose: () => void) {

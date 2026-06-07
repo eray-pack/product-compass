@@ -4,6 +4,7 @@ import { ShieldCheck, X, Flame, Brain, TrendingUp, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next";
 import { useAppState, dayCount, activeAddiction } from "@/lib/store";
 import { getReframe } from "@/lib/reframe";
+import { dragDismissProps } from "@/lib/sheetGesture";
 
 const GOLD   = "#C9A84C";
 const RED    = "#E05A42";
@@ -93,7 +94,20 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
   };
 
   return (
-    <Overlay>
+    <Overlay onClose={onClose}>
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={spring}
+        {...dragDismissProps(onClose)}
+        onClick={(e) => e.stopPropagation()}
+        style={{ width: "100%", maxWidth: 480, touchAction: "none" }}
+      >
+        {/* Grab handle */}
+        <div style={{ display: "flex", justifyContent: "center", paddingBottom: 8 }}>
+          <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.22)" }} />
+        </div>
       <AnimatePresence mode="wait">
         {step === "confirm" && (
           <motion.div key="confirm" variants={fadeUp} initial="hidden" animate="visible" exit="exit"
@@ -385,6 +399,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+      </motion.div>
     </Overlay>
   );
 }
@@ -393,12 +408,10 @@ const MODAL_BASE: React.CSSProperties = {
   position: "relative",
   background: `radial-gradient(ellipse 100% 60% at 50% 0%, #120e0a 0%, ${BG} 60%)`,
   border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 28,
-  padding: "28px 24px 32px",
+  borderRadius: "28px 28px 0 0",
+  padding: "26px 24px calc(32px + env(safe-area-inset-bottom))",
   width: "100%",
-  maxWidth: 368,
-  margin: "0 16px",
-  boxShadow: "0 24px 80px rgba(0,0,0,0.70), 0 0 0 0.5px rgba(255,255,255,0.05)",
+  boxShadow: "0 -24px 80px rgba(0,0,0,0.70), 0 0 0 0.5px rgba(255,255,255,0.05)",
 };
 
 const CLOSE_BTN: React.CSSProperties = {
@@ -410,15 +423,18 @@ const CLOSE_BTN: React.CSSProperties = {
   cursor: "pointer", color: "rgba(255,255,255,0.35)",
 };
 
-function Overlay({ children }: { children: React.ReactNode }) {
+function Overlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 50,
-      background: "rgba(0,0,0,0.85)",
-      backdropFilter: "blur(16px)",
-      WebkitBackdropFilter: "blur(16px)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-    }}>
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: "fixed", inset: 0, zIndex: 50,
+        background: "rgba(0,0,0,0.85)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+      }}
+    >
       {children}
     </div>
   );

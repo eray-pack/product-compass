@@ -1456,14 +1456,13 @@ function Settings() {
     else navigate({ to: "/" });
   };
 
-  // Pull down from the top of the page (anywhere) to go back — scroll-gated so
-  // the content still scrolls normally once you're past the top.
-  const dismissY = usePageSwipeDismiss(goBack);
+  // Slides in from the right; swipe right from anywhere to go back (iOS-style).
+  const dismissX = usePageSwipeDismiss(goBack, { axis: "x", entrance: true });
 
   return (
     <motion.div
       className="app-page min-h-screen pb-16 mx-auto max-w-md"
-      style={{ y: dismissY }}
+      style={{ x: dismissX }}
     >
       <PremiumBackground />
       {/* Sticky header */}

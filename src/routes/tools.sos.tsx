@@ -1,7 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePageSwipeDismiss } from "@/lib/sheetGesture";
 
 export const Route = createFileRoute("/tools/sos")({
   component: SOS,
@@ -287,6 +288,13 @@ function UrgeWaveGraph({ elapsed }: { elapsed: number }) {
 // ═════════════════════════════════════════════════════════════════════════════
 function SOS() {
   const navigate = useNavigate();
+  const router = useRouter();
+  const goBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) router.history.back();
+    else navigate({ to: "/tools" });
+  };
+  // Slides up from the bottom; swipe down to dismiss back to where you came from.
+  const dismissY = usePageSwipeDismiss(goBack, { axis: "y", entrance: true });
 
   // ── Timer + phase state (logic unchanged) ────────────────────────────────
   const [elapsed,   setElapsed]   = useState(0);
@@ -330,12 +338,14 @@ function SOS() {
         50%       { opacity: 1.00; transform: scale(1.06); }
       }
     `}</style>
-    <div
+    <motion.div
       style={{
+        y: dismissY,
         minHeight: "100dvh",
         background: "radial-gradient(circle at 50% 50%, #0c0812 0%, #06040a 60%, #000000 100%)",
         display: "flex", flexDirection: "column",
         position: "relative", overflow: "hidden",
+        willChange: "transform",
       }}
       className="mx-auto max-w-md px-6 pt-10 pb-12"
     >
@@ -354,13 +364,13 @@ function SOS() {
       ))}
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ position: "relative", zIndex: 1 }}>
-        <Link
-          to="/tools"
+        <button
+          onClick={goBack}
           className="inline-flex items-center gap-1 font-medium"
-          style={{ color: "rgba(255,255,255,0.40)", fontSize: 13, fontFamily: "DM Sans, sans-serif" }}
+          style={{ color: "rgba(255,255,255,0.40)", fontSize: 13, fontFamily: "DM Sans, sans-serif", background: "none", border: "none", cursor: "pointer", padding: 0 }}
         >
           <ArrowLeft className="h-4 w-4" /> Back
-        </Link>
+        </button>
         <ActiveUrgeModule />
       </div>
 
@@ -559,7 +569,7 @@ function SOS() {
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
     </>
   );
 }
