@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 import { CHANGELOG, CURRENT_VERSION, markChangelogSeen } from "@/lib/changelog";
-import { dragDismissProps } from "@/components/BottomSheet";
+import { dragDismissProps } from "@/lib/sheetGesture";
 
 type Props = {
   open: boolean;

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { PremiumBackground } from "@/components/PremiumBackground";
-import { dragDismissProps } from "@/components/BottomSheet";
+import { dragDismissProps } from "@/lib/sheetGesture";
 import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
 import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";

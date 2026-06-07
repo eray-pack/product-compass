@@ -12,7 +12,7 @@ import { initPurchases, checkPremium } from "@/lib/purchases";
 import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
-import { dragDismissProps } from "@/components/BottomSheet";
+import { dragDismissProps } from "@/lib/sheetGesture";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
 import { ChangelogModal } from "@/components/ChangelogModal";
@@ -792,7 +792,6 @@ function PremiumBadgeSymbol({ badge, active = true }: { badge: { name: string; s
               `drop-shadow(0 0 55px ${rgbBase}0.28))`,
             ].join(" "),
             userSelect: "none",
-            lineHeight: 1,
           }}
         >
           {badge.symbol}
