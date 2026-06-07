@@ -1,6 +1,99 @@
 import { useEffect, useRef } from "react";
 import { useMotionValue, animate, type MotionValue } from "framer-motion";
 
+// ── Page elastic overscroll bounce ────────────────────────────────────────────
+// JS-driven rubber-band for full pages (the native WKWebView bounce is
+// unreliable inside Capacitor). Transforms a content wrapper directly (GPU,
+// no React re-renders), engages ONLY at the scroll edges, springs back on
+// release. Set transform back to "" at rest so it never breaks position:fixed.
+const BOUNCE_MAX        = 150;   // px max stretch (asymptotic, never hard-capped feel)
+const BOUNCE_DIMENSION  = 600;   // rubber-band reference dimension
+const BOUNCE_CONSTANT   = 0.5;   // lower = stiffer
+const BOUNCE_SPRING     = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+
+function bounceResist(distance: number) {
+  const x = Math.abs(distance);
+  const b = (x * BOUNCE_DIMENSION * BOUNCE_CONSTANT) / (BOUNCE_DIMENSION + BOUNCE_CONSTANT * x);
+  const capped = Math.min(b, BOUNCE_MAX);
+  return distance < 0 ? -capped : capped;
+}
+
+// True if the touch began inside an overlay (position:fixed) or its own inner
+// scroller — in which case the page bounce must stay out of the way.
+function startedInOverlayOrScroller(target: EventTarget | null): boolean {
+  let node = target as HTMLElement | null;
+  while (node && node !== document.body && node !== document.documentElement) {
+    const cs = getComputedStyle(node);
+    if (cs.position === "fixed") return true;
+    const oy = cs.overflowY;
+    if ((oy === "auto" || oy === "scroll") && node.scrollHeight > node.clientHeight + 1) return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+
+/**
+ * Elastic overscroll for a full page. Bind the returned ref to a wrapper
+ * around the page's scrolling content. Pull past the top or bottom and it
+ * stretches with rubber-band resistance, then springs back on release.
+ */
+export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let startY = 0, dragging = false, decided = false, skip = false;
+    let rafId = 0, pending = 0;
+
+    const flush = () => {
+      rafId = 0;
+      el.style.transform = pending === 0 ? "" : `translate3d(0, ${pending}px, 0)`;
+    };
+    const queue = (v: number) => { pending = v; if (!rafId) rafId = requestAnimationFrame(flush); };
+
+    const onStart = (e: TouchEvent) => {
+      dragging = false; decided = false;
+      skip = startedInOverlayOrScroller(e.target);
+      startY = e.touches[0].clientY;
+      el.style.transition = "none";
+    };
+    const onMove = (e: TouchEvent) => {
+      if (skip) return;
+      const dy = e.touches[0].clientY - startY;
+      if (!decided) {
+        const atTop    = window.scrollY <= 0;
+        const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+        if (atTop && dy > 0)         { dragging = true; decided = true; }
+        else if (atBottom && dy < 0) { dragging = true; decided = true; }
+        else if (Math.abs(dy) > 3)   { decided = true; } // normal scroll — hands off
+      }
+      if (!dragging) return;
+      e.preventDefault();
+      queue(bounceResist(dy));
+    };
+    const onEnd = () => {
+      if (!dragging) return;
+      dragging = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      pending = 0;
+      el.style.transition = BOUNCE_SPRING;
+      el.style.transform = "";
+    };
+
+    window.addEventListener("touchstart",  onStart, { passive: true });
+    window.addEventListener("touchmove",   onMove,  { passive: false });
+    window.addEventListener("touchend",    onEnd,   { passive: true });
+    window.addEventListener("touchcancel", onEnd,   { passive: true });
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("touchstart",  onStart);
+      window.removeEventListener("touchmove",   onMove);
+      window.removeEventListener("touchend",    onEnd);
+      window.removeEventListener("touchcancel", onEnd);
+    };
+  }, [ref]);
+}
+
 // ── Drag-to-dismiss props for short, NON-scrolling bottom sheets ──────────────
 // Spread onto a Framer <motion.div> that's a bottom-anchored sheet. The whole
 // surface becomes draggable; release past ~100px or a fast downward flick

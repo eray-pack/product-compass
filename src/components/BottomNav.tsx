@@ -3,6 +3,7 @@ import { Home, Wrench, Users, BarChart2, Settings } from "lucide-react";
 import { loadState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
+import { usePageBounce } from "@/lib/sheetGesture";
 import { useTranslation } from "react-i18next";
 
 function useScrollHide() {
@@ -256,6 +257,10 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   const onHome     = path === "/";
   const onTree     = path === "/tree";
 
+  // Elastic overscroll bounce on the content (fixed chrome stays put)
+  const bounceRef = useRef<HTMLDivElement>(null);
+  usePageBounce(bounceRef);
+
   return (
     <div className="app-page min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
@@ -280,7 +285,9 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       )}
       <BottomNav />
 
-      {children}
+      <div ref={bounceRef} style={{ willChange: "transform" }}>
+        {children}
+      </div>
     </div>
   );
 }
