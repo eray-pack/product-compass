@@ -5,6 +5,71 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
 
+// ── JS elastic bounce — makes page feel springy at scroll edges ───────────────
+// Wraps page content (not fixed chrome) and physically moves it on overscroll.
+// Completely replaces native iOS bounce so it's consistent across all devices.
+function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let startY        = 0;
+    let startScrollY  = 0;
+    let atTop         = false;
+    let atBottom      = false;
+    let pulling       = false;
+
+    const setTransform = (y: number, animated: boolean) => {
+      el.style.transition = animated
+        ? "transform 0.52s cubic-bezier(0.22, 1, 0.36, 1)"
+        : "none";
+      el.style.transform = y === 0 ? "" : `translateY(${y}px)`;
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      startY       = e.touches[0].clientY;
+      startScrollY = window.scrollY;
+      const max    = document.documentElement.scrollHeight - window.innerHeight;
+      atTop        = startScrollY <= 1;
+      atBottom     = startScrollY >= max - 1;
+      pulling      = false;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const dy = e.touches[0].clientY - startY;
+
+      if (atTop && dy > 0) {
+        // Pulling down at top — push content down with resistance
+        pulling = true;
+        setTransform(Math.min(dy * 0.38, 96), false);
+      } else if (atBottom && dy < 0) {
+        // Pulling up at bottom — push content up with resistance
+        pulling = true;
+        setTransform(Math.max(dy * 0.38, -96), false);
+      }
+    };
+
+    const onTouchEnd = () => {
+      if (pulling) {
+        pulling = false;
+        setTransform(0, true);
+      }
+    };
+
+    window.addEventListener("touchstart",  onTouchStart,  { passive: true });
+    window.addEventListener("touchmove",   onTouchMove,   { passive: true });
+    window.addEventListener("touchend",    onTouchEnd,    { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd,    { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart",  onTouchStart);
+      window.removeEventListener("touchmove",   onTouchMove);
+      window.removeEventListener("touchend",    onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [ref]);
+}
+
 function useScrollHide() {
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
@@ -256,9 +321,15 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   const onHome     = path === "/";
   const onTree     = path === "/tree";
 
+  // Elastic bounce — only applied to the content div, not fixed chrome
+  const elasticRef = useRef<HTMLDivElement>(null);
+  useElasticBounce(elasticRef);
+
   return (
     <div className="min-h-screen pb-32 mx-auto max-w-md">
       <PremiumBackground hideWaves={path === "/" || path === "/tools"} />
+
+      {/* ── Fixed chrome — outside elastic wrapper so it never bounces ── */}
       {onHome && (
         <div className="fixed left-4 z-30" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
           <LogoPill />
@@ -266,7 +337,6 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       )}
       {!onSettings && (
         <div className="fixed right-4 z-30 flex items-center gap-2" style={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
-          {/* Credits chip only on tree/wolf page — that's the only place you can spend them */}
           {onTree && <CreditsChip />}
           <Link
             to="/settings"
@@ -278,8 +348,12 @@ export function PageShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
       )}
-      {children}
       <BottomNav />
+
+      {/* ── Elastic content wrapper — only this moves on overscroll ── */}
+      <div ref={elasticRef} style={{ willChange: "transform" }}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CartoonTree } from "@/components/CartoonTree";
 import { CompanionAvatar } from "@/components/avatars/CompanionAvatar";
@@ -2153,9 +2154,11 @@ function TreeUpgradeOverlays({
   );
 }
 
-// ── Overscroll easter egg — physically tracks the iOS rubber-band pull ───────
-// Sits above (top) and below (bottom) the viewport, revealed as the page
-// stretches. Follows the finger proportionally, springs back on release.
+// ── Overscroll easter egg ─────────────────────────────────────────────────────
+// Rendered via React portal (outside the elastic wrapper) so position: fixed
+// works correctly against the viewport, not any transformed ancestor.
+// Tracks the same touch gesture as PageShell's elastic bounce — they move in
+// sync because they both listen to the same window touch events.
 function OverscrollEasterEgg({
   topContent,
   bottomContent,
@@ -2165,97 +2168,71 @@ function OverscrollEasterEgg({
 }) {
   const [topPull, setTopPull]       = useState(0);
   const [bottomPull, setBottomPull] = useState(0);
-  const touchStartY                 = useRef(0);
-  const touchStartScrollY           = useRef(0);
-  const isTop                       = useRef(false);
-  const isBottom                    = useRef(false);
+  const startY    = useRef(0);
+  const atTop     = useRef(false);
+  const atBottom  = useRef(false);
 
   useEffect(() => {
     const onStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-      touchStartScrollY.current = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      isTop.current    = touchStartScrollY.current <= 2;
-      isBottom.current = touchStartScrollY.current >= maxScroll - 4;
+      startY.current   = e.touches[0].clientY;
+      const scrollY    = window.scrollY;
+      const max        = document.documentElement.scrollHeight - window.innerHeight;
+      atTop.current    = scrollY <= 1;
+      atBottom.current = scrollY >= max - 1;
     };
     const onMove = (e: TouchEvent) => {
-      const dy = e.touches[0].clientY - touchStartY.current;
-      if (isTop.current && dy > 0) {
-        // Pulling down at top — reveal top easter egg
-        setTopPull(Math.min(dy * 0.52, 88));
+      const dy = e.touches[0].clientY - startY.current;
+      if (atTop.current && dy > 0) {
+        setTopPull(Math.min(dy * 0.38, 96));
         setBottomPull(0);
-      } else if (isBottom.current && dy < 0) {
-        // Pulling up at bottom — reveal bottom easter egg
-        setBottomPull(Math.min(-dy * 0.52, 88));
+      } else if (atBottom.current && dy < 0) {
+        setBottomPull(Math.min(-dy * 0.38, 96));
         setTopPull(0);
       }
     };
-    const onEnd = () => {
-      setTopPull(0);
-      setBottomPull(0);
-    };
-    window.addEventListener("touchstart", onStart, { passive: true });
-    window.addEventListener("touchmove",  onMove,  { passive: true });
-    window.addEventListener("touchend",   onEnd,   { passive: true });
-    window.addEventListener("touchcancel", onEnd,  { passive: true });
+    const onEnd = () => { setTopPull(0); setBottomPull(0); };
+
+    window.addEventListener("touchstart",  onStart,  { passive: true });
+    window.addEventListener("touchmove",   onMove,   { passive: true });
+    window.addEventListener("touchend",    onEnd,    { passive: true });
+    window.addEventListener("touchcancel", onEnd,    { passive: true });
     return () => {
-      window.removeEventListener("touchstart", onStart);
-      window.removeEventListener("touchmove",  onMove);
-      window.removeEventListener("touchend",   onEnd);
+      window.removeEventListener("touchstart",  onStart);
+      window.removeEventListener("touchmove",   onMove);
+      window.removeEventListener("touchend",    onEnd);
       window.removeEventListener("touchcancel", onEnd);
     };
   }, []);
 
-  const STRIP_H  = 72; // px — height of each hidden strip
-  const FADE_IN  = 24; // px of pull before it starts fading in
+  const STRIP  = 72;
+  const FADE   = 20; // px pull before fading in
+  const spring = "transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease";
 
-  return (
+  // Portal renders outside the elastic wrapper — position: fixed stays viewport-relative
+  return createPortal(
     <>
-      {/* ── Top strip — hidden above viewport, slides down on pull ── */}
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          top: -STRIP_H,
-          left: 0, right: 0,
-          height: STRIP_H,
-          display: "flex", alignItems: "flex-end", justifyContent: "center",
-          paddingBottom: 10,
-          transform: `translateY(${topPull}px)`,
-          // Spring-back when released, instant-follow while pulling
-          transition: topPull === 0
-            ? "transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease"
-            : "none",
-          opacity: topPull < FADE_IN ? 0 : Math.min(1, (topPull - FADE_IN) / 28),
-          pointerEvents: "none",
-          zIndex: 9100,
-        }}
-      >
+      <div aria-hidden style={{
+        position: "fixed", top: -STRIP, left: 0, right: 0, height: STRIP,
+        display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 10,
+        transform: `translateY(${topPull}px)`,
+        transition: topPull === 0 ? spring : "none",
+        opacity: topPull < FADE ? 0 : Math.min(1, (topPull - FADE) / 30),
+        pointerEvents: "none", zIndex: 9100,
+      }}>
         {topContent}
       </div>
-
-      {/* ── Bottom strip — hidden below viewport, slides up on pull ── */}
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          bottom: -STRIP_H,
-          left: 0, right: 0,
-          height: STRIP_H,
-          display: "flex", alignItems: "flex-start", justifyContent: "center",
-          paddingTop: 10,
-          transform: `translateY(-${bottomPull}px)`,
-          transition: bottomPull === 0
-            ? "transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease"
-            : "none",
-          opacity: bottomPull < FADE_IN ? 0 : Math.min(1, (bottomPull - FADE_IN) / 28),
-          pointerEvents: "none",
-          zIndex: 9100,
-        }}
-      >
+      <div aria-hidden style={{
+        position: "fixed", bottom: -STRIP, left: 0, right: 0, height: STRIP,
+        display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 10,
+        transform: `translateY(-${bottomPull}px)`,
+        transition: bottomPull === 0 ? spring : "none",
+        opacity: bottomPull < FADE ? 0 : Math.min(1, (bottomPull - FADE) / 30),
+        pointerEvents: "none", zIndex: 9100,
+      }}>
         {bottomContent}
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
