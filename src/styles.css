@@ -256,26 +256,41 @@ html.light {
 }
 .animate-shimmer-leaf { animation: shimmer-leaf 3s ease-in-out infinite; }
 
-/* ── iOS / mobile touch optimizations ───────────────────── */
-/* Remove 300ms tap delay and grey flash on all interactive elements */
+/* ── iOS / mobile touch optimizations — make it feel like a native app ───── */
+/* Global: no tap-highlight flash, no long-press callout (magnifier/copy menu),
+   no text selection. This kills the "web page in an app" tells. */
 * {
   -webkit-tap-highlight-color: transparent;
-}
-html {
-  /* Smooth momentum scrolling on iOS */
-  -webkit-overflow-scrolling: touch;
-}
-button, a, [role="button"], [role="tab"], [role="switch"] {
-  /* Removes 300ms tap delay on iOS */
-  touch-action: manipulation;
-  /* Prevent text selection on rapid taps */
+  -webkit-touch-callout: none;   /* no long-press loupe / share-copy menu */
   -webkit-user-select: none;
   user-select: none;
 }
-input, textarea {
-  /* Allow text selection in inputs */
+html, body {
+  /* Smooth momentum scrolling + prevent double-tap zoom across the app */
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+}
+button, a, [role="button"], [role="tab"], [role="switch"] {
+  touch-action: manipulation;
+}
+/* Images: never draggable, never selectable, no long-press loupe.
+   (No pointer-events:none here — that would break interactive SVGs/charts.) */
+img, picture, video {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+/* Re-enable text selection + callout ONLY inside real inputs and editable text */
+input, textarea, [contenteditable="true"], [contenteditable=""] {
   -webkit-user-select: text;
   user-select: text;
+  -webkit-touch-callout: default;
+}
+/* Allow selecting genuine long-form copy if explicitly opted in */
+.selectable-text {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 /* Neural mesh backgrounds */
