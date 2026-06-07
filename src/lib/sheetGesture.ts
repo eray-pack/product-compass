@@ -11,6 +11,14 @@ const BOUNCE_DIMENSION  = 600;   // rubber-band reference dimension
 const BOUNCE_CONSTANT   = 0.5;   // lower = stiffer
 const BOUNCE_SPRING     = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
 
+// Fling → bounce (momentum carry-through): a fast scroll that REACHES an edge
+// with leftover velocity flows straight into the rubber-band, no hard stop.
+const FLING_THRESHOLD   = 0.35;  // px/ms remaining velocity at the edge to trigger
+const FLING_SCALE       = 0.55;  // how much scroll velocity converts to bounce impulse
+const FLING_MAX_V       = 1500;  // px/s cap on the impulse fed into the spring
+
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
 function bounceResist(distance: number) {
   const x = Math.abs(distance);
   const b = (x * BOUNCE_DIMENSION * BOUNCE_CONSTANT) / (BOUNCE_DIMENSION + BOUNCE_CONSTANT * x);
@@ -42,19 +50,24 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
     const el = ref.current;
     if (!el) return;
 
-    let startY = 0, dragging = false, decided = false, skip = false;
-    let rafId = 0, pending = 0;
-
-    const flush = () => {
-      rafId = 0;
-      el.style.transform = pending === 0 ? "" : `translate3d(0, ${pending}px, 0)`;
+    let fling: { stop: () => void } | null = null;
+    const stopFling = () => { if (fling) { fling.stop(); fling = null; } };
+    const setT = (v: number) => {
+      const c = clamp(v, -BOUNCE_MAX, BOUNCE_MAX);
+      el.style.transform = c === 0 ? "" : `translate3d(0, ${c}px, 0)`;
     };
+
+    // ── Manual pull (finger at the edge) ──────────────────────────────────────
+    let startY = 0, dragging = false, decided = false, skip = false, touching = false;
+    let rafId = 0, pending = 0;
+    const flush = () => { rafId = 0; setT(pending); };
     const queue = (v: number) => { pending = v; if (!rafId) rafId = requestAnimationFrame(flush); };
 
     const onStart = (e: TouchEvent) => {
-      dragging = false; decided = false;
+      touching = true; dragging = false; decided = false;
       skip = startedInOverlayOrScroller(e.target);
       startY = e.touches[0].clientY;
+      stopFling();
       el.style.transition = "none";
     };
     const onMove = (e: TouchEvent) => {
@@ -72,6 +85,7 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
       queue(bounceResist(dy));
     };
     const onEnd = () => {
+      touching = false;
       if (!dragging) return;
       dragging = false;
       if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
@@ -80,16 +94,49 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
       el.style.transform = "";
     };
 
+    // ── Fling carry-through (momentum reaches the edge) ───────────────────────
+    let lastY = window.scrollY, lastT = performance.now(), vel = 0, cooldown = false;
+    const fireFling = (impulsePerMs: number) => {
+      cooldown = true;
+      stopFling();
+      el.style.transition = "none";
+      // Spring from 0 → 0 with an initial velocity = overshoot then settle back.
+      const v0 = clamp(impulsePerMs * 1000 * FLING_SCALE, -FLING_MAX_V, FLING_MAX_V);
+      fling = animate(0, 0, {
+        type: "spring", velocity: v0, stiffness: 170, damping: 22,
+        restDelta: 0.4, restSpeed: 3,
+        onUpdate: (val: number) => setT(val),
+        onComplete: () => { el.style.transform = ""; fling = null; },
+      });
+    };
+    const onScroll = () => {
+      const now = performance.now();
+      const y = window.scrollY;
+      const dt = now - lastT;
+      if (dt > 0) vel = (y - lastY) / dt; // px/ms (negative = toward top)
+      lastY = y; lastT = now;
+      if (touching || dragging) return;   // finger handles edges directly
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (!cooldown) {
+        if (y <= 0 && vel < -FLING_THRESHOLD)        fireFling(-vel); // hit top with speed
+        else if (y >= max - 1 && vel > FLING_THRESHOLD) fireFling(-vel); // hit bottom
+      }
+      if (y > 2 && y < max - 2) cooldown = false; // re-arm once away from edges
+    };
+
     window.addEventListener("touchstart",  onStart, { passive: true });
     window.addEventListener("touchmove",   onMove,  { passive: false });
     window.addEventListener("touchend",    onEnd,   { passive: true });
     window.addEventListener("touchcancel", onEnd,   { passive: true });
+    window.addEventListener("scroll",      onScroll, { passive: true });
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
+      stopFling();
       window.removeEventListener("touchstart",  onStart);
       window.removeEventListener("touchmove",   onMove);
       window.removeEventListener("touchend",    onEnd);
       window.removeEventListener("touchcancel", onEnd);
+      window.removeEventListener("scroll",      onScroll);
     };
   }, [ref]);
 }
