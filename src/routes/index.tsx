@@ -655,11 +655,46 @@ const RANK_FX: Record<string, {
   Legend:   { glowScale: [1, 1.60, 1], glowDur: 4.0, ringDur: 7.0,  ringRotate: 360,  ringDouble: true,  pulseScale: [1, 1.10, 0.92, 1.08, 1], pulseDur: 1.2, particleCount: 12, particleSpread: 1.35, symbolScale: 1.1, symbolOffsetY: -4 , symbolOffsetX:  0 },
 };
 
-function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; color: string; glow: string } }) {
+function PremiumBadgeSymbol({ badge, active = true }: { badge: { name: string; symbol: string; color: string; glow: string }; active?: boolean }) {
   const fx = RANK_FX[badge.name] ?? RANK_FX.Spark;
   const rgb = badge.glow; // e.g. "rgba(224,122,69,0.40)"
   const rgbBase = rgb.replace(/[\d.]+\)$/, ""); // "rgba(224,122,69,"
   const particles = BADGE_PARTICLES.slice(0, fx.particleCount);
+
+  // Core symbol glyph — shared between active and static versions
+  const coreSymbol = (
+    <span
+      style={{
+        fontSize: "clamp(7rem, 30vw, 10rem)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        lineHeight: 1, textAlign: "center" as const,
+        background: `radial-gradient(circle at 40% 35%, #ffffff 0%, ${badge.color}cc 30%, ${badge.color} 65%)`,
+        WebkitBackgroundClip: "text", backgroundClip: "text",
+        WebkitTextFillColor: "transparent", color: "transparent",
+        filter: `drop-shadow(0 0 12px ${rgbBase}0.95)) drop-shadow(0 0 28px ${rgbBase}0.50))`,
+        userSelect: "none",
+      }}
+    >
+      {badge.symbol}
+    </span>
+  );
+
+  // ── Static (off-screen) version — no infinite animations, cheap to paint.
+  // Off-screen carousel badges use this so we don't run N sets of looping
+  // glow/ring/particle animations competing for the compositor during a swipe.
+  if (!active) {
+    return (
+      <div className="relative flex items-center justify-center" style={{ width: 270, height: 270 }}>
+        <div aria-hidden className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${rgbBase}0.30) 0%, ${rgbBase}0.08) 52%, transparent 72%)` }} />
+        <div aria-hidden className="absolute rounded-full pointer-events-none"
+          style={{ width: "66%", height: "66%", border: `2px solid ${rgbBase}0.70)` }} />
+        <span className="font-bold leading-none select-none relative" style={{ zIndex: 1, display: "flex", width: 160, height: 160, alignItems: "center", justifyContent: "center", marginTop: fx.symbolOffsetY, marginLeft: fx.symbolOffsetX }}>
+          {coreSymbol}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: 270, height: 270 }}>
@@ -769,40 +804,56 @@ function PremiumBadgeSymbol({ badge }: { badge: { name: string; symbol: string; 
 // ─── Badge Carousel ───────────────────────────────────────────────────────────
 function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addictionName: string; addictionId: string }) {
   const earnedCount = BADGES.filter((b) => day >= b.day).length;
-  const [idx, setIdx]             = useState(() => Math.max(0, earnedCount - 1));
-  const touchStartX               = useRef(0);
-  const touchStartY               = useRef(0);
-  const [dragging, setDragging]   = useState(false);
-  const [dragDelta, setDragDelta] = useState(0);
+  const [idx, setIdx]           = useState(() => Math.max(0, earnedCount - 1));
+  const [dragging, setDragging] = useState(false);
+  const trackRef                = useRef<HTMLDivElement>(null);
+  const touchStartX             = useRef(0);
+  const touchStartY             = useRef(0);
+  const dragDX                  = useRef(0);     // live drag offset (no re-render)
+  const horizontal              = useRef(false); // locked-in axis for this gesture
 
   // Snap to latest earned badge whenever the active habit changes
   useEffect(() => {
     setIdx(Math.max(0, BADGES.filter((b) => day >= b.day).length - 1));
   }, [addictionId]);
 
+  const SNAP = "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
   const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
+    horizontal.current  = false;
+    dragDX.current      = 0;
     setDragging(true);
-    setDragDelta(0);
+    if (trackRef.current) trackRef.current.style.transition = "none";
   };
   const onTouchMove = (e: React.TouchEvent) => {
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
-    if (Math.abs(dy) > Math.abs(dx)) return;
-    setDragDelta(dx);
+    // Lock axis on first meaningful movement so vertical scroll isn't hijacked
+    if (!horizontal.current) {
+      if (Math.abs(dy) > Math.abs(dx)) return;
+      if (Math.abs(dx) > 6) horizontal.current = true;
+    }
+    dragDX.current = dx;
+    // Direct DOM write — no React state, no re-render
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(calc(-${idx * 100}% + ${dx}px), 0, 0)`;
+    }
   };
   const onTouchEnd = () => {
+    const dx = dragDX.current;
+    if (trackRef.current) trackRef.current.style.transition = SNAP;
     setDragging(false);
-    if (dragDelta < -44) go(idx + 1);
-    else if (dragDelta > 44) go(idx - 1);
-    setDragDelta(0);
+    if (dx < -44) go(idx + 1);
+    else if (dx > 44) go(idx - 1);
+    else if (trackRef.current) {
+      // Snap back to current — restore the state-based transform
+      trackRef.current.style.transform = `translate3d(-${idx * 100}%, 0, 0)`;
+    }
+    dragDX.current = 0;
   };
-
-  const b       = BADGES[idx];
-  const isEarned = day >= b.day;
 
   return (
     <div className="select-none text-center">
@@ -814,17 +865,22 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <motion.div
-          style={{ display: "flex" }}
-          animate={{ x: `calc(-${idx * 100}% + ${dragging ? dragDelta : 0}px)` }}
-          transition={dragging ? { duration: 0 } : { type: "spring", damping: 30, stiffness: 300, mass: 0.85 }}
+        <div
+          ref={trackRef}
+          style={{
+            display: "flex",
+            transform: `translate3d(-${idx * 100}%, 0, 0)`,
+            transition: dragging ? "none" : SNAP,
+            willChange: "transform",
+          }}
         >
           {BADGES.map((b, i) => {
             const earned = day >= b.day;
+            const near   = Math.abs(i - idx) <= 1;  // only render heavy FX near viewport
             return (
               <div key={b.name} style={{ minWidth: "100%", width: "100%" }} className="relative pt-3 pb-2 flex flex-col items-center">
-                {/* Ambient glow */}
-                {earned && (
+                {/* Ambient glow — only near the visible slide (blur is expensive) */}
+                {earned && near && (
                   <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2"
                     style={{ width: 380, height: 380, borderRadius: "50%",
                       background: `radial-gradient(circle, ${b.glow.replace("0.40","0.12")} 0%, transparent 68%)`,
@@ -839,9 +895,9 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                     : i === earnedCount     ? "Next badge" : "Coming up"}
                 </p>
 
-                {/* Badge symbol — premium animated for all earned ranks */}
+                {/* Badge symbol — animated only for the visible slide */}
                 {earned ? (
-                  <PremiumBadgeSymbol badge={b} />
+                  <PremiumBadgeSymbol badge={b} active={i === idx} />
                 ) : (
                   <div className="relative flex items-center justify-center"
                     style={{ width: 270, height: 270 }}>
@@ -850,22 +906,22 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
                       style={{
                         fontSize: "9rem",
                         color: "rgba(255,255,255,0.07)",
-                        filter: "blur(10px)",
+                        filter: near ? "blur(10px)" : "none",
                         userSelect: "none",
                         position: "absolute",
                       }}>
                       {b.symbol}
                     </span>
 
-                    {/* Frosted lock bar */}
+                    {/* Frosted lock bar — backdrop-filter only near viewport (very costly) */}
                     <div style={{
                       position: "absolute",
                       left: "50%", top: "50%",
                       transform: "translate(-50%, -50%)",
                       width: 148,
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                      background: "rgba(255,255,255,0.06)",
+                      backdropFilter: near ? "blur(10px)" : undefined,
+                      WebkitBackdropFilter: near ? "blur(10px)" : undefined,
+                      background: near ? "rgba(255,255,255,0.06)" : "rgba(28,23,16,0.85)",
                       border: "1px solid rgba(255,255,255,0.10)",
                       borderRadius: 14,
                       padding: "10px 16px",
@@ -918,7 +974,7 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
               </div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
 
       {/* ── Fixed day display — outside the swipe area ── */}
