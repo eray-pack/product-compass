@@ -1,7 +1,7 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
-import { PageShell, SectionTitle } from "@/components/BottomNav";
+import { PageShell, SectionTitle, rubberBand } from "@/components/BottomNav";
 import { useAppState, treeStage, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
@@ -2173,68 +2173,75 @@ function OverscrollEasterEgg({
     const bottom = bottomRef.current;
     if (!top || !bottom) return;
 
-    const STRIP  = 72;
-    const FADE   = 20;
-    const SPRING = "transform 0.52s cubic-bezier(0.22,1,0.36,1), opacity 0.35s ease";
+    const FADE   = 16;
+    const SPRING = "transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease";
 
     let sY = 0, sTime = 0, edgeDy = 0, atEdge = false, side = 0;
+    let dimension = 800, maxScroll = 0;
+    let rafId = 0, pendingTop = 0, pendingBottom = 0;
 
-    const setTop = (pull: number, animated: boolean) => {
-      top.style.transition = animated ? SPRING : "none";
-      top.style.transform  = `translateY(${pull}px)`;
-      top.style.opacity    = pull < FADE ? "0" : String(Math.min(1, (pull - FADE) / 30));
+    const write = () => {
+      rafId = 0;
+      top.style.transform    = `translate3d(0, ${pendingTop}px, 0)`;
+      top.style.opacity      = pendingTop < FADE ? "0" : String(Math.min(1, (pendingTop - FADE) / 28));
+      bottom.style.transform = `translate3d(0, ${-pendingBottom}px, 0)`;
+      bottom.style.opacity   = pendingBottom < FADE ? "0" : String(Math.min(1, (pendingBottom - FADE) / 28));
     };
-    const setBottom = (pull: number, animated: boolean) => {
-      bottom.style.transition = animated ? SPRING : "none";
-      bottom.style.transform  = `translateY(-${pull}px)`;
-      bottom.style.opacity    = pull < FADE ? "0" : String(Math.min(1, (pull - FADE) / 30));
+    const queue = (t: number, b: number) => {
+      pendingTop = t; pendingBottom = b;
+      if (!rafId) rafId = requestAnimationFrame(write);
     };
-    const reset = (animated: boolean) => { setTop(0, animated); setBottom(0, animated); };
+    const spring = () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      pendingTop = 0; pendingBottom = 0;
+      top.style.transition = SPRING; bottom.style.transition = SPRING;
+      top.style.transform = "translate3d(0,0,0)"; top.style.opacity = "0";
+      bottom.style.transform = "translate3d(0,0,0)"; bottom.style.opacity = "0";
+    };
 
     const onStart = (e: TouchEvent) => {
       sY = e.touches[0].clientY; sTime = Date.now();
       atEdge = false; side = 0;
-      // Kill any in-progress spring
-      top.style.transition    = "none";
-      bottom.style.transition = "none";
+      dimension = window.innerHeight;
+      maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      top.style.transition = "none"; bottom.style.transition = "none";
     };
     const onMove = (e: TouchEvent) => {
-      const dy      = e.touches[0].clientY - sY;
-      const scrollY = window.scrollY;
-      const max     = document.documentElement.scrollHeight - window.innerHeight;
-
+      const dy = e.touches[0].clientY - sY;
       if (!atEdge) {
-        if      (scrollY <= 0     && dy > 0) { atEdge = true; edgeDy = dy; side =  1; }
-        else if (scrollY >= max-1 && dy < 0) { atEdge = true; edgeDy = dy; side = -1; }
+        const scrollY = window.scrollY;
+        if      (scrollY <= 0           && dy > 0) { atEdge = true; edgeDy = dy; side =  1; }
+        else if (scrollY >= maxScroll-1 && dy < 0) { atEdge = true; edgeDy = dy; side = -1; }
       }
       if (atEdge) {
         const excess = dy - edgeDy;
-        if (side ===  1) { setTop(Math.max(0, Math.min(excess * 0.38, 90)), false); setBottom(0, false); }
-        if (side === -1) { setBottom(Math.max(0, Math.min(-excess * 0.38, 90)), false); setTop(0, false); }
-        if ((side === 1 && dy < edgeDy) || (side === -1 && dy > edgeDy)) {
-          atEdge = false; side = 0; reset(true);
+        if ((side === 1 && excess <= 0) || (side === -1 && excess >= 0)) {
+          atEdge = false; side = 0; spring(); return;
         }
+        const pull = rubberBand(Math.abs(excess), dimension);
+        if (side === 1) queue(pull, 0);
+        else            queue(0, pull);
       }
     };
     const onEnd = (e: TouchEvent) => {
       const velocity = (e.changedTouches[0].clientY - sY) / Math.max(1, Date.now() - sTime);
-      const scrollY  = window.scrollY;
-      const max      = document.documentElement.scrollHeight - window.innerHeight;
-      if (!atEdge) {
-        if      (scrollY <= 6     && velocity >  1.8) { setTop(Math.min(velocity * 18, 55), false); requestAnimationFrame(() => setTop(0, true)); }
-        else if (scrollY >= max-6 && velocity < -1.8) { setBottom(Math.min(-velocity * 18, 55), false); requestAnimationFrame(() => setBottom(0, true)); }
+      if (atEdge) {
+        spring();
       } else {
-        reset(true);
+        const scrollY = window.scrollY;
+        if      (scrollY <= 4           && velocity >  1.6) { top.style.transition = "none"; queue(Math.min(velocity * 14, 44), 0); requestAnimationFrame(spring); }
+        else if (scrollY >= maxScroll-4 && velocity < -1.6) { bottom.style.transition = "none"; queue(0, Math.min(-velocity * 14, 44)); requestAnimationFrame(spring); }
       }
       atEdge = false; side = 0;
     };
-    const onCancel = () => { atEdge = false; side = 0; reset(true); };
+    const onCancel = () => { atEdge = false; side = 0; spring(); };
 
     window.addEventListener("touchstart",  onStart,  { passive: true });
     window.addEventListener("touchmove",   onMove,   { passive: true });
     window.addEventListener("touchend",    onEnd,    { passive: true });
     window.addEventListener("touchcancel", onCancel, { passive: true });
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener("touchstart",  onStart);
       window.removeEventListener("touchmove",   onMove);
       window.removeEventListener("touchend",    onEnd);

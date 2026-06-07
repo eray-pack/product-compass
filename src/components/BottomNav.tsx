@@ -5,6 +5,16 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { useTranslation } from "react-i18next";
 
+// ── iOS rubber-band resistance ────────────────────────────────────────────────
+// Asymptotic: pull is unbounded but gets progressively harder, never hard-stops.
+// b(x) = (x · d · c) / (d + c · x)  — Apple's actual UIScrollView formula.
+// As x → ∞, b → d, so it approaches the dimension but you can pull forever.
+export function rubberBand(distance: number, dimension: number, constant = 0.55) {
+  const x = Math.abs(distance);
+  const b = (x * dimension * constant) / (dimension + constant * x);
+  return distance < 0 ? -b : b;
+}
+
 // ── JS elastic bounce — makes page feel springy at scroll edges ───────────────
 function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
@@ -13,15 +23,29 @@ function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
 
     let startY    = 0;
     let startTime = 0;
-    let edgeDy    = 0;    // dy value at the moment we first hit the edge
+    let edgeDy    = 0;       // dy value at the moment we first hit the edge
     let atEdge    = false;
-    let edgeSide  = 0;    // 1 = top edge, -1 = bottom edge
+    let edgeSide  = 0;       // 1 = top edge, -1 = bottom edge
+    let dimension = 800;     // viewport height, cached at touchstart
+    let maxScroll = 0;       // cached at touchstart (avoids reflow per frame)
+    let rafId     = 0;
+    let pendingY  = 0;       // latest target, flushed in rAF
+    let curOffset = 0;       // current applied offset
 
-    const apply = (y: number, animated: boolean) => {
-      el.style.transition = animated
-        ? "transform 0.52s cubic-bezier(0.22, 1, 0.36, 1)"
-        : "none";
-      el.style.transform = y === 0 ? "" : `translateY(${y}px)`;
+    const flush = () => {
+      rafId = 0;
+      curOffset = pendingY;
+      el.style.transform = pendingY === 0 ? "" : `translate3d(0, ${pendingY}px, 0)`;
+    };
+    const queue = (y: number) => {
+      pendingY = y;
+      if (!rafId) rafId = requestAnimationFrame(flush);
+    };
+    const spring = () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      el.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+      el.style.transform = "";
+      pendingY = 0; curOffset = 0;
     };
 
     const onTouchStart = (e: TouchEvent) => {
@@ -29,65 +53,63 @@ function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
       startTime = Date.now();
       atEdge    = false;
       edgeSide  = 0;
-      // Kill any in-progress spring so it doesn't fight the finger
+      dimension = window.innerHeight;
+      maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      // Kill any in-progress spring so the finger has full control instantly
       el.style.transition = "none";
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const dy       = currentY - startY;
-      const scrollY  = window.scrollY;
-      const max      = document.documentElement.scrollHeight - window.innerHeight;
+      const dy = e.touches[0].clientY - startY;
 
-      // Detect the moment we first hit an edge (checked live, not just at touchstart)
+      // Detect the moment we first cross an edge (live scrollY, cheap read)
       if (!atEdge) {
+        const scrollY = window.scrollY;
         if (scrollY <= 0 && dy > 0) {
           atEdge = true; edgeDy = dy; edgeSide = 1;
-        } else if (scrollY >= max - 1 && dy < 0) {
+          el.style.transition = "none";
+        } else if (scrollY >= maxScroll - 1 && dy < 0) {
           atEdge = true; edgeDy = dy; edgeSide = -1;
+          el.style.transition = "none";
         }
       }
 
       if (atEdge) {
-        // Only stretch based on movement PAST the edge point, not the whole gesture
-        const excess = dy - edgeDy;
-        if (edgeSide === 1) {
-          apply(Math.max(0, Math.min(excess * 0.38, 90)), false);
-        } else {
-          apply(Math.min(0, Math.max(excess * 0.38, -90)), false);
-        }
-        // If finger reversed back into content, release
-        if ((edgeSide === 1 && dy < edgeDy) || (edgeSide === -1 && dy > edgeDy)) {
+        const excess = dy - edgeDy;   // movement past the edge only
+        // Released back into content?
+        if ((edgeSide === 1 && excess <= 0) || (edgeSide === -1 && excess >= 0)) {
           atEdge = false; edgeSide = 0;
-          apply(0, true);
+          spring();
+          return;
         }
+        queue(rubberBand(excess, dimension));
       }
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       const endY     = e.changedTouches[0].clientY;
       const dt       = Math.max(1, Date.now() - startTime);
-      const velocity = (endY - startY) / dt;          // px/ms, positive = downward
-      const scrollY  = window.scrollY;
-      const max      = document.documentElement.scrollHeight - window.innerHeight;
+      const velocity = (endY - startY) / dt;       // px/ms
 
       if (atEdge) {
-        // Actively pulling — spring back
-        apply(0, true);
-      } else if (scrollY <= 6 && velocity > 1.8) {
-        // Fast swipe ended right at top — predictive overshoot
-        apply(Math.min(velocity * 18, 55), false);
-        requestAnimationFrame(() => apply(0, true));
-      } else if (scrollY >= max - 6 && velocity < -1.8) {
-        // Fast swipe ended right at bottom
-        apply(Math.max(velocity * 18, -55), false);
-        requestAnimationFrame(() => apply(0, true));
+        spring();
+      } else {
+        // Fast fling that lands on an edge — small predictive overshoot
+        const scrollY = window.scrollY;
+        if (scrollY <= 4 && velocity > 1.6) {
+          el.style.transition = "none";
+          el.style.transform = `translate3d(0, ${Math.min(velocity * 14, 48)}px, 0)`;
+          requestAnimationFrame(spring);
+        } else if (scrollY >= maxScroll - 4 && velocity < -1.6) {
+          el.style.transition = "none";
+          el.style.transform = `translate3d(0, ${Math.max(velocity * 14, -48)}px, 0)`;
+          requestAnimationFrame(spring);
+        }
       }
-
       atEdge = false; edgeSide = 0;
     };
 
-    const onCancel = () => { atEdge = false; edgeSide = 0; apply(0, true); };
+    const onCancel = () => { atEdge = false; edgeSide = 0; spring(); };
 
     window.addEventListener("touchstart",  onTouchStart, { passive: true });
     window.addEventListener("touchmove",   onTouchMove,  { passive: true });
@@ -95,6 +117,7 @@ function useElasticBounce(ref: React.RefObject<HTMLDivElement | null>) {
     window.addEventListener("touchcancel", onCancel,     { passive: true });
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener("touchstart",  onTouchStart);
       window.removeEventListener("touchmove",   onTouchMove);
       window.removeEventListener("touchend",    onTouchEnd);
