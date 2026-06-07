@@ -842,20 +842,28 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
       if (Math.abs(dx) > 6) horizontal.current = true;
     }
     dragDX.current = dx;
-    // Direct DOM write — no React state, no re-render
+    // Rubber-band resistance at the ends so you can't drag the badge off-screen
+    const atStart = idx === 0 && dx > 0;
+    const atEnd   = idx === BADGES.length - 1 && dx < 0;
+    const eff = (atStart || atEnd) ? dx * 0.3 : dx;
     if (trackRef.current) {
-      trackRef.current.style.transform = `translate3d(calc(-${idx * 100}% + ${dx}px), 0, 0)`;
+      trackRef.current.style.transform = `translate3d(calc(-${idx * 100}% + ${eff}px), 0, 0)`;
     }
   };
   const onTouchEnd = () => {
     const dx = dragDX.current;
-    if (trackRef.current) trackRef.current.style.transition = SNAP;
+    // Resolve target index (clamped). May equal idx at the boundaries.
+    let target = idx;
+    if (dx < -44) target = Math.min(BADGES.length - 1, idx + 1);
+    else if (dx > 44) target = Math.max(0, idx - 1);
     setDragging(false);
-    if (dx < -44) go(idx + 1);
-    else if (dx > 44) go(idx - 1);
-    else if (trackRef.current) {
-      // Snap back to current — restore the state-based transform
-      trackRef.current.style.transform = `translate3d(-${idx * 100}%, 0, 0)`;
+    if (target !== idx) setIdx(target);
+    // ALWAYS settle the transform to the target — covers the boundary case
+    // where idx is unchanged (React won't re-render, so the drag transform
+    // would otherwise stay stuck off-screen).
+    if (trackRef.current) {
+      trackRef.current.style.transition = SNAP;
+      trackRef.current.style.transform = `translate3d(-${target * 100}%, 0, 0)`;
     }
     dragDX.current = 0;
   };
