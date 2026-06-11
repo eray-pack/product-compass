@@ -5,35 +5,32 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { loadEnv } from "vite";
 
-// loadEnv reads .env from the project root at config time (Node.js context).
-// The '' prefix means load all vars, not just VITE_* ones.
-const localEnv = loadEnv("", process.cwd(), "");
+// NOTE: the ANTHROPIC_API_KEY is intentionally NOT baked into the bundle.
+// It only exists as a Cloudflare Worker env binding, read at runtime in
+// src/server.ts — baking it via define both broke the reframe feature
+// (empty string in CI builds) and risked exposing the key to client code.
 
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
   vite: {
-    envPrefix: ["VITE_", "ANTHROPIC_"],
-    define: {
-      "process.env.ANTHROPIC_API_KEY": JSON.stringify(
-        localEnv.ANTHROPIC_API_KEY ?? "",
-      ),
-    },
+    envPrefix: ["VITE_"],
     optimizeDeps: {
       exclude: [
         "@revenuecat/purchases-capacitor",
         "@capacitor-community/apple-sign-in",
         "@capacitor/push-notifications",
-        "@capacitor/app",
       ],
     },
     build: {
       rollupOptions: {
-        // Native Capacitor plugins only run on device — exclude from web bundle
-        external: ["@capacitor/push-notifications", "@capacitor/app"],
+        // push-notifications is NOT installed (dead code references only) so it
+        // must stay external. Installed Capacitor plugins (@capacitor/app,
+        // apple-sign-in, purchases) are bundled normally — externalizing them
+        // left bare import specifiers the webview can't resolve at runtime.
+        external: ["@capacitor/push-notifications"],
         output: {
           manualChunks: {
             "vendor-react": ["react", "react-dom"],

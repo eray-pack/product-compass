@@ -9,7 +9,10 @@ let initialized = false;
 
 async function getPlugin() {
   if (!Capacitor.isNativePlatform()) return null;
-  const { Purchases } = await import(/* @vite-ignore */ "@revenuecat/purchases-capacitor");
+  // No @vite-ignore: Vite must bundle this into a resolvable chunk. A bare
+  // specifier in production can't be resolved by the webview, which made every
+  // RevenueCat call silently fail on device.
+  const { Purchases } = await import("@revenuecat/purchases-capacitor");
   return Purchases;
 }
 

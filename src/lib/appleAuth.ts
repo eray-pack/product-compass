@@ -36,9 +36,10 @@ export async function signInWithApple(): Promise<{ error: Error | null }> {
   }
 
   try {
-    const { SignInWithApple } = await import(
-      /* @vite-ignore */ "@capacitor-community/apple-sign-in"
-    );
+    // NOTE: no @vite-ignore here — Vite must bundle/code-split this import.
+    // A bare specifier left in the production bundle cannot be resolved by the
+    // WKWebView (no import map) and the native path would fail 100% of the time.
+    const { SignInWithApple } = await import("@capacitor-community/apple-sign-in");
 
     const rawNonce = crypto.randomUUID() + crypto.randomUUID();
     const hashedNonce = await sha256Hex(rawNonce);

@@ -14,8 +14,6 @@ const config: CapacitorConfig = {
     allowNavigation: [
       'iikoxopupfjiavjjvkgm.supabase.co',
       'appleid.apple.com',
-      'accounts.google.com',
-      '*.google.com',
     ],
   },
 };

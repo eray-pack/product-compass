@@ -16,7 +16,7 @@ const GAME_ROUTES = [
 ];
 
 // Main tabs and auth screens — no back navigation from these
-const NO_BACK_ROUTES = ["/", "/tree", "/community", "/progress", "/tools", "/auth", "/paywall"];
+const NO_BACK_ROUTES = ["/", "/tree", "/community", "/progress", "/tools", "/auth", "/paywall", "/onboarding"];
 
 function isGameRoute(pathname: string): boolean {
   return GAME_ROUTES.some((r) => pathname.startsWith(r));
@@ -42,7 +42,8 @@ export function useCapacitorBack(): void {
 
     (async () => {
       try {
-        // @ts-ignore — @capacitor/app is a native-only peer dep, marked external in vite.config.ts
+        // Bundled normally (installed dep) — externalizing it left a bare
+        // specifier the webview couldn't resolve, so this listener never loaded.
         const { App } = await import("@capacitor/app");
         handle = await App.addListener(
           "backButton",

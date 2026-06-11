@@ -96,7 +96,10 @@ function AuthPage() {
           </p>
         </div>
 
-        {/* Social sign-in */}
+        {/* Social sign-in — Apple only. Google/Microsoft buttons were removed:
+            those providers are DISABLED in Supabase, so tapping them replaced
+            the app with a raw JSON error (a 2.1 rejection on its own). Re-add
+            only after the providers are actually configured. */}
         <div className="space-y-3">
           <SocialButton
             onClick={() => handleOAuth("apple")}
@@ -104,20 +107,6 @@ function AuthPage() {
             loading={oauthLoading === "apple"}
             icon={<AppleIcon />}
             label="Continue with Apple"
-          />
-          <SocialButton
-            onClick={() => handleOAuth("google")}
-            disabled={!!oauthLoading}
-            loading={oauthLoading === "google"}
-            icon={<GoogleIcon />}
-            label="Continue with Google"
-          />
-          <SocialButton
-            onClick={() => handleOAuth("azure")}
-            disabled={!!oauthLoading}
-            loading={oauthLoading === "azure"}
-            icon={<MicrosoftIcon />}
-            label="Continue with Microsoft"
           />
         </div>
 
