@@ -1451,8 +1451,8 @@ function Dashboard() {
         <ReEntryScreen inactiveDays={reEntryDays} onDone={() => setReEntryDays(0)} />
       )}
       {showIdentity && state.onboarding?.identity && (
-        {/* Centered, not bottom-anchored — items-end rendered partially below
-            the visible viewport on iPhone (home-indicator area) */}
+        // Centered, not bottom-anchored — items-end rendered partially below
+        // the visible viewport on iPhone (home-indicator area)
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
           <motion.div
             className="rounded-3xl border border-primary/20 p-7 w-full max-w-sm space-y-5 text-center relative"
