@@ -5,7 +5,9 @@ export type ChatMessage = {
   content: string;
 };
 
-export async function sendCoachMessage(messages: ChatMessage[]): Promise<string> {
+export type CoachContext = { habit?: string; day?: number; strikes?: number };
+
+export async function sendCoachMessage(messages: ChatMessage[], context?: CoachContext): Promise<string> {
   // Get current session JWT — required for server-side auth verification
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not logged in");
@@ -16,7 +18,7 @@ export async function sendCoachMessage(messages: ChatMessage[]): Promise<string>
       "content-type": "application/json",
       "authorization": `Bearer ${session.access_token}`,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, context }),
   });
 
   const json = (await res.json()) as { text?: string; error?: string };

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Lock } from "lucide-react";
 import { sendCoachMessage, type ChatMessage } from "@/lib/coach";
-import { useAppState } from "@/lib/store";
+import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 
 const FREE_DAILY_LIMIT = 3;
@@ -32,10 +32,20 @@ export const Route = createFileRoute("/tools/coach")({
   component: Coach,
 });
 
-const FIRST_MESSAGE: ChatMessage = {
-  role: "assistant",
-  content: "Hey. I'm here. How are you holding up today?",
-};
+// Opener computed from REAL user state — a canned greeting reads as a template
+// chatbot; knowing the actual day/strike state is unfakeable original function.
+function firstMessage(day: number, habit: string | undefined, strikes: number): ChatMessage {
+  let content: string;
+  if (strikes >= 2) content = `Day ${day}. Two slips this streak — one more resets the counter. No judgment here. What's going on?`;
+  else if (strikes === 1) content = `Day ${day}, one slip logged this streak. Still standing. How are you holding up?`;
+  else if (day <= 3) content = habit
+    ? `Day ${day} off ${habit} — the hardest days are the first ones. I'm here. What's on your mind?`
+    : `Day ${day} — the hardest days are the first ones. I'm here. What's on your mind?`;
+  else content = habit
+    ? `Day ${day} clean from ${habit}. That's real momentum. How are you holding up today?`
+    : `Day ${day} clean. That's real momentum. How are you holding up today?`;
+  return { role: "assistant", content };
+}
 
 const QUICK_SUGGESTIONS = [
   "I'm struggling right now",
@@ -45,7 +55,10 @@ const QUICK_SUGGESTIONS = [
 
 function Coach() {
   const [state] = useAppState();
-  const [messages, setMessages] = useState<ChatMessage[]>([FIRST_MESSAGE]);
+  const active = activeAddiction(state);
+  const day = active?.startDate ? dayCount(active.startDate) : 1;
+  const strikes = active?.startDate ? state.relapses.filter((r) => r.ts >= active.startDate).length : 0;
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [firstMessage(day, active?.name, strikes)]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [freeUsed, setFreeUsed] = useState(getFreeUsage);
@@ -80,7 +93,7 @@ function Coach() {
     }
 
     try {
-      const reply = await sendCoachMessage(next);
+      const reply = await sendCoachMessage(next, { habit: active?.name, day, strikes });
       setMessages([...next, { role: "assistant", content: reply }]);
     } catch {
       setMessages([

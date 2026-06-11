@@ -1,15 +1,11 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   User,
   Mail,
-  Lock,
   Crown,
-  CreditCard,
-  Bell,
-  BarChart2,
   Download,
   Trash2,
   Globe,
@@ -120,32 +116,6 @@ function Row({
   );
 }
 
-function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      onClick={() => onChange(!value)}
-      className="h-6 w-11 rounded-full p-0.5 shrink-0"
-      style={{
-        background: value ? "#debc7a" : "rgba(255,255,255,0.12)",
-        boxShadow: value
-          ? "0 0 12px rgba(222,188,122,0.55), 0 0 26px rgba(222,188,122,0.22)"
-          : "none",
-        transition: "background 0.25s ease, box-shadow 0.25s ease",
-      }}
-      aria-checked={value}
-      role="switch"
-    >
-      <span
-        className="block h-5 w-5 rounded-full bg-white shadow-sm"
-        style={{
-          transform: value ? "translateX(20px)" : "translateX(0)",
-          transition: "transform 0.22s ease",
-        }}
-      />
-    </button>
-  );
-}
-
 // ── Sections ─────────────────────────────────────────────────────────────────
 
 // ── Circular crop helper ──────────────────────────────────────────────────────
@@ -197,6 +167,18 @@ function AccountSection({
   const [pickerOpen, setPickerOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const libraryInputRef = useRef<HTMLInputElement>(null);
+  // Real signed-in email — placeholders here read as broken to App Store review
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled) setEmail(session?.user?.email ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const initials = state.onboarding?.name
     ? state.onboarding.name.slice(0, 2).toUpperCase()
@@ -290,10 +272,10 @@ function AccountSection({
         </div>
       </div>
 
+      {/* Display-only: no edit flows exist for these, so no chevrons/handlers */}
       <Card>
-        <Row icon={User} label="Name" value={state.onboarding?.name || "Not set"} onClick={() => {}} />
-        <Row icon={Mail} label="Email" value="Not connected" onClick={() => {}} />
-        <Row icon={Lock} label="Change Password" onClick={() => {}} />
+        <Row icon={User} label="Name" value={state.onboarding?.name || "Not set"} />
+        <Row icon={Mail} label="Email" value={email ?? "—"} />
       </Card>
 
       {/* Photo picker sheet */}
@@ -391,7 +373,6 @@ function BillingSection({ state, update }: {
             </button>
           )}
         </Row>
-        <Row icon={CreditCard} label="Payment Method" value="No card on file" onClick={() => {}} />
       </Card>
       {!state.isPremium && (
         <>
@@ -412,58 +393,6 @@ function BillingSection({ state, update }: {
   );
 }
 
-
-function NotificationsSection() {
-  const [notifs, setNotifs] = useState({
-    push: true,
-    email: false,
-    weeklyReport: true,
-  });
-
-  const rows = [
-    {
-      key: "push" as const,
-      icon: Bell,
-      label: "Push notifications",
-      sub: "Urge warnings, milestones & streaks",
-    },
-    {
-      key: "email" as const,
-      icon: Mail,
-      label: "Email notifications",
-      sub: "Recovery tips and updates",
-    },
-    {
-      key: "weeklyReport" as const,
-      icon: BarChart2,
-      label: "Weekly progress report",
-      sub: "Sent every Sunday morning",
-    },
-  ];
-
-  return (
-    <section>
-      <SectionLabel>Notifications</SectionLabel>
-      <Card>
-        {rows.map(({ key, icon: Icon, label, sub }) => (
-          <label key={key} className="flex items-center gap-3 px-4 py-3.5 cursor-pointer">
-            <span className="h-8 w-8 rounded-xl grid place-items-center shrink-0 bg-foreground/[0.06]">
-              <Icon className="h-4 w-4 text-foreground" />
-            </span>
-            <div className="flex-1">
-              <p className="text-sm font-medium">{label}</p>
-              <p className="text-xs text-muted-foreground">{sub}</p>
-            </div>
-            <Toggle
-              value={notifs[key]}
-              onChange={(v) => setNotifs((s) => ({ ...s, [key]: v }))}
-            />
-          </label>
-        ))}
-      </Card>
-    </section>
-  );
-}
 
 function PrivacySection({ state }: { state: ReturnType<typeof useAppState>[0] }) {
   const navigate = useNavigate();
@@ -497,17 +426,24 @@ function PrivacySection({ state }: { state: ReturnType<typeof useAppState>[0] })
     }
     setDeleting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await supabase.from("user_state").delete().eq("user_id", session.user.id);
-        await supabase.auth.signOut();
+      // Edge function deletes the auth user server-side, not just the data row —
+      // App Store 5.1.1(v) requires account deletion, not data deletion
+      const { error } = await supabase.functions.invoke("delete-account");
+      if (error) {
+        // Proceed with the local wipe regardless so the user isn't stuck signed in
+        console.warn("[DeleteAccount] delete-account function failed", error);
       }
+      await supabase.auth.signOut();
     } catch (e) {
       console.warn("[DeleteAccount] Supabase cleanup failed", e);
     }
-    ["stopamine.v1", "stopamine.v2", "stopamine.theme"].forEach((k) =>
-      localStorage.removeItem(k)
-    );
+    [
+      "stopamine.v1",
+      "stopamine.v2",
+      "stopamine.theme",
+      "stopamine.records.v1",
+      "stopamine.coach.free",
+    ].forEach((k) => localStorage.removeItem(k));
     navigate({ to: "/onboarding" });
   };
 
@@ -740,7 +676,15 @@ function TrackedHabitsSection({
       <div className="flex items-baseline justify-between mb-3">
         <SectionLabel>Tracked Habits</SectionLabel>
         <motion.button
-          onClick={() => setShowAdd(true)}
+          onClick={() => {
+            // Multi-habit tracking is a PRO feature — same gate onboarding enforces,
+            // otherwise this button silently bypasses the paywall
+            if (!state.isPremium && state.addictions.length >= 1) {
+              triggerPaywall();
+              return;
+            }
+            setShowAdd(true);
+          }}
           whileTap={{ scale: 0.91 }}
           className="inline-flex items-center gap-1 mb-2"
           style={{
@@ -1488,7 +1432,6 @@ function Settings() {
         <AccountSection state={state} update={update} />
         <BadgesSection state={state} />
         <BillingSection state={state} update={update} />
-        <NotificationsSection />
         <TrackedHabitsSection state={state} update={update} />
         <StartDateSection state={state} update={update} />
         <PrivacySection state={state} />

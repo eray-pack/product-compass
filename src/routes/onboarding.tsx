@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { useAppState, NotificationStyle, NotificationApp, type Addiction } from "@/lib/store";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useAppState, type Addiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { CompanionStage, COMPANION_LABELS, type CompanionType } from "@/components/avatars/CompanionAvatar";
 import wolfStage2Url from "@/assets/wolf-stage2-transparent.png";
@@ -23,6 +23,20 @@ const pageVariants = {
 };
 
 // ── Static data ────────────────────────────────────────────────────────────────
+// Same preset list as AddAddictionModal — names must match HABIT_MAP so the
+// duplicate filter in finish() works
+const quitHabits = [
+  { key: "porn",            emoji: "🧠", label: "Porn" },
+  { key: "socialMedia",     emoji: "📱", label: "Social media" },
+  { key: "sugar",           emoji: "🍩", label: "Sugar" },
+  { key: "alcohol",         emoji: "🍺", label: "Alcohol" },
+  { key: "nicotine",        emoji: "🚬", label: "Nicotine" },
+  { key: "cannabis",        emoji: "🌿", label: "Cannabis" },
+  { key: "gambling",        emoji: "🎰", label: "Gambling" },
+  { key: "gaming",          emoji: "🎮", label: "Gaming" },
+  { key: "procrastination", emoji: "⏳", label: "Procrastination" },
+];
+
 const HABIT_MAP: Record<string, { name: string; emoji: string }> = {
   "Social media doomscrolling": { name: "Social media", emoji: "📱" },
   "Sugar / junk food": { name: "Sugar", emoji: "🍩" },
@@ -56,20 +70,6 @@ const triggers = [
   { emoji: "🌊", label: "When stressed" },
   { emoji: "🚪", label: "When alone" },
   { emoji: "💢", label: "After rejection" },
-];
-
-const notifStyleOptions: { id: NotificationStyle; emoji: string; label: string }[] = [
-  { id: "conversational", emoji: "💬", label: "A short message, like a text from a friend" },
-  { id: "curiosity",      emoji: "⚡", label: "A fact or insight that surprises me" },
-  { id: "question",       emoji: "🔍", label: "A question that makes me think" },
-  { id: "quiet",          emoji: "🍃", label: "A quiet nudge — nothing intense" },
-];
-
-const notifAppOptions: { id: NotificationApp; emoji: string; label: string }[] = [
-  { id: "messaging",  emoji: "📱", label: "iMessage / WhatsApp" },
-  { id: "instagram",  emoji: "📸", label: "Instagram" },
-  { id: "email",      emoji: "📧", label: "Email" },
-  { id: "rarely",     emoji: "🔕", label: "I rarely open notifications" },
 ];
 
 const otherHabitOptions = [
@@ -421,19 +421,22 @@ function Onboarding() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
+  // Defaults to porn so tapping straight through matches the old behavior
+  const [quitHabit, setQuitHabit] = useState("porn");
   const [duration, setDuration] = useState("");
   const [pickedCosts, setPickedCosts] = useState<string[]>([]);
   const [pickedTriggers, setPickedTriggers] = useState<string[]>([]);
-  const [notifStyles, setNotifStyles] = useState<NotificationStyle[]>([]);
-  const [notifApps, setNotifApps] = useState<NotificationApp[]>([]);
   const [pickedHabits, setPickedHabits] = useState<string[]>([]);
   const [identity, setIdentity] = useState("");
   const [customIdentitySelected, setCustomIdentitySelected] = useState(false);
   const [companion, setCompanion] = useState<CompanionType | null>(null);
   const [name, setName] = useState("");
 
-  const TOTAL = 9;
+  const TOTAL = 8;
   const next = () => setStep((s) => s + 1);
+  const back = () => setStep((s) => Math.max(0, s - 1));
+
+  const selectedQuit = quitHabits.find((h) => h.key === quitHabit) ?? quitHabits[0];
 
   const toggle = (arr: string[], v: string, setter: (a: string[]) => void) =>
     setter(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -441,22 +444,23 @@ function Onboarding() {
   const finish = () => {
     const now = Date.now();
     const mainAddiction: Addiction = {
-      id: "porn", name: "Porn", emoji: "🧠",
+      id: selectedQuit.key, name: selectedQuit.label, emoji: selectedQuit.emoji,
       startDate: now, totalCleanDays: 0, urgesSurvived: 0,
     };
-    const extraAddictions: Addiction[] = pickedHabits.map((h) => {
-      const preset = HABIT_MAP[h] ?? { name: h, emoji: "🔒" };
-      return {
-        id: preset.name.toLowerCase().replace(/\s+/g, "-"),
-        name: preset.name, emoji: preset.emoji,
-        startDate: now, totalCleanDays: 0, urgesSurvived: 0, premium: true,
-      };
-    });
+    const extraAddictions: Addiction[] = pickedHabits
+      .map((h) => {
+        const preset = HABIT_MAP[h] ?? { name: h, emoji: "🔒" };
+        return {
+          id: preset.name.toLowerCase().replace(/\s+/g, "-"),
+          name: preset.name, emoji: preset.emoji,
+          startDate: now, totalCleanDays: 0, urgesSurvived: 0, premium: true,
+        };
+      })
+      // User can pick X as extra, then go back and make X the main — drop the duplicate
+      .filter((a) => a.name !== mainAddiction.name);
     update({
       companion: companion ?? "tree",
       onboarding: { duration, costs: pickedCosts, triggers: pickedTriggers, identity, name, otherHabits: pickedHabits, completedAt: now },
-      notificationStyles: notifStyles,
-      notificationApps: notifApps,
       addictions: [mainAddiction, ...extraAddictions],
       activeAddictionId: mainAddiction.id,
     });
@@ -468,17 +472,41 @@ function Onboarding() {
       <PremiumBackground />
       <div style={{ maxWidth: 448, margin: "0 auto", padding: "0 20px" }}>
 
-        {/* ── Progress bar ──────────────────────────────────────────────── */}
-        <div style={{ paddingTop: 40 }}>
+        {/* ── Back chevron + progress bar ───────────────────────────────── */}
+        <div style={{ paddingTop: 16 }}>
+          {/* Fixed-height row so the bar doesn't jump when the chevron appears */}
+          <div style={{ height: 38, display: "flex", alignItems: "center", marginBottom: 8 }}>
+            <AnimatePresence>
+              {step > 0 && (
+                <motion.button
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.18 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={back}
+                  aria-label="Go back"
+                  style={{
+                    width: 34, height: 34, borderRadius: 12,
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "#9a8a6a", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <ArrowLeft size={16} />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
           <div style={{
             width: "100%", height: 3,
             background: "rgba(255,255,255,0.06)",
-            borderRadius: 10, overflow: "hidden", marginBottom: 32,
+            borderRadius: 10, overflow: "hidden", marginBottom: 28,
           }}>
             <motion.div
-              key={step}
               style={{ height: "100%", background: `linear-gradient(90deg, ${G}, #E8C96A)`, borderRadius: 10 }}
-              initial={{ width: `${(step / TOTAL) * 100}%` }}
+              // No key remount — animates from current width, so going back shrinks smoothly
               animate={{ width: `${((step + 1) / TOTAL) * 100}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             />
@@ -496,10 +524,32 @@ function Onboarding() {
             style={{ paddingBottom: 48 }}
           >
 
-            {/* STEP 0 — Duration */}
+            {/* STEP 0 — What are you quitting? */}
             {step === 0 && (
               <div>
                 <Eyebrow step={1} total={TOTAL} />
+                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
+                  What are you <SerifEm>quitting?</SerifEm>
+                </h1>
+                <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
+                  Pick your main battle. You can track more later.
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                  {quitHabits.map((h) => (
+                    <TileCard key={h.key} emoji={h.emoji} label={h.label}
+                      selected={quitHabit === h.key} onClick={() => setQuitHabit(h.key)} />
+                  ))}
+                </div>
+                <GoldButton onClick={next}>
+                  <span>Quit {selectedQuit.label.toLowerCase()}</span><ArrowRight size={16} />
+                </GoldButton>
+              </div>
+            )}
+
+            {/* STEP 1 — Duration */}
+            {step === 1 && (
+              <div>
+                <Eyebrow step={2} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Before we start — be honest with <SerifEm>yourself</SerifEm>
                 </h1>
@@ -518,10 +568,10 @@ function Onboarding() {
               </div>
             )}
 
-            {/* STEP 1 — Costs */}
-            {step === 1 && (
+            {/* STEP 2 — Costs */}
+            {step === 2 && (
               <div>
-                <Eyebrow step={2} total={TOTAL} />
+                <Eyebrow step={3} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   What does it cost <SerifEm>you?</SerifEm>
                 </h1>
@@ -543,15 +593,15 @@ function Onboarding() {
               </div>
             )}
 
-            {/* STEP 2 — Triggers */}
-            {step === 2 && (
+            {/* STEP 3 — Triggers */}
+            {step === 3 && (
               <div>
-                <Eyebrow step={3} total={TOTAL} />
+                <Eyebrow step={4} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Your trigger <SerifEm>profile</SerifEm>
                 </h1>
                 <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
-                  When are you most vulnerable? We'll use this for smart reminders.
+                  When are you most vulnerable? Knowing your patterns is half the fight.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {triggers.map((t) => (
@@ -568,60 +618,10 @@ function Onboarding() {
               </div>
             )}
 
-            {/* STEP 3 — Notification style */}
-            {step === 3 && (
-              <div>
-                <Eyebrow step={4} total={TOTAL} />
-                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
-                  How do you like to be <SerifEm>reminded?</SerifEm>
-                </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
-                  We'll show up in the way that actually works for you.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {notifStyleOptions.map(({ id, emoji, label }) => (
-                    <CheckCard key={id} emoji={emoji} label={label}
-                      selected={notifStyles.includes(id)}
-                      onClick={() => setNotifStyles(
-                        notifStyles.includes(id) ? notifStyles.filter(x => x !== id) : [...notifStyles, id]
-                      )} />
-                  ))}
-                </div>
-                <GoldButton onClick={next}>
-                  <span>Continue</span><ArrowRight size={16} />
-                </GoldButton>
-              </div>
-            )}
-
-            {/* STEP 4 — Notification apps */}
+            {/* STEP 4 — Other habits */}
             {step === 4 && (
               <div>
                 <Eyebrow step={5} total={TOTAL} />
-                <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
-                  Which apps do you actually <SerifEm>open?</SerifEm>
-                </h1>
-                <p style={{ fontSize: 14, color: "#5a5040", marginBottom: 24, lineHeight: 1.5 }}>
-                  We'll reach you where you are. You're in control — change it anytime.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {notifAppOptions.map(({ id, emoji, label }) => (
-                    <CheckCard key={id} emoji={emoji} label={label}
-                      selected={notifApps.includes(id)}
-                      onClick={() => setNotifApps(
-                        notifApps.includes(id) ? notifApps.filter(x => x !== id) : [...notifApps, id]
-                      )} />
-                  ))}
-                </div>
-                <GoldButton onClick={next}>
-                  <span>Continue</span><ArrowRight size={16} />
-                </GoldButton>
-              </div>
-            )}
-
-            {/* STEP 5 — Other habits */}
-            {step === 5 && (
-              <div>
-                <Eyebrow step={6} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Anything else you want to <SerifEm>quit?</SerifEm>
                 </h1>

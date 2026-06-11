@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/terms")({
   component: TermsOfService,
@@ -27,6 +27,8 @@ function Section({ number, title, children }: { number: number; title: string; c
 }
 
 function TermsOfService() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const router = useRouter();
   return (
     <div style={{
       minHeight: "100vh",
@@ -42,6 +44,18 @@ function TermsOfService() {
         alignItems: "center",
         gap: 10,
       }}>
+        {/* Back — without this the page is a dead-end inside the app webview */}
+        <button
+          onClick={() => (window.history.length > 1 ? router.history.back() : (window.location.href = "/"))}
+          aria-label="Back"
+          style={{
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)",
+            borderRadius: 10, width: 32, height: 32, display: "grid", placeItems: "center",
+            cursor: "pointer", color: "rgba(255,255,255,0.55)", fontSize: 16, lineHeight: 1, padding: 0,
+          }}
+        >
+          ←
+        </button>
         <span style={{
           fontFamily: "'Space Grotesk', system-ui, sans-serif",
           fontSize: 11,

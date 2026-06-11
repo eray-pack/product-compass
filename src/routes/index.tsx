@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { useEffect, useRef, useState } from "react";
-import { Coins, X, ArrowRight } from "lucide-react";
+import { Coins, X, ArrowRight, MessageCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
 import { motion, AnimatePresence, useAnimation, type Variants } from "framer-motion";
@@ -80,18 +80,26 @@ function todaysFocusText(t: TFunction): string {
 }
 
 // ─── Daily check-in ───────────────────────────────────────────────────────────
-const REWARDS = [
-  { weight: 50, xp: 10,  messageKey: null },
-  { weight: 25, xp: 50,  messageKey: "home.reward.bonus" },
-  { weight: 15, xp: 20,  messageKey: "home.reward.rare", badge: true },
-  { weight: 10, xp: 0,   messageKey: null },
-];
+// Flat, predictable XP — weighted-random payouts are slot-machine mechanics,
+// the exact dopamine loop this app exists to unwind. State has no
+// consecutive-checkin counter yet, so there is no streak bonus to pay out.
+const CHECKIN_XP = 10;
+const CHECKIN_REWARD_MSG = "+10 XP — consistency over intensity. That's the rewiring.";
 
-function rollReward() {
-  const roll = Math.random() * 100;
-  let cum = 0;
-  for (const r of REWARDS) { cum += r.weight; if (roll < cum) return r; }
-  return REWARDS[0];
+// The honest 3-strike state, surfaced on the first screen — the app's most
+// original mechanic was invisible until the moment of relapse.
+function StrikeDots({ used }: { used: number }) {
+  return (
+    <span className="flex items-center gap-1.5" style={{ height: 28 }}>
+      {[1, 2, 3].map((n) => (
+        <span key={n} style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: n <= used ? "#C9A84C" : "rgba(255,255,255,0.14)",
+          boxShadow: n <= used ? "0 0 8px rgba(201,168,76,0.6)" : "none",
+        }} />
+      ))}
+    </span>
+  );
 }
 
 type MoodResp = { message: string; buttons: { label: string; to: string }[] };
@@ -129,9 +137,9 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   const confirm = () => {
     if (confirmed) return;
     setConfirmed(true);
-    const r = rollReward();
-    if (r.xp > 0) update((s) => ({ points: s.points + r.xp, treeXP: s.treeXP + Math.floor(r.xp / 2) }));
-    if (r.messageKey) { onReward(t(r.messageKey)); setTimeout(() => onReward(""), 3200); }
+    update((s) => ({ points: s.points + CHECKIN_XP, treeXP: s.treeXP + Math.floor(CHECKIN_XP / 2) }));
+    onReward(CHECKIN_REWARD_MSG);
+    setTimeout(() => onReward(""), 3200);
   };
 
   const resp  = confirmed ? moodResp(mood, t) : null;
@@ -1137,11 +1145,18 @@ function Dashboard() {
         animate="show"
         variants={seq(0.45, 0.08)}
       >
-        {[
-          { value: `${recoveryPct}%`, sub: t("progress.stats.streak"),  gold: true, onTap: handleDevTap },
-          { value: `${bestStreak}d`,  sub: t("progress.stats.best"),    gold: false },
-          { value: state.relapses.length, sub: "Relapses",              gold: false },
-        ].map(({ value, sub, gold, onTap }: { value: string | number; sub: string; gold: boolean; onTap?: () => void }, i) => (
+        {(() => {
+          // Strikes THIS streak — same rule as RelapseModal (3rd slip resets)
+          const strikes = Math.min(
+            active?.startDate ? state.relapses.filter((r) => r.ts >= active.startDate).length : 0,
+            3,
+          );
+          return [
+            { value: `${recoveryPct}%` as React.ReactNode, sub: t("progress.stats.streak"), gold: true, onTap: handleDevTap },
+            { value: `${bestStreak}d` as React.ReactNode,  sub: t("progress.stats.best"),   gold: false },
+            { value: <StrikeDots used={strikes} />,        sub: `Slips · ${strikes}/3`,      gold: false },
+          ];
+        })().map(({ value, sub, gold, onTap }: { value: React.ReactNode; sub: string; gold: boolean; onTap?: () => void }, i) => (
           <motion.div
             key={sub}
             className="flex flex-col items-center justify-center py-5"
@@ -1317,6 +1332,39 @@ function Dashboard() {
             />
           </Link>
         </motion.div>
+      </motion.section>
+
+      {/* ── RECOVERY COACH — context-aware entry to the AI coach ── */}
+      <motion.section
+        className="mx-6 mb-4"
+        initial="hidden" whileInView="show" viewport={vp} variants={up}
+      >
+        <Link
+          to="/tools/coach"
+          className="flex items-center justify-between px-5 py-4 rounded-2xl"
+          style={{
+            background: "rgba(255,255,255,0.025)",
+            border: "1px solid rgba(255,255,255,0.055)",
+            borderTop: "1px solid rgba(201,168,76,0.18)",
+          }}
+        >
+          <div className="min-w-0">
+            <p className="text-[9px] font-bold tracking-[0.35em] uppercase mb-1"
+               style={{ color: "rgba(255,255,255,0.25)" }}>
+              Recovery coach
+            </p>
+            <p className="text-[15px] font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.8)" }}>
+              {(() => {
+                const lastRelapse = state.relapses[state.relapses.length - 1];
+                if (lastRelapse && Date.now() - lastRelapse.ts < 48 * 3600 * 1000)
+                  return "Rough patch? Talk it through — no judgment.";
+                if (day <= 7) return `Day ${day} — the first week is the steepest. I'm here.`;
+                return `Day ${day} with ${active?.name ?? "recovery"}. Want to talk strategy?`;
+              })()}
+            </p>
+          </div>
+          <MessageCircle className="h-5 w-5 shrink-0 ml-4" style={{ color: "#C9A84C", filter: "drop-shadow(0 0 6px rgba(201,168,76,0.45))" }} />
+        </Link>
       </motion.section>
 
       {/* ── NEXT MILESTONE ────────────────────────────────────── */}

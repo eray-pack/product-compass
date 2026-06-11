@@ -21,10 +21,10 @@ const msItem = {
 };
 
 export const Route = createFileRoute("/progress")({
-  beforeLoad: () => {
-    if (typeof window === "undefined") return;
-    if (!loadState().isPremium) throw redirect({ to: "/paywall" });
-  },
+  // No paywall redirect here: loadState() force-falses isPremium (never trusted
+  // from localStorage), so this bounced EVERY user — including paying ones — to
+  // /paywall. The tab now shows its content; premium-only sub-sections keep
+  // their inline blur-overlay gate further down.
   component: ProgressScreen,
 });
 

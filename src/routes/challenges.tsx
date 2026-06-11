@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Trophy, Coins, Check, Lock, Sparkles, Gift } from "lucide-react";
+import { Trophy, Coins, Check, Lock, Sparkles } from "lucide-react";
 import { PageShell } from "@/components/BottomNav";
 import { useAppState } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
@@ -29,11 +29,11 @@ const CHALLENGES: Challenge[] = [
   { id: "call-friend", title: "Call someone you trust",     desc: "Real connection rewires reward.",              points: 20, category: "Daily"  },
 ];
 
+// Only rewards that DO something are listed. Aurora theme / Streak Shield /
+// mantra pack deducted points and granted nothing (no code ever read their
+// unlock ids) — non-functional virtual goods are App Review 2.1 evidence.
 const REWARDS = [
   { id: "tree-leaves",    name: "Grow your Life Tree",   desc: "+50 XP boost",                              cost: 50,  icon: Sparkles },
-  { id: "theme",          name: "Unlock Aurora theme",   desc: "Cosmetic upgrade",                          cost: 200, icon: Gift     },
-  { id: "streak-shield",  name: "Streak Shield",         desc: "Forgive 1 slip-up without losing streak",   cost: 150, icon: Trophy   },
-  { id: "custom-mantra",  name: "Custom mantra pack",    desc: "10 personalized reframes",                  cost: 120, icon: Sparkles },
 ];
 
 // ── Category pill colors ──────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ function ChallengesPage() {
             </div>
           </div>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.32)", textAlign: "right", maxWidth: 130, lineHeight: 1.55 }}>
-            Spend on tree growth, themes, streak shields & more.
+            Spend them on growing your companion.
           </p>
         </div>
       </section>
