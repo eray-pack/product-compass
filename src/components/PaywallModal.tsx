@@ -6,6 +6,7 @@ import { useAppState } from "@/lib/store";
 import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
 import { Capacitor } from "@capacitor/core";
 import { purchaseAnnual, purchaseMonthly } from "@/lib/purchases";
+import { getIntroOfferRemaining } from "@/lib/introOffer";
 
 // ── Tokens ─────────────────────────────────────────────────────────────────────
 const GOLD          = "#C9A84C";
@@ -18,7 +19,6 @@ const SEL_SHADOW_MONTHLY = "0 0 16px rgba(201,168,76,0.16)";
 const GOLD_BTN_BG   = "linear-gradient(145deg, #D4954A 0%, #C4873A 35%, #A87030 65%, #C08840 100%)";
 
 const RENAG_AFTER_MS = 24 * 60 * 60 * 1000;
-const TIMER_START    = 14 * 60 + 51;
 
 // ── Sparkle particles ─────────────────────────────────────────────────────────
 const MODAL_SPARKLES = [
@@ -37,11 +37,13 @@ const MODAL_SPARKLES = [
 ];
 
 // ── Data ─────────────────────────────────────────────────────────────────────
-const TESTIMONIALS = [
-  { name: "Marcus, 24", text: "day 31. got a promotion last week. coincidence? i don't think so" },
-  { name: "Jaylen, 19", text: "i was sceptical but the tree thing actually makes me not want to ruin it" },
-  { name: "Timo, 28",   text: "first time i've gone this long. my girlfriend noticed before i told her" },
-  { name: "Arjun, 31",  text: "the momentum thing is genius. i relapsed once and kept going. old me would've quit" },
+// Real value props — replaced fabricated testimonials (invented names/quotes),
+// the social-proof pattern App Review flags under 4.3(a)
+const VALUE_PROPS = [
+  { title: "Multi-addiction tracking", text: "Quit more than one habit at once — each with its own streak and analytics." },
+  { title: "AI recovery coach",        text: "Personalized reframes and urge support, any hour you need it." },
+  { title: "20+ psychological tools",  text: "Urge surfing, cold exposure, craving games and more, grounded in CBT." },
+  { title: "Honest 3-strike system",   text: "A relapse doesn't erase your progress — log it honestly, keep your momentum." },
 ];
 
 const FEATURE_META = [
@@ -136,7 +138,7 @@ export function PaywallContent({
   }));
 
   useEffect(() => {
-    const t = setInterval(() => setTIdx((i) => (i + 1) % TESTIMONIALS.length), 3000);
+    const t = setInterval(() => setTIdx((i) => (i + 1) % VALUE_PROPS.length), 3000);
     return () => clearInterval(t);
   }, []);
 
@@ -291,7 +293,7 @@ export function PaywallContent({
         ))}
       </motion.div>
 
-      {/* ── Testimonial strip ── */}
+      {/* ── Value-prop strip — same rotating card, honest content ── */}
       <motion.div
         variants={iV}
         style={{
@@ -310,11 +312,11 @@ export function PaywallContent({
             transition={{ duration: 0.3 }}
             style={{ width: "100%" }}
           >
-            <p style={{ fontSize: 13, color: WHITE, margin: "0 0 8px", lineHeight: 1.45 }}>
-              "{TESTIMONIALS[tIdx].text}"
+            <p style={{ fontSize: 11, color: GOLD, margin: "0 0 8px", fontWeight: 600 }}>
+              {VALUE_PROPS[tIdx].title}
             </p>
-            <p style={{ fontSize: 11, color: GOLD, margin: 0, fontWeight: 600 }}>
-              — {TESTIMONIALS[tIdx].name}
+            <p style={{ fontSize: 13, color: WHITE, margin: 0, lineHeight: 1.45 }}>
+              {VALUE_PROPS[tIdx].text}
             </p>
           </motion.div>
         </AnimatePresence>
@@ -387,8 +389,41 @@ export function PaywallContent({
         >
           {t("paywall.noThanks")}
         </button>
+
+        {/* Apple 3.1.2: auto-renew disclosure + restore/terms/privacy on every purchase screen */}
+        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", margin: "4px 0 0" }}>
+          Subscription auto-renews until cancelled. Manage in App Store settings.
+        </p>
+        <ModalLegalFooter />
       </motion.div>
     </motion.div>
+  );
+}
+
+// Restore + legal links required by Apple 3.1.2 on subscription UI
+function ModalLegalFooter() {
+  const [restoring, setRestoring] = useState(false);
+  const [, update] = useAppState();
+  const handleRestore = async () => {
+    setRestoring(true);
+    try {
+      const { restorePurchases } = await import("@/lib/purchases");
+      const ok = await restorePurchases();
+      if (ok) { update({ isPremium: true }); closePaywall(); }
+    } catch { /* leave the paywall open — no silent unlock */ }
+    setRestoring(false);
+  };
+  return (
+    <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 8, fontSize: 11 }}>
+      <button onClick={handleRestore} disabled={restoring}
+        style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", cursor: "pointer", padding: 0, fontFamily: "DM Sans, sans-serif" }}>
+        {restoring ? "Restoring…" : "Restore Purchases"}
+      </button>
+      <span style={{ color: "rgba(255,255,255,0.18)" }}>·</span>
+      <a href="/terms" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Terms</a>
+      <span style={{ color: "rgba(255,255,255,0.18)" }}>·</span>
+      <a href="/privacy" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Privacy</a>
+    </div>
   );
 }
 
@@ -396,7 +431,9 @@ export function PaywallContent({
 export function PaywallModal() {
   const open              = usePaywallOpen();
   const [state, update]   = useAppState();
-  const [seconds, setSeconds] = useState(TIMER_START);
+  // Real persisted 24h intro window — anchored to the FIRST ever paywall view,
+  // so reopening the modal can never restart the countdown (0 once expired)
+  const [introMs, setIntroMs] = useState(0);
   const [plan, setPlan]   = useState<"annual" | "monthly">("annual");
   const hasOpenedRef      = useRef(false);
   const dragControls      = useDragControls();
@@ -404,8 +441,8 @@ export function PaywallModal() {
   useEffect(() => {
     if (!open) return;
     hasOpenedRef.current = true;
-    setSeconds(TIMER_START);
-    const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+    setIntroMs(getIntroOfferRemaining());
+    const t = setInterval(() => setIntroMs(getIntroOfferRemaining()), 1000);
     return () => clearInterval(t);
   }, [open]);
 
@@ -553,7 +590,7 @@ export function PaywallModal() {
 
             <div style={{ padding: "16px 20px 36px" }}>
               <PaywallContent
-                timerSeconds={seconds}
+                timerSeconds={Math.floor(introMs / 1000)}
                 plan={plan}
                 onPlanChange={setPlan}
                 onClaim={claim}

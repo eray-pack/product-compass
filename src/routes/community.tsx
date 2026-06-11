@@ -46,12 +46,14 @@ type Message = {
 };
 
 // ─── Static data ──────────────────────────────────────────────────────────────
+// memberCount 0 = "don't show a count" (we only ever display REAL numbers;
+// the global room gets the live count from get_member_count() at render time)
 const ROOMS: Room[] = [
-  { id: "global",        name: "Global",           description: "Everyone is here. Show up daily.",                icon: Globe,    color: "oklch(0.55 0.18 260)", memberCount: 46847, isGlobal: true },
-  { id: "bible",         name: "Faith & Recovery",  description: "Recovery through faith. All beliefs welcome.",   icon: Book,     color: "oklch(0.55 0.17 60)",  memberCount: 3241 },
-  { id: "fitness",       name: "Fitness Mode",      description: "Replace the habit with movement.",               icon: Dumbbell, color: "oklch(0.52 0.16 145)", memberCount: 5890 },
-  { id: "relationships", name: "Relationships",     description: "How this affects the people around us.",         icon: Heart,    color: "oklch(0.55 0.18 10)",  memberCount: 2107 },
-  { id: "mental",        name: "Mental Health",     description: "Anxiety, depression, and addiction.",            icon: Shield,   color: "oklch(0.50 0.15 290)", memberCount: 4562 },
+  { id: "global",        name: "Global",           description: "Everyone is here. Show up daily.",                icon: Globe,    color: "oklch(0.55 0.18 260)", memberCount: 0, isGlobal: true },
+  { id: "bible",         name: "Faith & Recovery",  description: "Recovery through faith. All beliefs welcome.",   icon: Book,     color: "oklch(0.55 0.17 60)",  memberCount: 0 },
+  { id: "fitness",       name: "Fitness Mode",      description: "Replace the habit with movement.",               icon: Dumbbell, color: "oklch(0.52 0.16 145)", memberCount: 0 },
+  { id: "relationships", name: "Relationships",     description: "How this affects the people around us.",         icon: Heart,    color: "oklch(0.55 0.18 10)",  memberCount: 0 },
+  { id: "mental",        name: "Mental Health",     description: "Anxiety, depression, and addiction.",            icon: Shield,   color: "oklch(0.50 0.15 290)", memberCount: 0 },
 ];
 
 // Avatar clusters per room — shown in the card
@@ -62,32 +64,6 @@ const ROOM_AVATARS: Record<string, { initial: string; bg: string }[]> = {
   relationships: [{ initial: "L", bg: "#B8404A" }, { initial: "P", bg: "#CC5560" }, { initial: "R", bg: "#A03040" }, { initial: "H", bg: "#D46070" }],
   mental:        [{ initial: "T", bg: "#5A4AB8" }, { initial: "N", bg: "#7060CC" }, { initial: "G", bg: "#4A3A9E" }, { initial: "V", bg: "#6858D0" }],
 };
-
-function makeMockMessages(): Record<string, Message[]> {
-  const now = Date.now();
-  return {
-    global: [
-      { id: "1", userId: "u1", name: "Marcus",  initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Titan",    text: "day 61 checking in. feeling sharp today.", ts: now - 1000 * 60 * 4 },
-      { id: "2", userId: "u2", name: "Arjun",   initial: "A", avatarColor: "oklch(0.50 0.15 290)", rank: "Legend",   text: "112 days. the urges barely register anymore. it gets easier.", ts: now - 1000 * 60 * 3 },
-      { id: "3", userId: "u3", name: "Timo",    initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Ironmind", text: "used the sos button last night. worked. still going.", ts: now - 1000 * 60 * 2 },
-      { id: "4", userId: "u4", name: "Noah",    initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awaken",   text: "first week done. harder than i thought but i'm here", ts: now - 1000 * 60 * 1 },
-      { id: "5", userId: "u5", name: "Jaylen",  initial: "J", avatarColor: "oklch(0.52 0.16 145)", rank: "Warrior",  text: "relapsed on day 28 but came back day 29. momentum never stopped.", ts: now - 1000 * 30 },
-    ],
-    bible: [
-      { id: "b1", userId: "u6", name: "Samuel",  initial: "S", avatarColor: "oklch(0.55 0.17 60)", rank: "Titan",  text: "praying for everyone here tonight. you're not alone in this.", ts: now - 1000 * 60 * 5 },
-      { id: "b2", userId: "u7", name: "Dimitri", initial: "D", avatarColor: "oklch(0.56 0.16 60)", rank: "Legend", text: "1 Cor 10:13 — he will not let you be tempted beyond what you can bear.", ts: now - 1000 * 60 * 2 },
-    ],
-    fitness: [
-      { id: "f1", userId: "u8", name: "Kenji",  initial: "K", avatarColor: "oklch(0.54 0.14 180)", rank: "Titan", text: "replaced the urge with a cold shower + 20 pushups. works every time.", ts: now - 1000 * 60 * 8 },
-      { id: "f2", userId: "u9", name: "Marcus", initial: "M", avatarColor: "oklch(0.55 0.18 260)", rank: "Titan", text: "ran 5k this morning. day 61. body feels different.", ts: now - 1000 * 60 * 3 },
-    ],
-    relationships: [],
-    mental: [
-      { id: "m1", userId: "u10", name: "Timo", initial: "T", avatarColor: "oklch(0.55 0.17 30)",  rank: "Disciplined", text: "anyone else notice anxiety drops significantly after 2 weeks clean?", ts: now - 1000 * 60 * 10 },
-      { id: "m2", userId: "u11", name: "Noah", initial: "N", avatarColor: "oklch(0.53 0.18 200)", rank: "Awakened",    text: "yes. the brain fog lifted around day 10 for me.", ts: now - 1000 * 60 * 6 },
-    ],
-  };
-}
 
 // Badge name → color (matches BADGES in badges.ts)
 const BADGE_COLORS: Record<string, { color: string; glow: string }> = {
@@ -106,40 +82,47 @@ const BADGE_COLORS: Record<string, { color: string; glow: string }> = {
 
 const COOLDOWN_SECS = 10;
 
-// ─── Social stickiness ────────────────────────────────────────────────────────
-const TICKER_STATS = [
-  "2.3M clean days logged community-wide",
-  "1,847 people succeeding today",
-  "312 urges survived this hour",
-  "46,847 members fighting alongside you",
-  "94% who reach day 7 make it to day 30",
-];
-
-const ROOM_GOALS: Record<string, { current: number; goal: number; label: string }> = {
-  global:        { current: 2341850, goal: 2500000, label: "community clean days" },
-  bible:         { current: 89240,   goal: 100000,  label: "days of faith" },
-  fitness:       { current: 147600,  goal: 200000,  label: "workouts logged" },
-  relationships: { current: 41200,   goal: 75000,   label: "days rebuilding trust" },
-  mental:        { current: 98450,   goal: 150000,  label: "days of clarity" },
-};
-
-function formatGoal(n: number): string {
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `${Math.round(n / 1000)}k`;
-  return `${n}`;
+// ─── Social proof — REAL numbers only ─────────────────────────────────────────
+// The previous hardcoded stats ("46,847 members", "94% make it") were fiction —
+// exactly the template-app pattern App Review flagged under 4.3(a). The member
+// count now comes from the database; everything else is an honest statement.
+let cachedMemberCount: number | null = null;
+function useMemberCount(): number | null {
+  const [count, setCount] = useState<number | null>(cachedMemberCount);
+  useEffect(() => {
+    if (cachedMemberCount !== null) return;
+    supabase.rpc("get_member_count").then(({ data }) => {
+      if (typeof data === "number") { cachedMemberCount = data; setCount(data); }
+    });
+  }, []);
+  return count;
 }
+
+function tickerLines(memberCount: number | null): string[] {
+  return [
+    memberCount && memberCount > 1
+      ? `${memberCount.toLocaleString()} members walking this path with you`
+      : "A real community — every member here is real",
+    "Every urge you outlast weakens the loop",
+    "Day 1 or day 100 — showing up is the win",
+    "Nobody here is judging. Everybody here gets it.",
+  ];
+}
+
 
 function ImpactTicker() {
   const [idx, setIdx] = useState(0);
   const [show, setShow] = useState(true);
+  const memberCount = useMemberCount();
+  const lines = tickerLines(memberCount);
 
   useEffect(() => {
     const id = setInterval(() => {
       setShow(false);
-      setTimeout(() => { setIdx((i) => (i + 1) % TICKER_STATS.length); setShow(true); }, 380);
+      setTimeout(() => { setIdx((i) => (i + 1) % lines.length); setShow(true); }, 380);
     }, 3600);
     return () => clearInterval(id);
-  }, []);
+  }, [lines.length]);
 
   return (
     <div className="mt-3 flex items-center gap-2">
@@ -155,39 +138,12 @@ function ImpactTicker() {
         className="text-[11px] font-medium"
         style={{ color: "rgba(201,168,76,0.75)" }}
       >
-        {TICKER_STATS[idx]}
+        {lines[idx]}
       </motion.span>
     </div>
   );
 }
 
-function CollectiveGoalBar({ roomId, color }: { roomId: string; color: string }) {
-  const goal = ROOM_GOALS[roomId];
-  if (!goal) return null;
-  const pct = Math.min(100, Math.round((goal.current / goal.goal) * 100));
-
-  return (
-    <div className="mt-2.5">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.28)" }}>
-          Collective Goal
-        </span>
-        <span className="text-[9px] font-bold tabular-nums" style={{ color }}>
-          {formatGoal(goal.current)} / {formatGoal(goal.goal)} {goal.label}
-        </span>
-      </div>
-      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <motion.div
-          className="h-full rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-          style={{ background: `linear-gradient(90deg, ${color}70, ${color})` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 function GlobalCheckInBar({ checkedIn, onCheckIn }: { checkedIn: boolean; onCheckIn: () => void }) {
   return (
@@ -309,24 +265,19 @@ function makeDot(coords: [number, number], phase: DotPhase = "visible"): LiveDot
 
 const USER_CHECKIN_COORDS: [number, number] = [-74, 41]; // New York placeholder
 
-function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: boolean; extraMembers?: number }) {
-  const [liveCount, setLiveCount] = useState(248);
+function WorldMapHero({ userCheckedIn }: { userCheckedIn: boolean }) {
+  // Real total from the DB — the old jittering "active now" number was invented
+  // realtime activity, the exact 4.3(a) pattern App Review rejected.
+  const memberCount = useMemberCount();
 
   // ── Initialise dots from a random subset of the world pool ──────────────────
+  // Dots are decorative ambience only; they don't represent specific people.
   const [dots, setDots] = useState<LiveDot[]>(() =>
     [...WORLD_POOL]
       .sort(() => Math.random() - 0.5)
       .slice(0, TARGET_DOT_COUNT)
       .map((c) => makeDot(c, "visible"))
   );
-
-  // ── Live member counter ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const id = setInterval(() => {
-      setLiveCount((n) => Math.max(240, Math.min(260, n + Math.floor(Math.random() * 5) - 2)));
-    }, 3500);
-    return () => clearInterval(id);
-  }, []);
 
   // ── Heartbeat lifecycle — interval every 3s ──────────────────────────────────
   useEffect(() => {
@@ -373,7 +324,7 @@ function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: bool
 
   return (
     <div style={{ marginTop: 8 }} className="px-4">
-      {/* ── Live counter ── */}
+      {/* ── Member count — real DB total, never a fabricated "live" figure ── */}
       <div className="flex items-center justify-center gap-2 pb-2">
         <span
           className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
@@ -383,7 +334,9 @@ function WorldMapHero({ userCheckedIn, extraMembers = 0 }: { userCheckedIn: bool
           className="text-[11px] font-bold tracking-wider tabular-nums"
           style={{ color: "#C4873A" }}
         >
-          {liveCount + extraMembers} active now
+          {memberCount !== null
+            ? `${memberCount.toLocaleString()} members worldwide`
+            : "Recovery, worldwide"}
         </span>
       </div>
 
@@ -540,22 +493,34 @@ function AvatarStack({ roomId, memberCount, isGlobal }: { roomId: string; member
         ))}
       </div>
 
-      {/* Live dot + count for global; plain count for others */}
+      {/* Real member count for global (live from DB); honest open-door for the rest.
+          We never display invented activity numbers — that's what got us a 4.3(a). */}
       {isGlobal ? (
-        <div className="flex items-center gap-1.5">
-          <span
-            className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
-            style={{ background: "#3a9a6e", boxShadow: "0 0 5px #3a9a6e" }}
-          />
-          <span className="text-[10px] font-medium" style={{ color: "#4aaa80" }}>
-            247 active now
-          </span>
-        </div>
+        <GlobalLiveCount />
+      ) : memberCount > 0 ? (
+        <span className="text-[10px]" style={{ color: "oklch(0.52 0.015 265 / 0.55)" }}>
+          {formatCount(memberCount)} {memberCount === 1 ? "member" : "members"}
+        </span>
       ) : (
         <span className="text-[10px]" style={{ color: "oklch(0.52 0.015 265 / 0.55)" }}>
-          +{formatCount(memberCount - shown.length)} others
+          Open to everyone
         </span>
       )}
+    </div>
+  );
+}
+
+function GlobalLiveCount() {
+  const memberCount = useMemberCount();
+  return (
+    <div className="flex items-center gap-1.5">
+      <span
+        className="h-1.5 w-1.5 rounded-full animate-pulse shrink-0"
+        style={{ background: "#3a9a6e", boxShadow: "0 0 5px #3a9a6e" }}
+      />
+      <span className="text-[10px] font-medium" style={{ color: "#4aaa80" }}>
+        {memberCount && memberCount > 0 ? `${memberCount.toLocaleString()} members` : "Live"}
+      </span>
     </div>
   );
 }
@@ -1027,7 +992,6 @@ function CommunityPage() {
 
   // ── Dev panel ────────────────────────────────────────────────────────────────
   const [devOpen, setDevOpen] = useState(false);
-  const [devExtraMembers, setDevExtraMembers] = useState(0);
   const [devRooms, setDevRooms] = useState<Room[]>([]);
   const devTapCount = useRef(0);
   const devTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1097,8 +1061,10 @@ function CommunityPage() {
         <ImpactTicker />
       </header>
 
-      {/* ── Dev Panel (triple-tap "Community" or "You're not alone." to toggle) ── */}
-      {devOpen && (
+      {/* ── Dev Panel (triple-tap "Community" or "You're not alone." to toggle) ──
+          DEV-only: must never ship — a hidden tier toggle in prod is its own
+          App Review rejection waiting to happen. */}
+      {import.meta.env.DEV && devOpen && (
         <div style={{
           margin: "8px 16px 0",
           padding: "14px 16px",
@@ -1138,35 +1104,10 @@ function CommunityPage() {
             </span>
           </div>
 
-          {/* ── SECTION 2: MEMBERS ── */}
-          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Members</p>
-          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-            <button
-              onClick={() => setDevExtraMembers((n) => n + 100)}
-              style={{
-                fontSize: 11, padding: "5px 14px", borderRadius: 8, cursor: "pointer",
-                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.30)",
-                color: "#C9A84C", fontWeight: 600,
-              }}>
-              + 100 members
-            </button>
-            <button
-              onClick={() => setDevExtraMembers(0)}
-              style={{
-                fontSize: 11, padding: "5px 14px", borderRadius: 8, cursor: "pointer",
-                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
-                color: "rgba(255,255,255,0.55)", fontWeight: 400,
-              }}>
-              Reset
-            </button>
-            {devExtraMembers > 0 && (
-              <span style={{ fontSize: 11, color: "#C9A84C", alignSelf: "center", marginLeft: 4 }}>
-                +{devExtraMembers} added
-              </span>
-            )}
-          </div>
+          {/* Member-count inflation deliberately removed: numbers shown to users
+              must be real even in dev builds — no tool to fake them exists. */}
 
-          {/* ── SECTION 3: COMMUNITIES ── */}
+          {/* ── SECTION 2: COMMUNITIES ── */}
           <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6, letterSpacing: "0.12em", textTransform: "uppercase" }}>Communities</p>
           <div style={{ display: "flex", gap: 6 }}>
             <button
@@ -1179,7 +1120,7 @@ function CommunityPage() {
                   description: `Dev dummy community #${n} for testing.`,
                   icon: Users,
                   color: "oklch(0.55 0.15 220)",
-                  memberCount: Math.floor(Math.random() * 500) + 50,
+                  memberCount: 0, // unknown — never show an invented number
                 }]);
               }}
               style={{
@@ -1209,7 +1150,7 @@ function CommunityPage() {
 
       {/* ── World map hero ───────────────────────────────────── */}
       <div className="fade-up-1">
-        <WorldMapHero userCheckedIn={checkedIn} extraMembers={devExtraMembers} />
+        <WorldMapHero userCheckedIn={checkedIn} />
       </div>
 
       {/* ── Global check-in bar ──────────────────────────────── */}
@@ -1283,7 +1224,6 @@ function CommunityPage() {
                   {/* Avatar stack + live/member count */}
                   <AvatarStack roomId={room.id} memberCount={room.memberCount} isGlobal={room.isGlobal} />
                   {/* Collective goal progress bar */}
-                  <CollectiveGoalBar roomId={room.id} color={room.color} />
                 </div>
               </button>
             );
@@ -1503,7 +1443,42 @@ function CommunityPage() {
   );
 }
 
-// ─── Chat screen ──────────────────────────────────────────────────────────────
+// ─── Chat screen — REAL messages via Supabase + Realtime ─────────────────────
+// The old version showed hardcoded mock users (Marcus/Arjun/Timo…) as if they
+// were a live community — the exact fake-social-proof pattern App Review
+// rejected under 4.3(a). Every message below is a real row in
+// public.community_messages, live-updated over a Realtime subscription.
+
+// Deterministic avatar color per user — stable across sessions, no storage
+function avatarColorFor(userId: string): string {
+  let h = 0;
+  for (let i = 0; i < userId.length; i++) h = (h * 31 + userId.charCodeAt(i)) % 360;
+  return `oklch(0.55 0.16 ${h})`;
+}
+
+type MessageRow = {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  rank: string | null;
+  content: string;
+  created_at: string;
+};
+
+function rowToMessage(r: MessageRow): Message {
+  const name = r.display_name || "Member";
+  return {
+    id: r.id,
+    userId: r.user_id,
+    name,
+    initial: name[0]?.toUpperCase() ?? "M",
+    avatarColor: avatarColorFor(r.user_id),
+    rank: r.rank ?? "Spark",
+    text: r.content,
+    ts: Date.parse(r.created_at),
+  };
+}
+
 function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const [state] = useAppState();
   // Flagship = addiction with most days — shown in community regardless of active tab
@@ -1511,7 +1486,8 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const day = flagship ? dayCount(flagship.startDate) : 1;
   const stage = treeStage(state.treeXP);
 
-  const [messages, setMessages] = useState<Message[]>(() => makeMockMessages()[room.id] ?? []);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [myId, setMyId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1522,6 +1498,40 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const userInitial = userName[0]?.toUpperCase() ?? "Y";
   const userBadge = currentBadge(day);
   const userRank  = userBadge?.name ?? "Spark";
+
+  // Load history + subscribe to live inserts for this room
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!cancelled && session) setMyId(session.user.id);
+      const { data } = await supabase
+        .from("community_messages")
+        .select("id, user_id, display_name, rank, content, created_at")
+        .eq("room", room.id)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (!cancelled && data) setMessages((data as MessageRow[]).map(rowToMessage));
+    })();
+
+    const channel = supabase
+      .channel(`room-${room.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "community_messages", filter: `room=eq.${room.id}` },
+        (payload) => {
+          const m = rowToMessage(payload.new as MessageRow);
+          // Skip if we already appended it optimistically (same id)
+          setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [room.id]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
@@ -1536,17 +1546,24 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
     }, 1000);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = input.trim();
-    if (!text || cooldown > 0) return;
-    const msg: Message = {
-      id: `local-${Date.now()}`, userId: "me", name: userName, initial: userInitial,
-      avatarColor: "oklch(0.55 0.18 260)", rank: userRank, text, ts: Date.now(),
-    };
-    setMessages((prev) => [...prev, msg]);
+    if (!text || cooldown > 0 || !myId) return;
     setInput("");
     if (room.isGlobal) startCooldown();
     inputRef.current?.focus();
+
+    // Optimistic append with a provisional id; the realtime echo is deduped
+    // by checking the real row id when the insert returns.
+    const { data, error } = await supabase
+      .from("community_messages")
+      .insert({ user_id: myId, room: room.id, content: text, display_name: userName, rank: userRank })
+      .select("id, user_id, display_name, rank, content, created_at")
+      .single();
+    if (!error && data) {
+      const m = rowToMessage(data as MessageRow);
+      setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+    }
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -1566,7 +1583,9 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
         </button>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">{room.name}</p>
-          <p className="text-[10px] text-muted-foreground">{room.memberCount.toLocaleString()} members</p>
+          <p className="text-[10px] text-muted-foreground">
+            {room.memberCount > 0 ? `${room.memberCount.toLocaleString()} members` : "Open to everyone · be kind"}
+          </p>
         </div>
         {room.isGlobal && (
           <span className="text-[9px] uppercase tracking-wider px-2 py-1 rounded-full"
@@ -1594,7 +1613,7 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
           </div>
         )}
         {messages.map((msg) => {
-          const isMe = msg.userId === "me";
+          const isMe = myId !== null && msg.userId === myId;
           return (
             <div key={msg.id} className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
               {!isMe && (

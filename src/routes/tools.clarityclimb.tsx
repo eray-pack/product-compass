@@ -1,8 +1,9 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { loadState } from "@/lib/store";
+import { submitRecord } from "@/lib/records";
 
 export const Route = createFileRoute("/tools/clarityclimb")({
   beforeLoad: () => {
@@ -98,6 +99,12 @@ function ClarityClimb() {
       setCard(makeCard());
     }, 550);
   }
+
+  // Persist the highest step ever reached — submitRecord ignores anything
+  // that doesn't beat the stored best, so wrong picks (level drops) are free.
+  useEffect(() => {
+    submitRecord("clarityclimb", level);
+  }, [level]);
 
   const t = level / SUMMIT; // 0 → 1
   const playerPos = getPlayerPos(level);

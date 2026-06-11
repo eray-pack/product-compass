@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Check, X, Sparkles, Crown, Shield, Star, Loader2 } from "lucide-react";
+import { Lock, Check, X, Crown, Loader2 } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { purchaseMonthly, purchaseAnnual, restorePurchases } from "@/lib/purchases";
+import { getIntroOfferRemaining } from "@/lib/introOffer";
 
 export const Route = createFileRoute("/paywall")({
   component: Paywall,
@@ -32,31 +33,24 @@ const up = {
 };
 
 // ── Static data ────────────────────────────────────────────────────────────────
-const AVATARS = ["M", "J", "T", "A", "N", "K"];
-const AVATAR_COLORS = [
-  "oklch(0.55 0.18 260)",
-  "oklch(0.52 0.16 145)",
-  "oklch(0.55 0.17 30)",
-  "oklch(0.50 0.15 290)",
-  "oklch(0.53 0.18 200)",
-  "oklch(0.56 0.16 60)",
+// No invented users, quotes, ratings or stats anywhere below — App Review
+// (4.3a) pattern-matches fabricated social proof. Everything here is a real,
+// verifiable capability of the app.
+const VALUE_PROPS = [
+  { title: "Multi-addiction tracking", text: "Quit more than one habit at once — each with its own streak, analytics and milestones." },
+  { title: "AI recovery coach",        text: "Personalized reframes and urge support, any hour you need it — including 2am." },
+  { title: "20+ psychological tools",  text: "Urge surfing, cold exposure, craving games and more, grounded in CBT techniques." },
+  { title: "Honest 3-strike system",   text: "A relapse doesn't erase your progress. Log it honestly and keep your momentum." },
 ];
 
-const TESTIMONIALS = [
-  { name: "Marcus",  age: 24, text: "day 31. got a promotion last week. coincidence? i don't think so." },
-  { name: "Jaylen",  age: 19, text: "the tree thing actually makes me not want to ruin it. sounds dumb but it works." },
-  { name: "Timo",    age: 28, text: "first time i've gone this long. my girlfriend noticed before i told her." },
-  { name: "Arjun",   age: 31, text: "i relapsed once and kept going. old me would've quit. momentum never stopped." },
-];
-
-const LIVE_FEED = [
-  "Noah just hit Day 7 — \"First week done\"",
-  "Arjun survived an urge at 11pm",
-  "Samuel reached Gorilla rank today",
-  "Kenji — \"This app hits different\"",
-  "Marcus just unlocked Strong Tree",
-  "Dimitri — Day 60. Brain reset complete.",
-  "Jaylen used Momentum Shield last night",
+// Rotating strip of real app capabilities (replaced a fabricated "live user
+// activity" feed with invented names)
+const FEATURE_TICKER = [
+  "Track multiple addictions side-by-side",
+  "AI coach for the urges that hit at 2am",
+  "20+ psychological tools, grounded in CBT",
+  "3-strike system — relapse without losing everything",
+  "Sacred Tree & Wolf companion evolve over 90 days",
 ];
 
 const FEATURES = [
@@ -66,13 +60,7 @@ const FEATURES = [
   "Sacred Tree & Wolf companion — evolve them over 90 days",
   "Community — create rooms, connect with others on the same path",
   "XP Multiplier — bonus XP for deep streak milestones",
-  "PRO members are 3× more likely to reach day 90",
-];
-
-const UPSELLS = [
-  { id: "shield", icon: Shield, title: "Momentum Shield", desc: "Protect your streak for 3 days after a relapse", price: "$2.99" },
-  { id: "skin",   icon: Sparkles, title: "Golden Tree Skin", desc: "Exclusive visual for your companion tree",       price: "$1.99" },
-  { id: "elite",  icon: Crown,  title: "Elite Status",      desc: "Black card + Hall of Legends eligibility",       price: "$9.99/mo" },
+  "Honest 3-strike system — a relapse logs honestly, momentum survives",
 ];
 
 type Stage = "main" | "final" | "upsell";
@@ -100,99 +88,17 @@ const MAIN_SPARKLES = [
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-function fmt(n: number) {
-  return `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
+// h:mm:ss above an hour, m:ss below — the intro window is 24h, so a pure
+// minutes display would read as an absurd "1439:59"
+function fmt(ms: number) {
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return h > 0
+    ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+    : `${m}:${String(s).padStart(2, "0")}`;
 }
-
-// ── Upsell illustrations ───────────────────────────────────────────────────────
-function ShieldIllustration({ active }: { active: boolean }) {
-  return (
-    <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-      <AnimatePresence>
-        {active && (
-          <motion.div key="pulse" className="absolute rounded-full pointer-events-none"
-            style={{ width: 72, height: 72, border: `2px solid ${G}`, borderRadius: "50%" }}
-            initial={{ scale: 1, opacity: 0.6 }} animate={{ scale: 2, opacity: 0 }} exit={{ opacity: 0 }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }} />
-        )}
-      </AnimatePresence>
-      <motion.svg width="64" height="72" viewBox="0 0 64 72" fill="none"
-        initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-        <defs>
-          <linearGradient id="sg" x1="32" y1="0" x2="32" y2="72" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor={G} stopOpacity="0.9" />
-            <stop offset="100%" stopColor={G} stopOpacity="0.3" />
-          </linearGradient>
-        </defs>
-        <path d="M32 4 L58 14 L58 36 Q58 56 32 68 Q6 56 6 36 L6 14 Z"
-          fill={`${G}18`} stroke="url(#sg)" strokeWidth="1.5" />
-        <path d="M22 36 L29 43 L43 29" stroke={G} strokeWidth="2.5"
-          strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
-      </motion.svg>
-    </div>
-  );
-}
-
-function TreeIllustration() {
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <svg width="90" height="110" viewBox="0 0 90 120" fill="none">
-        <defs>
-          <linearGradient id="tg" x1="45" y1="0" x2="45" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#E8C96A" /><stop offset="100%" stopColor="#7A5510" />
-          </linearGradient>
-          <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#5C3D0E" /><stop offset="50%" stopColor="#8B6520" /><stop offset="100%" stopColor="#5C3D0E" />
-          </linearGradient>
-        </defs>
-        <rect x="37" y="90" width="16" height="24" rx="4" fill="url(#trunk)" />
-        <polygon points="45,42 6,92 84,92" fill="url(#tg)" opacity="0.85" />
-        <polygon points="45,22 14,68 76,68" fill="url(#tg)" opacity="0.92" />
-        <polygon points="45,4 22,46 68,46" fill="url(#tg)" />
-      </svg>
-    </div>
-  );
-}
-
-function EliteIllustration({ active }: { active: boolean }) {
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <motion.div style={{
-        width: 160, height: 96, borderRadius: 12, position: "relative", overflow: "hidden",
-        background: "linear-gradient(135deg, #111 0%, #1a1a1a 50%, #0a0a0a 100%)",
-        border: `1px solid ${G}44`,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.6)`,
-      }}
-        initial={{ y: 30, rotate: -6, opacity: 0 }}
-        animate={{ y: 0, rotate: -4, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 22 }}>
-        <motion.div style={{
-          position: "absolute", top: 0, bottom: 0, width: 40,
-          background: `linear-gradient(90deg, transparent, ${G}${active ? "44" : "1a"}, transparent)`,
-        }}
-          animate={{ left: ["-20%", "130%"] }}
-          transition={{ duration: active ? 1.2 : 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: active ? 0.2 : 1.2 }} />
-        <div style={{ position: "absolute", top: 18, left: 16, width: 24, height: 18, borderRadius: 4,
-          background: `linear-gradient(135deg, ${G}88, ${G}44)`, border: `1px solid ${G}66` }} />
-        <div style={{ position: "absolute", bottom: 14, left: 16, fontSize: 11, fontWeight: 700,
-          color: G, letterSpacing: "0.18em", textTransform: "uppercase" }}>ELITE</div>
-        <div style={{ position: "absolute", bottom: 12, right: 16, color: G, fontSize: 16 }}>♛</div>
-      </motion.div>
-    </div>
-  );
-}
-
-const ILLUS: Record<string, (active: boolean) => React.ReactNode> = {
-  shield: (a) => <ShieldIllustration active={a} />,
-  skin:   (_) => <TreeIllustration />,
-  elite:  (a) => <EliteIllustration active={a} />,
-};
-const ILLUS_ICON: Record<string, React.ReactNode> = {
-  shield: <Shield className="h-4 w-4" />,
-  skin:   <Sparkles className="h-4 w-4" />,
-  elite:  <Crown className="h-4 w-4" />,
-};
 
 // ── Main component ─────────────────────────────────────────────────────────────
 function Paywall() {
@@ -200,23 +106,23 @@ function Paywall() {
   const navigate       = useNavigate();
   const [stage, setStage]       = useState<Stage>("main");
   const [plan, setPlan]         = useState<"annual" | "monthly">("annual");
-  const [seconds, setSeconds]         = useState(14 * 60 + 59);
-  const [finalSeconds, setFinalSeconds] = useState(5 * 60);
+  // Real one-time intro window (ms). Starts at 0 so SSR/first paint never
+  // shows a timer the client would have to correct (hydration-safe).
+  const [introMs, setIntroMs]   = useState(0);
   const [feedIdx, setFeedIdx]   = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring]   = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setSeconds((s) => Math.max(0, s - 1));
-      setFinalSeconds((s) => Math.max(0, s - 1));
-    }, 1000);
+    // Recompute from the persisted timestamp every tick (drift-proof, and the
+    // timer can never restart — it hides itself once the 24h window passes)
+    setIntroMs(getIntroOfferRemaining());
+    const t = setInterval(() => setIntroMs(getIntroOfferRemaining()), 1000);
     return () => clearInterval(t);
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setFeedIdx((i) => (i + 1) % LIVE_FEED.length), 2800);
+    const t = setInterval(() => setFeedIdx((i) => (i + 1) % FEATURE_TICKER.length), 2800);
     return () => clearInterval(t);
   }, []);
 
@@ -230,7 +136,7 @@ function Paywall() {
     finally { setPurchasing(false); }
   };
 
-  // Final offer — always annual (the 92% off deal shown on that screen)
+  // Final offer — always annual (that screen pitches the real annual plan)
   const subscribeFinal = async () => {
     setPurchasing(true);
     try {
@@ -251,117 +157,60 @@ function Paywall() {
 
   const continueFree    = () => setStage("final");
   const skipForReal     = () => { update({ paywallSeen: true }); navigate({ to: "/" }); };
-  const finishUpsell = () => {
-    if (selected === "shield") update({ momentumShieldDays: 3 });
-    navigate({ to: "/" });
-  };
+  const finishUpsell = () => navigate({ to: "/" });
 
-  // ── UPSELL ─────────────────────────────────────────────────────────────────
+  // ── POST-PURCHASE WELCOME ──────────────────────────────────────────────────
+  // The old "upsell" stage sold Momentum Shield $2.99 / Golden Tree Skin $1.99 /
+  // Elite Status $9.99/mo with NO StoreKit products and NO functional effect
+  // (momentumShieldDays was never read anywhere) — priced fake IAPs are an
+  // instant App Review rejection. PRO purchase now lands on an honest welcome.
   if (stage === "upsell") {
     return (
       <div style={{ minHeight: "100svh", background: BG, fontFamily: "DM Sans, sans-serif" }}>
-        <motion.div className="mx-auto w-full max-w-md px-5 pt-12 pb-10 flex flex-col"
+        <motion.div className="mx-auto w-full max-w-md px-5 pt-24 pb-10 flex flex-col items-center text-center"
           variants={stagger} initial="hidden" animate="show">
 
-          <motion.div variants={up} className="flex justify-center mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.25em] uppercase"
-              style={{ background: G_MUTED, border: `1px solid ${G}44`, color: G }}>
-              ✦ One More Thing
-            </span>
+          <motion.div variants={up} style={{
+            width: 84, height: 84, borderRadius: "50%", marginBottom: 26,
+            background: `radial-gradient(circle, ${G}22 0%, transparent 70%)`,
+            border: `1.5px solid ${G}55`,
+            boxShadow: `0 0 44px ${G_GLOW}`,
+            display: "grid", placeItems: "center",
+          }}>
+            <Crown style={{ width: 36, height: 36, color: G }} />
           </motion.div>
 
-          <motion.h1 variants={up} className="text-center text-[32px] font-bold leading-tight mb-2"
+          <motion.h1 variants={up} className="text-[34px] font-bold leading-tight mb-3"
             style={{ fontFamily: "Cormorant Garamond, Georgia, serif", color: TEXT }}>
-            Protect what you've built.
+            PRO unlocked.
           </motion.h1>
 
-          <motion.p variants={up} className="text-center text-sm mb-8" style={{ color: TEXT_SUB }}>
-            Optional. Add now or find it later in settings.
+          <motion.p variants={up} className="text-sm mb-10" style={{ color: TEXT_SUB, lineHeight: 1.7, maxWidth: 300 }}>
+            Your full recovery toolkit is open — multi-habit tracking, the AI coach,
+            every psychological tool, and your companion\'s complete journey.
           </motion.p>
 
-          <div className="flex flex-col gap-3">
-            {UPSELLS.map(({ id, title, desc, price }) => {
-              const isSel = selected === id;
-              return (
-                <motion.div key={id} variants={up}>
-                  <motion.button onClick={() => setSelected(isSel ? null : id)}
-                    className="w-full text-left" whileTap={{ scale: 0.97 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 22 }}>
-                    <motion.div animate={{
-                      borderColor: isSel ? G : CARD_BD,
-                      boxShadow: isSel ? `0 0 24px ${G_GLOW}` : "none",
-                    }} transition={{ duration: 0.2 }}
-                      style={{ background: CARD_BG, border: `1px solid`, borderRadius: 18, overflow: "hidden" }}>
-
-                      {/* Illustration */}
-                      <div style={{
-                        height: 120,
-                        background: isSel ? `radial-gradient(ellipse 70% 80% at 50% 60%, ${G}0e 0%, transparent 75%)` : "rgba(0,0,0,0.2)",
-                        borderBottom: `1px solid ${isSel ? G + "33" : CARD_BD}`,
-                        transition: "background 0.3s ease",
-                      }}>
-                        {ILLUS[id]?.(isSel)}
-                      </div>
-
-                      <div className="flex items-center gap-3 px-4 py-3.5">
-                        <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-                          background: G_MUTED, border: `1px solid ${G}33`,
-                          display: "flex", alignItems: "center", justifyContent: "center", color: G }}>
-                          {ILLUS_ICON[id]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold leading-tight" style={{ color: TEXT }}>{title}</p>
-                          <p className="text-[11px] mt-0.5 leading-tight" style={{ color: TEXT_SUB }}>{desc}</p>
-                        </div>
-                        <p className="text-sm font-bold shrink-0 mr-2" style={{ color: G }}>{price}</p>
-                        <motion.div animate={{ borderColor: isSel ? G : "rgba(255,255,255,0.2)", background: isSel ? G : "transparent" }}
-                          transition={{ duration: 0.18 }}
-                          style={{ width: 20, height: 20, borderRadius: "50%", borderWidth: 1.5, borderStyle: "solid",
-                            flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          {isSel && (
-                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
-                              style={{ width: 8, height: 8, borderRadius: "50%", background: BG }} />
-                          )}
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  </motion.button>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <motion.div variants={up} className="mt-7">
+          <motion.div variants={up} style={{ width: "100%" }}>
             <motion.button onClick={finishUpsell} whileTap={{ scale: 0.97 }}
               transition={{ type: "spring", stiffness: 500, damping: 20 }}
               style={{
-                width: "100%", height: 56, borderRadius: 16, fontSize: 15, fontWeight: 600,
-                background: selected ? `linear-gradient(135deg, ${G}, #a07830)` : "rgba(255,255,255,0.06)",
-                color: selected ? "#080a0e" : TEXT_SUB,
-                border: selected ? "none" : `1px solid rgba(255,255,255,0.1)`,
-                boxShadow: selected ? `0 0 32px ${G_GLOW}` : "none",
-                transition: "background 0.25s, color 0.25s, box-shadow 0.25s",
+                width: "100%", height: 56, borderRadius: 16, fontSize: 15, fontWeight: 700,
+                background: `linear-gradient(135deg, ${G}, #a07830)`,
+                color: "#080a0e", border: "none",
+                boxShadow: `0 0 32px ${G_GLOW}`,
                 cursor: "pointer",
               }}>
-              {selected
-                ? `Add ${UPSELLS.find((u) => u.id === selected)?.title} — ${UPSELLS.find((u) => u.id === selected)?.price}`
-                : "No thanks, continue"}
+              Start your journey
             </motion.button>
-
-            {selected && (
-              <motion.button onClick={() => { setSelected(null); finishUpsell(); }}
-                style={{ width: "100%", height: 40, marginTop: 8, color: TEXT_DIM, fontSize: 13, cursor: "pointer", background: "none", border: "none" }}
-                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} whileTap={{ opacity: 0.6 }}>
-                Skip for now
-              </motion.button>
-            )}
           </motion.div>
         </motion.div>
       </div>
     );
   }
 
-  // ── FINAL (last-chance discount) — redesigned ─────────────────────────────
+  // ── FINAL (last chance at the real annual rate) ───────────────────────────
+  // Same dramatic design, honest numbers: it sells the REAL $39.99/yr plan
+  // ($3.33/mo — 83% less per month than $19.99 monthly), no invented discount.
   if (stage === "final") {
 
     // Deterministic sparkle positions — no jitter on re-render
@@ -498,35 +347,38 @@ function Paywall() {
               Wait — one last thing.
             </h1>
             <p style={{ fontSize: 14, color: TEXT_SUB }}>
-              Lowest price we'll ever offer. Only on this screen.
+              Last chance at the annual rate before you continue free.
             </p>
           </motion.div>
 
-          {/* Countdown — sharp, crisp */}
-          <motion.div variants={up} className="flex justify-center">
-            <div style={{
-              borderRadius: 24,
-              background: "rgba(220,38,38,0.10)",
-              border: "1px solid rgba(220,38,38,0.38)",
-              padding: "8px 20px",
-              display: "inline-flex", alignItems: "center", gap: 10,
-              boxShadow: "0 0 18px rgba(220,38,38,0.18)",
-            }}>
-              <motion.span
-                animate={{ opacity: [1, 0.4, 1] }}
-                transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%",
-                  background: "#FF4444", boxShadow: "0 0 8px rgba(255,68,68,0.80)", flexShrink: 0 }}
-              />
-              <span style={{
-                fontSize: 14, fontWeight: 800, letterSpacing: "0.04em",
-                color: "#FF5555", fontVariantNumeric: "tabular-nums",
-                textShadow: "0 0 12px rgba(255,85,85,0.55)",
+          {/* Countdown — sharp, crisp. Real persisted 24h intro window; once it
+              expires the row disappears for good instead of restarting. */}
+          {introMs > 0 && (
+            <motion.div variants={up} className="flex justify-center">
+              <div style={{
+                borderRadius: 24,
+                background: "rgba(220,38,38,0.10)",
+                border: "1px solid rgba(220,38,38,0.38)",
+                padding: "8px 20px",
+                display: "inline-flex", alignItems: "center", gap: 10,
+                boxShadow: "0 0 18px rgba(220,38,38,0.18)",
               }}>
-                Expires in {fmt(finalSeconds)}
-              </span>
-            </div>
-          </motion.div>
+                <motion.span
+                  animate={{ opacity: [1, 0.4, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%",
+                    background: "#FF4444", boxShadow: "0 0 8px rgba(255,68,68,0.80)", flexShrink: 0 }}
+                />
+                <span style={{
+                  fontSize: 14, fontWeight: 800, letterSpacing: "0.04em",
+                  color: "#FF5555", fontVariantNumeric: "tabular-nums",
+                  textShadow: "0 0 12px rgba(255,85,85,0.55)",
+                }}>
+                  Intro window ends in {fmt(introMs)}
+                </span>
+              </div>
+            </motion.div>
+          )}
 
           {/* Offer card */}
           <motion.div variants={up} style={{
@@ -536,27 +388,29 @@ function Paywall() {
             boxShadow: `0 0 0 1px rgba(196,135,58,0.10), 0 8px 48px rgba(196,135,58,0.18), 0 2px 12px rgba(0,0,0,0.60)`,
             backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           }}>
+            {/* Real numbers only: $39.99/yr = $3.33/mo, vs $19.99/mo monthly
+                — that's a real 83% lower per-month cost, nothing invented */}
             <div className="flex items-center justify-between mb-1">
               <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.38em", textTransform: "uppercase", color: G }}>
-                Annual — 92% off
+                Annual — Best Value
               </p>
-              <p style={{ fontSize: 11, color: TEXT_DIM, textDecoration: "line-through" }}>$39.99/yr</p>
+              <p style={{ fontSize: 11, color: TEXT_DIM }}>vs $19.99/mo monthly</p>
             </div>
 
             <div className="flex items-end gap-2 mt-2 mb-1">
               <p style={{ fontSize: 52, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: "-0.02em" }}>
-                $1.49
+                $3.33
               </p>
               <p style={{ fontSize: 15, fontWeight: 400, color: TEXT_SUB, paddingBottom: 8 }}>/month</p>
             </div>
-            <p style={{ fontSize: 12, color: TEXT_DIM, marginBottom: 18 }}>$17.88 billed once a year</p>
+            <p style={{ fontSize: 12, color: TEXT_DIM, marginBottom: 18 }}>$39.99 billed once a year — 83% less than monthly</p>
 
             <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${G}33, transparent)`, marginBottom: 16 }} />
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 "Everything in the full PRO plan",
-                "Locked-in price for life",
+                "$3.33/mo billed annually — 83% less than monthly",
                 "Cancel anytime — no questions asked",
               ].map((f) => (
                 <div key={f} className="flex items-center gap-3">
@@ -595,7 +449,7 @@ function Paywall() {
               }}>
               {purchasing
                 ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
-                : "Claim 92% Discount"}
+                : "Get Annual — $3.33/mo"}
             </motion.button>
 
             <button onClick={skipForReal} style={{
@@ -609,8 +463,23 @@ function Paywall() {
             <p style={{ textAlign: "center", fontSize: 11, color: TEXT_DIM,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
               <Lock style={{ width: 11, height: 11 }} />
-              7-day free trial · Cancel anytime · 256-bit encryption
+              7-day free trial · Cancel anytime · Private by design
             </p>
+
+            {/* Apple 3.1.2: auto-renew disclosure + restore/terms/privacy on every purchase screen */}
+            <p style={{ textAlign: "center", fontSize: 10, color: TEXT_DIM, marginTop: 6 }}>
+              Subscription auto-renews until cancelled. Manage in App Store settings.
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 8, fontSize: 11 }}>
+              <button onClick={handleRestore} disabled={restoring}
+                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", cursor: "pointer", padding: 0 }}>
+                {restoring ? "Restoring…" : "Restore Purchases"}
+              </button>
+              <span style={{ color: "rgba(255,255,255,0.18)" }}>·</span>
+              <a href="/terms" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Terms</a>
+              <span style={{ color: "rgba(255,255,255,0.18)" }}>·</span>
+              <a href="/privacy" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Privacy</a>
+            </div>
           </motion.div>
 
         </motion.div>
@@ -801,26 +670,16 @@ function Paywall() {
           </p>
         </motion.div>
 
-        {/* Social proof */}
+        {/* Positioning line — replaced fabricated avatars + invented member
+            count ("46,847 others") with an honest statement */}
         <motion.div variants={up} className="flex items-center justify-center gap-3">
-          <div className="flex">
-            {AVATARS.map((l, i) => (
-              <div key={i} style={{
-                width: 32, height: 32, borderRadius: "50%", marginLeft: i > 0 ? -10 : 0,
-                background: AVATAR_COLORS[i],
-                border: "2px solid rgba(3,2,5,0.90)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11, fontWeight: 700, color: "white",
-              }}>{l}</div>
-            ))}
-          </div>
           <p style={{ fontSize: 12, color: TEXT_SUB }}>
-            Marcus, Jaylen and{" "}
-            <span style={{ color: TEXT, fontWeight: 600 }}>46,847 others</span> started
+            Built for people serious about quitting —{" "}
+            <span style={{ color: TEXT, fontWeight: 600 }}>no gimmicks, no shortcuts</span>
           </p>
         </motion.div>
 
-        {/* Live feed ticker */}
+        {/* Feature ticker — rotates real capabilities, not invented user activity */}
         <motion.div variants={up} style={{
           borderRadius: 24,
           background: "linear-gradient(145deg, rgba(12,8,18,0.78) 0%, rgba(7,5,15,0.84) 100%)",
@@ -833,38 +692,41 @@ function Paywall() {
             <motion.p key={feedIdx} style={{ fontSize: 12, color: TEXT_SUB }}
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.35 }}>
-              ✦ {LIVE_FEED[feedIdx]}
+              ✦ {FEATURE_TICKER[feedIdx]}
             </motion.p>
           </AnimatePresence>
         </motion.div>
 
-        {/* Countdown — refined dark gold, sophisticated pulse */}
-        <motion.div variants={up} className="flex justify-center">
-          <div style={{
-            borderRadius: 24,
-            background: "linear-gradient(135deg, rgba(28,20,8,0.88) 0%, rgba(16,11,4,0.92) 100%)",
-            border: "1px solid rgba(196,135,58,0.34)",
-            padding: "8px 20px",
-            display: "inline-flex", alignItems: "center", gap: 10,
-            boxShadow: "0 0 22px rgba(196,135,58,0.10), inset 0 1px 0 rgba(196,135,58,0.14)",
-            backdropFilter: "blur(10px)",
-          }}>
-            <motion.span
-              animate={{ opacity: [1, 0.30, 1] }}
-              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-              style={{
-                display: "inline-block", width: 6, height: 6, borderRadius: "50%",
-                background: "#C9A84C", boxShadow: "0 0 6px rgba(201,168,76,0.70)", flexShrink: 0,
-              }}
-            />
-            <span style={{
-              fontSize: 13, fontWeight: 700, letterSpacing: "0.05em",
-              color: "#C9A84C", fontVariantNumeric: "tabular-nums",
+        {/* Countdown — refined dark gold, sophisticated pulse. Real persisted
+            24h intro window: hides forever once expired, never resets. */}
+        {introMs > 0 && (
+          <motion.div variants={up} className="flex justify-center">
+            <div style={{
+              borderRadius: 24,
+              background: "linear-gradient(135deg, rgba(28,20,8,0.88) 0%, rgba(16,11,4,0.92) 100%)",
+              border: "1px solid rgba(196,135,58,0.34)",
+              padding: "8px 20px",
+              display: "inline-flex", alignItems: "center", gap: 10,
+              boxShadow: "0 0 22px rgba(196,135,58,0.10), inset 0 1px 0 rgba(196,135,58,0.14)",
+              backdropFilter: "blur(10px)",
             }}>
-              Offer expires in {fmt(seconds)}
-            </span>
-          </div>
-        </motion.div>
+              <motion.span
+                animate={{ opacity: [1, 0.30, 1] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                style={{
+                  display: "inline-block", width: 6, height: 6, borderRadius: "50%",
+                  background: "#C9A84C", boxShadow: "0 0 6px rgba(201,168,76,0.70)", flexShrink: 0,
+                }}
+              />
+              <span style={{
+                fontSize: 13, fontWeight: 700, letterSpacing: "0.05em",
+                color: "#C9A84C", fontVariantNumeric: "tabular-nums",
+              }}>
+                Intro window ends in {fmt(introMs)}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Pricing cards — etched gold borders */}
         <motion.div variants={up} className="grid grid-cols-2 gap-3">
@@ -952,15 +814,16 @@ function Paywall() {
           ))}
         </motion.div>
 
-        {/* Testimonials */}
+        {/* Value props — same card scroller that used to hold fabricated
+            testimonials + 5-star ratings; now sells what the app really does */}
         <motion.div variants={up}>
           <p style={{
             fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", textTransform: "uppercase",
             color: TEXT_DIM, marginBottom: 12,
-          }}>Real people, real results</p>
+          }}>What makes PRO different</p>
           <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-            {TESTIMONIALS.map(({ name, age, text }) => (
-              <div key={name} style={{
+            {VALUE_PROPS.map(({ title, text }) => (
+              <div key={title} style={{
                 flexShrink: 0, width: 240, borderRadius: 18, padding: "14px 16px",
                 background: "linear-gradient(145deg, rgba(12,8,18,0.90) 0%, rgba(7,5,15,0.94) 100%)",
                 border: "1px solid rgba(196,135,58,0.16)",
@@ -971,20 +834,15 @@ function Paywall() {
                 <div className="flex items-center gap-2">
                   <div style={{
                     width: 32, height: 32, borderRadius: "50%",
-                    background: AVATAR_COLORS[AVATARS.indexOf(name[0])] ?? AVATAR_COLORS[0],
+                    background: G_MUTED, border: `1px solid ${G}33`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: 700, color: "white",
-                  }}>{name[0]}</div>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{name}, {age}</p>
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} style={{ width: 10, height: 10, fill: G, color: G }} />
-                      ))}
-                    </div>
+                    flexShrink: 0,
+                  }}>
+                    <Check style={{ width: 14, height: 14, color: G, strokeWidth: 3 }} />
                   </div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{title}</p>
                 </div>
-                <p style={{ fontSize: 12, color: TEXT_SUB, lineHeight: 1.45 }}>"{text}"</p>
+                <p style={{ fontSize: 12, color: TEXT_SUB, lineHeight: 1.45 }}>{text}</p>
               </div>
             ))}
           </div>
@@ -1045,8 +903,18 @@ function Paywall() {
             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
           }}>
             <Lock style={{ width: 11, height: 11 }} />
-            7-day free trial · Cancel anytime · 256-bit encryption
+            7-day free trial · Cancel anytime · Private by design
           </p>
+
+          {/* Apple 3.1.2: auto-renew disclosure + terms/privacy on the purchase screen */}
+          <p style={{ textAlign: "center", fontSize: 10, color: TEXT_DIM, marginTop: 6 }}>
+            Subscription auto-renews until cancelled. Manage in App Store settings.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 8, fontSize: 11 }}>
+            <a href="/terms" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Terms of Use</a>
+            <span style={{ color: "rgba(255,255,255,0.18)" }}>·</span>
+            <a href="/privacy" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Privacy Policy</a>
+          </div>
         </motion.div>
 
       </motion.div>

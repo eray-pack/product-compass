@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useMemo } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
 import { Brain, Snowflake, GitBranch, Plus, Lock, ChevronDown, Trophy } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { BottomSheet } from "@/components/BottomSheet";
 import { useAppState } from "@/lib/store";
+import { readRecords, type GameId } from "@/lib/records";
 import { triggerPaywall } from "@/lib/paywall";
 import { useTranslation } from "react-i18next";
 
@@ -372,6 +373,42 @@ const PRO_GAMES: GameEntry[] = [
   { to: "/tools/nebulaflow",    glow: "#A855F7", labelKey: "tools.nebulaflow.name",    icon: <NebulaFlowIcon />,    ambient: "pulse"   },
 ];
 
+// ── "Your Records" board ──────────────────────────────────────────────────────
+// Only the user's own bests appear here — no invented players, ever
+// (App Store 4.3(a): fake social proof got the app rejected).
+// Accents match each game's tile glow elsewhere on this page.
+const RECORD_GAMES: { id: GameId; name: string; metric: string; unit: string; accent: string; monogram: string }[] = [
+  { id: "steadyhand",   name: "Steady Hand",   metric: "Furthest steady reach",     unit: "%",      accent: "#D97706", monogram: "SH" },
+  { id: "clarityclimb", name: "Clarity Climb", metric: "Steps toward the summit",   unit: "steps",  accent: "#10B981", monogram: "CC" },
+  { id: "coldswitch",   name: "Cold Switch",   metric: "Correct switches in a run", unit: "pts",    accent: "#00BCD4", monogram: "CS" },
+  { id: "mindpulse",    name: "Mind Pulse",    metric: "Breath cycles completed",   unit: "cycles", accent: "#38bdf8", monogram: "MP" },
+];
+
+// Gold / silver / bronze treatment for the top-3 of the user's own bests.
+const RANK_META: Record<number, {
+  borderColor: string; glowAnim: string; badgeBg: string;
+  badge: string; labelColor: string; cardBg: string;
+}> = {
+  1: {
+    borderColor: "#C9A84C",
+    glowAnim: "lb-pulse-gold 2.8s ease-in-out infinite",
+    badgeBg: "linear-gradient(135deg, #C9A84C, #E8C87A)",
+    badge: "I", labelColor: "#E8C87A", cardBg: "rgba(201,168,76,0.07)",
+  },
+  2: {
+    borderColor: "#a0b4d0",
+    glowAnim: "lb-pulse-silver 3.2s ease-in-out infinite",
+    badgeBg: "linear-gradient(135deg, #8090a8, #b8cce0)",
+    badge: "II", labelColor: "#b8cce0", cardBg: "rgba(160,180,220,0.05)",
+  },
+  3: {
+    borderColor: "#c87830",
+    glowAnim: "lb-pulse-bronze 3.6s ease-in-out infinite",
+    badgeBg: "linear-gradient(135deg, #a06028, #d89850)",
+    badge: "III", labelColor: "#d89850", cardBg: "rgba(200,120,48,0.05)",
+  },
+};
+
 // ── Arcade panel static texture ───────────────────────────────────────────────
 function ArcadeTextureSVG() {
   // Centre of the concentric pattern — slightly above mid-height so rings
@@ -656,7 +693,9 @@ function Tools() {
   const [planOpen, setPlanOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [lbOpen, setLbOpen] = useState(false);
-  const [lbFilter, setLbFilter] = useState("All");
+  // Re-read personal bests on every sheet toggle so a fresh open always
+  // shows the latest records. Safe in render: the sheet never SSRs (closed).
+  const gameRecords = useMemo(() => readRecords(), [lbOpen]); // eslint-disable-line react-hooks/exhaustive-deps
   const [trigger, setTrigger] = useState("");
   const [action, setAction] = useState("");
   const [plans, setPlans] = useState([
@@ -1449,82 +1488,31 @@ function Tools() {
                 <div style={{ padding: "8px 2px 16px", borderBottom: "1px solid rgba(201,168,76,0.10)", marginBottom: 16 }}>
                   <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,168,76,0.50)", fontFamily: "DM Sans, sans-serif" }}>Sacred Ground</p>
                   <h2 style={{ margin: "4px 0 2px", fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontStyle: "italic", fontWeight: 600, color: "#E8C87A", lineHeight: 1.1 }}>
-                    Hall of Champions
+                    Your Records
                   </h2>
                   <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.32)", fontFamily: "DM Sans, sans-serif" }}>
-                    The strongest survivors this week
+                    Personal bests — every score on this board is yours
                   </p>
                 </div>
 
-                {/* ── Filter pills ── */}
-                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 16, scrollbarWidth: "none" }}>
-                  {["All", "Steady Hand", "Clarity Climb", "Cold Switch", "Mind Pulse"].map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setLbFilter(f)}
-                      style={{
-                        flexShrink: 0, padding: "6px 14px", borderRadius: 20,
-                        fontSize: 11, fontWeight: lbFilter === f ? 700 : 500,
-                        fontFamily: "DM Sans, sans-serif", cursor: "pointer",
-                        border: lbFilter === f ? "1px solid rgba(201,168,76,0.60)" : "1px solid rgba(255,255,255,0.08)",
-                        background: lbFilter === f ? "rgba(201,168,76,0.14)" : "rgba(255,255,255,0.03)",
-                        color: lbFilter === f ? "#E8C87A" : "rgba(255,255,255,0.38)",
-                        transition: "all 0.18s",
-                      }}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-
-                {/* ── Player cards ── */}
-                {([
-                  { rank: 1,  username: "Marcus", score: 2840, game: "Steady Hand",   companion: "🌲", days: 61 },
-                  { rank: 2,  username: "Jaylen", score: 2210, game: "Clarity Climb", companion: "🐺", days: 34 },
-                  { rank: 3,  username: "Sven",   score: 1990, game: "Cold Switch",   companion: "🌲", days: 29 },
-                  { rank: 4,  username: "Alex",   score: 1750, game: "Mind Pulse",    companion: "🐺", days: 22 },
-                  { rank: 5,  username: "Ryan",   score: 1420, game: "Steady Hand",   companion: "🌲", days: 19 },
-                  { rank: 6,  username: "Tobias", score: 1180, game: "Clarity Climb", companion: "🐺", days: 16 },
-                  { rank: 7,  username: "Dante",  score:  940, game: "Mind Pulse",    companion: "🌲", days: 14 },
-                  { rank: 8,  username: "Elias",  score:  780, game: "Cold Switch",   companion: "🐺", days: 11 },
-                  { rank: 9,  username: "Noah",   score:  610, game: "Steady Hand",   companion: "🌲", days: 8  },
-                  { rank: 10, username: "Luka",   score:  490, game: "Clarity Climb", companion: "🐺", days: 6  },
-                ] as { rank: number; username: string; score: number; game: string; companion: string; days: number }[])
-                  .filter(r => lbFilter === "All" || r.game === lbFilter)
+                {/* ── Record cards — one row per game, the user's real bests only ── */}
+                {RECORD_GAMES
+                  .map((g) => ({ ...g, score: gameRecords[g.id] }))
+                  // Played games rank above unplayed; sort is stable so ties
+                  // and unplayed rows keep the arcade order.
+                  .sort((a, b) => (b.score ?? -1) - (a.score ?? -1))
                   .map((row, i) => {
-                    const RANK_META: Record<number, {
-                      borderColor: string; glowAnim: string; badgeBg: string;
-                      badge: string; labelColor: string; cardBg: string;
-                    }> = {
-                      1: {
-                        borderColor: "#C9A84C",
-                        glowAnim: "lb-pulse-gold 2.8s ease-in-out infinite",
-                        badgeBg: "linear-gradient(135deg, #C9A84C, #E8C87A)",
-                        badge: "I", labelColor: "#E8C87A", cardBg: "rgba(201,168,76,0.07)",
-                      },
-                      2: {
-                        borderColor: "#a0b4d0",
-                        glowAnim: "lb-pulse-silver 3.2s ease-in-out infinite",
-                        badgeBg: "linear-gradient(135deg, #8090a8, #b8cce0)",
-                        badge: "II", labelColor: "#b8cce0", cardBg: "rgba(160,180,220,0.05)",
-                      },
-                      3: {
-                        borderColor: "#c87830",
-                        glowAnim: "lb-pulse-bronze 3.6s ease-in-out infinite",
-                        badgeBg: "linear-gradient(135deg, #a06028, #d89850)",
-                        badge: "III", labelColor: "#d89850", cardBg: "rgba(200,120,48,0.05)",
-                      },
-                    };
-                    const meta = RANK_META[row.rank];
+                    const played = typeof row.score === "number";
+                    const meta = played ? RANK_META[i + 1] : undefined;
                     const isTop3 = !!meta;
-                    // "You" = rank 7 for demo (could be wired to real state)
-                    const isMe = row.rank === 7;
 
                     return (
                       <motion.div
-                        key={row.username}
+                        key={row.id}
                         initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        // Unplayed rows settle dimmed — the dim must be the
+                        // animation target; a style opacity would be overridden.
+                        animate={{ opacity: played ? 1 : 0.55, y: 0 }}
                         transition={{ delay: i * 0.055, type: "spring", stiffness: 340, damping: 28 }}
                         style={{
                           position: "relative",
@@ -1532,13 +1520,9 @@ function Tools() {
                           borderRadius: 14,
                           padding: "12px 14px",
                           display: "flex", alignItems: "center", gap: 12,
-                          background: isMe
-                            ? "rgba(52,211,153,0.07)"
-                            : (meta?.cardBg ?? "rgba(255,255,255,0.025)"),
-                          border: isMe
-                            ? "1px solid rgba(52,211,153,0.45)"
-                            : `1px solid ${isTop3 ? meta.borderColor + "45" : "rgba(255,255,255,0.07)"}`,
-                          animation: isTop3 ? `${meta.glowAnim}` : isMe ? "lb-pulse-silver 2.8s ease-in-out infinite" : "none",
+                          background: meta?.cardBg ?? "rgba(255,255,255,0.025)",
+                          border: `1px solid ${isTop3 ? meta.borderColor + "45" : "rgba(255,255,255,0.07)"}`,
+                          animation: isTop3 ? meta.glowAnim : "none",
                           fontFamily: "DM Sans, sans-serif",
                         }}
                       >
@@ -1551,74 +1535,71 @@ function Tools() {
                           }}/>
                         )}
 
-                        {/* Rank badge */}
+                        {/* Rank badge — the user's own top-3 earn the laurels */}
                         <div style={{
                           flexShrink: 0,
                           width: 36, height: 36, borderRadius: 10,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          background: isTop3 ? meta.badgeBg : isMe ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.05)",
+                          background: isTop3 ? meta.badgeBg : "rgba(255,255,255,0.05)",
                           boxShadow: isTop3 ? `0 2px 8px ${meta.borderColor}50` : "none",
                         }}>
                           {isTop3
                             ? <span style={{ fontSize: 11, fontWeight: 900, color: "#08060a", letterSpacing: "0.04em", fontFamily: "DM Sans, sans-serif" }}>{meta.badge}</span>
-                            : <span style={{ fontSize: 12, fontWeight: 700, color: isMe ? "#3fd399" : "rgba(255,255,255,0.28)", fontFamily: "DM Sans, sans-serif" }}>{row.rank}</span>
+                            : <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.28)", fontFamily: "DM Sans, sans-serif" }}>{played ? i + 1 : "·"}</span>
                           }
                         </div>
 
-                        {/* Avatar circle */}
+                        {/* Game monogram — accent matches the arcade tile glow */}
                         <div style={{
                           flexShrink: 0,
                           width: 38, height: 38, borderRadius: "50%",
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          background: isTop3 ? `${meta.borderColor}14` : isMe ? "rgba(52,211,153,0.10)" : "rgba(255,255,255,0.04)",
-                          border: `1px solid ${isTop3 ? meta.borderColor + "35" : isMe ? "rgba(52,211,153,0.30)" : "rgba(255,255,255,0.08)"}`,
-                          fontSize: 18,
+                          background: `${row.accent}14`,
+                          border: `1px solid ${row.accent}${played ? "55" : "30"}`,
+                          fontSize: 11, fontWeight: 800, letterSpacing: "0.05em",
+                          color: played ? row.accent : `${row.accent}88`,
+                          fontFamily: "DM Sans, sans-serif",
                         }}>
-                          {row.companion}
+                          {row.monogram}
                         </div>
 
-                        {/* Name + game + days */}
+                        {/* Game name + metric */}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: isTop3 ? meta.labelColor : isMe ? "#3fd399" : "rgba(255,255,255,0.82)", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {row.username}
-                            </p>
-                            {isMe && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", color: "#3fd399", background: "rgba(52,211,153,0.14)", padding: "1px 5px", borderRadius: 4, textTransform: "uppercase" }}>YOU</span>}
-                          </div>
+                          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: isTop3 ? meta.labelColor : "rgba(255,255,255,0.82)", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {row.name}
+                          </p>
                           <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.28)", lineHeight: 1.3 }}>
-                            {lbFilter === "All" ? row.game : `Day ${row.days}`} · Day {row.days}
+                            {played ? row.metric : "Not played yet"}
                           </p>
                         </div>
 
-                        {/* Score */}
+                        {/* Best score */}
                         <div style={{ textAlign: "right", flexShrink: 0 }}>
                           <div style={{
                             fontSize: 18, fontWeight: 800, lineHeight: 1,
-                            color: isTop3 ? meta.labelColor : isMe ? "#3fd399" : "rgba(255,255,255,0.70)",
+                            color: isTop3 ? meta.labelColor : played ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.30)",
                             fontFamily: "DM Sans, sans-serif",
                             letterSpacing: "-0.02em",
                           }}>
-                            {row.score.toLocaleString()}
+                            {played ? row.score!.toLocaleString() : "—"}
                           </div>
-                          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 1 }}>
-                            pts
-                          </div>
+                          {played && (
+                            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 1 }}>
+                              {row.unit}
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     );
                   })
                 }
 
-                {/* ── Your rank summary ── */}
-                <div style={{ marginTop: 20, padding: "14px 16px", borderRadius: 14, background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.22)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 10, color: "rgba(52,211,153,0.65)", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "DM Sans, sans-serif" }}>Your rank</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 800, color: "#3fd399", fontFamily: "DM Sans, sans-serif" }}>#7 · Dante</p>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.28)", fontFamily: "DM Sans, sans-serif" }}>940 pts · Day 14</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 10, color: "rgba(52,211,153,0.55)", fontFamily: "DM Sans, sans-serif" }}>260 pts to #6</p>
-                  </div>
+                {/* ── Global rankings teaser — honest, no invented players ── */}
+                <div style={{ marginTop: 20, padding: "14px 16px", borderRadius: 14, background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.22)" }}>
+                  <p style={{ margin: 0, fontSize: 10, color: "rgba(201,168,76,0.65)", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "DM Sans, sans-serif" }}>On the horizon</p>
+                  <p style={{ margin: "4px 0 0", fontSize: 12, lineHeight: 1.5, color: "rgba(255,255,255,0.55)", fontFamily: "DM Sans, sans-serif" }}>
+                    Global rankings are coming as the community grows — your records are ready to compete.
+                  </p>
                 </div>
 
         </div>

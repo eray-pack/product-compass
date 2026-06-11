@@ -902,7 +902,7 @@ function UrgeSurfing() {
           <UrgeChart elapsed={elapsed} />
         </div>
 
-        {/* ══ Social proof strip ════════════════════════════════════ */}
+        {/* ══ Completion line — fabricated testimonials violate App Store 4.3(a) ══ */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -916,34 +916,17 @@ function UrgeSurfing() {
             padding: "13px 16px",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
-            display: "flex", alignItems: "center", gap: 13,
+            display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          {/* Avatar cluster */}
-          <div style={{ display: "flex", flexShrink: 0 }}>
-            {([
-              ["K", "oklch(0.50 0.15 290)"],
-              ["J", "oklch(0.52 0.16 145)"],
-              ["M", "oklch(0.55 0.18 260)"],
-            ] as [string, string][]).map(([l, bg], i) => (
-              <div key={i} style={{
-                width: 26, height: 26, borderRadius: "50%",
-                background: bg,
-                border: "1.5px solid rgba(3,2,5,0.88)",
-                marginLeft: i > 0 ? -8 : 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 700, color: "white",
-              }}>{l}</div>
-            ))}
-          </div>
-          {/* Quote */}
           <p style={{
             fontSize: 12, color: "rgba(255,255,255,0.58)",
             lineHeight: 1.4, fontFamily: "DM Sans, sans-serif",
+            textAlign: "center",
           }}>
-            <span style={{ color: GOLD, fontWeight: 700 }}>✦ Kenji</span>
-            {" — "}<em>"This app hits different"</em>
+            <span style={{ color: GOLD, fontWeight: 700 }}>✦</span>
+            {" "}You rode it out. That's the rep that counts.
           </p>
         </motion.div>
 

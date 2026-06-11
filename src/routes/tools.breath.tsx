@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { submitRecord } from "@/lib/records";
 
 export const Route = createFileRoute("/tools/breath")({
   component: BreathBall,
@@ -103,6 +104,12 @@ function BreathBall() {
   }
 
   useEffect(() => () => clearTimer(), []);
+
+  // Persist completed breath cycles (even partial sessions count) — feeds
+  // the "Your Records" board on the Tools page.
+  useEffect(() => {
+    if (cycle > 0) submitRecord("mindpulse", cycle);
+  }, [cycle]);
 
   const isRunning  = phase !== "idle" && phase !== "done";
   const ballColor  = PHASE_COLOR[phase];

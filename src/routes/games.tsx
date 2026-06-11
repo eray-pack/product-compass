@@ -22,14 +22,6 @@ const TOP3_CONFIG: Record<number, { neon: string; glyph: string }> = {
 const FILTERS = ["All", "Steady Hand", "Clarity Climb", "Cold Switch", "Mind Pulse"] as const;
 type Filter = typeof FILTERS[number];
 
-const DUMMY: ScoreRow[] = [
-  { rank: 1, username: "Marcus", score: 2840, game: "Steady Hand"   },
-  { rank: 2, username: "Jaylen", score: 2210, game: "Clarity Climb" },
-  { rank: 3, username: "Sven",   score: 1990, game: "Cold Switch"   },
-  { rank: 4, username: "Alex",   score: 1750, game: "Mind Pulse"    },
-  { rank: 5, username: "Ryan",   score: 1420, game: "Steady Hand"   },
-];
-
 interface ScoreRow {
   rank: number;
   username: string;
@@ -109,8 +101,9 @@ const CYBER_CSS = `
 // ── Component ─────────────────────────────────────────────────────────────────
 function GamesPage() {
   const [selected, setSelected] = useState<Filter>("All");
-  const [rows, setRows]         = useState<ScoreRow[]>(DUMMY);
-  const [loading, setLoading]   = useState(false);
+  const [rows, setRows]         = useState<ScoreRow[]>([]);
+  // Start in loading so the empty state never flashes before the first fetch resolves
+  const [loading, setLoading]   = useState(true);
   const fetchId = useRef(0);
 
   useEffect(() => {
@@ -131,10 +124,8 @@ function GamesPage() {
         if (id !== fetchId.current) return;
 
         if (error || !data || data.length === 0) {
-          const filtered = selected === "All"
-            ? DUMMY
-            : DUMMY.filter(r => r.game === selected).map((r, i) => ({ ...r, rank: i + 1 }));
-          setRows(filtered.length ? filtered : DUMMY);
+          // Honest empty state — fabricated players violate App Store 4.3(a)
+          setRows([]);
         } else {
           setRows(data.map((row: Record<string, unknown>, i: number) => ({
             rank:     i + 1,
@@ -145,10 +136,7 @@ function GamesPage() {
         }
       } catch {
         if (id !== fetchId.current) return;
-        const filtered = selected === "All"
-          ? DUMMY
-          : DUMMY.filter(r => r.game === selected).map((r, i) => ({ ...r, rank: i + 1 }));
-        setRows(filtered.length ? filtered : DUMMY);
+        setRows([]);
       } finally {
         if (id === fetchId.current) setLoading(false);
       }
@@ -336,13 +324,47 @@ function GamesPage() {
               </div>
             ))
           ) : rows.length === 0 ? (
-            <div style={{ padding: "48px 20px", textAlign: "center" }}>
-              <p style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 12, letterSpacing: "0.12em",
-                color: `${CYAN}35`,
+            <div style={{ padding: "56px 24px", textAlign: "center" }}>
+              <div style={{
+                width: 52, height: 52, margin: "0 auto 18px",
+                borderRadius: 8,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                border: "1px solid rgba(0,229,255,0.22)",
+                background: "rgba(0,229,255,0.05)",
+                boxShadow: `0 0 16px ${CYAN}25, inset 0 0 12px ${CYAN}10`,
               }}>
-                NO_DATA_FOUND
+                <svg
+                  width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke={CYAN} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                  aria-hidden
+                  style={{ filter: `drop-shadow(0 0 6px ${CYAN}90)` }}
+                >
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                  <path d="M4 22h16" />
+                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg>
+              </div>
+              <p style={{
+                margin: 0,
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 13, fontWeight: 700,
+                letterSpacing: "0.14em", textTransform: "uppercase",
+                color: `${CYAN}cc`,
+                textShadow: `0 0 12px ${CYAN}40`,
+              }}>
+                No runs on the board yet
+              </p>
+              <p style={{
+                margin: "8px 0 0",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10, letterSpacing: "0.09em",
+                lineHeight: 1.6,
+                color: `${CYAN}45`,
+              }}>
+                Play any focus game — your score lands here.
               </p>
             </div>
           ) : (

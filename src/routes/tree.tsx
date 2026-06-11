@@ -1,8 +1,8 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { pageContainer, popUp, usePageAnimation } from "@/lib/pageAnimation";
-import { Sparkles, Coins, Lock, CreditCard, Share2, Users, Crown, Globe } from "lucide-react";
+import { Sparkles, Coins, Lock, CreditCard, Share2, Crown, Globe } from "lucide-react";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
-import { useAppState, treeStage, dayCount } from "@/lib/store";
+import { useAppState, treeStage, dayCount, activeAddiction } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,14 +27,7 @@ const UPGRADES = [
 ];
 
 const RANK_BY_STAGE = ["Beginning", "Awakening", "Building", "Established", "Rising", "Legendary"];
-const TOP_PCT_BY_STAGE = [82, 61, 40, 25, 13, 3];
 const STAGE_NAMES = ["Day 1", "Week 1", "2 Weeks", "Month 1", "2 Months", "90 Days"];
-
-const HALL_OF_LEGENDS = [
-  { name: "Dimitri K.", day: 412 },
-  { name: "Samuel R.", day: 287 },
-  { name: "Kenji T.", day: 156 },
-];
 
 // ── Wolf companion constants ───────────────────────────────────────────────────
 const WOLF_UPGRADES = [
@@ -2154,6 +2147,44 @@ function TreeUpgradeOverlays({
 }
 
 // ── Wolf companion page ───────────────────────────────────────────────────────
+// Real personal milestones — replaces the fabricated "Hall of Legends" leaderboard
+// that read as fake social proof (App Store 4.3(a) rejection).
+function PersonalRecordCard({
+  label,
+  state,
+  day,
+}: {
+  label: string;
+  state: ReturnType<typeof useAppState>[0];
+  day: number;
+}) {
+  // Mirrors the bestStreak math in index.tsx so the two pages never disagree
+  const sorted = [...state.relapses].sort((a, b) => a.ts - b.ts);
+  const points = [activeAddiction(state)?.startDate ?? Date.now(), ...sorted.map((r) => r.ts), Date.now()];
+  const gaps = points.slice(1).map((t, i) => (t - points[i]) / 86400000);
+  const bestStreak = Math.max(day, ...gaps.map((g) => Math.floor(g)));
+  const rows = [
+    { label: "Longest run", value: `${bestStreak} days`, opacity: 1 },
+    { label: "Current run", value: `Day ${day}`, opacity: 0.65 },
+    // "returns" frames relapses as comebacks — shame-free, recovery-positive copy
+    { label: "Comebacks", value: `${state.relapses.length} returns`, opacity: 0.40 },
+  ];
+  return (
+    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "14px 18px" }}>
+      <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: "rgba(196,135,58,0.55)" }}>{label}</p>
+      <div className="space-y-2.5">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-center gap-2.5">
+            <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: r.opacity }} />
+            <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{r.label}</span>
+            <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.70)" }}>{r.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function WolfPage({
   state,
   update,
@@ -2235,8 +2266,9 @@ function WolfPage({
         <h1 className="mt-0.5 text-2xl font-bold">Your Wolf</h1>
       </motion.header>
 
-      {/* ── Dev panel (triple-tap "Your Companion" to toggle) ────────────── */}
-      {wolfDevMode && (
+      {/* ── Dev panel (triple-tap "Your Companion" to toggle) — DEV builds only,
+           must never be reachable in production/App Review */}
+      {import.meta.env.DEV && wolfDevMode && (
         <div style={{
           margin: "8px 16px 0",
           padding: "14px 16px",
@@ -2459,20 +2491,9 @@ function WolfPage({
         );
       })()}
 
-      {/* Hall of Legends */}
+      {/* Pack Record */}
       <motion.section variants={popUp} className="px-6 mt-3">
-        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderTop: "1px solid rgba(201,168,76,0.12)", borderRadius: 20, padding: "14px 18px" }}>
-          <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
-          <div className="space-y-2.5">
-            {HALL_OF_LEGENDS.map((u, i) => (
-              <div key={u.name} className="flex items-center gap-2.5">
-                <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.65 : 0.40 }} />
-                <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{u.name}</span>
-                <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.70)" }}>Day {u.day}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <PersonalRecordCard label="Pack Record" state={state} day={day} />
       </motion.section>
 
       {/* Share card */}
@@ -2646,8 +2667,9 @@ function LifeTreePage({
         <h1 className="mt-0.5 text-2xl font-bold">Your Life Tree</h1>
       </motion.header>
 
-      {/* ── Dev panel (triple-tap "Sacred Ground" to toggle) ─────────────── */}
-      {devMode && (
+      {/* ── Dev panel (triple-tap "Sacred Ground" to toggle) — DEV builds only,
+           must never be reachable in production/App Review */}
+      {import.meta.env.DEV && devMode && (
         <div style={{
           margin: "8px 16px 0",
           padding: "14px 16px",
@@ -2880,7 +2902,7 @@ function LifeTreePage({
               <div className="flex items-center justify-between mt-1.5">
                 <p className="text-xs text-muted-foreground">
                   <Globe className="inline h-3.5 w-3.5 text-success mr-1" />
-                  Top <span className="text-success font-semibold">{TOP_PCT_BY_STAGE[stage.stage]}%</span> of all users · Day {day}
+                  <span className="text-success font-semibold">Stage {stage.stage + 1} of 6</span> · Day {day}
                 </p>
                 <p className="text-xs" style={{ color: health.color, opacity: 0.85 }}>
                   {health.emoji} {health.label} · {daysThisWeek}/7
@@ -2891,25 +2913,9 @@ function LifeTreePage({
         );
       })()}
 
-      {/* Hall of Legends */}
+      {/* Personal Record */}
       <motion.section variants={popUp} className="px-6 mt-3">
-        <div style={{
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderTop: "1px solid rgba(201,168,76,0.12)",
-          borderRadius: 20, padding: "14px 18px",
-        }}>
-          <p className="text-[9px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: "rgba(196,135,58,0.55)" }}>Hall of Legends</p>
-          <div className="space-y-2.5">
-            {HALL_OF_LEGENDS.map((u, i) => (
-              <div key={u.name} className="flex items-center gap-2.5">
-                <Crown className="h-3 w-3 shrink-0" style={{ color: "#C4873A", opacity: i === 0 ? 1 : i === 1 ? 0.65 : 0.40 }} />
-                <span className="flex-1 text-[12px] font-medium truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{u.name}</span>
-                <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,135,58,0.70)" }}>Day {u.day}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <PersonalRecordCard label="Personal Record" state={state} day={day} />
       </motion.section>
 
       {/* Social share */}
@@ -3562,15 +3568,6 @@ function CompanionSwitcher({
   );
 }
 
-// ── Shared community feed data ────────────────────────────────────────────────
-const COMMUNITY_FEED = [
-  { name: "Marcus", stage: "Strong tree", day: 61, xp: 2340 },
-  { name: "Jaylen", stage: "Young tree",  day: 34, xp: 980  },
-  { name: "Timo",   stage: "Sapling",     day: 19, xp: 420  },
-  { name: "Arjun",  stage: "Ancient tree",day: 112,xp: 4100 },
-  { name: "Noah",   stage: "Sprout",      day: 8,  xp: 180  },
-];
-
 // ── Wolf share card ───────────────────────────────────────────────────────────
 function ShareWolfCard({
   wolfStage,
@@ -3582,7 +3579,6 @@ function ShareWolfCard({
   xp: number;
 }) {
   const [shared, setShared] = useState(false);
-  const [showCommunity, setShowCommunity] = useState(false);
   const shareText = `Day ${day} of my recovery. My Wolf is ${wolfStage.name} (${xp} XP). The hunt never stops. 🐺 #Stopamine`;
 
   const handleShare = async () => {
@@ -3625,31 +3621,6 @@ function ShareWolfCard({
       >
         {shared ? "Copied to clipboard" : "Share your wolf"}
       </button>
-      <button
-        onClick={() => setShowCommunity(!showCommunity)}
-        className="w-full h-10 rounded-xl text-xs font-semibold bg-secondary/60 text-foreground border border-border inline-flex items-center justify-center gap-1.5"
-      >
-        <Users className="h-3.5 w-3.5" /> {showCommunity ? "Hide community" : "See the pack"}
-      </button>
-      {showCommunity && (
-        <div className="space-y-2 pt-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Others holding the line</p>
-          {COMMUNITY_FEED.map((u) => (
-            <div key={u.name} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-              <div className="h-8 w-8 rounded-full bg-primary/10 grid place-items-center text-xs font-bold text-primary">
-                {u.name[0]}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{u.name}</p>
-                <p className="text-[10px] text-muted-foreground">{u.stage} · Day {u.day}</p>
-              </div>
-              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-full">
-                {u.xp} XP
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -3658,7 +3629,6 @@ function ShareWolfCard({
 
 function ShareTreeCard({ stage, day, xp }: { stage: { name: string; stage: number }; day: number; xp: number }) {
   const [shared, setShared] = useState(false);
-  const [showCommunity, setShowCommunity] = useState(false);
   const shareText = `Day ${day} of my recovery. My Life Tree is a ${stage.name} (${xp} XP). Building something real. 🌱 #Stopamine`;
 
   const handleShare = async () => {
@@ -3701,34 +3671,6 @@ function ShareTreeCard({ stage, day, xp }: { stage: { name: string; stage: numbe
       >
         {shared ? "Copied to clipboard" : "Share your tree"}
       </button>
-      <button
-        onClick={() => setShowCommunity(!showCommunity)}
-        className="w-full h-10 rounded-xl text-xs font-semibold bg-secondary/60 text-foreground border border-border inline-flex items-center justify-center gap-1.5"
-      >
-        <Users className="h-3.5 w-3.5" /> {showCommunity ? "Hide community" : "See community"}
-      </button>
-      {showCommunity && (
-        <div className="space-y-2 pt-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Others grinding right now</p>
-          {COMMUNITY_FEED.map((u) => (
-            <div key={u.name} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-              <div className="h-8 w-8 rounded-full bg-primary/10 grid place-items-center text-xs font-bold text-primary">
-                {u.name[0]}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{u.name}</p>
-                <p className="text-[10px] text-muted-foreground">{u.stage} · Day {u.day}</p>
-              </div>
-              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-full">
-                {u.xp} XP
-              </span>
-            </div>
-          ))}
-          <p className="text-[10px] text-center text-muted-foreground pt-1">
-            Full community coming soon · r/Stopamine
-          </p>
-        </div>
-      )}
     </div>
   );
 }

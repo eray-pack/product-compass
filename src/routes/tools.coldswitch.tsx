@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence, useAnimate } from "framer-motion";
 import { loadState } from "@/lib/store";
+import { submitRecord } from "@/lib/records";
 
 export const Route = createFileRoute("/tools/coldswitch")({
   beforeLoad: () => {
@@ -145,6 +146,12 @@ function ColdSwitch() {
   }
 
   useEffect(() => () => clearAll(), [clearAll]);
+
+  // Persist the final score once the round ends — feeds the "Your Records"
+  // board on the Tools page. Score is settled by the time phase flips.
+  useEffect(() => {
+    if (phase === "done") submitRecord("coldswitch", score);
+  }, [phase, score]);
 
   const rating =
     score >= 30 ? "Lightning reflexes."   :

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { loadState } from "@/lib/store";
+import { submitRecord } from "@/lib/records";
 
 export const Route = createFileRoute("/tools/steadyhand")({
   beforeLoad: () => {
@@ -110,6 +111,13 @@ function SteadyHand() {
   }
 
   useEffect(() => () => clearTimer(), []);
+
+  // Persist the run's furthest reach (as %) once the round is over — feeds
+  // the "Your Records" board on the Tools page.
+  useEffect(() => {
+    if (phase !== "done") return;
+    submitRecord("steadyhand", Math.round(((maxX.current - DOT_R - 4) / (TRACK_W - DOT_R * 2 - 8)) * 100));
+  }, [phase]);
 
   const pct = Math.round(((maxX.current - DOT_R - 4) / (TRACK_W - DOT_R * 2 - 8)) * 100);
   const bestPct = Math.round(((best - DOT_R - 4) / (TRACK_W - DOT_R * 2 - 8)) * 100);
