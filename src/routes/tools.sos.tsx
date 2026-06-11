@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageSwipeDismiss } from "@/lib/sheetGesture";
+import { maybeRequestAppReview } from "@/lib/appReview";
+import { loadState, activeAddiction, dayCount } from "@/lib/store";
 
 export const Route = createFileRoute("/tools/sos")({
   component: SOS,
@@ -302,6 +304,17 @@ function SOS() {
   const [phaseLeft, setPhaseLeft] = useState(PHASES[0].seconds);
   const phaseIdxRef = useRef(0);
   const done = elapsed >= TOTAL_SECONDS;
+
+  // Surviving a full urge wave is the app's peak moment — the right time to
+  // ask for a REAL App Store review (OS-drawn sheet, user's own words).
+  useEffect(() => {
+    if (!done) return;
+    const st = loadState();
+    const active = activeAddiction(st);
+    const day = active?.startDate ? dayCount(active.startDate) : 1;
+    const strikes = active?.startDate ? st.relapses.filter((r) => r.ts >= active.startDate).length : 0;
+    maybeRequestAppReview({ day, strikes });
+  }, [done]);
 
   useEffect(() => {
     const t = setInterval(() => {

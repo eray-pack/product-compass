@@ -21,6 +21,7 @@ export default defineConfig({
       exclude: [
         "@revenuecat/purchases-capacitor",
         "@capacitor-community/apple-sign-in",
+        "@capacitor-community/in-app-review",
         "@capacitor/push-notifications",
       ],
     },
