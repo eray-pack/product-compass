@@ -25,6 +25,7 @@ export default defineConfig({
     optimizeDeps: {
       exclude: [
         "@revenuecat/purchases-capacitor",
+        "@capacitor-community/apple-sign-in",
         "@capacitor/push-notifications",
         "@capacitor/app",
       ],

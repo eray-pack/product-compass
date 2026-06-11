@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { signInWithApple } from "@/lib/appleAuth";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -46,6 +47,15 @@ function AuthPage() {
   const handleOAuth = async (provider: "apple" | "google" | "azure") => {
     setOauthLoading(provider);
     setError(null);
+    if (provider === "apple") {
+      // Native iOS: OS-level AuthenticationServices sheet + signInWithIdToken
+      // (no browser redirect — the redirect chain is what failed App Review).
+      // Web: falls back to the normal Supabase OAuth redirect inside appleAuth.
+      const { error } = await signInWithApple();
+      if (error) setError(error.message);
+      setOauthLoading(null); // native resolves in-place; onAuthStateChange navigates
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `https://stopamineapp.com/auth` },

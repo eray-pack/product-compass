@@ -4,6 +4,8 @@ import { X, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppState } from "@/lib/store";
 import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
+import { Capacitor } from "@capacitor/core";
+import { purchaseAnnual, purchaseMonthly } from "@/lib/purchases";
 
 // ── Tokens ─────────────────────────────────────────────────────────────────────
 const GOLD          = "#C9A84C";
@@ -418,7 +420,19 @@ export function PaywallModal() {
 
   if (!open) return null;
 
-  const claim = () => {
+  // On native, PRO must come from a REAL App Store purchase through RevenueCat —
+  // granting isPremium directly would be an instant App Review rejection (and a
+  // free-PRO hole). Web keeps the direct unlock until web billing exists.
+  const claim = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const ok = plan === "annual" ? await purchaseAnnual() : await purchaseMonthly();
+        if (ok) { update({ isPremium: true }); closePaywall(); }
+      } catch {
+        // Purchase failed/unavailable — keep the paywall open, no silent unlock
+      }
+      return;
+    }
     update({ isPremium: true });
     closePaywall();
   };
