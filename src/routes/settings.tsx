@@ -20,7 +20,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { usePageSwipeDismiss } from "@/lib/sheetGesture";
+import { usePageSwipeDismiss, usePageBounce } from "@/lib/sheetGesture";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { BADGES, currentBadge, badgeSplit, type Badge } from "@/lib/badges";
 import { triggerPaywall } from "@/lib/paywall";
@@ -1403,12 +1403,17 @@ function Settings() {
   // Slides in from the right; swipe right from anywhere to go back (iOS-style).
   const dismissX = usePageSwipeDismiss(goBack, { axis: "x", entrance: true });
 
+  // Elastic overscroll on the content, same as the main tabs
+  const bounceRef = useRef<HTMLDivElement>(null);
+  usePageBounce(bounceRef);
+
   return (
     <motion.div
       className="app-page min-h-screen pb-16 mx-auto max-w-md"
       style={{ x: dismissX }}
     >
       <PremiumBackground />
+      <div ref={bounceRef} style={{ willChange: "transform" }}>
       {/* Sticky header */}
       <header
         className="sticky z-20 flex items-center gap-3 px-4 h-14 border-b border-border/50 backdrop-blur-xl"
@@ -1437,6 +1442,7 @@ function Settings() {
         <PrivacySection state={state} />
         <LanguageSection />
         <AboutSection />
+      </div>
       </div>
     </motion.div>
   );

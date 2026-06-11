@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Lock } from "lucide-react";
 import { sendCoachMessage, type ChatMessage } from "@/lib/coach";
+import { motion } from "framer-motion";
+import { usePageSwipeDismiss } from "@/lib/sheetGesture";
 import { useAppState, activeAddiction, dayCount } from "@/lib/store";
 import { triggerPaywall } from "@/lib/paywall";
 
@@ -55,6 +57,12 @@ const QUICK_SUGGESTIONS = [
 
 function Coach() {
   const [state] = useAppState();
+  const router = useRouter();
+  // Swipe right anywhere to leave the chat — Telegram-style, finger-tracked
+  const dismissX = usePageSwipeDismiss(
+    () => { if (window.history.length > 1) router.history.back(); else window.location.href = "/tools"; },
+    { axis: "x" },
+  );
   const active = activeAddiction(state);
   const day = active?.startDate ? dayCount(active.startDate) : 1;
   const strikes = active?.startDate ? state.relapses.filter((r) => r.ts >= active.startDate).length : 0;
@@ -121,9 +129,10 @@ function Coach() {
   }
 
   return (
-    <div
+    <motion.div
       className="flex flex-col"
       style={{
+        x: dismissX,
         position: "fixed", inset: 0, zIndex: 40,
         maxWidth: 448, margin: "0 auto",
         overflow: "hidden",
@@ -372,7 +381,7 @@ function Coach() {
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

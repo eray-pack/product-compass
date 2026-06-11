@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { PageShell } from "@/components/BottomNav";
+import { usePageSwipeDismiss } from "@/lib/sheetGesture";
 
 export const Route = createFileRoute("/games")({
   component: GamesPage,
@@ -100,6 +101,11 @@ const CYBER_CSS = `
 
 // ── Component ─────────────────────────────────────────────────────────────────
 function GamesPage() {
+  // Swipe right anywhere to slide back to Tools (finger-tracked)
+  const dismissX = usePageSwipeDismiss(
+    () => { if (window.history.length > 1) window.history.back(); else window.location.href = "/tools"; },
+    { axis: "x" },
+  );
   const [selected, setSelected] = useState<Filter>("All");
   const [rows, setRows]         = useState<ScoreRow[]>([]);
   // Start in loading so the empty state never flashes before the first fetch resolves
@@ -148,7 +154,7 @@ function GamesPage() {
       {/* Injected keyframes + Google Font */}
       <style dangerouslySetInnerHTML={{ __html: CYBER_CSS }} />
 
-      <div style={{ minHeight: "100dvh", background: BASE_BG, paddingTop: 60, position: "relative", overflow: "hidden" }}>
+      <motion.div style={{ x: dismissX, minHeight: "100dvh", background: BASE_BG, paddingTop: 60, position: "relative", overflow: "hidden" }}>
 
         {/* ── Animated grid ────────────────────────────────────────────── */}
         <div
@@ -483,7 +489,7 @@ function GamesPage() {
           {/* Bottom glow rule */}
           <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${CYAN}28, transparent)` }} />
         </div>
-      </div>
+      </motion.div>
     </PageShell>
   );
 }

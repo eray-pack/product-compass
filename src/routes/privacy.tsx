@@ -1,4 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { motion } from "framer-motion";
+import { usePageSwipeDismiss } from "@/lib/sheetGesture";
 
 export const Route = createFileRoute("/privacy")({
   component: PrivacyPolicy,
@@ -29,8 +31,15 @@ function Section({ number, title, children }: { number: number; title: string; c
 function PrivacyPolicy() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const router = useRouter();
+  // Swipe right anywhere to slide back (finger-tracked)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const dismissX = usePageSwipeDismiss(
+    () => { if (window.history.length > 1) router.history.back(); else window.location.href = "/"; },
+    { axis: "x" },
+  );
   return (
-    <div style={{
+    <motion.div style={{
+      x: dismissX,
       minHeight: "100vh",
       background: "#0D0A08",
       padding: "0 0 80px",
@@ -161,6 +170,6 @@ function PrivacyPolicy() {
           </a>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell, SectionTitle } from "@/components/BottomNav";
 import { PremiumBackground } from "@/components/PremiumBackground";
-import { dragDismissProps } from "@/lib/sheetGesture";
+import { dragDismissProps, usePageSwipeDismiss } from "@/lib/sheetGesture";
 import { useAppState, treeStage, dayCount, flagshipAddiction } from "@/lib/store";
 import { currentBadge, BADGES } from "@/lib/badges";
 import { supabase } from "@/lib/supabase";
@@ -1481,6 +1481,8 @@ function rowToMessage(r: MessageRow): Message {
 
 function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   const [state] = useAppState();
+  // Swipe right anywhere to slide back out of the room (finger-tracked)
+  const chatDismissX = usePageSwipeDismiss(onBack, { axis: "x" });
   // Flagship = addiction with most days — shown in community regardless of active tab
   const flagship = flagshipAddiction(state);
   const day = flagship ? dayCount(flagship.startDate) : 1;
@@ -1571,7 +1573,7 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
   };
 
   return (
-    <div className="flex flex-col" style={{ position: "fixed", inset: 0, maxWidth: 448, margin: "0 auto", zIndex: 40 }}>
+    <motion.div className="flex flex-col" style={{ x: chatDismissX, position: "fixed", inset: 0, maxWidth: 448, margin: "0 auto", zIndex: 40 }}>
       <PremiumBackground />
       {/* ── Fixed header — pinned, never scrolls ── */}
       <header className="z-30 backdrop-blur-xl px-4 pb-3 flex items-center gap-3 shrink-0"
@@ -1694,7 +1696,7 @@ function ChatScreen({ room, onBack }: { room: Room; onBack: () => void }) {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
