@@ -27,7 +27,13 @@ export function isNative(): boolean {
  * Native path resolves with a live session; web path triggers a redirect.
  */
 export async function signInWithApple(): Promise<{ error: Error | null }> {
-  if (!Capacitor.isNativePlatform()) {
+  // Path B ships web updates instantly but native plugins only exist in shells
+  // built AFTER the plugin was added. Older installed binaries must fall back
+  // to the web OAuth flow instead of throwing "plugin is not implemented".
+  const nativeAvailable =
+    Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("SignInWithApple");
+
+  if (!nativeAvailable) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "apple",
       options: { redirectTo: "https://stopamineapp.com/auth" },

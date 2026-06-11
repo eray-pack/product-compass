@@ -4,6 +4,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageSwipeDismiss } from "@/lib/sheetGesture";
 import { maybeRequestAppReview } from "@/lib/appReview";
+import { hapticSuccess } from "@/lib/haptics";
 import { loadState, activeAddiction, dayCount } from "@/lib/store";
 
 export const Route = createFileRoute("/tools/sos")({
@@ -309,6 +310,7 @@ function SOS() {
   // ask for a REAL App Store review (OS-drawn sheet, user's own words).
   useEffect(() => {
     if (!done) return;
+    hapticSuccess(); // you rode out a full urge wave — mark it physically
     const st = loadState();
     const active = activeAddiction(st);
     const day = active?.startDate ? dayCount(active.startDate) : 1;

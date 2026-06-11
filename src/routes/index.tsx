@@ -13,6 +13,7 @@ import { triggerPaywall } from "@/lib/paywall";
 import { supabase } from "@/lib/supabase";
 import { AddAddictionModal } from "@/components/AddAddictionModal";
 import { dragDismissProps } from "@/lib/sheetGesture";
+import { hapticLight, hapticMedium } from "@/lib/haptics";
 import { RelapseModal } from "@/components/RelapseModal";
 import { ReEntryScreen } from "@/components/ReEntryScreen";
 import { ChangelogModal } from "@/components/ChangelogModal";
@@ -137,6 +138,7 @@ function CheckIn({ onReward }: { onReward: (msg: string) => void }) {
   const confirm = () => {
     if (confirmed) return;
     setConfirmed(true);
+    hapticMedium();
     update((s) => ({ points: s.points + CHECKIN_XP, treeXP: s.treeXP + Math.floor(CHECKIN_XP / 2) }));
     onReward(CHECKIN_REWARD_MSG);
     setTimeout(() => onReward(""), 3200);
@@ -466,6 +468,7 @@ function QuestPill({
   const bounceControls = useAnimation();
 
   const handleClick = async () => {
+    hapticLight();
     onClick(addiction.id);
     await bounceControls.start({
       scale: [1, 0.84, 1.14, 1],
@@ -831,7 +834,11 @@ function BadgeCarousel({ day, addictionName, addictionId }: { day: number; addic
   }, [addictionId, day]);
 
   const SNAP = "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
-  const go = (next: number) => setIdx(Math.max(0, Math.min(BADGES.length - 1, next)));
+  const go = (next: number) => {
+    const clamped = Math.max(0, Math.min(BADGES.length - 1, next));
+    if (clamped !== idx) hapticLight(); // physical tick when the carousel snaps
+    setIdx(clamped);
+  };
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -1444,7 +1451,9 @@ function Dashboard() {
         <ReEntryScreen inactiveDays={reEntryDays} onDone={() => setReEntryDays(0)} />
       )}
       {showIdentity && state.onboarding?.identity && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end justify-center p-6 pb-10">
+        {/* Centered, not bottom-anchored — items-end rendered partially below
+            the visible viewport on iPhone (home-indicator area) */}
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
           <motion.div
             className="rounded-3xl border border-primary/20 p-7 w-full max-w-sm space-y-5 text-center relative"
             style={{ background: "var(--card)", touchAction: "none" }}

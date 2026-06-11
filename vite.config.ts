@@ -22,6 +22,7 @@ export default defineConfig({
         "@revenuecat/purchases-capacitor",
         "@capacitor-community/apple-sign-in",
         "@capacitor-community/in-app-review",
+        "@capacitor/haptics",
         "@capacitor/push-notifications",
       ],
     },

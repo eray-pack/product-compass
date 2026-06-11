@@ -4,6 +4,7 @@ import { loadState } from "@/lib/store";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PremiumBackground } from "@/components/PremiumBackground";
 import { usePageBounce } from "@/lib/sheetGesture";
+import { hapticLight } from "@/lib/haptics";
 import { useTranslation } from "react-i18next";
 
 function useScrollHide() {
@@ -132,6 +133,7 @@ export function BottomNav() {
             <Link
               key={to}
               to={to}
+              onClick={() => hapticLight()}
               className="relative flex flex-col items-center transition-all"
               style={{
                 color: active ? "#C4873A" : "rgba(255,255,255,0.58)",

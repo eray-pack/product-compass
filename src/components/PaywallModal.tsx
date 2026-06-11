@@ -7,6 +7,7 @@ import { usePaywallOpen, closePaywall, triggerPaywall } from "@/lib/paywall";
 import { Capacitor } from "@capacitor/core";
 import { purchaseAnnual, purchaseMonthly } from "@/lib/purchases";
 import { getIntroOfferRemaining } from "@/lib/introOffer";
+import { hapticSuccess } from "@/lib/haptics";
 
 // ── Tokens ─────────────────────────────────────────────────────────────────────
 const GOLD          = "#C9A84C";
@@ -464,7 +465,7 @@ export function PaywallModal() {
     if (Capacitor.isNativePlatform()) {
       try {
         const ok = plan === "annual" ? await purchaseAnnual() : await purchaseMonthly();
-        if (ok) { update({ isPremium: true }); closePaywall(); }
+        if (ok) { hapticSuccess(); update({ isPremium: true }); closePaywall(); }
       } catch {
         // Purchase failed/unavailable — keep the paywall open, no silent unlock
       }

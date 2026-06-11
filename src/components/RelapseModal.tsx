@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAppState, dayCount, activeAddiction } from "@/lib/store";
 import { getReframe } from "@/lib/reframe";
 import { dragDismissProps } from "@/lib/sheetGesture";
+import { hapticWarning, hapticSuccess } from "@/lib/haptics";
 
 const GOLD   = "#C9A84C";
 const RED    = "#E05A42";
@@ -85,6 +86,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
   const willReset    = thisStrike >= 3;        // 3rd slip resets
 
   const logRelapse = () => {
+    hapticWarning(); // logging a relapse is a heavy moment — acknowledge it
     setLoggedDay(streakDay);
     setDidReset(willReset);
     update((s) => {

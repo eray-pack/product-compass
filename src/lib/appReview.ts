@@ -9,7 +9,8 @@ const ASKED_KEY = "stopamine.reviewAskedAt";
 const MIN_DAYS_BETWEEN_ASKS = 60;
 
 export async function maybeRequestAppReview(opts: { day: number; strikes: number }) {
-  if (!Capacitor.isNativePlatform()) return;
+  // Older installed shells don't carry this plugin — skip silently (Path B)
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable("InAppReview")) return;
   // Only ask users in a good place: a few days in, no slips this streak
   if (opts.day < 3 || opts.strikes > 0) return;
   try {
