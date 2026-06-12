@@ -2,16 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "splash-preview",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "7777"],
-      "port": 7777
-    },
-    {
       "name": "dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "splash-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "7777"],
+      "port": 7777
     }
   ]
 }
