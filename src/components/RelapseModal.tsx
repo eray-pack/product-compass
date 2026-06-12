@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, X, Flame, Brain, TrendingUp, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppState, dayCount, activeAddiction } from "@/lib/store";
 import { getReframe } from "@/lib/reframe";
-import { dragDismissProps } from "@/lib/sheetGesture";
+import { useSheetDismiss } from "@/lib/sheetGesture";
 import { hapticWarning, hapticSuccess } from "@/lib/haptics";
 
 const GOLD   = "#C9A84C";
@@ -60,6 +60,10 @@ type Step = "confirm" | "trigger_select" | "ai_reframe" | "done";
 export function RelapseModal({ onClose, totalCleanDays }: Props) {
   const { t } = useTranslation();
   const [state, update] = useAppState();
+  // HARD dismiss tier: this sheet can hold an AI-written reframe the user is
+  // reading — a casual scroll must never throw it away. The sheet only drags
+  // when the content is scrolled to the top AND the pull is deliberate.
+  const { y: sheetY, sheetRef, scrollRef } = useSheetDismiss(onClose, { hard: true });
   const [step, setStep]           = useState<Step>("confirm");
   const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
   const [reframeText, setReframeText] = useState<string | null>(null);
@@ -84,6 +88,13 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
     : 0;
   const thisStrike   = priorStrikes + 1;       // the slip about to be logged
   const willReset    = thisStrike >= 3;        // 3rd slip resets
+
+  // Each step starts at its top — the reframe especially must be readable
+  // from the first line (it previously opened mid-text on tall content)
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const logRelapse = () => {
     hapticWarning(); // logging a relapse is a heavy moment — acknowledge it
@@ -122,18 +133,31 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
   return (
     <Overlay onClose={onClose}>
       <motion.div
+        ref={sheetRef}
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={spring}
-        {...dragDismissProps(onClose)}
         onClick={(e) => e.stopPropagation()}
-        style={{ width: "100%", maxWidth: 480, touchAction: "none" }}
+        style={{ y: sheetY, width: "100%", maxWidth: 480 }}
       >
         {/* Grab handle */}
         <div style={{ display: "flex", justifyContent: "center", paddingBottom: 8 }}>
           <div style={{ width: 40, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.22)" }} />
         </div>
+      {/* Inner scroller — long reframes scroll here instead of fighting the
+          dismiss gesture; capped below the notch so the top is always readable */}
+      <div
+        ref={scrollRef}
+        style={{
+          maxHeight: "calc(100dvh - env(safe-area-inset-top) - 72px)",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
+          overscrollBehavior: "contain",
+          touchAction: "pan-y",
+          borderRadius: "28px 28px 0 0",
+        }}
+      >
       <AnimatePresence mode="wait">
         {step === "confirm" && (
           <motion.div key="confirm" variants={fadeUp} initial="hidden" animate="visible" exit="exit"
@@ -462,6 +486,7 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
       </motion.div>
     </Overlay>
   );

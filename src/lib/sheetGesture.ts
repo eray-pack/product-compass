@@ -158,12 +158,13 @@ export function usePageBounce(ref: React.RefObject<HTMLDivElement | null>) {
 // surface becomes draggable; release past ~100px or a fast downward flick
 // dismisses, otherwise it springs back. For sheets WITH an internal scroll area,
 // use the BottomSheet component (scroll-at-top gating) instead.
-const DRAG_DISMISS_OFFSET   = 100;  // px dragged → dismiss
-const DRAG_DISMISS_VELOCITY = 500;  // px/s downward flick → dismiss
+const DRAG_DISMISS_OFFSET   = 120;  // px dragged → dismiss
+const DRAG_DISMISS_VELOCITY = 650;  // px/s downward flick → dismiss
 
-// Page-level swipe-to-dismiss tuning
-const PAGE_DISMISS_OFFSET   = 130;  // px pulled down → dismiss
-const PAGE_DISMISS_VELOCITY = 0.55; // px/ms downward flick → dismiss
+// Page-level swipe-to-dismiss tuning — deliberately conservative: a swipe
+// must be clearly intentional before the page even starts following the finger
+const PAGE_DISMISS_OFFSET   = 160;  // px pulled → dismiss
+const PAGE_DISMISS_VELOCITY = 0.75; // px/ms flick → dismiss
 const PAGE_SAMPLE_MS        = 80;
 const PAGE_SNAP   = { type: "spring", stiffness: 300, damping: 30 } as const;
 const PAGE_EXIT   = { type: "tween", duration: 0.24, ease: [0.32, 0, 0.67, 0] } as const;
@@ -215,9 +216,10 @@ export function usePageSwipeDismiss(
       const dy = e.touches[0].clientY - startY;
       if (!decided) {
         if (axis === "x") {
-          // swipe right, horizontally dominant
-          if (dx > 6 && dx > Math.abs(dy)) { dragging = true; decided = true; }
-          else if (Math.abs(dx) > 6 || Math.abs(dy) > 6) decided = true;
+          // swipe right, CLEARLY horizontal (1.5x dominance) — a diagonal
+          // reading-scroll must never grab the page
+          if (dx > 12 && dx > Math.abs(dy) * 1.5) { dragging = true; decided = true; }
+          else if (Math.abs(dx) > 12 || Math.abs(dy) > 10) decided = true;
         } else {
           if (window.scrollY <= 0 && dy > 4) { dragging = true; decided = true; }
           else if (Math.abs(dy) > 4) decided = true;
@@ -262,6 +264,93 @@ export function usePageSwipeDismiss(
   }, [v, axis]);
 
   return v;
+}
+
+// ── Scroll-gated sheet dismiss (the Apple-sheet model) ───────────────────────
+// For sheets whose content can be TALLER than the screen (e.g. the AI relapse
+// reframe). Two rules real apps follow that the plain drag helper violates:
+//   1. While the inner content can scroll, your finger SCROLLS — the sheet
+//      only starts dismissing when the scroller is at the top AND you pull down.
+//   2. "hard" tier: content that's expensive to lose (an AI-written message)
+//      needs a deliberate pull — bigger distance, faster flick — to dismiss.
+// Bind: style={{ y }} + ref={sheetRef} on the sheet root, ref={scrollRef} on
+// the inner scroll container.
+const SHEET_SOFT = { offset: 120, velocity: 0.65 };  // px, px/ms
+const SHEET_HARD = { offset: 240, velocity: 1.1 };   // deliberate pull only
+
+export function useSheetDismiss(
+  onClose: () => void,
+  opts: { hard?: boolean } = {},
+): { y: MotionValue<number>; sheetRef: React.RefObject<HTMLDivElement | null>; scrollRef: React.RefObject<HTMLDivElement | null> } {
+  const y = useMotionValue(0);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cb = useRef(onClose);
+  cb.current = onClose;
+  const tier = opts.hard ? SHEET_HARD : SHEET_SOFT;
+
+  useEffect(() => {
+    const el = sheetRef.current;
+    if (!el) return;
+
+    let startY = 0, dragging = false, decided = false;
+    let samples: { t: number; p: number }[] = [];
+
+    const onStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+      dragging = false; decided = false;
+      samples = [{ t: performance.now(), p: startY }];
+      y.stop();
+    };
+    const onMove = (e: TouchEvent) => {
+      const cur = e.touches[0].clientY;
+      const dy = cur - startY;
+      if (!decided) {
+        const sc = scrollRef.current;
+        const atTop = !sc || sc.scrollTop <= 0;
+        // Only a downward pull while the content is at its top becomes a
+        // dismiss-drag; everything else belongs to the content's scroll.
+        if (atTop && dy > 8) { dragging = true; decided = true; }
+        else if (Math.abs(dy) > 8) decided = true;
+      }
+      if (!dragging) return;
+      e.preventDefault();
+      y.set(dy < 0 ? dy * 0.2 : dy);
+      const now = performance.now();
+      samples.push({ t: now, p: cur });
+      while (samples.length > 2 && now - samples[0].t > PAGE_SAMPLE_MS) samples.shift();
+    };
+    const onEnd = () => {
+      if (!dragging) return;
+      dragging = false;
+      const offset = y.get();
+      let vel = 0;
+      if (samples.length >= 2) {
+        const f = samples[0], l = samples[samples.length - 1];
+        const dt = l.t - f.t;
+        if (dt > 0) vel = (l.p - f.p) / dt;
+      }
+      if (offset > tier.offset || vel > tier.velocity) {
+        animate(y, window.innerHeight, { ...PAGE_EXIT, velocity: vel * 1000 }).then(() => cb.current());
+      } else {
+        animate(y, 0, PAGE_SNAP);
+      }
+    };
+
+    el.addEventListener("touchstart",  onStart, { passive: true });
+    el.addEventListener("touchmove",   onMove,  { passive: false });
+    el.addEventListener("touchend",    onEnd,   { passive: true });
+    el.addEventListener("touchcancel", onEnd,   { passive: true });
+    return () => {
+      el.removeEventListener("touchstart",  onStart);
+      el.removeEventListener("touchmove",   onMove);
+      el.removeEventListener("touchend",    onEnd);
+      el.removeEventListener("touchcancel", onEnd);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [y, opts.hard]);
+
+  return { y, sheetRef, scrollRef };
 }
 
 export function dragDismissProps(onClose: () => void) {
