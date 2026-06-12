@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useAppState, type Addiction } from "@/lib/store";
@@ -178,15 +178,15 @@ function TileCard({ emoji, label, selected, onClick }: {
       }}
       transition={{ duration: 0.18 }}
       style={{
-        width: "100%", minHeight: 108,
+        width: "100%", minHeight: 84,
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
-        gap: 10, padding: "16px 10px",
+        gap: 8, padding: "12px 10px",
         borderRadius: 18, borderWidth: 1.5, borderStyle: "solid",
         cursor: "pointer", position: "relative", textAlign: "center",
       }}
     >
-      <span style={{ fontSize: 30, lineHeight: 1 }}>{emoji}</span>
+      <span style={{ fontSize: 26, lineHeight: 1 }}>{emoji}</span>
       <span style={{
         fontSize: 13, fontWeight: 600, lineHeight: 1.3,
         color: selected ? "#fff" : "#9a8a6a",
@@ -401,7 +401,6 @@ function GoldButton({ disabled, onClick, children }: {
         cursor: disabled ? "not-allowed" : "pointer",
         display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
         boxShadow: disabled ? "none" : "0 0 20px rgba(201,168,76,0.25)",
-        marginTop: 20,
         transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
       }}
     >
@@ -436,6 +435,10 @@ function Onboarding() {
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => Math.max(0, s - 1));
 
+  // Each step starts at the top of the scroller, not wherever the last one ended
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { scrollerRef.current?.scrollTo({ top: 0 }); }, [step]);
+
   const selectedQuit = quitHabits.find((h) => h.key === quitHabit) ?? quitHabits[0];
 
   const toggle = (arr: string[], v: string, setter: (a: string[]) => void) =>
@@ -467,13 +470,29 @@ function Onboarding() {
     navigate({ to: "/paywall" });
   };
 
-  return (
-    <div style={{ background: "transparent", minHeight: "100vh", fontFamily: "DM Sans, sans-serif" }}>
-      <PremiumBackground />
-      <div style={{ maxWidth: 448, margin: "0 auto", padding: "0 20px" }}>
+  // CTA lives in a pinned footer (always on screen), so its label/state per
+  // step is declared here instead of inline at the bottom of each step.
+  const ctas: Record<number, { label: React.ReactNode; disabled?: boolean; onClick: () => void }> = {
+    0: { label: <><span>Quit {selectedQuit.label.toLowerCase()}</span><ArrowRight size={16} /></>, onClick: next },
+    1: { label: duration ? <><span>Continue</span><ArrowRight size={16} /></> : "Pick an option", disabled: !duration, onClick: next },
+    2: { label: pickedCosts.length ? <><span>These are the things I'm taking back</span><ArrowRight size={16} /></> : "Pick at least one", disabled: pickedCosts.length === 0, onClick: next },
+    3: { label: pickedTriggers.length ? <><span>Continue</span><ArrowRight size={16} /></> : "Pick at least one", disabled: pickedTriggers.length === 0, onClick: next },
+    4: { label: <><span>Continue</span><ArrowRight size={16} /></>, onClick: next },
+    5: { label: identity.trim() ? <><span>This is who I'm becoming</span><ArrowRight size={16} /></> : "Pick an option", disabled: !identity.trim(), onClick: next },
+    6: { label: companion ? <><span>{COMPANION_LABELS[companion].name} — let's go</span><ArrowRight size={16} /></> : "Choose your companion", disabled: !companion, onClick: next },
+    7: { label: name.trim() ? <><span>I commit to this</span><ArrowRight size={16} /></> : "Sign your name", disabled: !name.trim(), onClick: finish },
+  };
+  const cta = ctas[step] ?? ctas[0];
 
-        {/* ── Back chevron + progress bar ───────────────────────────────── */}
-        <div style={{ paddingTop: 16 }}>
+  return (
+    // height (not minHeight) + overflow hidden: the page itself never scrolls —
+    // only the step content does, and the CTA footer is always on screen.
+    <div style={{ background: "transparent", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "DM Sans, sans-serif" }}>
+      <PremiumBackground />
+
+      {/* ── Back chevron + progress bar — static header ────────────────── */}
+      <div style={{ flexShrink: 0, width: "100%", maxWidth: 448, margin: "0 auto", padding: "0 20px" }}>
+        <div style={{ paddingTop: "max(16px, env(safe-area-inset-top))" }}>
           {/* Fixed-height row so the bar doesn't jump when the chevron appears */}
           <div style={{ height: 38, display: "flex", alignItems: "center", marginBottom: 8 }}>
             <AnimatePresence>
@@ -502,7 +521,7 @@ function Onboarding() {
           <div style={{
             width: "100%", height: 3,
             background: "rgba(255,255,255,0.06)",
-            borderRadius: 10, overflow: "hidden", marginBottom: 28,
+            borderRadius: 10, overflow: "hidden", marginBottom: 18,
           }}>
             <motion.div
               style={{ height: "100%", background: `linear-gradient(90deg, ${G}, #E8C96A)`, borderRadius: 10 }}
@@ -512,8 +531,11 @@ function Onboarding() {
             />
           </div>
         </div>
+      </div>
 
-        {/* ── Steps ─────────────────────────────────────────────────────── */}
+      {/* ── Steps — the only scrolling region (and only when content overflows) */}
+      <div ref={scrollerRef} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ maxWidth: 448, margin: "0 auto", padding: "0 20px 28px" }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -521,7 +543,6 @@ function Onboarding() {
             initial="initial"
             animate="animate"
             exit="exit"
-            style={{ paddingBottom: 48 }}
           >
 
             {/* STEP 0 — What are you quitting? */}
@@ -534,15 +555,12 @@ function Onboarding() {
                 <p style={{ fontSize: 14, color: "#7a6a50", marginBottom: 24, lineHeight: 1.5 }}>
                   Pick your main battle. You can track more later.
                 </p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
                   {quitHabits.map((h) => (
                     <TileCard key={h.key} emoji={h.emoji} label={h.label}
                       selected={quitHabit === h.key} onClick={() => setQuitHabit(h.key)} />
                   ))}
                 </div>
-                <GoldButton onClick={next}>
-                  <span>Quit {selectedQuit.label.toLowerCase()}</span><ArrowRight size={16} />
-                </GoldButton>
               </div>
             )}
 
@@ -562,9 +580,6 @@ function Onboarding() {
                       selected={duration === d.label} onClick={() => setDuration(d.label)} />
                   ))}
                 </div>
-                <GoldButton disabled={!duration} onClick={next}>
-                  {duration ? <><span>Continue</span><ArrowRight size={16} /></> : "Pick an option"}
-                </GoldButton>
               </div>
             )}
 
@@ -585,11 +600,6 @@ function Onboarding() {
                       onClick={() => toggle(pickedCosts, c.label, setPickedCosts)} />
                   ))}
                 </div>
-                <GoldButton disabled={pickedCosts.length === 0} onClick={next}>
-                  {pickedCosts.length
-                    ? <><span>These are the things I'm taking back</span><ArrowRight size={16} /></>
-                    : "Pick at least one"}
-                </GoldButton>
               </div>
             )}
 
@@ -610,11 +620,6 @@ function Onboarding() {
                       onClick={() => toggle(pickedTriggers, t.label, setPickedTriggers)} />
                   ))}
                 </div>
-                <GoldButton disabled={pickedTriggers.length === 0} onClick={next}>
-                  {pickedTriggers.length
-                    ? <><span>Continue</span><ArrowRight size={16} /></>
-                    : "Pick at least one"}
-                </GoldButton>
               </div>
             )}
 
@@ -671,17 +676,13 @@ function Onboarding() {
                   })}
                 </div>
 
-                <GoldButton onClick={next}>
-                  <span>Continue</span><ArrowRight size={16} />
-                </GoldButton>
-
               </div>
             )}
 
-            {/* STEP 6 — Identity */}
-            {step === 6 && (
+            {/* STEP 5 — Identity */}
+            {step === 5 && (
               <div>
-                <Eyebrow step={7} total={TOTAL} />
+                <Eyebrow step={6} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 24px" }}>
                   Choose who you are <SerifEm>becoming.</SerifEm>
                 </h1>
@@ -737,16 +738,11 @@ function Onboarding() {
                     </motion.button>
                   )}
                 </div>
-                <GoldButton disabled={!identity.trim()} onClick={next}>
-                  {identity.trim()
-                    ? <><span>This is who I'm becoming</span><ArrowRight size={16} /></>
-                    : "Pick an option"}
-                </GoldButton>
               </div>
             )}
 
-            {/* STEP 7 — Companion */}
-            {step === 7 && (
+            {/* STEP 6 — Companion */}
+            {step === 6 && (
               <div>
                 <style>{`
                   @keyframes ob-leaf-float {
@@ -787,7 +783,7 @@ function Onboarding() {
                     50%       { opacity: 0.32; }
                   }
                 `}</style>
-                <Eyebrow step={8} total={TOTAL} />
+                <Eyebrow step={7} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Choose your recovery <SerifEm>companion.</SerifEm>
                 </h1>
@@ -1065,18 +1061,13 @@ function Onboarding() {
                   })()}
 
                 </div>
-                <GoldButton disabled={!companion} onClick={next}>
-                  {companion
-                    ? <><span>{COMPANION_LABELS[companion].name} — let's go</span><ArrowRight size={16} /></>
-                    : "Choose your companion"}
-                </GoldButton>
               </div>
             )}
 
-            {/* STEP 8 — Commitment */}
-            {step === 8 && (
+            {/* STEP 7 — Commitment */}
+            {step === 7 && (
               <div>
-                <Eyebrow step={9} total={TOTAL} />
+                <Eyebrow step={8} total={TOTAL} />
                 <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.2, margin: "0 0 8px" }}>
                   Your <SerifEm>commitment.</SerifEm>
                 </h1>
@@ -1113,16 +1104,23 @@ function Onboarding() {
                   onFocus={(e) => { e.currentTarget.style.borderColor = G; e.currentTarget.style.boxShadow = "0 0 0 1px rgba(201,168,76,0.25)"; }}
                   onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.boxShadow = "none"; }}
                 />
-                <GoldButton disabled={!name.trim()} onClick={finish}>
-                  {name.trim()
-                    ? <><span>I commit to this</span><ArrowRight size={16} /></>
-                    : "Sign your name"}
-                </GoldButton>
               </div>
             )}
 
           </motion.div>
         </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── Pinned CTA — always on screen; content scrolls behind the fade ── */}
+      <div style={{
+        flexShrink: 0,
+        background: "linear-gradient(180deg, rgba(9,7,5,0) 0%, rgba(9,7,5,0.92) 40%, #090705 100%)",
+        paddingTop: 22,
+      }}>
+        <div style={{ maxWidth: 448, margin: "0 auto", padding: "0 20px calc(14px + env(safe-area-inset-bottom))" }}>
+          <GoldButton disabled={cta.disabled} onClick={cta.onClick}>{cta.label}</GoldButton>
+        </div>
       </div>
     </div>
   );
