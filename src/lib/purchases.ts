@@ -2,7 +2,7 @@
 // Uses dynamic imports so the native plugin never loads in the browser.
 import { Capacitor } from "@capacitor/core";
 
-const RC_API_KEY_IOS = "test_lpSpiHnqWYUyBaEYCWfJQqnWupe";
+const RC_API_KEY_IOS = "appl_TMxsnGzBqLeJFbTYVcbgYSrTrAR";
 const ENTITLEMENT_ID = "Stopamine Pro";
 
 let initialized = false;
