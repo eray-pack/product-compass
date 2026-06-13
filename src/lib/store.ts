@@ -1,5 +1,5 @@
 // Local-storage backed store for Stopamine — syncs key fields to Supabase
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
 export type OnboardingData = {
@@ -157,7 +157,7 @@ async function syncToSupabase(s: AppState) {
   });
 }
 
-async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => void) {
+async function loadFromSupabase(apply: (merge: (prev: AppState) => AppState) => void) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
   const { data } = await supabase
@@ -166,45 +166,55 @@ async function loadFromSupabase(setState: (fn: (prev: AppState) => AppState) => 
     .eq("user_id", session.user.id)
     .single();
   if (!data) return;
-  setState((prev) => {
-    const merged: AppState = {
-      ...prev,
-      points: data.points ?? prev.points,
-      treeXP: data.tree_xp ?? prev.treeXP,
-      badges: data.badges ?? prev.badges,
-      totalReturns: data.total_returns ?? prev.totalReturns,
-      lastLoginAt: data.last_login_at ?? prev.lastLoginAt,
-      onboarding: data.onboarding ?? prev.onboarding,
-      isPremium: data.is_premium ?? prev.isPremium,
-    };
-    saveState(merged);
-    return merged;
-  });
+  apply((prev) => ({
+    ...prev,
+    points: data.points ?? prev.points,
+    treeXP: data.tree_xp ?? prev.treeXP,
+    badges: data.badges ?? prev.badges,
+    totalReturns: data.total_returns ?? prev.totalReturns,
+    lastLoginAt: data.last_login_at ?? prev.lastLoginAt,
+    onboarding: data.onboarding ?? prev.onboarding,
+    isPremium: data.is_premium ?? prev.isPremium,
+  }));
 }
 
 export function useAppState() {
   const [state, setState] = useState<AppState>(loadState);
+  // Mirrors the latest known state so `update` can compute `next` without a
+  // setState updater — side effects (saveState dispatch, Supabase sync) must
+  // never run inside an updater: it fires other components' setState during
+  // render and double-runs under StrictMode.
+  const stateRef = useRef(state);
 
   useEffect(() => {
-    setState(loadState());
-    loadFromSupabase(setState);
+    const fresh = loadState();
+    stateRef.current = fresh;
+    setState(fresh);
+    loadFromSupabase((merge) => {
+      const next = merge(stateRef.current);
+      stateRef.current = next;
+      setState(next);
+      saveState(next);
+    });
 
     // Re-sync whenever ANY component writes state (cross-component reactivity)
     const onStateChange = (e: Event) => {
-      setState((e as CustomEvent<AppState>).detail);
+      const next = (e as CustomEvent<AppState>).detail;
+      stateRef.current = next;
+      setState(next);
     };
     window.addEventListener(STATE_CHANGE_EVENT, onStateChange);
     return () => window.removeEventListener(STATE_CHANGE_EVENT, onStateChange);
   }, []);
 
   const update = (patch: Partial<AppState> | ((s: AppState) => Partial<AppState>)) => {
-    setState((prev) => {
-      const p = typeof patch === "function" ? patch(prev) : patch;
-      const next = { ...prev, ...p };
-      saveState(next);   // dispatches STATE_CHANGE_EVENT → all subscribers update
-      syncToSupabase(next);
-      return next;
-    });
+    const prev = stateRef.current;
+    const p = typeof patch === "function" ? patch(prev) : patch;
+    const next = { ...prev, ...p };
+    stateRef.current = next;
+    setState(next);
+    saveState(next);   // dispatches STATE_CHANGE_EVENT → all subscribers update
+    syncToSupabase(next);
   };
   return [state, update] as const;
 }
