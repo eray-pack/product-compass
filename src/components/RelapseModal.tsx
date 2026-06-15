@@ -77,7 +77,10 @@ export function RelapseModal({ onClose, totalCleanDays }: Props) {
 
   const active          = activeAddiction(state);
   const streakDay       = active?.startDate ? dayCount(active.startDate) : 1;
-  const addictionName   = active?.name ?? "Porn";
+  // Generic fallback — the modal is habit-agnostic, so never assume a specific
+  // habit here. `active` only resolves to undefined when there are no addictions
+  // (shouldn't happen post-onboarding); "this habit" keeps the AI reframe neutral.
+  const addictionName   = active?.name ?? "this habit";
   const onboardingTriggers = state.onboarding?.triggers ?? [];
 
   // ── 3-strike system ───────────────────────────────────────────────────────

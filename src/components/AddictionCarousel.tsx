@@ -61,8 +61,8 @@ export function AddictionCarousel() {
         className="flex gap-3 overflow-x-auto snap-x snap-mandatory px-6 pb-2 -mx-0 scrollbar-none"
         style={{ scrollbarWidth: "none" }}
       >
-        {cards.map((a) => (
-          <AddictionCard key={a.id} a={a} isPremium={state.isPremium} />
+        {cards.map((a, i) => (
+          <AddictionCard key={a.id} a={a} isPremium={state.isPremium} isPrimary={i === 0} />
         ))}
         <AddNewCard isPremium={state.isPremium} onClick={() => state.isPremium ? setShowAdd(true) : triggerPaywall()} />
       </div>
@@ -101,9 +101,11 @@ export function AddictionCarousel() {
   );
 }
 
-function AddictionCard({ a, isPremium }: { a: Addiction; isPremium: boolean }) {
-  const isMain = a.id === "porn";
-  const locked = !isPremium && !isMain;
+function AddictionCard({ a, isPremium, isPrimary }: { a: Addiction; isPremium: boolean; isPrimary: boolean }) {
+  // Free tier unlocks the user's PRIMARY habit — the first addiction, set during
+  // onboarding (and pointed at by activeAddictionId). Whatever habit they quit is
+  // their main card; extra trackers stay behind PRO. (No habit is special-cased.)
+  const locked = !isPremium && !isPrimary;
   const day = dayCount(a.startDate);
   return (
     <div className="snap-start shrink-0 w-[calc(100vw-3rem)] max-w-[calc(28rem-3rem)]">
