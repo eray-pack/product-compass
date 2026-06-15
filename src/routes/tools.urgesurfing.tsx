@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppState } from "@/lib/store";
+import { hapticSuccess } from "@/lib/haptics";
 
 export const Route = createFileRoute("/tools/urgesurfing")({
   component: UrgeSurfing,
@@ -12,6 +14,15 @@ const GOLD    = "#C9A84C";
 const AMBER   = "#E8A030";
 const CRIMSON = "#DC2626";
 const CHART_TOTAL = 180; // 3-minute session
+
+// ── Completion tuning ──────────────────────────────────────────────────────────
+// The urge curve (urgeAt) peaks at t = 0.5 of the 180 s session → 90 s. Crossing
+// the peak is the "win": the hardest point is behind you and intensity now fades.
+// We record the completion exactly once at this crossing. The session keeps
+// running afterward (no hard-stop) — riding the *fade* is the lesson of urge
+// surfing, so cutting it short at 90 s would deny the user the payoff.
+const PEAK_SEC = 90;      // elapsed seconds at which the urge peaks / completion fires
+const PEAK_POINTS = 10;   // points awarded on completion — mirrors the dev "Complete urge" button
 
 // ── Breath cycle ──────────────────────────────────────────────────────────────
 const PHASES = [
@@ -518,15 +529,44 @@ function UrgeChart({ elapsed }: { elapsed: number }) {
 // ═════════════════════════════════════════════════════════════════════════════
 function UrgeSurfing() {
   const navigate          = useNavigate();
+  const [, update]                = useAppState();
   const [elapsed, setElapsed]     = useState(0);
   const [shockKey, setShockKey]   = useState(0); // bump to fire shockwave
+  const [peakPassed, setPeakPassed] = useState(false); // drives the calm completion UI
   const prevLabel                  = useRef<string>("");
+  // Latch: ensures the completion fires EXACTLY ONCE per session. A ref (not
+  // state) so it can't be reset by a re-render, and so the synchronous set+check
+  // is atomic against React StrictMode's double-invoked effects in dev — by the
+  // time the second invocation runs the latch is already true and we bail.
+  const completedRef               = useRef(false);
 
   // 1-second heartbeat
   useEffect(() => {
     const id = setInterval(() => setElapsed(e => e + 1), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // ANALYTICS: fire urge_surf_started here (on mount). Do NOT import an SDK yet —
+  // this is just the documented seam for the deferred analytics task.
+
+  // ── 90-second peak completion ────────────────────────────────────────────────
+  // Fires once when the elapsed timer crosses PEAK_SEC. We guard with the
+  // completedRef latch first so the StrictMode double-mount / double-effect can't
+  // double-count urgesSurvived.
+  useEffect(() => {
+    if (elapsed < PEAK_SEC || completedRef.current) return;
+    completedRef.current = true; // set BEFORE any side effect — closes the latch atomically
+
+    setPeakPassed(true);
+    hapticSuccess(); // you rode it past the peak — mark the win physically (matches SOS completion)
+
+    // The REAL increment the DEV "Complete urge" button was faking. Mirrors it
+    // exactly: +1 urge survived, +10 points. Functional updater reads the latest
+    // store snapshot so we never clobber a concurrent write.
+    update((s) => ({ urgesSurvived: s.urgesSurvived + 1, points: s.points + PEAK_POINTS }));
+
+    // ANALYTICS: fire urge_surf_completed here.
+  }, [elapsed, update]);
 
   const phase = getPhase(elapsed);
 
@@ -902,32 +942,106 @@ function UrgeSurfing() {
           <UrgeChart elapsed={elapsed} />
         </div>
 
-        {/* ══ Completion line — fabricated testimonials violate App Store 4.3(a) ══ */}
+        {/* ══ Completion / guidance card ═════════════════════════════════════
+            Before the 90 s peak: a calm "stay with it" prompt.
+            After the peak crosses: the milestone — "you rode it past the peak".
+            We swap content (not the card chrome) so the aesthetic is unbroken:
+            same gradient/border/blur, no confetti — serene by design, on-brand
+            for an anti-dopamine app. Fabricated testimonials would violate App
+            Store 4.3(a), so the copy is purely about the user's own action. */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.85, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           style={{
+            position: "relative",
             margin: "0 20px 28px",
             borderRadius: 18,
             background: "linear-gradient(145deg, rgba(12,8,18,0.78) 0%, rgba(7,5,15,0.84) 100%)",
-            border: "1px solid rgba(196,135,58,0.18)",
-            boxShadow: "inset 0 0 0 1px rgba(196,135,58,0.05), 0 2px 22px rgba(0,0,0,0.30)",
-            padding: "13px 16px",
+            // Border warms to a clearer gold once the peak is passed — quiet acknowledgement.
+            border: peakPassed
+              ? "1px solid rgba(201,168,76,0.42)"
+              : "1px solid rgba(196,135,58,0.18)",
+            boxShadow: peakPassed
+              ? "inset 0 0 0 1px rgba(201,168,76,0.10), 0 0 28px rgba(201,168,76,0.10), 0 2px 22px rgba(0,0,0,0.30)"
+              : "inset 0 0 0 1px rgba(196,135,58,0.05), 0 2px 22px rgba(0,0,0,0.30)",
+            transition: "border-color 1.2s ease, box-shadow 1.2s ease",
+            padding: "15px 16px",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            overflow: "hidden",
             flexShrink: 0,
           }}
         >
-          <p style={{
-            fontSize: 12, color: "rgba(255,255,255,0.58)",
-            lineHeight: 1.4, fontFamily: "DM Sans, sans-serif",
-            textAlign: "center",
-          }}>
-            <span style={{ color: GOLD, fontWeight: 700 }}>✦</span>
-            {" "}You rode it out. That's the rep that counts.
-          </p>
+          {/* One-shot soft gold sweep on completion — a single calm exhale of
+              light across the card. Framer animates transform/opacity only
+              (compositor-friendly); no per-frame React state, no looping. */}
+          {peakPassed && (
+            <motion.div
+              aria-hidden
+              initial={{ x: "-110%", opacity: 0 }}
+              animate={{ x: "110%", opacity: [0, 0.7, 0] }}
+              transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(105deg, transparent 0%, rgba(201,168,76,0.16) 50%, transparent 100%)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+
+          <AnimatePresence mode="wait" initial={false}>
+            {peakPassed ? (
+              <motion.div
+                key="peak-passed"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "relative", textAlign: "center" }}
+              >
+                <p style={{
+                  fontSize: 9, fontWeight: 800, letterSpacing: "0.3em",
+                  color: GOLD, marginBottom: 6,
+                  fontFamily: "DM Sans, sans-serif",
+                  textShadow: `0 0 14px ${GOLD}70`,
+                }}>
+                  ✦ PEAK PASSED
+                </p>
+                <p style={{
+                  fontSize: 13, color: "rgba(255,255,255,0.82)",
+                  lineHeight: 1.45, fontWeight: 500,
+                  fontFamily: "DM Sans, sans-serif",
+                }}>
+                  You rode it past the peak.
+                </p>
+                <p style={{
+                  fontSize: 11, color: "rgba(255,255,255,0.46)",
+                  lineHeight: 1.45, marginTop: 5,
+                  fontFamily: "DM Sans, sans-serif",
+                }}>
+                  From here it only fades. Stop now, or stay and watch it go.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="riding"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                style={{ position: "relative", textAlign: "center" }}
+              >
+                <p style={{
+                  fontSize: 12, color: "rgba(255,255,255,0.58)",
+                  lineHeight: 1.4, fontFamily: "DM Sans, sans-serif",
+                }}>
+                  <span style={{ color: GOLD, fontWeight: 700 }}>✦</span>
+                  {" "}You rode it out. That's the rep that counts.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
       </div>{/* end page content */}
